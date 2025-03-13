@@ -73,21 +73,21 @@ export function OnlineGuide() {
   };
 
   return (
-    <div className="bg-energia-50 min-h-screen">
-      <header className="bg-energia-600 text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
+    <div className="bg-maternal-50 min-h-screen">
+      <header className="bg-maternal-600 text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <BookOpen className="h-6 w-6" />
             <h1 className="text-xl font-bold">Guia do Plano de Parto</h1>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" className="text-white border-white hover:bg-energia-500" onClick={handlePrint}>
+            <Button variant="outline" className="text-white border-white hover:bg-maternal-500" onClick={handlePrint}>
               <Printer className="h-4 w-4 mr-2" /> Imprimir
             </Button>
-            <Button variant="outline" className="text-white border-white hover:bg-energia-500" onClick={handleDownload}>
+            <Button variant="outline" className="text-white border-white hover:bg-maternal-500" onClick={handleDownload}>
               <Download className="h-4 w-4 mr-2" /> Download
             </Button>
-            <Button variant="outline" className="text-white border-white hover:bg-energia-500" onClick={handleShare}>
+            <Button variant="outline" className="text-white border-white hover:bg-maternal-500" onClick={handleShare}>
               <Share2 className="h-4 w-4 mr-2" /> Compartilhar
             </Button>
           </div>
@@ -97,8 +97,8 @@ export function OnlineGuide() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-4 print:hidden">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-energia-700">Seu progresso</span>
-            <span className="text-sm font-medium text-energia-700">{Math.round(progress)}%</span>
+            <span className="text-sm font-medium text-maternal-700">Seu progresso</span>
+            <span className="text-sm font-medium text-maternal-700">{Math.round(progress)}%</span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
@@ -212,7 +212,7 @@ export function OnlineGuide() {
           
           {activeTab !== "resources" ? (
             <Button 
-              className="bg-energia-600 hover:bg-energia-700 flex items-center ml-auto" 
+              className="bg-maternal-600 hover:bg-maternal-700 flex items-center ml-auto" 
               onClick={() => {
                 const currentIndex = tabs.indexOf(activeTab);
                 if (currentIndex < tabs.length - 1) {
@@ -234,3 +234,4 @@ export function OnlineGuide() {
     </div>
   );
 }
+

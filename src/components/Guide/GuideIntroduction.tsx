@@ -9,7 +9,7 @@ interface GuideIntroductionProps {
 export function GuideIntroduction({ onNext }: GuideIntroductionProps) {
   return (
     <div className="animate-fade-in">
-      <h1 className="text-3xl font-bold text-gold-900 mb-6">Bem-vinda ao Guia do Plano de Parto!</h1>
+      <h1 className="text-3xl font-bold text-maternal-900 mb-6">Bem-vinda ao Guia do Plano de Parto!</h1>
       
       <div className="prose max-w-none">
         <p className="text-lg mb-4">
@@ -22,7 +22,7 @@ export function GuideIntroduction({ onNext }: GuideIntroductionProps) {
           elaborar o seu próprio plano de forma simples e eficaz.
         </p>
         
-        <h2 className="text-2xl font-semibold text-gold-800 mt-8 mb-4">O que é um Plano de Parto?</h2>
+        <h2 className="text-2xl font-semibold text-maternal-800 mt-8 mb-4">O que é um Plano de Parto?</h2>
         
         <p className="mb-4">
           Um plano de parto é um documento escrito que comunica seus desejos, 
@@ -36,9 +36,9 @@ export function GuideIntroduction({ onNext }: GuideIntroductionProps) {
           como uma ferramenta importante para garantir um parto respeitoso e humanizado.
         </p>
         
-        <h2 className="text-2xl font-semibold text-gold-800 mt-8 mb-4">Por que criar um Plano de Parto?</h2>
+        <h2 className="text-2xl font-semibold text-maternal-800 mt-8 mb-4">Por que criar um Plano de Parto?</h2>
         
-        <div className="bg-pink-50 p-4 rounded-lg mb-6">
+        <div className="bg-maternal-50 p-4 rounded-lg mb-6">
           <ul className="list-disc pl-5 space-y-2">
             <li>Para se sentir mais segura e confiante durante o processo de parto</li>
             <li>Para garantir que suas preferências sejam conhecidas pela equipe médica</li>
@@ -55,8 +55,8 @@ export function GuideIntroduction({ onNext }: GuideIntroductionProps) {
           aspectos importantes.
         </p>
         
-        <div className="bg-maternal-100 p-4 rounded-lg border-l-4 border-gold-600 mb-6">
-          <p className="font-medium text-gold-900">
+        <div className="bg-maternal-100 p-4 rounded-lg border-l-4 border-maternal-600 mb-6">
+          <p className="font-medium text-maternal-900">
             Lembre-se: seu corpo, sua escolha. Este guia vai te ajudar a se sentir empoderada 
             para fazer escolhas informadas sobre o seu parto.
           </p>
@@ -66,7 +66,7 @@ export function GuideIntroduction({ onNext }: GuideIntroductionProps) {
       <div className="mt-8 text-center">
         <Button 
           onClick={onNext}
-          className="bg-gold-600 hover:bg-gold-700 flex items-center mx-auto"
+          className="bg-maternal-600 hover:bg-maternal-700 flex items-center mx-auto"
         >
           Próximo: Como Estruturar seu Plano de Parto <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
