@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Download, Video, FileText, Link as LinkIcon } from 'lucide-react';
+import { ArrowLeft, BookOpen, Download, Video, FileText, Link as LinkIcon, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 
