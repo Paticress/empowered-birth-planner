@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Download, FileText, ExternalLink, BookHeart, Notebook, Calendar, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, BookOpen, Download, FileText, ExternalLink, BookHeart, Notebook, Calendar, ShoppingCart, Check, AlertTriangle, Info } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,9 +11,14 @@ interface GuideResourcesProps {
 
 export function GuideResources({ onPrevious }: GuideResourcesProps) {
   const [activeResource, setActiveResource] = useState<string | null>(null);
+  const [showProceduresGuide, setShowProceduresGuide] = useState(false);
 
   const handleResourceClick = (resource: string) => {
-    setActiveResource(resource === activeResource ? null : resource);
+    if (resource === 'checklist') {
+      setShowProceduresGuide(!showProceduresGuide);
+    } else {
+      setActiveResource(resource === activeResource ? null : resource);
+    }
   };
 
   const handleDownload = (resourceName: string) => {
@@ -91,6 +96,7 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDownload('Guia de Procedimentos');
+                  setShowProceduresGuide(true);
                 }}
               >
                 <Download className="mr-2 h-4 w-4" /> Baixar Guia
@@ -98,6 +104,214 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
             </div>
           </div>
         </div>
+        
+        {/* Exibição do Guia de Procedimentos quando clicado */}
+        {showProceduresGuide && (
+          <div className="bg-white p-6 rounded-lg border border-maternal-200 mb-8 animate-fade-in">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-maternal-800">Guia de Procedimentos no Parto</h2>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowProceduresGuide(false)}
+              >
+                Fechar
+              </Button>
+            </div>
+            
+            <p className="text-maternal-700 mb-6">
+              Este guia explica os procedimentos comuns durante o trabalho de parto e nascimento, 
+              ajudando você a entender melhor suas opções e tomar decisões informadas para seu plano de parto.
+            </p>
+            
+            <div className="space-y-6">
+              <div className="border-l-4 border-maternal-300 pl-4">
+                <h3 className="text-xl font-medium text-maternal-800 mb-2">Monitoramento Fetal</h3>
+                <p className="text-maternal-700 mb-2">
+                  O monitoramento fetal verifica os batimentos cardíacos do bebê durante o trabalho de parto.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                  <div className="bg-maternal-50 p-3 rounded-md">
+                    <div className="flex items-start">
+                      <div className="bg-maternal-100 p-2 rounded-full mr-3 mt-1">
+                        <Info className="h-4 w-4 text-maternal-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-maternal-800">Monitoramento Intermitente</h4>
+                        <p className="text-sm text-maternal-700">
+                          Permite maior liberdade de movimento. O profissional checa os batimentos em intervalos regulares.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-maternal-50 p-3 rounded-md">
+                    <div className="flex items-start">
+                      <div className="bg-maternal-100 p-2 rounded-full mr-3 mt-1">
+                        <Info className="h-4 w-4 text-maternal-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-maternal-800">Monitoramento Contínuo</h4>
+                        <p className="text-sm text-maternal-700">
+                          Registro contínuo dos batimentos cardíacos e contrações. Pode limitar a movimentação.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-maternal-300 pl-4">
+                <h3 className="text-xl font-medium text-maternal-800 mb-2">Manejo da Dor</h3>
+                <p className="text-maternal-700 mb-2">
+                  Existem diferentes métodos para alívio da dor durante o trabalho de parto.
+                </p>
+                <div className="space-y-3 mt-3">
+                  <div className="bg-maternal-50 p-3 rounded-md">
+                    <div className="flex items-start">
+                      <div className="bg-maternal-100 p-2 rounded-full mr-3 mt-1">
+                        <Check className="h-4 w-4 text-maternal-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-maternal-800">Métodos Não-Farmacológicos</h4>
+                        <p className="text-sm text-maternal-700">
+                          Técnicas como respiração, banho morno, massagem, bola de parto, mudanças de posição e hipnose. 
+                          Não causam efeitos colaterais e permitem maior mobilidade.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-maternal-50 p-3 rounded-md">
+                    <div className="flex items-start">
+                      <div className="bg-maternal-100 p-2 rounded-full mr-3 mt-1">
+                        <Info className="h-4 w-4 text-maternal-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-maternal-800">Analgesia Farmacológica</h4>
+                        <p className="text-sm text-maternal-700">
+                          A analgesia peridural é comum e administrada por anestesista. Bloqueia a sensação de dor, 
+                          mas pode limitar a mobilidade e, em alguns casos, prolongar o segundo estágio do trabalho de parto.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-maternal-300 pl-4">
+                <h3 className="text-xl font-medium text-maternal-800 mb-2">Episiotomia</h3>
+                <p className="text-maternal-700 mb-2">
+                  Corte cirúrgico realizado no períneo para ampliar o canal de parto.
+                </p>
+                <div className="bg-maternal-50 p-3 rounded-md mt-3">
+                  <div className="flex items-start">
+                    <div className="bg-maternal-100 p-2 rounded-full mr-3 mt-1">
+                      <AlertTriangle className="h-4 w-4 text-maternal-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-maternal-700">
+                        A OMS não recomenda o uso rotineiro de episiotomia. Estudos mostram que o procedimento 
+                        pode causar mais dor, risco de infecção e traumatismo do que um rompimento natural. 
+                        Quando necessária, deve ser feita com consentimento informado.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-maternal-300 pl-4">
+                <h3 className="text-xl font-medium text-maternal-800 mb-2">Indução do Parto</h3>
+                <p className="text-maternal-700 mb-2">
+                  Procedimento para iniciar artificialmente o trabalho de parto.
+                </p>
+                <div className="bg-maternal-50 p-3 rounded-md mt-3">
+                  <div className="flex items-start">
+                    <div className="bg-maternal-100 p-2 rounded-full mr-3 mt-1">
+                      <Info className="h-4 w-4 text-maternal-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-maternal-700">
+                        Pode ser realizada por diversos métodos, como administração de ocitocina sintética, 
+                        ruptura artificial da bolsa ou uso de prostaglandinas. Geralmente indicada quando há 
+                        riscos para a mãe ou bebê na continuação da gravidez.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-maternal-300 pl-4">
+                <h3 className="text-xl font-medium text-maternal-800 mb-2">Cesárea</h3>
+                <p className="text-maternal-700 mb-2">
+                  Cirurgia para extração do bebê através de uma incisão no abdômen e útero.
+                </p>
+                <div className="bg-maternal-50 p-3 rounded-md mt-3">
+                  <div className="flex items-start">
+                    <div className="bg-maternal-100 p-2 rounded-full mr-3 mt-1">
+                      <Info className="h-4 w-4 text-maternal-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-maternal-700">
+                        Recomendada apenas quando há indicações médicas específicas. É considerada uma cirurgia 
+                        de grande porte com tempo de recuperação maior. Se necessária, você pode discutir opções 
+                        como cesárea humanizada, com o bebê colocado imediatamente em contato pele a pele.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-maternal-300 pl-4">
+                <h3 className="text-xl font-medium text-maternal-800 mb-2">Clampeamento do Cordão</h3>
+                <p className="text-maternal-700 mb-2">
+                  Momento em que o cordão umbilical é pinçado e cortado após o nascimento.
+                </p>
+                <div className="bg-maternal-50 p-3 rounded-md mt-3">
+                  <div className="flex items-start">
+                    <div className="bg-maternal-100 p-2 rounded-full mr-3 mt-1">
+                      <Check className="h-4 w-4 text-maternal-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-maternal-700">
+                        O clampeamento tardio (após 1-5 minutos do nascimento ou quando o cordão parar de pulsar) 
+                        é recomendado pela OMS por beneficiar o bebê com maior volume sanguíneo e reservas de ferro. 
+                        O clampeamento imediato pode ser necessário em algumas situações específicas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-maternal-300 pl-4">
+                <h3 className="text-xl font-medium text-maternal-800 mb-2">Contato Pele a Pele</h3>
+                <p className="text-maternal-700 mb-2">
+                  Colocação do recém-nascido diretamente sobre o corpo da mãe após o nascimento.
+                </p>
+                <div className="bg-maternal-50 p-3 rounded-md mt-3">
+                  <div className="flex items-start">
+                    <div className="bg-maternal-100 p-2 rounded-full mr-3 mt-1">
+                      <Check className="h-4 w-4 text-maternal-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-maternal-700">
+                        Recomendado pela OMS, favorece o vínculo mãe-bebê, regulação da temperatura, 
+                        início da amamentação e redução do estresse do bebê. A maioria dos procedimentos 
+                        de rotina pode ser realizada enquanto o bebê está em contato pele a pele.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 text-maternal-700 text-sm">
+              <p>
+                <strong>Observação:</strong> Este é um guia informativo simplificado. Converse sempre com sua 
+                equipe médica sobre suas preferências e possibilidades. Cada parto é único e pode requerer 
+                adaptações com base nas circunstâncias específicas.
+              </p>
+            </div>
+          </div>
+        )}
         
         {/* Consulta Acolhedora - Adjusted from "Modelo Personalizado" */}
         <div className="bg-maternal-100 p-6 rounded-lg border-l-4 border-maternal-600 mb-8">
