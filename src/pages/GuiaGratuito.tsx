@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { LeadForm } from '@/components/Lead/LeadForm';
 import { OnlineGuide } from '@/components/Guide/OnlineGuide';
 import { Testimonial } from '@/components/Testimonial';
-import { CheckCircle } from 'lucide-react';
+import { BookOpen, Shield, MessageCircle, CheckSquare } from 'lucide-react';
+import { FeatureCard } from '@/components/FeatureCard';
 
 const GuiaGratuito = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -52,38 +53,30 @@ const GuiaGratuito = () => {
             <h2 className="text-2xl font-bold text-maternal-900 mb-6 text-center">
               O que você vai aprender
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="benefit-item flex items-start p-4 bg-white bg-opacity-80 rounded-xl shadow-sm">
-                <CheckCircle className="h-6 w-6 text-maternal-600 mr-3 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-maternal-900">Estrutura clara e objetiva</h3>
-                  <p className="text-maternal-700">Como estruturar seu plano de parto de forma clara para que a equipe médica compreenda facilmente</p>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              <FeatureCard 
+                icon={<BookOpen className="h-8 w-8" />}
+                title="Estrutura clara e objetiva"
+                description="Como estruturar seu plano de parto de forma clara para que a equipe médica compreenda facilmente"
+              />
               
-              <div className="benefit-item flex items-start p-4 bg-white bg-opacity-80 rounded-xl shadow-sm">
-                <CheckCircle className="h-6 w-6 text-maternal-600 mr-3 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-maternal-900">Seus direitos garantidos</h3>
-                  <p className="text-maternal-700">Quais são seus direitos na gestação, parto e pós-parto, baseados na legislação brasileira</p>
-                </div>
-              </div>
+              <FeatureCard 
+                icon={<Shield className="h-8 w-8" />}
+                title="Seus direitos garantidos"
+                description="Quais são seus direitos na gestação, parto e pós-parto, baseados na legislação brasileira"
+              />
               
-              <div className="benefit-item flex items-start p-4 bg-white bg-opacity-80 rounded-xl shadow-sm">
-                <CheckCircle className="h-6 w-6 text-maternal-600 mr-3 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-maternal-900">Comunicação eficaz</h3>
-                  <p className="text-maternal-700">Como se comunicar com a equipe médica e evitar intervenções desnecessárias</p>
-                </div>
-              </div>
+              <FeatureCard 
+                icon={<MessageCircle className="h-8 w-8" />}
+                title="Comunicação eficaz"
+                description="Como se comunicar com a equipe médica e evitar intervenções desnecessárias"
+              />
               
-              <div className="benefit-item flex items-start p-4 bg-white bg-opacity-80 rounded-xl shadow-sm">
-                <CheckCircle className="h-6 w-6 text-maternal-600 mr-3 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-maternal-900">Checklist essencial</h3>
-                  <p className="text-maternal-700">Checklist completo para garantir que todos os detalhes importantes sejam considerados</p>
-                </div>
-              </div>
+              <FeatureCard 
+                icon={<CheckSquare className="h-8 w-8" />}
+                title="Checklist essencial"
+                description="Checklist completo para garantir que todos os detalhes importantes sejam considerados"
+              />
             </div>
             
             <div className="text-center mt-10">
