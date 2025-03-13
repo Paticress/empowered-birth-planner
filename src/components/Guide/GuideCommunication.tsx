@@ -72,7 +72,7 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
           <div className="bg-maternal-50 p-4 rounded-lg">
             <p className="font-bold text-maternal-900 mb-1">B = Benefícios</p>
             <p className="text-maternal-700">
-              "Quais são os benefícios desse procedimento/intervenção?"
+              "Quais são os benefícios desse procedimento/ intervenção?"
             </p>
           </div>
           
@@ -86,7 +86,7 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
           <div className="bg-maternal-50 p-4 rounded-lg">
             <p className="font-bold text-maternal-900 mb-1">A = Alternativas</p>
             <p className="text-maternal-700">
-              "Existem alternativas a esse procedimento/intervenção?"
+              "Existem alternativas a esse procedimento/ intervenção?"
             </p>
           </div>
           
