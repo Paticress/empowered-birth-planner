@@ -1,6 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ArrowLeft, MessageCircle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GuideCommunicationProps {
   onPrevious: () => void;
@@ -8,6 +9,8 @@ interface GuideCommunicationProps {
 }
 
 export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="animate-fade-in">
       <h1 className="text-3xl font-bold text-maternal-900 mb-6">Comunicação Eficaz com a Equipe Médica</h1>
@@ -65,7 +68,7 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
           ajudar a obter as informações necessárias para tomar decisões informadas:
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-5'} gap-4 mb-8`}>
           <div className="bg-maternal-50 p-4 rounded-lg">
             <p className="font-bold text-maternal-900 mb-1">B = Benefícios</p>
             <p className="text-maternal-700">
