@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
@@ -81,13 +80,25 @@ export function OnlineGuide() {
             <h1 className="text-xl font-bold">Guia do Plano de Parto</h1>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" className="text-white border-white hover:bg-maternal-500" onClick={handlePrint}>
+            <Button 
+              variant="outline" 
+              className="text-white border-white hover:bg-maternal-500 bg-maternal-700/30"
+              onClick={handlePrint}
+            >
               <Printer className="h-4 w-4 mr-2" /> Imprimir
             </Button>
-            <Button variant="outline" className="text-white border-white hover:bg-maternal-500" onClick={handleDownload}>
+            <Button 
+              variant="outline" 
+              className="text-white border-white hover:bg-maternal-500 bg-maternal-700/30" 
+              onClick={handleDownload}
+            >
               <Download className="h-4 w-4 mr-2" /> Download
             </Button>
-            <Button variant="outline" className="text-white border-white hover:bg-maternal-500" onClick={handleShare}>
+            <Button 
+              variant="outline" 
+              className="text-white border-white hover:bg-maternal-500 bg-maternal-700/30" 
+              onClick={handleShare}
+            >
               <Share2 className="h-4 w-4 mr-2" /> Compartilhar
             </Button>
           </div>
@@ -110,37 +121,37 @@ export function OnlineGuide() {
             scrollToTop();
           }} className="w-full">
             <TabsList className="grid grid-cols-2 md:grid-cols-6 w-full mb-8 bg-white shadow-sm print:hidden">
-              <TabsTrigger value="introduction" className="px-2 md:px-3">
+              <TabsTrigger value="introduction" className="px-2 md:px-3 data-[state=active]:bg-maternal-600 data-[state=active]:text-white text-maternal-800">
                 <span className="flex flex-col md:flex-row items-center">
                   <BookOpen className="h-5 w-5 md:mr-2" />
                   <span className="text-xs md:text-sm">Introdução</span>
                 </span>
               </TabsTrigger>
-              <TabsTrigger value="structure" className="px-2 md:px-3">
+              <TabsTrigger value="structure" className="px-2 md:px-3 data-[state=active]:bg-maternal-600 data-[state=active]:text-white text-maternal-800">
                 <span className="flex flex-col md:flex-row items-center">
                   <FileText className="h-5 w-5 md:mr-2" />
                   <span className="text-xs md:text-sm">Estrutura</span>
                 </span>
               </TabsTrigger>
-              <TabsTrigger value="rights" className="px-2 md:px-3">
+              <TabsTrigger value="rights" className="px-2 md:px-3 data-[state=active]:bg-maternal-600 data-[state=active]:text-white text-maternal-800">
                 <span className="flex flex-col md:flex-row items-center">
                   <CheckCircle className="h-5 w-5 md:mr-2" />
                   <span className="text-xs md:text-sm">Direitos</span>
                 </span>
               </TabsTrigger>
-              <TabsTrigger value="communication" className="px-2 md:px-3">
+              <TabsTrigger value="communication" className="px-2 md:px-3 data-[state=active]:bg-maternal-600 data-[state=active]:text-white text-maternal-800">
                 <span className="flex flex-col md:flex-row items-center">
                   <MessageCircle className="h-5 w-5 md:mr-2" />
                   <span className="text-xs md:text-sm">Comunicação</span>
                 </span>
               </TabsTrigger>
-              <TabsTrigger value="checklist" className="px-2 md:px-3">
+              <TabsTrigger value="checklist" className="px-2 md:px-3 data-[state=active]:bg-maternal-600 data-[state=active]:text-white text-maternal-800">
                 <span className="flex flex-col md:flex-row items-center">
                   <ClipboardList className="h-5 w-5 md:mr-2" />
                   <span className="text-xs md:text-sm">Checklist</span>
                 </span>
               </TabsTrigger>
-              <TabsTrigger value="resources" className="px-2 md:px-3">
+              <TabsTrigger value="resources" className="px-2 md:px-3 data-[state=active]:bg-maternal-600 data-[state=active]:text-white text-maternal-800">
                 <span className="flex flex-col md:flex-row items-center">
                   <BookOpen className="h-5 w-5 md:mr-2" />
                   <span className="text-xs md:text-sm">Recursos</span>
@@ -234,4 +245,3 @@ export function OnlineGuide() {
     </div>
   );
 }
-
