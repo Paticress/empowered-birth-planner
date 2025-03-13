@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, BookOpen, Download, FileText, ExternalLink, BookHeart, Notebook, Calendar } from 'lucide-react';
 import { useState } from 'react';
@@ -56,20 +55,18 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
               Um modelo pronto para usar como base para o seu plano de parto, já estruturado com todas as seções importantes.
             </p>
             
-            {activeResource === 'template' && (
-              <div className="mt-4 animate-fade-in">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDownload('Modelo de Plano de Parto');
-                  }}
-                >
-                  <Download className="mr-2 h-4 w-4" /> Baixar Modelo
-                </Button>
-              </div>
-            )}
+            <div className="mt-4">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownload('Modelo de Plano de Parto');
+                }}
+              >
+                <Download className="mr-2 h-4 w-4" /> Baixar Modelo
+              </Button>
+            </div>
           </div>
           
           <div 
@@ -87,20 +84,18 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
               Glossário com explicações sobre os procedimentos mais comuns do parto, para você entender melhor suas opções.
             </p>
             
-            {activeResource === 'checklist' && (
-              <div className="mt-4 animate-fade-in">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDownload('Guia de Procedimentos');
-                  }}
-                >
-                  <Download className="mr-2 h-4 w-4" /> Baixar Guia
-                </Button>
-              </div>
-            )}
+            <div className="mt-4">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownload('Guia de Procedimentos');
+                }}
+              >
+                <Download className="mr-2 h-4 w-4" /> Baixar Guia
+              </Button>
+            </div>
           </div>
         </div>
         
