@@ -13,7 +13,7 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
   
   return (
     <div className="animate-fade-in">
-      <h1 className="text-3xl font-bold text-energia-900 mb-6">Comunicação Eficaz com a Equipe Médica</h1>
+      <h1 className="text-3xl font-bold text-gold-900 mb-6">Comunicação Eficaz com a Equipe Médica</h1>
       
       <div className="prose max-w-none">
         <p className="text-lg mb-4">
@@ -21,11 +21,11 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
           preferências sejam respeitadas durante o parto.
         </p>
         
-        <h2 className="text-2xl font-semibold text-energia-800 mt-8 mb-4">Apresentando seu Plano de Parto</h2>
+        <h2 className="text-2xl font-semibold text-gold-800 mt-8 mb-4">Apresentando seu Plano de Parto</h2>
         
         <div className="space-y-6 mb-8">
-          <div className="bg-white p-5 rounded-lg border border-energia-200 shadow-sm">
-            <h3 className="text-xl font-medium text-energia-800 mb-3">Quando apresentar</h3>
+          <div className="bg-white p-5 rounded-lg border border-gold-200 shadow-sm">
+            <h3 className="text-xl font-medium text-gold-800 mb-3">Quando apresentar</h3>
             <p>
               Idealmente, discuta seu plano de parto com seu médico/obstetra durante 
               o pré-natal, por volta da 32ª-34ª semana. Isso permite tempo para esclarecer 
@@ -37,8 +37,8 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
             </p>
           </div>
           
-          <div className="bg-white p-5 rounded-lg border border-energia-200 shadow-sm">
-            <h3 className="text-xl font-medium text-energia-800 mb-3">Como apresentar</h3>
+          <div className="bg-white p-5 rounded-lg border border-gold-200 shadow-sm">
+            <h3 className="text-xl font-medium text-gold-800 mb-3">Como apresentar</h3>
             <ul className="list-disc pl-5 space-y-2">
               <li>
                 <strong>Seja educada e assertiva:</strong> Apresente seu plano de parto como 
@@ -60,7 +60,7 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
           </div>
         </div>
         
-        <h2 className="text-2xl font-semibold text-energia-800 mt-8 mb-4">Perguntas Essenciais: O método B.R.A.I.N</h2>
+        <h2 className="text-2xl font-semibold text-gold-800 mt-8 mb-4">Perguntas Essenciais: O método B.R.A.I.N</h2>
         
         <p className="mb-4">
           Durante o trabalho de parto e parto, podem surgir situações onde você precisará 
@@ -69,43 +69,43 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
         </p>
         
         <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-5'} gap-4 mb-8`}>
-          <div className="bg-energia-50 p-4 rounded-lg">
-            <p className="font-bold text-energia-900 mb-1">B = Benefícios</p>
-            <p className="text-energia-700">
+          <div className="bg-pink-50 p-4 rounded-lg">
+            <p className="font-bold text-gold-900 mb-1">B = Benefícios</p>
+            <p className="text-gold-700">
               "Quais são os benefícios desse procedimento/ intervenção?"
             </p>
           </div>
           
-          <div className="bg-energia-50 p-4 rounded-lg">
-            <p className="font-bold text-energia-900 mb-1">R = Riscos</p>
-            <p className="text-energia-700">
+          <div className="bg-pink-50 p-4 rounded-lg">
+            <p className="font-bold text-gold-900 mb-1">R = Riscos</p>
+            <p className="text-gold-700">
               "Quais são os riscos ou efeitos colaterais possíveis?"
             </p>
           </div>
           
-          <div className="bg-energia-50 p-4 rounded-lg">
-            <p className="font-bold text-energia-900 mb-1">A = Alternativas</p>
-            <p className="text-energia-700">
+          <div className="bg-pink-50 p-4 rounded-lg">
+            <p className="font-bold text-gold-900 mb-1">A = Alternativas</p>
+            <p className="text-gold-700">
               "Existem alternativas a esse procedimento/ intervenção?"
             </p>
           </div>
           
-          <div className="bg-energia-50 p-4 rounded-lg">
-            <p className="font-bold text-energia-900 mb-1">I = Intuição</p>
-            <p className="text-energia-700">
+          <div className="bg-pink-50 p-4 rounded-lg">
+            <p className="font-bold text-gold-900 mb-1">I = Intuição</p>
+            <p className="text-gold-700">
               "O que a minha intuição me diz sobre isso?"
             </p>
           </div>
           
-          <div className="bg-energia-50 p-4 rounded-lg">
-            <p className="font-bold text-energia-900 mb-1">N = Nada</p>
-            <p className="text-energia-700">
+          <div className="bg-pink-50 p-4 rounded-lg">
+            <p className="font-bold text-gold-900 mb-1">N = Nada</p>
+            <p className="text-gold-700">
               "O que acontece se não fizermos nada? Podemos esperar um pouco?"
             </p>
           </div>
         </div>
         
-        <h2 className="text-2xl font-semibold text-energia-800 mt-8 mb-4">Lidando com Resistência</h2>
+        <h2 className="text-2xl font-semibold text-gold-800 mt-8 mb-4">Lidando com Resistência</h2>
         
         <p className="mb-4">
           Infelizmente, você pode encontrar resistência a algumas de suas preferências. 
@@ -131,15 +131,15 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
           </li>
         </ul>
         
-        <div className="bg-energia-100 p-4 rounded-lg border-l-4 border-energia-600 mb-6">
-          <p className="font-medium text-energia-900">
+        <div className="bg-maternal-100 p-4 rounded-lg border-l-4 border-gold-600 mb-6">
+          <p className="font-medium text-gold-900">
             Lembre-se: A comunicação respeitosa e baseada em evidências beneficia a todos. 
             A maioria dos profissionais de saúde quer o melhor para você e seu bebê, mesmo 
             que às vezes haja discordâncias sobre qual é o melhor caminho.
           </p>
         </div>
         
-        <h2 className="text-2xl font-semibold text-energia-800 mt-8 mb-4">O Papel do Acompanhante/Doula</h2>
+        <h2 className="text-2xl font-semibold text-gold-800 mt-8 mb-4">O Papel do Acompanhante/Doula</h2>
         
         <p className="mb-4">
           Seu acompanhante e/ou doula podem ser fundamentais no processo de comunicação:
@@ -169,7 +169,7 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
         
         <Button 
           onClick={onNext}
-          className="bg-energia-600 hover:bg-energia-700 flex items-center"
+          className="bg-gold-600 hover:bg-gold-700 flex items-center"
         >
           Próximo: Checklist Essencial <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
