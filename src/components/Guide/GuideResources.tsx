@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Download, FileText, ExternalLink, Heart, BookMarked, Calendar } from 'lucide-react';
+import { ArrowLeft, BookOpen, Download, FileText, ExternalLink, BookHeart, Notebook, Calendar } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -121,60 +121,60 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           </Button>
         </div>
         
-        {/* New section for other Energia Materna products */}
+        {/* Updated section for other Energia Materna products */}
         <h2 className="text-2xl font-semibold text-maternal-800 mt-10 mb-6">Produtos para sua Jornada Materna</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <Card className="border-maternal-200 hover:border-maternal-300 transition-all duration-300">
             <CardHeader className="pb-3">
-              <CardTitle className="text-maternal-800">Plano de Parto Personalizado</CardTitle>
-              <CardDescription>Programa completo + modelo personalizável</CardDescription>
+              <CardTitle className="text-maternal-800">Meu Diário da Maternidade</CardTitle>
+              <CardDescription>Registre memórias e sentimentos</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-maternal-700 mb-4">
-                Aprenda a criar um plano de parto personalizado de acordo com suas necessidades e preferências.
+                Este diário foi criado para você registrar suas memórias, sentimentos e aprendizados, criando uma lembrança afetiva desse período tão especial. Escreva, reflita e celebre cada passo do seu caminho.
               </p>
               <Button 
                 className="w-full bg-maternal-600 hover:bg-maternal-700"
-                onClick={() => window.open('https://www.energiamaterna.com.br/challenge-page/personalize-seu-plano-de-parto', '_blank')}
+                onClick={() => window.open('https://www.energiamaterna.com.br/especiais/diario-da-maternidade', '_blank')}
               >
-                <ExternalLink className="mr-2 h-4 w-4" /> Conhecer Programa
+                <BookHeart className="mr-2 h-4 w-4" /> Conhecer Diário
               </Button>
             </CardContent>
           </Card>
           
           <Card className="border-maternal-200 hover:border-maternal-300 transition-all duration-300">
             <CardHeader className="pb-3">
-              <CardTitle className="text-maternal-800">Ebook Parto com Amor</CardTitle>
-              <CardDescription>Guia completo para um parto respeitoso</CardDescription>
+              <CardTitle className="text-maternal-800">Afirmações para um Parto Positivo</CardTitle>
+              <CardDescription>64 afirmações poderosas</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-maternal-700 mb-4">
-                Descubra como ter um parto humanizado e respeitoso, com informações baseadas em evidências científicas.
+                eBook com 64 afirmações poderosas para nutrir sua confiança ao longo da gestação, trazer leveza ao momento do nascimento e fortalecer sua conexão com seu bebê. Deixe que essas palavras te guiem em cada etapa dessa experiência única.
               </p>
               <Button 
                 className="w-full bg-maternal-600 hover:bg-maternal-700"
-                onClick={() => window.open('https://www.energiamaterna.com.br/especiais', '_blank')}
+                onClick={() => window.open('https://www.energiamaterna.com.br/especiais/afirmacoes-para-um-parto-positivo', '_blank')}
               >
-                <BookMarked className="mr-2 h-4 w-4" /> Adquirir Ebook
+                <BookOpen className="mr-2 h-4 w-4" /> Obter eBook
               </Button>
             </CardContent>
           </Card>
           
           <Card className="border-maternal-200 hover:border-maternal-300 transition-all duration-300">
             <CardHeader className="pb-3">
-              <CardTitle className="text-maternal-800">Curso Pós-Parto Tranquilo</CardTitle>
-              <CardDescription>Preparação para o puerpério</CardDescription>
+              <CardTitle className="text-maternal-800">Caderno de Bem-Estar</CardTitle>
+              <CardDescription>Seu refúgio para autocuidado</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-maternal-700 mb-4">
-                Prepare-se para o período pós-parto com dicas práticas, orientações e suporte emocional.
+                Este caderno foi pensado para ser seu refúgio: um espaço para se expressar, aliviar a mente e reencontrar seu equilíbrio. Cuide de você, porque estar bem consigo mesma é vital para cuidar de quem ama.
               </p>
               <Button 
                 className="w-full bg-maternal-600 hover:bg-maternal-700"
-                onClick={() => window.open('https://www.energiamaterna.com.br/especiais', '_blank')}
+                onClick={() => window.open('https://www.energiamaterna.com.br/especiais/caderno-de-bem-estar', '_blank')}
               >
-                <Heart className="mr-2 h-4 w-4" /> Acessar Curso
+                <Notebook className="mr-2 h-4 w-4" /> Adquirir Caderno
               </Button>
             </CardContent>
           </Card>
