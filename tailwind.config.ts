@@ -63,19 +63,19 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom colors for our birth planning project
-				maternal: {
-					50: '#f8f0ff',
-					100: '#f0e0ff',
-					200: '#e1c2ff',
-					300: '#d1a3ff',
-					400: '#bc76ff',
-					500: '#a04aff',
-					600: '#9133ff',
-					700: '#8022ff',
-					800: '#6c1adf',
-					900: '#5a16b9',
-					950: '#3b0986',
+				// Custom colors for Energia Materna
+				energia: {
+					50: '#F5F8FF',
+					100: '#EBF1FF',
+					200: '#D6E4FF',
+					300: '#ADC6FF',
+					400: '#85A5FF',
+					500: '#597EF7',
+					600: '#3F63F3',
+					700: '#2F4BE0',
+					800: '#2539B8',
+					900: '#1D2B8F',
+					950: '#101760',
 				},
 			},
 			borderRadius: {

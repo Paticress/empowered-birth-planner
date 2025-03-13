@@ -32,7 +32,7 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-3xl font-bold text-maternal-900 mb-6">Recursos Adicionais</h1>
+      <h1 className="text-3xl font-bold text-energia-900 mb-6">Recursos Adicionais</h1>
       
       <div className="prose max-w-none">
         <p className="text-lg mb-6">
@@ -41,17 +41,17 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div 
-            className={`resource-card p-6 rounded-lg border border-maternal-200 cursor-pointer transition-all duration-300 ${activeResource === 'template' ? 'bg-maternal-50 shadow-md' : 'bg-white hover:shadow-sm'}`}
+            className={`resource-card p-6 rounded-lg border border-energia-200 cursor-pointer transition-all duration-300 ${activeResource === 'template' ? 'bg-energia-50 shadow-md' : 'bg-white hover:shadow-sm'}`}
             onClick={() => handleResourceClick('template')}
           >
             <div className="flex items-center mb-4">
-              <div className="bg-maternal-100 p-3 rounded-full mr-4">
-                <FileText className="h-6 w-6 text-maternal-600" />
+              <div className="bg-energia-100 p-3 rounded-full mr-4">
+                <FileText className="h-6 w-6 text-energia-600" />
               </div>
-              <h3 className="text-xl font-medium text-maternal-800">Modelo de Plano de Parto</h3>
+              <h3 className="text-xl font-medium text-energia-800">Modelo de Plano de Parto</h3>
             </div>
             
-            <p className="text-maternal-700 mb-3">
+            <p className="text-energia-700 mb-3">
               Um modelo pronto para usar como base para o seu plano de parto, já estruturado com todas as seções importantes.
             </p>
             
@@ -72,17 +72,17 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           </div>
           
           <div 
-            className={`resource-card p-6 rounded-lg border border-maternal-200 cursor-pointer transition-all duration-300 ${activeResource === 'checklist' ? 'bg-maternal-50 shadow-md' : 'bg-white hover:shadow-sm'}`}
+            className={`resource-card p-6 rounded-lg border border-energia-200 cursor-pointer transition-all duration-300 ${activeResource === 'checklist' ? 'bg-energia-50 shadow-md' : 'bg-white hover:shadow-sm'}`}
             onClick={() => handleResourceClick('checklist')}
           >
             <div className="flex items-center mb-4">
-              <div className="bg-maternal-100 p-3 rounded-full mr-4">
-                <BookOpen className="h-6 w-6 text-maternal-600" />
+              <div className="bg-energia-100 p-3 rounded-full mr-4">
+                <BookOpen className="h-6 w-6 text-energia-600" />
               </div>
-              <h3 className="text-xl font-medium text-maternal-800">Guia de Procedimentos</h3>
+              <h3 className="text-xl font-medium text-energia-800">Guia de Procedimentos</h3>
             </div>
             
-            <p className="text-maternal-700 mb-3">
+            <p className="text-energia-700 mb-3">
               Glossário com explicações sobre os procedimentos mais comuns do parto, para você entender melhor suas opções.
             </p>
             
@@ -103,17 +103,17 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           </div>
           
           <div 
-            className={`resource-card p-6 rounded-lg border border-maternal-200 cursor-pointer transition-all duration-300 ${activeResource === 'videos' ? 'bg-maternal-50 shadow-md' : 'bg-white hover:shadow-sm'}`}
+            className={`resource-card p-6 rounded-lg border border-energia-200 cursor-pointer transition-all duration-300 ${activeResource === 'videos' ? 'bg-energia-50 shadow-md' : 'bg-white hover:shadow-sm'}`}
             onClick={() => handleResourceClick('videos')}
           >
             <div className="flex items-center mb-4">
-              <div className="bg-maternal-100 p-3 rounded-full mr-4">
-                <Video className="h-6 w-6 text-maternal-600" />
+              <div className="bg-energia-100 p-3 rounded-full mr-4">
+                <Video className="h-6 w-6 text-energia-600" />
               </div>
-              <h3 className="text-xl font-medium text-maternal-800">Videoaulas</h3>
+              <h3 className="text-xl font-medium text-energia-800">Videoaulas</h3>
             </div>
             
-            <p className="text-maternal-700 mb-3">
+            <p className="text-energia-700 mb-3">
               Série de videoaulas sobre parto humanizado, plano de parto e seus direitos, com especialistas renomados.
             </p>
             
@@ -121,19 +121,19 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
               <div className="mt-4 animate-fade-in">
                 <ul className="space-y-2">
                   <li className="flex items-center justify-between">
-                    <span className="text-maternal-800">Como conversar com seu médico</span>
+                    <span className="text-energia-800">Como conversar com seu médico</span>
                     <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
                       <LinkIcon className="h-4 w-4" />
                     </Button>
                   </li>
                   <li className="flex items-center justify-between">
-                    <span className="text-maternal-800">Posições para o trabalho de parto</span>
+                    <span className="text-energia-800">Posições para o trabalho de parto</span>
                     <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
                       <LinkIcon className="h-4 w-4" />
                     </Button>
                   </li>
                   <li className="flex items-center justify-between">
-                    <span className="text-maternal-800">Técnicas de relaxamento</span>
+                    <span className="text-energia-800">Técnicas de relaxamento</span>
                     <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
                       <LinkIcon className="h-4 w-4" />
                     </Button>
@@ -144,17 +144,17 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           </div>
           
           <div 
-            className={`resource-card p-6 rounded-lg border border-maternal-200 cursor-pointer transition-all duration-300 ${activeResource === 'community' ? 'bg-maternal-50 shadow-md' : 'bg-white hover:shadow-sm'}`}
+            className={`resource-card p-6 rounded-lg border border-energia-200 cursor-pointer transition-all duration-300 ${activeResource === 'community' ? 'bg-energia-50 shadow-md' : 'bg-white hover:shadow-sm'}`}
             onClick={() => handleResourceClick('community')}
           >
             <div className="flex items-center mb-4">
-              <div className="bg-maternal-100 p-3 rounded-full mr-4">
-                <MessageCircle className="h-6 w-6 text-maternal-600" />
+              <div className="bg-energia-100 p-3 rounded-full mr-4">
+                <MessageCircle className="h-6 w-6 text-energia-600" />
               </div>
-              <h3 className="text-xl font-medium text-maternal-800">Comunidade</h3>
+              <h3 className="text-xl font-medium text-energia-800">Comunidade</h3>
             </div>
             
-            <p className="text-maternal-700 mb-3">
+            <p className="text-energia-700 mb-3">
               Participe da nossa comunidade de gestantes e mães para compartilhar experiências e tirar dúvidas.
             </p>
             
@@ -176,23 +176,23 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           </div>
         </div>
         
-        <div className="bg-maternal-100 p-6 rounded-lg border-l-4 border-maternal-600 mb-8">
-          <h3 className="text-xl font-semibold text-maternal-800 mb-3">Modelo Personalizado</h3>
-          <p className="text-maternal-700 mb-4">
+        <div className="bg-energia-100 p-6 rounded-lg border-l-4 border-energia-600 mb-8">
+          <h3 className="text-xl font-semibold text-energia-800 mb-3">Modelo Personalizado</h3>
+          <p className="text-energia-700 mb-4">
             Quer um plano de parto ainda mais completo e personalizado para suas necessidades específicas?
           </p>
-          <p className="text-maternal-700 mb-4">
+          <p className="text-energia-700 mb-4">
             Acesse nosso serviço de criação de Plano de Parto Personalizado e tenha um documento único feito especialmente para você!
           </p>
           <Button 
-            className="bg-maternal-600 hover:bg-maternal-700"
+            className="bg-energia-600 hover:bg-energia-700"
             onClick={() => window.location.href = '/plano-personalizado'}
           >
             Conhecer o Plano Personalizado
           </Button>
         </div>
         
-        <h2 className="text-2xl font-semibold text-maternal-800 mt-10 mb-4">Próximos Passos</h2>
+        <h2 className="text-2xl font-semibold text-energia-800 mt-10 mb-4">Próximos Passos</h2>
         
         <p className="mb-4">
           Agora que você conhece os elementos essenciais de um plano de parto, recomendamos:
