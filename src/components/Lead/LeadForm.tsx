@@ -12,7 +12,7 @@ interface LeadFormProps {
   withWhatsapp?: boolean;
 }
 
-export function LeadForm({ onSuccess, buttonText = "Baixar Agora", withWhatsapp = true }: LeadFormProps) {
+export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp = true }: LeadFormProps) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -33,7 +33,7 @@ export function LeadForm({ onSuccess, buttonText = "Baixar Agora", withWhatsapp 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast.success("Obrigado! Seu download está pronto.");
+      toast.success("Obrigado! Seu guia está pronto para acesso.");
       
       if (onSuccess) {
         onSuccess();

@@ -1,11 +1,9 @@
 
 import { useState } from 'react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { LeadForm } from '@/components/Lead/LeadForm';
-import { SuccessDownload } from '@/components/Lead/SuccessDownload';
-import { FeatureCard } from '@/components/FeatureCard';
+import { OnlineGuide } from '@/components/Guide/OnlineGuide';
 import { Testimonial } from '@/components/Testimonial';
+import { CheckCircle } from 'lucide-react';
 
 const GuiaGratuito = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -16,154 +14,116 @@ const GuiaGratuito = () => {
   };
 
   return (
-    <div className="min-h-screen page-transition">
-      <Header />
-      
-      {/* Hero Section */}
-      <section className="pt-28 md:pt-36 bg-gradient-to-br from-maternal-50 via-purple-50 to-indigo-50">
-        <div className="landing-container">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="section-transition">
-              <span className="badge mb-4">Guia Gratuito</span>
-              <h1 className="heading-primary text-maternal-900">
-                Quer um parto mais seguro, respeitoso e sem surpresas?
-              </h1>
-              <p className="subheading mb-8">
-                Baixe agora o Guia Completo do Plano de Parto e descubra como garantir seus direitos e escolher o parto que deseja!
-              </p>
-              {!formSubmitted && (
-                <div className="hidden md:block">
-                  <a href="#form-section" className="btn-primary inline-block">
-                    Quero Meu Guia Agora
-                  </a>
-                </div>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-maternal-50 via-purple-50 to-indigo-50 page-transition">
+      {formSubmitted ? (
+        <OnlineGuide />
+      ) : (
+        <main className="py-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+          {/* Hero Section */}
+          <section className="mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <div className="section-transition">
+                <span className="badge mb-4">Guia Gratuito</span>
+                <h1 className="heading-primary text-maternal-900">
+                  Quer um parto mais seguro, respeitoso e sem surpresas?
+                </h1>
+                <p className="subheading mb-8">
+                  Acesse agora o Guia Completo do Plano de Parto e descubra como garantir seus direitos e escolher o parto que deseja!
+                </p>
+              </div>
+              
+              <div className="form-section animate-fade-in">
+                <h2 className="text-2xl font-bold text-maternal-900 mb-4 text-center">
+                  Acesse seu guia gratuito
+                </h2>
+                <p className="text-maternal-700 mb-6 text-center">
+                  Preencha o formulário abaixo para acessar o guia online:
+                </p>
+                <LeadForm 
+                  onSuccess={handleFormSuccess} 
+                  buttonText="Acessar Meu Guia" 
+                />
+              </div>
             </div>
-            
-            <div className="form-section animate-fade-in">
-              {formSubmitted ? (
-                <SuccessDownload />
-              ) : (
+          </section>
+          
+          {/* Benefits Section */}
+          <section className="mb-16">
+            <h2 className="text-2xl font-bold text-maternal-900 mb-6 text-center">
+              O que você vai aprender
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="benefit-item flex items-start p-4 bg-white bg-opacity-80 rounded-xl shadow-sm">
+                <CheckCircle className="h-6 w-6 text-maternal-600 mr-3 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h2 className="text-2xl font-bold text-maternal-900 mb-4 text-center">
-                    Baixe seu guia gratuito
-                  </h2>
-                  <p className="text-maternal-700 mb-6 text-center">
-                    Preencha o formulário abaixo para receber seu guia por email:
-                  </p>
-                  <LeadForm onSuccess={handleFormSuccess} />
+                  <h3 className="font-medium text-maternal-900">Estrutura clara e objetiva</h3>
+                  <p className="text-maternal-700">Como estruturar seu plano de parto de forma clara para que a equipe médica compreenda facilmente</p>
                 </div>
-              )}
+              </div>
+              
+              <div className="benefit-item flex items-start p-4 bg-white bg-opacity-80 rounded-xl shadow-sm">
+                <CheckCircle className="h-6 w-6 text-maternal-600 mr-3 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-maternal-900">Seus direitos garantidos</h3>
+                  <p className="text-maternal-700">Quais são seus direitos na gestação, parto e pós-parto, baseados na legislação brasileira</p>
+                </div>
+              </div>
+              
+              <div className="benefit-item flex items-start p-4 bg-white bg-opacity-80 rounded-xl shadow-sm">
+                <CheckCircle className="h-6 w-6 text-maternal-600 mr-3 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-maternal-900">Comunicação eficaz</h3>
+                  <p className="text-maternal-700">Como se comunicar com a equipe médica e evitar intervenções desnecessárias</p>
+                </div>
+              </div>
+              
+              <div className="benefit-item flex items-start p-4 bg-white bg-opacity-80 rounded-xl shadow-sm">
+                <CheckCircle className="h-6 w-6 text-maternal-600 mr-3 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-maternal-900">Checklist essencial</h3>
+                  <p className="text-maternal-700">Checklist completo para garantir que todos os detalhes importantes sejam considerados</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        
-        <div className="h-24 md:h-32 bg-wave-pattern bg-repeat-x bg-bottom"></div>
-      </section>
-      
-      {/* Benefits Section */}
-      <section className="py-16 md:py-24" id="benefits">
-        <div className="landing-container">
-          <div className="text-center mb-16 section-transition">
-            <h2 className="heading-secondary text-maternal-900">O que você vai aprender</h2>
-            <p className="subheading max-w-3xl mx-auto">
-              Nosso guia completo fornece tudo o que você precisa para criar um plano de parto eficaz e garantir seus direitos
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <FeatureCard
-              icon={
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              }
-              title="Estrutura Clara"
-              description="Como estruturar seu plano de parto de forma clara e objetiva para que a equipe médica compreenda facilmente"
-            />
             
-            <FeatureCard
-              icon={
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              }
-              title="Seus Direitos"
-              description="Quais são seus direitos na gestação, parto e pós-parto, baseados na legislação brasileira e recomendações da OMS"
-            />
-            
-            <FeatureCard
-              icon={
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              }
-              title="Comunicação Eficaz"
-              description="Como se comunicar com a equipe médica e evitar intervenções desnecessárias durante o trabalho de parto"
-            />
-            
-            <FeatureCard
-              icon={
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              }
-              title="Checklist Essencial"
-              description="Checklist completo para garantir que todos os detalhes importantes sejam considerados no seu plano de parto"
-            />
-          </div>
-        </div>
-      </section>
-      
-      {/* Testimonial Section */}
-      <section className="py-16 md:py-24 bg-maternal-50">
-        <div className="landing-container">
-          <div className="text-center mb-16 section-transition">
-            <h2 className="heading-secondary text-maternal-900">O que as mães estão dizendo</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Testimonial 
-              quote="Baixei o guia do Energia Materna e finalmente consegui organizar tudo para meu parto! Foi um divisor de águas na minha preparação."
-              name="Mariana S."
-              role="Mãe do Gabriel"
-            />
-            
-            <Testimonial 
-              quote="O guia me ajudou a entender meus direitos e a me comunicar melhor com minha equipe médica. Meu parto foi muito mais tranquilo!"
-              name="Fernanda L."
-              role="Mãe da Beatriz"
-            />
-          </div>
-          
-          {!formSubmitted && (
-            <div className="text-center mt-16">
+            <div className="text-center mt-10">
+              <p className="text-maternal-900 font-medium text-lg mb-4">
+                100% GRATUITO – Acesse agora e dê o primeiro passo para um parto consciente!
+              </p>
               <a href="#form-section" className="btn-primary inline-block">
-                Quero Baixar o Guia Agora
+                Quero Meu Guia Agora
               </a>
             </div>
-          )}
-        </div>
-      </section>
-      
-      {/* Form Section (Mobile) */}
-      {!formSubmitted && (
-        <section className="py-16 md:hidden" id="form-section">
-          <div className="landing-container">
-            <div className="form-section">
-              <h2 className="text-2xl font-bold text-maternal-900 mb-4 text-center">
-                Baixe seu guia gratuito
-              </h2>
-              <p className="text-maternal-700 mb-6 text-center">
-                Preencha o formulário abaixo para receber seu guia por email:
-              </p>
-              <LeadForm onSuccess={handleFormSuccess} />
+          </section>
+          
+          {/* Testimonial Section */}
+          <section className="mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div className="section-transition">
+                <img 
+                  src="https://images.unsplash.com/photo-1595924733523-c87d4bc15812?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                  alt="Gestante escrevendo plano de parto" 
+                  className="rounded-xl shadow-md object-cover h-80 w-full"
+                />
+              </div>
+              
+              <div className="section-transition">
+                <Testimonial 
+                  quote="Baixei o guia do Energia Materna e finalmente consegui organizar tudo para meu parto! Foi um divisor de águas na minha preparação."
+                  name="Mariana S."
+                  role="Mãe do Gabriel"
+                />
+                
+                <div className="mt-8 text-center">
+                  <a href="#form-section" className="btn-primary inline-block" id="form-section">
+                    Quero Acessar o Guia Agora
+                  </a>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </main>
       )}
-      
-      <Footer />
     </div>
   );
 };
