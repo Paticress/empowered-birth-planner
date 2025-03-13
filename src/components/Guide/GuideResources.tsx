@@ -1,5 +1,6 @@
+
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Download, FileText, ExternalLink, BookHeart, Notebook, Calendar } from 'lucide-react';
+import { ArrowLeft, BookOpen, Download, FileText, ExternalLink, BookHeart, Notebook, Calendar, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,14 +58,13 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
             
             <div className="mt-4">
               <Button 
-                variant="outline" 
-                className="w-full"
+                className="w-full bg-maternal-600 hover:bg-maternal-700"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDownload('Modelo de Plano de Parto');
+                  window.open('https://www.energiamaterna.com.br/challenge-page/personalize-seu-plano-de-parto', '_blank');
                 }}
               >
-                <Download className="mr-2 h-4 w-4" /> Baixar Modelo
+                <ShoppingCart className="mr-2 h-4 w-4" /> Adquirir Modelo
               </Button>
             </div>
           </div>
