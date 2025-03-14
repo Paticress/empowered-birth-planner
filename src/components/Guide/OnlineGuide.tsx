@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { GuideIntroduction } from './GuideIntroduction';
@@ -10,13 +11,13 @@ import { GuideHeader } from './GuideHeader';
 import { GuideTabs } from './GuideTabs';
 import { GuideProgressBar } from './GuideProgressBar';
 import { BackToTopButton } from './BackToTopButton';
+import { GuideSearch } from './Search/GuideSearch';
 import { GuideShare } from './Share/GuideShare';
 import { MobileNavigation } from './MobileNavigation';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Search, Share2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Header } from '@/components/Header';
 
 export function OnlineGuide() {
   const [activeTab, setActiveTab] = useState("introduction");
@@ -41,27 +42,6 @@ export function OnlineGuide() {
       setActiveTab(savedTab);
       updateProgress(savedTab);
     }
-  }, []);
-  
-  // Listen for navigation events from the Header component
-  useEffect(() => {
-    const handleNavigation = (event: CustomEvent<{ tab: string }>) => {
-      setActiveTab(event.detail.tab);
-      updateProgress(event.detail.tab);
-      scrollToTop();
-    };
-
-    const handleShare = () => {
-      setShareOpen(true);
-    };
-
-    window.addEventListener('guide-navigate', handleNavigation as EventListener);
-    window.addEventListener('guide-share', handleShare);
-
-    return () => {
-      window.removeEventListener('guide-navigate', handleNavigation as EventListener);
-      window.removeEventListener('guide-share', handleShare);
-    };
   }, []);
   
   // Save current tab to localStorage whenever it changes
@@ -97,17 +77,47 @@ export function OnlineGuide() {
 
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Guia do Plano de Parto">
-      <Header />
       <GuideHeader />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Mobile header with navigation and actions - keep only navigation */}
-        <div className="flex justify-start items-center mb-4 md:hidden print:hidden">
+        {/* Mobile header with navigation and actions */}
+        <div className="flex justify-between items-center mb-4 md:hidden print:hidden">
           <MobileNavigation 
             activeTab={activeTab} 
             onTabChange={handleTabChange} 
             tabNames={tabNames} 
           />
+          
+          <div className="flex space-x-2">
+            <GuideSearch onNavigate={handleTabChange} />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="p-2"
+              onClick={() => setShareOpen(true)}
+              aria-label="Compartilhar"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Desktop header with search and share */}
+        <div className="hidden md:flex justify-end items-center mb-4 print:hidden">
+          <div className="flex space-x-2">
+            <GuideSearch onNavigate={handleTabChange} />
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-muted-foreground"
+              onClick={() => setShareOpen(true)}
+              aria-label="Compartilhar o guia"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              <span className="hidden md:inline">Compartilhar</span>
+            </Button>
+          </div>
         </div>
         
         <GuideProgressBar progress={progress} />
