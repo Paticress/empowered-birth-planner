@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,16 +22,49 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [formattedWhatsapp, setFormattedWhatsapp] = useState('');
   const [isPregnant, setIsPregnant] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Aplicar máscara ao número de WhatsApp
+  useEffect(() => {
+    if (!whatsapp) {
+      setFormattedWhatsapp('');
+      return;
+    }
+
+    // Remove todos os caracteres não numéricos
+    const numbers = whatsapp.replace(/\D/g, '');
+    
+    // Aplica a máscara de acordo com o tamanho da string
+    if (numbers.length <= 2) {
+      setFormattedWhatsapp(`(${numbers}`);
+    } else if (numbers.length <= 6) {
+      setFormattedWhatsapp(`(${numbers.slice(0, 2)}) ${numbers.slice(2)}`);
+    } else if (numbers.length <= 10) {
+      setFormattedWhatsapp(`(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`);
+    } else {
+      setFormattedWhatsapp(`(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`);
+    }
+  }, [whatsapp]);
+
+  const validateWhatsapp = (number: string) => {
+    const digits = number.replace(/\D/g, '');
+    return digits.length >= 10 && digits.length <= 11;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !name || (withWhatsapp && !whatsapp) || !isPregnant || !acceptTerms) {
+    if (!email || !name || !isPregnant || !acceptTerms) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
+      return;
+    }
+
+    if (withWhatsapp && !validateWhatsapp(whatsapp)) {
+      toast.error("Por favor, insira um número de WhatsApp válido");
       return;
     }
     
@@ -45,7 +78,7 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
       const formData = {
         name,
         email,
-        whatsapp: withWhatsapp ? whatsapp : null,
+        whatsapp: withWhatsapp ? whatsapp.replace(/\D/g, '') : null,
         isPregnant,
         dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : null,
         timestamp: new Date().toISOString()
@@ -107,7 +140,7 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
           <Input
             id="whatsapp"
             placeholder="(00) 00000-0000"
-            value={whatsapp}
+            value={formattedWhatsapp}
             onChange={(e) => setWhatsapp(e.target.value)}
             className="rounded-xl border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
             required
