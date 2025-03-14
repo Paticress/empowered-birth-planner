@@ -14,7 +14,8 @@ import {
   validateWhatsapp, 
   validateEmail, 
   validateName,
-  type LeadFormData 
+  type LeadFormData,
+  type ValidationResult 
 } from './services/formService';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 
@@ -22,6 +23,16 @@ interface LeadFormProps {
   onSuccess?: () => void;
   buttonText?: string;
   withWhatsapp?: boolean;
+}
+
+// Define a type for validation state that ensures message is always present
+interface ValidationState {
+  name: ValidationResult;
+  email: ValidationResult;
+  whatsapp: boolean;
+  isPregnant: boolean;
+  dueDate: boolean;
+  terms: boolean;
 }
 
 export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp = true }: LeadFormProps) {
@@ -39,7 +50,7 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
     email: false,
     terms: false
   });
-  const [validationState, setValidationState] = useState({
+  const [validationState, setValidationState] = useState<ValidationState>({
     name: { isValid: true, message: '' },
     email: { isValid: true, message: '' },
     whatsapp: true,

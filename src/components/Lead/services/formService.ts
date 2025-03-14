@@ -18,7 +18,7 @@ export interface CRMResponse {
 // Interface for field validation
 export interface ValidationResult {
   isValid: boolean;
-  message?: string;
+  message: string; // Now required, not optional
 }
 
 // Validates a WhatsApp number
@@ -39,7 +39,7 @@ export const validateEmail = (email: string): ValidationResult => {
     return { isValid: false, message: "Email inválido" };
   }
   
-  return { isValid: true };
+  return { isValid: true, message: "" };
 };
 
 // Validates a name
@@ -52,7 +52,7 @@ export const validateName = (name: string): ValidationResult => {
     return { isValid: false, message: "Nome deve ter pelo menos 3 caracteres" };
   }
   
-  return { isValid: true };
+  return { isValid: true, message: "" };
 };
 
 // Validates WhatsApp with detailed feedback
@@ -67,7 +67,7 @@ export const validateWhatsappDetailed = (number: string): ValidationResult => {
     return { isValid: false, message: "WhatsApp deve ter entre 10 e 11 dígitos" };
   }
   
-  return { isValid: true };
+  return { isValid: true, message: "" };
 };
 
 // Sends data to the CRM
