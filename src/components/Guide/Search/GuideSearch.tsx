@@ -13,7 +13,7 @@ type SearchResult = {
 };
 
 type GuideSearchProps = {
-  onNavigate: (tab: string) => void;
+  onNavigate?: (tab: string) => void;
 };
 
 export function GuideSearch({ onNavigate }: GuideSearchProps) {
@@ -106,7 +106,9 @@ export function GuideSearch({ onNavigate }: GuideSearchProps) {
   }, []);
   
   const handleSelect = (result: SearchResult) => {
-    onNavigate(result.tab);
+    if (onNavigate) {
+      onNavigate(result.tab);
+    }
     setOpen(false);
     setSearch('');
   };
@@ -116,12 +118,12 @@ export function GuideSearch({ onNavigate }: GuideSearchProps) {
       <Button 
         variant="outline" 
         size="sm" 
-        className="text-muted-foreground gap-2"
+        className="text-white border-white hover:bg-brand-tan bg-brand-gold/30 gap-2"
         onClick={() => setOpen(true)}
       >
         <Search className="h-4 w-4" />
-        <span className="hidden md:inline">Pesquisar...</span>
-        <kbd className="hidden md:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-xs text-muted-foreground">
+        <span className="hidden md:inline">Pesquisar</span>
+        <kbd className="hidden md:inline-flex h-5 select-none items-center gap-1 rounded border bg-brand-gold/20 px-1.5 font-mono text-xs text-white">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>

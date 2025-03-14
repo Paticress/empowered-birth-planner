@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +18,10 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [scrolled]);
 
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
@@ -29,13 +34,36 @@ export function Header() {
             </Link>
           </div>
           <nav className="hidden md:flex space-x-8">
-            <Link to="/guia-gratuito" className="text-maternal-800 hover:text-maternal-600 transition-colors">
+            <Link 
+              to="/guia-gratuito" 
+              className={`transition-colors ${isActive('/guia-gratuito') 
+                ? 'text-maternal-600 font-medium' 
+                : 'text-maternal-800 hover:text-maternal-600'}`}
+            >
               Guia Gratuito
             </Link>
-            <Link to="/plano-personalizado" className="text-maternal-800 hover:text-maternal-600 transition-colors">
+            <Link 
+              to="/guia-online" 
+              className={`transition-colors ${isActive('/guia-online') 
+                ? 'text-maternal-600 font-medium' 
+                : 'text-maternal-800 hover:text-maternal-600'}`}
+            >
+              Guia Online
+            </Link>
+            <Link 
+              to="/plano-personalizado" 
+              className={`transition-colors ${isActive('/plano-personalizado') 
+                ? 'text-maternal-600 font-medium' 
+                : 'text-maternal-800 hover:text-maternal-600'}`}
+            >
               Plano Personalizado
             </Link>
-            <Link to="/depoimentos" className="text-maternal-800 hover:text-maternal-600 transition-colors">
+            <Link 
+              to="/depoimentos" 
+              className={`transition-colors ${isActive('/depoimentos') 
+                ? 'text-maternal-600 font-medium' 
+                : 'text-maternal-800 hover:text-maternal-600'}`}
+            >
               Depoimentos
             </Link>
           </nav>
