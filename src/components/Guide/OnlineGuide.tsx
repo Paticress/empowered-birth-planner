@@ -55,26 +55,29 @@ export function OnlineGuide() {
       <GuideHeader />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search and Share buttons moved above the progress bar */}
+        <div className="flex justify-end items-center mb-4 print:hidden">
+          <div className="flex space-x-2">
+            <GuideSearch onNavigate={handleTabChange} />
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-muted-foreground"
+              onClick={() => setShareOpen(true)}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              <span className="hidden md:inline">Compartilhar</span>
+            </Button>
+          </div>
+        </div>
+        
         <GuideProgressBar progress={progress} />
         
         <div className="mb-8 animate-fade-in print:block">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="flex justify-between items-center mb-4 print:hidden">
               <GuideTabs activeTab={activeTab} onChange={handleTabChange} />
-              
-              <div className="flex space-x-2">
-                <GuideSearch onNavigate={handleTabChange} />
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-muted-foreground"
-                  onClick={() => setShareOpen(true)}
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  <span className="hidden md:inline">Compartilhar</span>
-                </Button>
-              </div>
             </div>
             
             <div className="flex justify-between items-center mb-4 print:hidden">
