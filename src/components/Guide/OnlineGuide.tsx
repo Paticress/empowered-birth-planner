@@ -9,7 +9,6 @@ import { GuideChecklist } from './GuideChecklist';
 import { GuideResources } from './GuideResources';
 import { GuideHeader } from './GuideHeader';
 import { GuideTabs } from './GuideTabs';
-import { GuideNavigation } from './GuideNavigation';
 import { GuideProgressBar } from './GuideProgressBar';
 import { Footer } from '@/components/Footer';
 
@@ -22,6 +21,7 @@ export function OnlineGuide() {
   const handleNextSection = (next: string) => {
     setActiveTab(next);
     updateProgress(next);
+    scrollToTop();
   };
 
   const updateProgress = (tab: string) => {
@@ -92,12 +92,6 @@ export function OnlineGuide() {
             </div>
           </Tabs>
         </div>
-        
-        <GuideNavigation 
-          activeTab={activeTab} 
-          onNavigate={handleNextSection}
-          tabs={tabs}
-        />
       </main>
       
       <Footer />
