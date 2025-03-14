@@ -33,7 +33,7 @@ export function ProceduresGuide({ onClose }: ProceduresGuideProps) {
           <ProcedureOption
             title="Monitoramento Intermitente"
             description="Permite maior liberdade de movimento. O profissional checa os batimentos em intervalos regulares."
-            icon={<Info className="h-4 w-4 text-maternal-600" />}
+            icon={<Check className="h-4 w-4 text-maternal-600" />}
           />
           <ProcedureOption
             title="Monitoramento Contínuo"
