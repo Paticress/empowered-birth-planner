@@ -11,13 +11,16 @@ import { GuideHeader } from './GuideHeader';
 import { GuideTabs } from './GuideTabs';
 import { GuideProgressBar } from './GuideProgressBar';
 import { BackToTopButton } from './BackToTopButton';
+import { GuideSearch } from './Search/GuideSearch';
+import { GuideShare } from './Share/GuideShare';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Search, Share2 } from 'lucide-react';
 
 export function OnlineGuide() {
   const [activeTab, setActiveTab] = useState("introduction");
   const [progress, setProgress] = useState(0);
+  const [shareOpen, setShareOpen] = useState(false);
   
   const tabs = ["introduction", "structure", "rights", "communication", "checklist", "resources"];
   
@@ -56,7 +59,23 @@ export function OnlineGuide() {
         
         <div className="mb-8 animate-fade-in print:block">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <GuideTabs activeTab={activeTab} onChange={handleTabChange} />
+            <div className="flex justify-between items-center mb-4 print:hidden">
+              <GuideTabs activeTab={activeTab} onChange={handleTabChange} />
+              
+              <div className="flex space-x-2">
+                <GuideSearch onNavigate={handleTabChange} />
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-muted-foreground"
+                  onClick={() => setShareOpen(true)}
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  <span className="hidden md:inline">Compartilhar</span>
+                </Button>
+              </div>
+            </div>
             
             <div className="flex justify-between items-center mb-4 print:hidden">
               {!isFirstTab ? (
@@ -126,6 +145,7 @@ export function OnlineGuide() {
         </div>
       </main>
       
+      <GuideShare open={shareOpen} onOpenChange={setShareOpen} currentTab={activeTab} />
       <BackToTopButton />
       <Footer />
     </div>

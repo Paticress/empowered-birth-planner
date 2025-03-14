@@ -1,11 +1,13 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChecklistSections } from './Checklist/ChecklistSections';
 import { ChecklistTip } from './Checklist/ChecklistTip';
 import { ChecklistNavigation } from './Checklist/ChecklistNavigation';
-import { Printer, Save } from 'lucide-react';
+import { Printer, Save, RefreshCcw, FileText, Download, Share2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { exportAsPDF, exportAsText } from '@/utils/exportUtils';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface GuideChecklistProps {
   onPrevious: () => void;
@@ -14,6 +16,7 @@ interface GuideChecklistProps {
 
 export function GuideChecklist({ onPrevious, onNext }: GuideChecklistProps) {
   const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const checklistRef = useRef<HTMLDivElement>(null);
 
   // Load last saved time
   useEffect(() => {
@@ -59,6 +62,18 @@ export function GuideChecklist({ onPrevious, onNext }: GuideChecklistProps) {
       window.location.reload();
     }
   };
+  
+  const handleExportPDF = () => {
+    if (checklistRef.current) {
+      exportAsPDF('checklist-content', 'plano-de-parto-checklist.pdf');
+    }
+  };
+  
+  const handleExportText = () => {
+    if (checklistRef.current) {
+      exportAsText('checklist-content', 'plano-de-parto-checklist.txt');
+    }
+  };
 
   return (
     <div className="animate-fade-in">
@@ -71,8 +86,27 @@ export function GuideChecklist({ onPrevious, onNext }: GuideChecklistProps) {
           onClick={handlePrint}
         >
           <Printer className="h-4 w-4" />
-          Imprimir Checklist
+          Imprimir
         </Button>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Exportar
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={handleExportPDF}>
+              <FileText className="h-4 w-4 mr-2" />
+              Exportar como PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportText}>
+              <FileText className="h-4 w-4 mr-2" />
+              Exportar como Texto
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         
         <Button 
           variant="outline"
@@ -83,15 +117,14 @@ export function GuideChecklist({ onPrevious, onNext }: GuideChecklistProps) {
           Salvar Progresso
         </Button>
         
-        {lastSaved && (
-          <Button 
-            variant="link" 
-            className="text-maternal-600" 
-            onClick={handleClearProgress}
-          >
-            Limpar Progresso
-          </Button>
-        )}
+        <Button 
+          variant="outline"
+          className="flex items-center gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={handleClearProgress}
+        >
+          <RefreshCcw className="h-4 w-4" />
+          Resetar Checklist
+        </Button>
       </div>
       
       {lastSaved && (
@@ -100,7 +133,7 @@ export function GuideChecklist({ onPrevious, onNext }: GuideChecklistProps) {
         </p>
       )}
       
-      <div className="prose max-w-none">
+      <div className="prose max-w-none" id="checklist-content" ref={checklistRef}>
         <p className="text-lg mb-4">
           Utilize este checklist para garantir que você considerou todos os aspectos importantes 
           ao elaborar seu plano de parto.
