@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Check, Copy, Facebook, Link, Linkedin, Twitter, WhatsApp } from 'lucide-react';
+import { Check, Copy, Facebook, Link, Linkedin, Twitter, MessageSquare } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface GuideShareProps {
@@ -119,7 +119,7 @@ export function GuideShare({ open, onOpenChange, currentTab }: GuideShareProps) 
               className="flex-1 min-w-[100px]"
               onClick={() => handleShare('whatsapp')}
             >
-              <WhatsApp className="h-4 w-4 mr-2" />
+              <MessageSquare className="h-4 w-4 mr-2" />
               WhatsApp
             </Button>
             <Button
