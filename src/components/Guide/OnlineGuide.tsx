@@ -11,6 +11,8 @@ import { GuideHeader } from './GuideHeader';
 import { GuideTabs } from './GuideTabs';
 import { GuideProgressBar } from './GuideProgressBar';
 import { Footer } from '@/components/Footer';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
 
 export function OnlineGuide() {
   const [activeTab, setActiveTab] = useState("introduction");
@@ -40,6 +42,10 @@ export function OnlineGuide() {
     scrollToTop();
   };
 
+  const currentIndex = tabs.indexOf(activeTab);
+  const isFirstTab = currentIndex === 0;
+  const isLastTab = currentIndex === tabs.length - 1;
+
   return (
     <div className="bg-maternal-50 min-h-screen">
       <GuideHeader />
@@ -50,6 +56,31 @@ export function OnlineGuide() {
         <div className="mb-8 animate-fade-in print:block">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <GuideTabs activeTab={activeTab} onChange={handleTabChange} />
+            
+            <div className="flex justify-between items-center mb-4 print:hidden">
+              {!isFirstTab ? (
+                <Button 
+                  variant="outline" 
+                  className="flex items-center border-brand-tan text-brand-gold hover:bg-brand-beige/20" 
+                  onClick={() => handleNextSection(tabs[currentIndex - 1])}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Seção Anterior
+                </Button>
+              ) : (
+                <div></div>
+              )}
+              
+              {!isLastTab ? (
+                <Button 
+                  className="bg-brand-gold hover:bg-brand-tan flex items-center ml-auto" 
+                  onClick={() => handleNextSection(tabs[currentIndex + 1])}
+                >
+                  Próxima Seção <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <div></div>
+              )}
+            </div>
             
             <div className="bg-white shadow-md rounded-lg p-6 md:p-8">
               <TabsContent value="introduction" className="mt-0">
