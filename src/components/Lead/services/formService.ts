@@ -15,10 +15,59 @@ export interface CRMResponse {
   id: string;
 }
 
+// Interface for field validation
+export interface ValidationResult {
+  isValid: boolean;
+  message?: string;
+}
+
 // Validates a WhatsApp number
 export const validateWhatsapp = (number: string): boolean => {
   const digits = number.replace(/\D/g, '');
   return digits.length >= 10 && digits.length <= 11;
+};
+
+// Validates an email address
+export const validateEmail = (email: string): ValidationResult => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (!email.trim()) {
+    return { isValid: false, message: "Email é obrigatório" };
+  }
+  
+  if (!emailRegex.test(email)) {
+    return { isValid: false, message: "Email inválido" };
+  }
+  
+  return { isValid: true };
+};
+
+// Validates a name
+export const validateName = (name: string): ValidationResult => {
+  if (!name.trim()) {
+    return { isValid: false, message: "Nome é obrigatório" };
+  }
+  
+  if (name.trim().length < 3) {
+    return { isValid: false, message: "Nome deve ter pelo menos 3 caracteres" };
+  }
+  
+  return { isValid: true };
+};
+
+// Validates WhatsApp with detailed feedback
+export const validateWhatsappDetailed = (number: string): ValidationResult => {
+  if (!number.trim()) {
+    return { isValid: false, message: "WhatsApp é obrigatório" };
+  }
+  
+  const digits = number.replace(/\D/g, '');
+  
+  if (digits.length < 10 || digits.length > 11) {
+    return { isValid: false, message: "WhatsApp deve ter entre 10 e 11 dígitos" };
+  }
+  
+  return { isValid: true };
 };
 
 // Sends data to the CRM
