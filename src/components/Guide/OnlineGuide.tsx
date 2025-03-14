@@ -10,6 +10,7 @@ import { GuideResources } from './GuideResources';
 import { GuideHeader } from './GuideHeader';
 import { GuideTabs } from './GuideTabs';
 import { GuideProgressBar } from './GuideProgressBar';
+import { BackToTopButton } from './BackToTopButton';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
@@ -125,6 +126,7 @@ export function OnlineGuide() {
         </div>
       </main>
       
+      <BackToTopButton />
       <Footer />
     </div>
   );
