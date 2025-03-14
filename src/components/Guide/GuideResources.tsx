@@ -66,8 +66,8 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
             description="Glossário com explicações sobre os procedimentos mais comuns do parto, para você entender melhor suas opções."
             icon={<BookOpen className="h-6 w-6 text-maternal-600" />}
             isActive={activeResource === 'checklist'}
-            buttonText="Baixar Guia"
-            buttonIcon={<Download className="mr-2 h-4 w-4" />}
+            buttonText="Visualizar Guia"
+            buttonIcon={<BookOpen className="mr-2 h-4 w-4" />}
             onClick={() => handleResourceClick('checklist')}
             onButtonClick={(e) => {
               e.stopPropagation();
