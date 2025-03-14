@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Download, FileText, BookHeart, Notebook, Calendar, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, BookOpen, Download, FileText, BookHeart, Notebook, Calendar, ShoppingCart, BookText } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { ResourceCard } from './ResourceCard';
@@ -73,6 +73,24 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
               e.stopPropagation();
               handleDownload('Guia de Procedimentos');
               setShowProceduresGuide(true);
+            }}
+          />
+          
+          <ResourceCard 
+            title="Ebook Gratuito: Seu Plano de Parto"
+            description="Um guia completo em formato de ebook para te ajudar a criar seu plano de parto ideal, com dicas e exemplos práticos."
+            icon={<BookText className="h-6 w-6 text-maternal-600" />}
+            isActive={activeResource === 'ebook'}
+            buttonText="Acessar Ebook"
+            buttonIcon={<BookOpen className="mr-2 h-4 w-4" />}
+            onClick={() => handleResourceClick('ebook')}
+            onButtonClick={(e) => {
+              e.stopPropagation();
+              window.open('https://www.canva.com/design/DAGgZcXb8tk/4aPC17sCJ8iYv7Z0zEfJtw/view?utm_content=DAGgZcXb8tk&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h51b40a15c3', '_blank');
+              toast({
+                title: "Ebook Aberto",
+                description: "O ebook gratuito foi aberto em uma nova guia.",
+              });
             }}
           />
         </div>
