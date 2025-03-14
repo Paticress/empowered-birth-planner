@@ -1,5 +1,5 @@
 
-import { BookOpen, FileText, MessageCircle, ClipboardList, CheckCircle, BookMarked } from 'lucide-react';
+import { BookOpen, FileText, MessageCircle, ClipboardList, CheckCircle } from 'lucide-react';
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type GuideTabsProps = {
@@ -8,6 +8,18 @@ type GuideTabsProps = {
 };
 
 export function GuideTabs({ activeTab, onChange }: GuideTabsProps) {
+  const getTabLabel = (id: string): string => {
+    switch(id) {
+      case "introduction": return "Introdução";
+      case "structure": return "Estrutura";
+      case "rights": return "Direitos";
+      case "communication": return "Comunicação";
+      case "checklist": return "Checklist";
+      case "resources": return "Recursos";
+      default: return id;
+    }
+  };
+
   return (
     <TabsList 
       className="grid grid-cols-2 md:grid-cols-6 w-full mb-8 bg-white shadow-sm print:hidden"
@@ -87,7 +99,7 @@ export function GuideTabs({ activeTab, onChange }: GuideTabsProps) {
         aria-controls="panel-resources"
       >
         <span className="flex flex-col md:flex-row items-center">
-          <BookMarked className="h-5 w-5 md:mr-2" aria-hidden="true" />
+          <BookOpen className="h-5 w-5 md:mr-2" aria-hidden="true" />
           <span className="text-xs md:text-sm">Recursos</span>
         </span>
       </TabsTrigger>
