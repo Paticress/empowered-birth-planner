@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,12 @@ interface LeadFormProps {
   onSuccess?: () => void;
   buttonText?: string;
   withWhatsapp?: boolean;
+}
+
+// Define an interface for the CRM response
+interface CRMResponse {
+  success: boolean;
+  id: string;
 }
 
 export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp = true }: LeadFormProps) {
@@ -51,7 +58,8 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
     return digits.length >= 10 && digits.length <= 11;
   };
 
-  const sendToCRM = async (data: any) => {
+  // Add proper type to the return value of sendToCRM
+  const sendToCRM = async (data: any): Promise<CRMResponse> => {
     console.log("✅ Enviando dados para o CRM:", data);
     
     return new Promise((resolve) => {
