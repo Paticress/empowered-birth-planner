@@ -95,11 +95,7 @@ export function OnlineGuide() {
         
         <GuideNavigation 
           activeTab={activeTab} 
-          onNavigate={(tab) => {
-            setActiveTab(tab);
-            updateProgress(tab);
-            scrollToTop();
-          }}
+          onNavigate={handleNextSection}
           tabs={tabs}
         />
       </main>
