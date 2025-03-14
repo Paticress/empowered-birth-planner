@@ -43,7 +43,7 @@ export function GuideHeader() {
   };
 
   return (
-    <header className="bg-maternal-600 text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
+    <header className="bg-brand-gold text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <BookOpen className="h-6 w-6" />
@@ -52,21 +52,21 @@ export function GuideHeader() {
         <div className="flex space-x-2">
           <Button 
             variant="outline" 
-            className="text-white border-white hover:bg-maternal-500 bg-maternal-700/30"
+            className="text-white border-white hover:bg-brand-tan bg-brand-gold/30"
             onClick={handlePrint}
           >
             <Printer className="h-4 w-4 mr-2" /> Imprimir
           </Button>
           <Button 
             variant="outline" 
-            className="text-white border-white hover:bg-maternal-500 bg-maternal-700/30" 
+            className="text-white border-white hover:bg-brand-tan bg-brand-gold/30" 
             onClick={handleDownload}
           >
             <Download className="h-4 w-4 mr-2" /> Download
           </Button>
           <Button 
             variant="outline" 
-            className="text-white border-white hover:bg-maternal-500 bg-maternal-700/30" 
+            className="text-white border-white hover:bg-brand-tan bg-brand-gold/30" 
             onClick={handleShare}
           >
             <Share2 className="h-4 w-4 mr-2" /> Compartilhar

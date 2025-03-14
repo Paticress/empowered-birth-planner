@@ -18,7 +18,7 @@ export function GuideNavigation({ activeTab, onNavigate, tabs }: GuideNavigation
       {!isFirstTab ? (
         <Button 
           variant="outline" 
-          className="flex items-center" 
+          className="flex items-center border-brand-tan text-brand-gold hover:bg-brand-beige/20" 
           onClick={() => onNavigate(tabs[currentIndex - 1])}
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Seção Anterior
@@ -29,7 +29,7 @@ export function GuideNavigation({ activeTab, onNavigate, tabs }: GuideNavigation
       
       {!isLastTab ? (
         <Button 
-          className="bg-maternal-600 hover:bg-maternal-700 flex items-center ml-auto" 
+          className="bg-brand-gold hover:bg-brand-tan flex items-center ml-auto" 
           onClick={() => onNavigate(tabs[currentIndex + 1])}
         >
           Próxima Seção <ChevronRight className="ml-2 h-4 w-4" />

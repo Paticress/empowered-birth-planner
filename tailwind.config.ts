@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,19 +62,28 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom colors for our birth planning project
+				brand: {
+					beige: '#D3BE7D',
+					gold: '#A69242',
+					pink: '#F0CDBC',
+					tan: '#C8AA6E',
+					black: '#000000',
+					'light-gray': '#D1D1D1',
+					'medium-gray': '#8A898C',
+					'dark-gray': '#403E43',
+				},
 				maternal: {
-					50: '#f8f0ff',
-					100: '#f0e0ff',
-					200: '#e1c2ff',
-					300: '#d1a3ff',
-					400: '#bc76ff',
-					500: '#a04aff',
-					600: '#9133ff',
-					700: '#8022ff',
-					800: '#6c1adf',
-					900: '#5a16b9',
-					950: '#3b0986',
+					50: '#F9F5E8',
+					100: '#F0CDBC',
+					200: '#D3BE7D',
+					300: '#C8AA6E',
+					400: '#A69242',
+					500: '#8A7536',
+					600: '#6E5E2B',
+					700: '#594C23',
+					800: '#403E43',
+					900: '#000000',
+					950: '#000000',
 				},
 			},
 			borderRadius: {
