@@ -1,14 +1,19 @@
 
-import { BookOpen, Printer, Download, Share2, Search } from 'lucide-react';
+import { BookOpen, Printer, Download, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { GuideSearch } from './Search/GuideSearch';
+import { useState } from 'react';
+import { GuideShare } from './Share/GuideShare';
 
 interface GuideHeaderProps {
   onNavigate?: (tab: string) => void;
+  currentTab?: string;
 }
 
-export function GuideHeader({ onNavigate }: GuideHeaderProps) {
+export function GuideHeader({ onNavigate, currentTab = "introduction" }: GuideHeaderProps) {
+  const [shareOpen, setShareOpen] = useState(false);
+  
   const handlePrint = () => {
     window.print();
     toast({
@@ -27,6 +32,10 @@ export function GuideHeader({ onNavigate }: GuideHeaderProps) {
     setTimeout(() => {
       window.open('/guia-plano-parto-humanizado.pdf', '_blank');
     }, 1500);
+  };
+
+  const handleShare = () => {
+    setShareOpen(true);
   };
 
   return (
@@ -58,9 +67,20 @@ export function GuideHeader({ onNavigate }: GuideHeaderProps) {
               <Download className="h-4 w-4 mr-2" /> 
               <span className="hidden sm:inline">Download</span>
             </Button>
+            
+            <Button 
+              variant="outline" 
+              className="text-white border-white hover:bg-brand-tan bg-brand-gold/30" 
+              onClick={handleShare}
+            >
+              <Share2 className="h-4 w-4 mr-2" /> 
+              <span className="hidden sm:inline">Compartilhar</span>
+            </Button>
           </div>
         </div>
       </div>
+      
+      <GuideShare open={shareOpen} onOpenChange={setShareOpen} currentTab={currentTab} />
     </header>
   );
 }

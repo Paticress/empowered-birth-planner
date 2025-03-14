@@ -37,7 +37,7 @@ export function Header() {
             <Link 
               to="/guia-gratuito" 
               className={`transition-colors ${isActive('/guia-gratuito') 
-                ? 'text-maternal-600 font-medium' 
+                ? 'text-maternal-600 font-semibold border-b-2 border-maternal-600' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
             >
               Guia Gratuito
@@ -45,7 +45,7 @@ export function Header() {
             <Link 
               to="/guia-online" 
               className={`transition-colors ${isActive('/guia-online') 
-                ? 'text-maternal-600 font-medium' 
+                ? 'text-maternal-600 font-semibold border-b-2 border-maternal-600' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
             >
               Guia Online
@@ -53,7 +53,7 @@ export function Header() {
             <Link 
               to="/plano-personalizado" 
               className={`transition-colors ${isActive('/plano-personalizado') 
-                ? 'text-maternal-600 font-medium' 
+                ? 'text-maternal-600 font-semibold border-b-2 border-maternal-600' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
             >
               Plano Personalizado
@@ -61,7 +61,7 @@ export function Header() {
             <Link 
               to="/depoimentos" 
               className={`transition-colors ${isActive('/depoimentos') 
-                ? 'text-maternal-600 font-medium' 
+                ? 'text-maternal-600 font-semibold border-b-2 border-maternal-600' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
             >
               Depoimentos

@@ -11,17 +11,15 @@ import { GuideHeader } from './GuideHeader';
 import { GuideTabs } from './GuideTabs';
 import { GuideProgressBar } from './GuideProgressBar';
 import { BackToTopButton } from './BackToTopButton';
-import { GuideShare } from './Share/GuideShare';
 import { MobileNavigation } from './MobileNavigation';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronRight, Share2 } from 'lucide-react';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function OnlineGuide() {
   const [activeTab, setActiveTab] = useState("introduction");
   const [progress, setProgress] = useState(0);
-  const [shareOpen, setShareOpen] = useState(false);
   const isMobile = useIsMobile();
   
   const tabs = ["introduction", "structure", "rights", "communication", "checklist", "resources"];
@@ -76,40 +74,16 @@ export function OnlineGuide() {
 
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Guia do Plano de Parto">
-      <GuideHeader onNavigate={handleTabChange} />
+      <GuideHeader onNavigate={handleTabChange} currentTab={activeTab} />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Mobile header with navigation and share button */}
+        {/* Mobile header with navigation */}
         <div className="flex justify-between items-center mb-4 md:hidden print:hidden">
           <MobileNavigation 
             activeTab={activeTab} 
             onTabChange={handleTabChange} 
             tabNames={tabNames} 
           />
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="p-2"
-            onClick={() => setShareOpen(true)}
-            aria-label="Compartilhar"
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        {/* Desktop share button */}
-        <div className="hidden md:flex justify-end items-center mb-4 print:hidden">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="text-muted-foreground"
-            onClick={() => setShareOpen(true)}
-            aria-label="Compartilhar o guia"
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            <span>Compartilhar</span>
-          </Button>
         </div>
         
         <GuideProgressBar progress={progress} />
@@ -190,7 +164,6 @@ export function OnlineGuide() {
         </div>
       </main>
       
-      <GuideShare open={shareOpen} onOpenChange={setShareOpen} currentTab={activeTab} />
       <BackToTopButton />
       <Footer />
     </div>
