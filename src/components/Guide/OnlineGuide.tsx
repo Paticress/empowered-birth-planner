@@ -16,7 +16,7 @@ import { GuideShare } from './Share/GuideShare';
 import { MobileNavigation } from './MobileNavigation';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronRight, Search, Share2 } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Share2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function OnlineGuide() {
