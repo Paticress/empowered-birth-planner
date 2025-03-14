@@ -46,7 +46,7 @@ export function OnlineGuide() {
       window.removeEventListener('guide-navigate', handleNavigation as EventListener);
       window.removeEventListener('guide-share', handleShare);
     };
-  }, []);
+  }, [handleTabChange]);
 
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Guia do Plano de Parto">
@@ -66,7 +66,7 @@ export function OnlineGuide() {
         <GuideProgressBar progress={progress} />
         
         <div className="mb-8 animate-fade-in print:block">
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <Tabs value={activeTab} className="w-full">
             <div className="hidden md:flex justify-between items-center mb-4 print:hidden">
               <GuideTabs activeTab={activeTab} onChange={handleTabChange} />
             </div>

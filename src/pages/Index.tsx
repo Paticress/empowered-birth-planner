@@ -1,15 +1,8 @@
 
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 const Index = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    navigate("/guia-gratuito");
-  }, [navigate]);
-
-  return null;
+  return <Navigate to="/guia-gratuito" replace />;
 };
 
 export default Index;
