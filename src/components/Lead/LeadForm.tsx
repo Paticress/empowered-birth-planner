@@ -4,7 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface LeadFormProps {
   onSuccess?: () => void;
@@ -16,13 +22,15 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [isPregnant, setIsPregnant] = useState<string | null>(null);
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !name || (withWhatsapp && !whatsapp) || !acceptTerms) {
+    if (!email || !name || (withWhatsapp && !whatsapp) || !isPregnant || !acceptTerms) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
@@ -32,6 +40,18 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Prepare data for CRM
+      const formData = {
+        name,
+        email,
+        whatsapp: withWhatsapp ? whatsapp : null,
+        isPregnant,
+        dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : null,
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log("Form data for CRM:", formData);
       
       toast.success("Obrigado! Seu guia está pronto para acesso.");
       
@@ -43,6 +63,8 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
       setEmail('');
       setName('');
       setWhatsapp('');
+      setIsPregnant(null);
+      setDueDate(undefined);
       setAcceptTerms(false);
     } catch (error) {
       console.error("Form submission error:", error);
@@ -90,6 +112,62 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
             className="rounded-xl border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
             required
           />
+        </div>
+      )}
+      
+      {/* Pergunta sobre gravidez */}
+      <div className="space-y-2">
+        <Label className="text-base">Você está grávida?</Label>
+        <RadioGroup 
+          value={isPregnant || ""} 
+          onValueChange={setIsPregnant}
+          className="flex flex-col space-y-1"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="sim" id="pregnant-yes" />
+            <Label htmlFor="pregnant-yes">Sim</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="nao" id="pregnant-no" />
+            <Label htmlFor="pregnant-no">Não</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="parceira" id="pregnant-partner" />
+            <Label htmlFor="pregnant-partner">Minha parceira está</Label>
+          </div>
+        </RadioGroup>
+      </div>
+      
+      {/* Data Prevista do Parto (apenas visível se estiver grávida ou parceira estiver) */}
+      {(isPregnant === 'sim' || isPregnant === 'parceira') && (
+        <div className="space-y-2">
+          <Label>Data Prevista para o Parto (DPP)</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal rounded-xl border-maternal-200",
+                  !dueDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dueDate ? format(dueDate, "dd/MM/yyyy") : <span>Selecione a data</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dueDate}
+                onSelect={setDueDate}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+                disabled={(date) => 
+                  date < new Date() // Não permitir datas no passado
+                }
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       )}
       
