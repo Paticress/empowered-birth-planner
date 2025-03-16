@@ -27,7 +27,7 @@ export function GuideTabs({ activeTab, onChange }: GuideTabsProps) {
     >
       <TabsTrigger 
         value="introduction" 
-        className="px-2 md:px-3 data-[state=active]:bg-brand-gold data-[state=active]:text-white text-brand-dark-gray"
+        className="px-2 md:px-3 data-[state=active]:bg-brand-pink data-[state=active]:text-brand-black text-brand-black"
         onClick={() => onChange("introduction")}
         id="tab-introduction"
         aria-selected={activeTab === "introduction"}
@@ -40,7 +40,7 @@ export function GuideTabs({ activeTab, onChange }: GuideTabsProps) {
       </TabsTrigger>
       <TabsTrigger 
         value="structure" 
-        className="px-2 md:px-3 data-[state=active]:bg-brand-gold data-[state=active]:text-white text-brand-dark-gray"
+        className="px-2 md:px-3 data-[state=active]:bg-brand-beige data-[state=active]:text-brand-black text-brand-black"
         onClick={() => onChange("structure")}
         id="tab-structure"
         aria-selected={activeTab === "structure"}
@@ -53,7 +53,7 @@ export function GuideTabs({ activeTab, onChange }: GuideTabsProps) {
       </TabsTrigger>
       <TabsTrigger 
         value="rights" 
-        className="px-2 md:px-3 data-[state=active]:bg-brand-gold data-[state=active]:text-white text-brand-dark-gray"
+        className="px-2 md:px-3 data-[state=active]:bg-brand-pink data-[state=active]:text-brand-black text-brand-black"
         onClick={() => onChange("rights")}
         id="tab-rights"
         aria-selected={activeTab === "rights"}
@@ -66,7 +66,7 @@ export function GuideTabs({ activeTab, onChange }: GuideTabsProps) {
       </TabsTrigger>
       <TabsTrigger 
         value="communication" 
-        className="px-2 md:px-3 data-[state=active]:bg-brand-gold data-[state=active]:text-white text-brand-dark-gray"
+        className="px-2 md:px-3 data-[state=active]:bg-brand-beige data-[state=active]:text-brand-black text-brand-black"
         onClick={() => onChange("communication")}
         id="tab-communication"
         aria-selected={activeTab === "communication"}
@@ -79,7 +79,7 @@ export function GuideTabs({ activeTab, onChange }: GuideTabsProps) {
       </TabsTrigger>
       <TabsTrigger 
         value="checklist" 
-        className="px-2 md:px-3 data-[state=active]:bg-brand-gold data-[state=active]:text-white text-brand-dark-gray"
+        className="px-2 md:px-3 data-[state=active]:bg-brand-pink data-[state=active]:text-brand-black text-brand-black"
         onClick={() => onChange("checklist")}
         id="tab-checklist"
         aria-selected={activeTab === "checklist"}
@@ -92,7 +92,7 @@ export function GuideTabs({ activeTab, onChange }: GuideTabsProps) {
       </TabsTrigger>
       <TabsTrigger 
         value="resources" 
-        className="px-2 md:px-3 data-[state=active]:bg-brand-gold data-[state=active]:text-white text-brand-dark-gray"
+        className="px-2 md:px-3 data-[state=active]:bg-brand-beige data-[state=active]:text-brand-black text-brand-black"
         onClick={() => onChange("resources")}
         id="tab-resources"
         aria-selected={activeTab === "resources"}
