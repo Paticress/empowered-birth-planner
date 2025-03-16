@@ -13,14 +13,14 @@ export function ChecklistNavigation({ onPrevious, onNext }: ChecklistNavigationP
       <Button 
         variant="outline" 
         onClick={onPrevious}
-        className="flex items-center"
+        className="flex items-center border-brand-beige text-brand-charcoal hover:bg-brand-pink/20"
       >
         <ArrowLeft className="mr-2 h-4 w-4" /> Voltar à Comunicação
       </Button>
       
       <Button 
         onClick={onNext}
-        className="bg-maternal-600 hover:bg-maternal-700 flex items-center"
+        className="bg-brand-charcoal hover:bg-brand-beige hover:text-brand-black flex items-center"
       >
         Próximo: Recursos Adicionais <ChevronRight className="ml-2 h-4 w-4" />
       </Button>

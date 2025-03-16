@@ -39,11 +39,11 @@ export function GuideHeader({ onNavigate, currentTab = "introduction" }: GuideHe
   };
 
   return (
-    <header className="bg-brand-gold text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
+    <header className="bg-white text-brand-black py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center">
         <div className="flex items-center space-x-2">
-          <BookOpen className="h-6 w-6" />
-          <h1 className="text-xl font-bold">Guia do Plano de Parto</h1>
+          <BookOpen className="h-6 w-6 text-brand-charcoal" />
+          <h1 className="text-xl font-bold text-brand-charcoal">Guia do Plano de Parto</h1>
         </div>
         
         <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export function GuideHeader({ onNavigate, currentTab = "introduction" }: GuideHe
           <div className="flex space-x-2">
             <Button 
               variant="outline" 
-              className="text-white border-white hover:bg-brand-tan bg-brand-gold/30"
+              className="border-brand-charcoal text-brand-charcoal hover:bg-brand-pink/20"
               onClick={handlePrint}
             >
               <Printer className="h-4 w-4 mr-2" /> 
@@ -61,7 +61,7 @@ export function GuideHeader({ onNavigate, currentTab = "introduction" }: GuideHe
             
             <Button 
               variant="outline" 
-              className="text-white border-white hover:bg-brand-tan bg-brand-gold/30" 
+              className="border-brand-charcoal text-brand-charcoal hover:bg-brand-pink/20" 
               onClick={handleDownload}
             >
               <Download className="h-4 w-4 mr-2" /> 
@@ -70,7 +70,7 @@ export function GuideHeader({ onNavigate, currentTab = "introduction" }: GuideHe
             
             <Button 
               variant="outline" 
-              className="text-white border-white hover:bg-brand-tan bg-brand-gold/30" 
+              className="border-brand-charcoal text-brand-charcoal hover:bg-brand-pink/20" 
               onClick={handleShare}
             >
               <Share2 className="h-4 w-4 mr-2" /> 

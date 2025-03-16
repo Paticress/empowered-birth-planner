@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,25 +64,27 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				brand: {
-					beige: '#D3BE7D',
-					gold: '#A69242',
-					pink: '#F0CDBC',
-					tan: '#C8AA6E',
+					beige: '#B8A072',
+					gold: '#907F46',
+					pink: '#F1CABB',
+					tan: '#B8A072',
 					black: '#000000',
+					charcoal: '#404040',
+					white: '#FFFFFF',
 					'light-gray': '#D1D1D1',
 					'medium-gray': '#8A898C',
 					'dark-gray': '#403E43',
 				},
 				maternal: {
-					50: '#F9F5E8',
-					100: '#F0CDBC',
-					200: '#D3BE7D',
-					300: '#C8AA6E',
-					400: '#A69242',
-					500: '#8A7536',
-					600: '#6E5E2B',
-					700: '#594C23',
-					800: '#403E43',
+					50: '#FFFFFF',
+					100: '#F1CABB',
+					200: '#B8A072',
+					300: '#9F8A61',
+					400: '#907F46',
+					500: '#736539',
+					600: '#5A502D',
+					700: '#404040',
+					800: '#333333',
 					900: '#000000',
 					950: '#000000',
 				},

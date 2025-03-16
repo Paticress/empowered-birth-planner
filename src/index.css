@@ -5,48 +5,48 @@
 
 @layer base {
   :root {
-    --background: 45 30% 98%;
-    --foreground: 0 0% 12%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 43 43% 55%;
+    --primary: 36 32% 59%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 38% 92%;
-    --secondary-foreground: 43 43% 35%;
+    --secondary: 18 60% 84%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 45 30% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 24 38% 84%;
-    --accent-foreground: 43 43% 35%;
+    --accent: 0 0% 25%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 43 20% 85%;
-    --input: 43 20% 80%;
-    --ring: 43 43% 55%;
+    --border: 36 32% 70%;
+    --input: 36 32% 70%;
+    --ring: 36 32% 59%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 35%;
-    --sidebar-primary: 43 43% 55%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 36 32% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 45 30% 94%;
-    --sidebar-accent-foreground: 43 43% 35%;
-    --sidebar-border: 43 20% 90%;
-    --sidebar-ring: 43 43% 55%;
+    --sidebar-accent: 18 60% 84%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 36 32% 70%;
+    --sidebar-ring: 36 32% 59%;
   }
 
   .dark {
-    --background: 0 0% 12%;
+    --background: 0 0% 10%;
     --foreground: 0 0% 98%;
 
     --card: 0 0% 15%;
@@ -55,33 +55,33 @@
     --popover: 0 0% 15%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 43 43% 55%;
-    --primary-foreground: 0 0% 12%;
+    --primary: 36 32% 59%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 0 0% 20%;
+    --secondary: 0 0% 25%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 20%;
+    --muted: 0 0% 25%;
     --muted-foreground: 0 0% 70%;
 
     --accent: 0 0% 25%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 25%;
     --input: 0 0% 25%;
-    --ring: 43 43% 55%;
+    --ring: 36 32% 59%;
 
     --sidebar-background: 0 0% 15%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 43 43% 55%;
+    --sidebar-primary: 36 32% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 20%;
     --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 0 0% 25%;
-    --sidebar-ring: 43 43% 55%;
+    --sidebar-ring: 36 32% 59%;
   }
 }
 
@@ -114,15 +114,15 @@
   }
   
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-beige text-brand-gold;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-beige text-brand-black;
   }
   
   .form-section {
-    @apply bg-white bg-opacity-80 backdrop-blur-md rounded-2xl p-8 shadow-lg border border-brand-beige;
+    @apply bg-white bg-opacity-90 backdrop-blur-md rounded-2xl p-8 shadow-lg border border-brand-beige;
   }
   
   .feature-card {
-    @apply p-6 rounded-xl bg-white bg-opacity-80 backdrop-blur-sm border border-brand-beige shadow-sm transition-all duration-300 hover:shadow-md hover:border-brand-tan;
+    @apply p-6 rounded-xl bg-white bg-opacity-90 backdrop-blur-sm border border-brand-beige shadow-sm transition-all duration-300 hover:shadow-md hover:border-brand-tan;
   }
   
   .testimonial-card {
@@ -130,7 +130,7 @@
   }
   
   .btn-primary {
-    @apply px-8 py-4 rounded-full bg-brand-gold text-white font-medium transition-all duration-300 hover:bg-brand-tan focus:outline-none focus:ring-2 focus:ring-brand-tan focus:ring-offset-2 shadow-md hover:shadow-lg;
+    @apply px-8 py-4 rounded-full bg-brand-charcoal border-2 border-brand-black text-white font-medium transition-all duration-300 hover:bg-brand-beige hover:text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-tan focus:ring-offset-2 shadow-md hover:shadow-lg;
   }
   
   .page-transition {
