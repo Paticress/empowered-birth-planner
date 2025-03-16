@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -15,9 +16,11 @@ const buttonVariants = cva(
         outline:
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-secondary text-white hover:bg-secondary/80", // Changed to white text for better contrast
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        maternal: "bg-maternal-600 text-white hover:bg-maternal-700", // New maternal variant with white text
+        "maternal-outline": "border-2 border-maternal-900 text-maternal-900 bg-transparent hover:bg-maternal-100/50", // New maternal outline variant
       },
       size: {
         default: "h-10 px-4 py-2",

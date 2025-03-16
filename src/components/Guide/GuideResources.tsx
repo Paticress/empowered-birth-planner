@@ -132,7 +132,7 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
       
       <div className="mt-8">
         <Button 
-          variant="outline" 
+          variant="maternal-outline"
           onClick={onPrevious}
           className="flex items-center"
         >

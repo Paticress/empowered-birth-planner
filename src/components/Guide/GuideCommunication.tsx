@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ArrowLeft, MessageCircle } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -70,46 +69,46 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
         </p>
         
         <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-5'} gap-4 mb-8`}>
-          <Card className="bg-gradient-to-br from-[#F1CABB] to-white border-2 border-maternal-200 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-400">
+          <Card className="bg-gradient-to-br from-[#F1CABB] to-white border-2 border-maternal-300 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-500">
             <CardContent className="p-4">
-              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-300 pb-1">B = Benefícios</p>
-              <p className="text-maternal-700">
+              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-400 pb-1">B = Benefícios</p>
+              <p className="text-maternal-800">
                 "Quais são os benefícios desse procedimento/ intervenção?"
               </p>
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-br from-[#B8A072]/30 to-white border-2 border-maternal-300 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-400">
+          <Card className="bg-gradient-to-br from-[#B8A072]/40 to-white border-2 border-maternal-400 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-500">
             <CardContent className="p-4">
-              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-300 pb-1">R = Riscos</p>
-              <p className="text-maternal-700">
+              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-400 pb-1">R = Riscos</p>
+              <p className="text-maternal-800">
                 "Quais são os riscos ou efeitos colaterais possíveis?"
               </p>
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-br from-white to-[#F1CABB]/80 border-2 border-maternal-200 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-400">
+          <Card className="bg-gradient-to-br from-white to-[#F1CABB]/90 border-2 border-maternal-300 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-500">
             <CardContent className="p-4">
-              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-300 pb-1">A = Alternativas</p>
-              <p className="text-maternal-700">
+              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-400 pb-1">A = Alternativas</p>
+              <p className="text-maternal-800">
                 "Existem alternativas a esse procedimento/ intervenção?"
               </p>
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-br from-[#B8A072]/30 to-white border-2 border-maternal-300 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-400">
+          <Card className="bg-gradient-to-br from-[#B8A072]/40 to-white border-2 border-maternal-400 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-500">
             <CardContent className="p-4">
-              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-300 pb-1">I = Intuição</p>
-              <p className="text-maternal-700">
+              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-400 pb-1">I = Intuição</p>
+              <p className="text-maternal-800">
                 "O que a minha intuição me diz sobre isso?"
               </p>
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-br from-[#F1CABB] to-white border-2 border-maternal-200 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-400">
+          <Card className="bg-gradient-to-br from-[#F1CABB] to-white border-2 border-maternal-300 shadow-md transform hover:scale-105 transition-transform hover:border-maternal-500">
             <CardContent className="p-4">
-              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-300 pb-1">N = Nada</p>
-              <p className="text-maternal-700">
+              <p className="font-bold text-maternal-900 text-xl mb-1 border-b-2 border-maternal-400 pb-1">N = Nada</p>
+              <p className="text-maternal-800">
                 "O que acontece se não fizermos nada? Podemos esperar um pouco?"
               </p>
             </CardContent>
@@ -171,16 +170,15 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
       
       <div className="mt-8 flex justify-between">
         <Button 
-          variant="outline" 
+          variant="maternal-outline" 
           onClick={onPrevious}
-          className="flex items-center border-maternal-900 text-maternal-900 hover:bg-maternal-100"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar aos Direitos
         </Button>
         
         <Button 
           onClick={onNext}
-          className="bg-maternal-600 hover:bg-maternal-700 text-white flex items-center"
+          variant="maternal"
         >
           Próximo: Checklist Essencial <ChevronRight className="ml-2 h-4 w-4" />
         </Button>

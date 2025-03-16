@@ -20,7 +20,7 @@ export function SuccessDownload() {
         <a 
           href="/guia-plano-parto-humanizado.pdf" 
           download 
-          className="btn-primary inline-block"
+          className="bg-maternal-600 hover:bg-maternal-700 text-white px-8 py-4 rounded-full font-medium shadow-md hover:shadow-lg transition-all duration-300 inline-block"
         >
           Baixar Novamente
         </a>
@@ -32,7 +32,7 @@ export function SuccessDownload() {
           Para ter um plano de parto ainda mais completo e personalizado para suas necessidades...
         </p>
         <Link to="/plano-personalizado">
-          <Button variant="outline" className="border-maternal-400 text-maternal-700 hover:bg-maternal-100 hover:text-maternal-800">
+          <Button variant="maternal-outline" className="hover:bg-maternal-100">
             Conhecer o Modelo Personalizado
           </Button>
         </Link>
