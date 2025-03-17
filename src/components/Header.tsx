@@ -1,9 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Sparkles, Menu, X } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   
   useEffect(() => {
@@ -24,49 +27,123 @@ export function Header() {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white shadow-sm' : 'bg-white'
+      scrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm' : 'bg-white'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <span className="text-brand-black font-bold text-xl md:text-2xl">Energia Materna</span>
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="flex items-center justify-center bg-maternal-100 rounded-full p-1.5">
+                <Sparkles className="h-5 w-5 text-maternal-600" aria-hidden="true" />
+              </div>
+              <span className="text-maternal-900 font-bold text-xl md:text-2xl">Energia Materna</span>
             </Link>
           </div>
+          
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link 
               to="/guia-gratuito" 
               className={`transition-colors ${isActive('/guia-gratuito') 
-                ? 'text-brand-black font-semibold border-b-2 border-brand-pink' 
-                : 'text-brand-black hover:text-brand-pink'}`}
+                ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
+                : 'text-maternal-800 hover:text-maternal-600'}`}
             >
               Guia Gratuito
             </Link>
             <Link 
               to="/guia-online" 
               className={`transition-colors ${isActive('/guia-online') 
-                ? 'text-brand-black font-semibold border-b-2 border-brand-pink' 
-                : 'text-brand-black hover:text-brand-pink'}`}
+                ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
+                : 'text-maternal-800 hover:text-maternal-600'}`}
             >
               Guia Online
             </Link>
             <Link 
               to="/plano-personalizado" 
               className={`transition-colors ${isActive('/plano-personalizado') 
-                ? 'text-brand-black font-semibold border-b-2 border-brand-pink' 
-                : 'text-brand-black hover:text-brand-pink'}`}
+                ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
+                : 'text-maternal-800 hover:text-maternal-600'}`}
             >
               Plano Personalizado
             </Link>
             <Link 
               to="/depoimentos" 
               className={`transition-colors ${isActive('/depoimentos') 
-                ? 'text-brand-black font-semibold border-b-2 border-brand-pink' 
-                : 'text-brand-black hover:text-brand-pink'}`}
+                ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
+                : 'text-maternal-800 hover:text-maternal-600'}`}
             >
               Depoimentos
             </Link>
           </nav>
+          
+          {/* Mobile Menu Button */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <button 
+                className="text-maternal-900 p-2 rounded-md"
+                aria-label="Menu principal"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[250px] sm:w-[300px] bg-white">
+              <div className="flex flex-col h-full py-6">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-maternal-100 rounded-full p-1.5">
+                      <Sparkles className="h-4 w-4 text-maternal-600" aria-hidden="true" />
+                    </div>
+                    <span className="text-maternal-900 font-bold text-lg">Energia Materna</span>
+                  </div>
+                  <button 
+                    className="text-maternal-900 p-1 rounded-md"
+                    onClick={() => setMobileMenuOpen(false)}
+                    aria-label="Fechar menu"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <nav className="flex flex-col space-y-4">
+                  <Link 
+                    to="/guia-gratuito" 
+                    className={`py-2 px-3 rounded-md transition-colors ${isActive('/guia-gratuito') 
+                      ? 'bg-maternal-100 text-maternal-900 font-medium' 
+                      : 'text-maternal-800 hover:bg-maternal-50'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Guia Gratuito
+                  </Link>
+                  <Link 
+                    to="/guia-online" 
+                    className={`py-2 px-3 rounded-md transition-colors ${isActive('/guia-online') 
+                      ? 'bg-maternal-100 text-maternal-900 font-medium' 
+                      : 'text-maternal-800 hover:bg-maternal-50'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Guia Online
+                  </Link>
+                  <Link 
+                    to="/plano-personalizado" 
+                    className={`py-2 px-3 rounded-md transition-colors ${isActive('/plano-personalizado') 
+                      ? 'bg-maternal-100 text-maternal-900 font-medium' 
+                      : 'text-maternal-800 hover:bg-maternal-50'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Plano Personalizado
+                  </Link>
+                  <Link 
+                    to="/depoimentos" 
+                    className={`py-2 px-3 rounded-md transition-colors ${isActive('/depoimentos') 
+                      ? 'bg-maternal-100 text-maternal-900 font-medium' 
+                      : 'text-maternal-800 hover:bg-maternal-50'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Depoimentos
+                  </Link>
+                </nav>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
