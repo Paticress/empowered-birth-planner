@@ -25,8 +25,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Explicitly set the input
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
+  },
+  // Explicitly set the entry point
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+    },
   },
 });

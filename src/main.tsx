@@ -13,6 +13,7 @@ registerServiceWorker();
 // Logs for debugging
 console.log("Initializing application...");
 console.log("Routing mode: HashRouter");
+console.log("Entry point loaded: main.tsx");
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
