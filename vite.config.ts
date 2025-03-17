@@ -12,7 +12,6 @@ export default defineConfig({
     port: 8080,          
     strictPort: true,    
     open: true,          
-    force: true,         // Force the server to use the specified port
   },
   plugins: [
     react(),
