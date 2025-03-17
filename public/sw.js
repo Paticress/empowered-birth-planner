@@ -1,10 +1,10 @@
 
 const CACHE_NAME = 'plano-parto-cache-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/assets/index.js',
-  '/assets/index.css',
+  './',
+  './index.html',
+  './assets/index.js',
+  './assets/index.css',
   // Add other important assets here
 ];
 
