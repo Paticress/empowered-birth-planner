@@ -6,8 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 
-// Guide Resources
+// Pages
 import { OnlineGuide } from "./components/Guide/OnlineGuide";
+import GuiaGratuito from "./pages/GuiaGratuito";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<OnlineGuide />} />
           <Route path="/guia-online" element={<OnlineGuide />} />
+          <Route path="/guia-gratuito" element={<GuiaGratuito />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

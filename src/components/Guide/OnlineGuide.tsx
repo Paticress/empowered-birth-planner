@@ -12,6 +12,7 @@ import { GuideProgressBar } from './GuideProgressBar';
 import { BackToTopButton } from './BackToTopButton';
 import { MobileNavigation } from './MobileNavigation';
 import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -71,98 +72,101 @@ export function OnlineGuide() {
 
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Guia do Plano de Parto">
-      <GuideHeader onNavigate={handleTabChange} currentTab={activeTab} />
+      <Header />
+      <div className="pt-16 md:pt-20">
+        <GuideHeader onNavigate={handleTabChange} currentTab={activeTab} />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-4 md:hidden print:hidden">
-          <MobileNavigation 
-            activeTab={activeTab} 
-            onTabChange={handleTabChange} 
-            tabNames={tabNames} 
-          />
-        </div>
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-between items-center mb-4 md:hidden print:hidden">
+            <MobileNavigation 
+              activeTab={activeTab} 
+              onTabChange={handleTabChange} 
+              tabNames={tabNames} 
+            />
+          </div>
+          
+          <GuideProgressBar progress={progress} />
+          
+          <div className="mb-8 animate-fade-in print:block">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+              <div className="hidden md:flex justify-between items-center mb-4 print:hidden">
+                <GuideTabs activeTab={activeTab} onChange={handleTabChange} />
+              </div>
+              
+              <div className="flex justify-between items-center mb-4 print:hidden">
+                {!isFirstTab ? (
+                  <Button 
+                    variant="navigation" 
+                    className="flex items-center" 
+                    onClick={() => handleNextSection(tabs[currentIndex - 1])}
+                    aria-label={`Ir para seção anterior: ${tabNames[tabs[currentIndex - 1]]}`}
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Seção Anterior
+                  </Button>
+                ) : (
+                  <div></div>
+                )}
+                
+                {!isLastTab ? (
+                  <Button 
+                    className="flex items-center ml-auto" 
+                    variant="navigation"
+                    onClick={() => handleNextSection(tabs[currentIndex + 1])}
+                    aria-label={`Ir para próxima seção: ${tabNames[tabs[currentIndex + 1]]}`}
+                  >
+                    Próxima Seção <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <div></div>
+                )}
+              </div>
+              
+              <div className="bg-white shadow-md rounded-lg p-6 md:p-8">
+                <TabsContent value="introduction" className="mt-0" role="tabpanel" aria-labelledby="tab-introduction">
+                  <GuideIntroduction onNext={() => handleNextSection("structure")} />
+                </TabsContent>
+                
+                <TabsContent value="structure" className="mt-0" role="tabpanel" aria-labelledby="tab-structure">
+                  <GuideStructure 
+                    onPrevious={() => handleNextSection("introduction")} 
+                    onNext={() => handleNextSection("rights")} 
+                  />
+                </TabsContent>
+                
+                <TabsContent value="rights" className="mt-0" role="tabpanel" aria-labelledby="tab-rights">
+                  <GuideRights 
+                    onPrevious={() => handleNextSection("structure")} 
+                    onNext={() => handleNextSection("communication")} 
+                  />
+                </TabsContent>
+                
+                <TabsContent value="communication" className="mt-0" role="tabpanel" aria-labelledby="tab-communication">
+                  <GuideCommunication 
+                    onPrevious={() => handleNextSection("rights")} 
+                    onNext={() => handleNextSection("checklist")} 
+                  />
+                </TabsContent>
+                
+                <TabsContent value="checklist" className="mt-0" role="tabpanel" aria-labelledby="tab-checklist">
+                  <GuideChecklist
+                    onPrevious={() => handleNextSection("communication")}
+                    onNext={() => handleNextSection("resources")}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="resources" className="mt-0" role="tabpanel" aria-labelledby="tab-resources">
+                  <GuideResources
+                    onPrevious={() => handleNextSection("checklist")}
+                  />
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
+        </main>
         
-        <GuideProgressBar progress={progress} />
-        
-        <div className="mb-8 animate-fade-in print:block">
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <div className="hidden md:flex justify-between items-center mb-4 print:hidden">
-              <GuideTabs activeTab={activeTab} onChange={handleTabChange} />
-            </div>
-            
-            <div className="flex justify-between items-center mb-4 print:hidden">
-              {!isFirstTab ? (
-                <Button 
-                  variant="navigation" 
-                  className="flex items-center" 
-                  onClick={() => handleNextSection(tabs[currentIndex - 1])}
-                  aria-label={`Ir para seção anterior: ${tabNames[tabs[currentIndex - 1]]}`}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Seção Anterior
-                </Button>
-              ) : (
-                <div></div>
-              )}
-              
-              {!isLastTab ? (
-                <Button 
-                  className="flex items-center ml-auto" 
-                  variant="navigation"
-                  onClick={() => handleNextSection(tabs[currentIndex + 1])}
-                  aria-label={`Ir para próxima seção: ${tabNames[tabs[currentIndex + 1]]}`}
-                >
-                  Próxima Seção <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <div></div>
-              )}
-            </div>
-            
-            <div className="bg-white shadow-md rounded-lg p-6 md:p-8">
-              <TabsContent value="introduction" className="mt-0" role="tabpanel" aria-labelledby="tab-introduction">
-                <GuideIntroduction onNext={() => handleNextSection("structure")} />
-              </TabsContent>
-              
-              <TabsContent value="structure" className="mt-0" role="tabpanel" aria-labelledby="tab-structure">
-                <GuideStructure 
-                  onPrevious={() => handleNextSection("introduction")} 
-                  onNext={() => handleNextSection("rights")} 
-                />
-              </TabsContent>
-              
-              <TabsContent value="rights" className="mt-0" role="tabpanel" aria-labelledby="tab-rights">
-                <GuideRights 
-                  onPrevious={() => handleNextSection("structure")} 
-                  onNext={() => handleNextSection("communication")} 
-                />
-              </TabsContent>
-              
-              <TabsContent value="communication" className="mt-0" role="tabpanel" aria-labelledby="tab-communication">
-                <GuideCommunication 
-                  onPrevious={() => handleNextSection("rights")} 
-                  onNext={() => handleNextSection("checklist")} 
-                />
-              </TabsContent>
-              
-              <TabsContent value="checklist" className="mt-0" role="tabpanel" aria-labelledby="tab-checklist">
-                <GuideChecklist
-                  onPrevious={() => handleNextSection("communication")}
-                  onNext={() => handleNextSection("resources")}
-                />
-              </TabsContent>
-              
-              <TabsContent value="resources" className="mt-0" role="tabpanel" aria-labelledby="tab-resources">
-                <GuideResources
-                  onPrevious={() => handleNextSection("checklist")}
-                />
-              </TabsContent>
-            </div>
-          </Tabs>
-        </div>
-      </main>
-      
-      <BackToTopButton />
-      <Footer />
+        <BackToTopButton />
+        <Footer />
+      </div>
     </div>
   );
 }
