@@ -1,7 +1,5 @@
 
 import { Link } from 'react-router-dom';
-import { MessageCircleQuestion } from 'lucide-react';
-import { Button } from './ui/button';
 
 export function Footer() {
   return (
@@ -22,16 +20,41 @@ export function Footer() {
           </div>
           
           <div>
-            <h3 className="text-maternal-900 font-semibold text-lg mb-4">Contato</h3>
-            <div className="mb-4">
-              <a href="https://www.energiamaterna.com.br#contato" target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" className="flex items-center gap-2">
-                  <MessageCircleQuestion size={18} />
-                  Suporte
-                </Button>
-              </a>
-            </div>
-            <div className="flex space-x-4 mt-4">
+            <h3 className="text-maternal-900 font-semibold text-lg mb-4">Links Rápidos</h3>
+            <ul className="space-y-2">
+              <li>
+                <a 
+                  href="https://www.energiamaterna.com.br/meu-plano-de-parto" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-maternal-700 hover:text-maternal-600 transition-colors"
+                >
+                  Modelo de Plano de Parto
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://www.energiamaterna.com.br/especiais" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-maternal-700 hover:text-maternal-600 transition-colors"
+                >
+                  Especiais Energia Materna
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://www.energiamaterna.com.br/blog" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-maternal-700 hover:text-maternal-600 transition-colors"
+                >
+                  Blog
+                </a>
+              </li>
+            </ul>
+            
+            <div className="flex space-x-4 mt-6">
               <a href="https://www.instagram.com/energiamaternabr" target="_blank" rel="noopener noreferrer" className="text-maternal-700 hover:text-maternal-600 transition-colors">
                 <span className="sr-only">Instagram</span>
                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
