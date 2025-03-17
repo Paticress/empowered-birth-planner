@@ -1,4 +1,3 @@
-
 const CACHE_NAME = 'plano-parto-cache-v1';
 const STATIC_ASSETS = [
   './',
@@ -9,15 +8,19 @@ const STATIC_ASSETS = [
   './manifest.json'
 ];
 
-// Function to limit cache size
-const limitCacheSize = (cacheName, maxItems) => {
-  caches.open(cacheName).then(cache => {
-    cache.keys().then(keys => {
-      if (keys.length > maxItems) {
-        cache.delete(keys[0]).then(limitCacheSize(cacheName, maxItems));
-      }
-    });
-  });
+// Function to limit cache size with improved efficiency
+const limitCacheSize = async (cacheName, maxItems) => {
+  try {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    if (keys.length > maxItems) {
+      // Delete oldest items in bulk for better performance
+      const deletePromises = keys.slice(0, keys.length - maxItems).map(key => cache.delete(key));
+      await Promise.all(deletePromises);
+    }
+  } catch (err) {
+    console.error('Cache size limiting failed:', err);
+  }
 };
 
 // Install event - cache initial resources
@@ -48,68 +51,129 @@ self.addEventListener('install', event => {
   );
 });
 
-// Fetch event with network-first strategy for API requests and cache-first for static assets
+// Fetch event with optimized caching strategies
 self.addEventListener('fetch', event => {
-  // Don't cache browser-sync requests in development
-  if (event.request.url.includes('browser-sync')) {
+  // Don't cache browser-sync or analytics requests
+  if (event.request.url.includes('browser-sync') || 
+      event.request.url.includes('analytics') ||
+      event.request.url.includes('chrome-extension')) {
     return;
   }
   
   // Parse the URL
   const requestUrl = new URL(event.request.url);
   
-  // Use different strategies based on the request type
-  if (requestUrl.origin === location.origin && STATIC_ASSETS.some(asset => requestUrl.pathname.endsWith(asset))) {
-    // Cache-first for static assets
+  // Handle different request types efficiently
+  if (requestUrl.origin === location.origin) {
+    // Cache static assets aggressively
+    const isStaticAsset = STATIC_ASSETS.some(asset => requestUrl.pathname.endsWith(asset)) || 
+                         requestUrl.pathname.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2|ttf|eot)$/);
+    
+    if (isStaticAsset) {
+      // Cache-first for static assets
+      event.respondWith(
+        caches.match(event.request)
+          .then(cachedResponse => {
+            if (cachedResponse) {
+              // Return cached response immediately
+              return cachedResponse;
+            }
+            
+            // If not in cache, fetch from network and cache
+            return fetch(event.request)
+              .then(fetchResponse => {
+                if (!fetchResponse || fetchResponse.status !== 200 || fetchResponse.type !== 'basic') {
+                  return fetchResponse;
+                }
+                
+                // Cache the fetched response (use clone because response can only be used once)
+                const responseToCache = fetchResponse.clone();
+                caches.open(CACHE_NAME)
+                  .then(cache => {
+                    cache.put(event.request, responseToCache);
+                  });
+                  
+                return fetchResponse;
+              })
+              .catch(() => {
+                // Fallback for image files if fetch fails
+                if (event.request.url.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
+                  return caches.match('/placeholder.svg');
+                }
+              });
+          })
+      );
+    } else {
+      // For HTML pages (routes) - network first, fallback to cache
+      if (requestUrl.pathname.endsWith('/') || requestUrl.pathname.endsWith('.html') || !requestUrl.pathname.includes('.')) {
+        event.respondWith(
+          fetch(event.request)
+            .then(response => {
+              // Cache the latest version of the page
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME)
+                .then(cache => {
+                  cache.put(event.request, responseToCache);
+                });
+              return response;
+            })
+            .catch(() => {
+              // If network fails, try to return the cached version
+              return caches.match(event.request)
+                .then(cachedResponse => {
+                  if (cachedResponse) {
+                    return cachedResponse;
+                  }
+                  // If not in cache, fallback to index.html for SPA routing
+                  return caches.match('./index.html');
+                });
+            })
+        );
+      } else {
+        // For API requests or other dynamic content - network first with timeout
+        event.respondWith(
+          Promise.race([
+            // Network request with timeout
+            new Promise((resolve, reject) => {
+              setTimeout(() => reject(new Error('Network timeout')), 3000);
+              fetch(event.request).then(resolve, reject);
+            }),
+            // Fallback to cache after timeout
+            new Promise(resolve => {
+              setTimeout(() => {
+                caches.match(event.request).then(cachedResponse => {
+                  if (cachedResponse) resolve(cachedResponse);
+                });
+              }, 3000);
+            })
+          ])
+          .catch(() => {
+            // If both network and cache fail, try the generic fallback
+            return caches.match('./index.html');
+          })
+        );
+      }
+    }
+  } else {
+    // For cross-origin requests - attempt network, don't cache
     event.respondWith(
-      caches.match(event.request)
-        .then(cachedResponse => {
-          return cachedResponse || fetch(event.request).then(fetchResponse => {
-            return caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, fetchResponse.clone());
-              return fetchResponse;
-            });
-          });
-        })
+      fetch(event.request)
         .catch(() => {
-          // Return fallback for image files
+          // For cross-origin images, try placeholder
           if (event.request.url.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
             return caches.match('/placeholder.svg');
           }
-          return caches.match('./index.html');
-        })
-    );
-  } else {
-    // Network-first for everything else
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          // Clone the response
-          const responseClone = response.clone();
-          
-          // Open the cache
-          caches.open(CACHE_NAME).then(cache => {
-            // Only cache successful responses
-            if (response.status === 200) {
-              cache.put(event.request, responseClone);
-            }
-            
-            // Limit the cache size
-            limitCacheSize(CACHE_NAME, 100);
-          });
-          
-          return response;
-        })
-        .catch(() => {
-          return caches.match(event.request).then(cachedResponse => {
-            return cachedResponse || caches.match('./index.html');
+          // Otherwise just fail
+          return new Response('Network error occurred', {
+            status: 408,
+            headers: { 'Content-Type': 'text/plain' }
           });
         })
     );
   }
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches efficiently
 self.addEventListener('activate', event => {
   console.log('Service Worker: Activating...');
   
