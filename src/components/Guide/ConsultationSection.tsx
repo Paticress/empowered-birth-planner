@@ -13,7 +13,7 @@ export function ConsultationSection() {
         Explore alternativas e receba orientação personalizada para ajustar o que for necessário, tornando seu Plano de Parto um documento ideal para a sua jornada.
       </p>
       <Button 
-        className="bg-maternal-600 hover:bg-maternal-700"
+        className="bg-maternal-700 hover:bg-maternal-800 text-white"
         onClick={() => window.open('https://www.energiamaterna.com.br/service-page/consulta-acolhedora', '_blank')}
       >
         <Calendar className="mr-2 h-4 w-4" /> Agendar Consulta Acolhedora
