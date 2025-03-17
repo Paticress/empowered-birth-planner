@@ -33,8 +33,9 @@ export function BackToTopButton() {
       {isVisible && (
         <Button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-50 rounded-full p-3 bg-maternal-600 hover:bg-maternal-700 shadow-lg print:hidden"
+          className="fixed bottom-6 right-6 z-50 rounded-full p-3 shadow-lg print:hidden"
           aria-label="Voltar ao topo"
+          variant="navigation"
           size="icon"
         >
           <ArrowUp className="h-5 w-5" />

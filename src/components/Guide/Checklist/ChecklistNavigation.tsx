@@ -11,7 +11,7 @@ export function ChecklistNavigation({ onPrevious, onNext }: ChecklistNavigationP
   return (
     <div className="mt-8 flex justify-between">
       <Button 
-        variant="maternal-outline" 
+        variant="navigation" 
         onClick={onPrevious}
         className="flex items-center"
       >
@@ -20,7 +20,7 @@ export function ChecklistNavigation({ onPrevious, onNext }: ChecklistNavigationP
       
       <Button 
         onClick={onNext}
-        variant="maternal"
+        variant="navigation"
         className="flex items-center"
       >
         Próximo: Recursos Adicionais <ChevronRight className="ml-2 h-4 w-4" />

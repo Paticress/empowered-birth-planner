@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ArrowLeft, MessageCircle } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -170,15 +171,17 @@ export function GuideCommunication({ onPrevious, onNext }: GuideCommunicationPro
       
       <div className="mt-8 flex justify-between">
         <Button 
-          variant="maternal-outline" 
+          variant="navigation" 
           onClick={onPrevious}
+          className="flex items-center"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar aos Direitos
         </Button>
         
         <Button 
           onClick={onNext}
-          variant="maternal"
+          variant="navigation"
+          className="flex items-center"
         >
           Próximo: Checklist Essencial <ChevronRight className="ml-2 h-4 w-4" />
         </Button>

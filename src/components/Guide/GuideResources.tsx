@@ -56,7 +56,7 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
             isActive={activeResource === 'template'}
             buttonText="Adquirir Modelo"
             buttonIcon={<ShoppingCart className="mr-2 h-4 w-4" />}
-            buttonVariant="default"
+            buttonVariant="resource-highlight"
             onClick={() => handleResourceClick('template')}
             onButtonClick={() => window.open('https://www.energiamaterna.com.br/challenge-page/personalize-seu-plano-de-parto', '_blank')}
           />
@@ -68,6 +68,7 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
             isActive={activeResource === 'checklist'}
             buttonText="Visualizar Guia"
             buttonIcon={<BookOpen className="mr-2 h-4 w-4" />}
+            buttonVariant="resource"
             onClick={() => handleResourceClick('checklist')}
             onButtonClick={(e) => {
               e.stopPropagation();
@@ -132,7 +133,7 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
       
       <div className="mt-8">
         <Button 
-          variant="maternal-outline"
+          variant="navigation"
           onClick={onPrevious}
           className="flex items-center"
         >

@@ -9,7 +9,7 @@ interface ResourceCardProps {
   isActive: boolean;
   buttonText: string;
   buttonIcon: ReactNode;
-  buttonVariant?: 'default' | 'outline';
+  buttonVariant?: 'resource' | 'resource-highlight';
   onClick: () => void;
   onButtonClick: (e: React.MouseEvent) => void;
 }
@@ -21,7 +21,7 @@ export function ResourceCard({
   isActive,
   buttonText,
   buttonIcon,
-  buttonVariant = 'outline',
+  buttonVariant = 'resource',
   onClick,
   onButtonClick
 }: ResourceCardProps) {
@@ -44,7 +44,7 @@ export function ResourceCard({
       <div className="mt-4">
         <Button 
           variant={buttonVariant}
-          className={buttonVariant === 'default' ? "w-full bg-maternal-600 hover:bg-maternal-700" : "w-full"}
+          className="w-full"
           onClick={(e) => {
             e.stopPropagation();
             onButtonClick(e);

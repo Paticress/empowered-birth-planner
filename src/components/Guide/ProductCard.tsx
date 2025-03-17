@@ -31,7 +31,8 @@ export function ProductCard({
           {description}
         </p>
         <Button 
-          className="w-full bg-maternal-600 hover:bg-maternal-700"
+          className="w-full"
+          variant="resource-highlight"
           onClick={() => window.open(url, '_blank')}
         >
           {buttonIcon} {buttonText}

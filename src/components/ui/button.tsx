@@ -14,13 +14,18 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-white text-black hover:bg-gray-200 hover:text-black",
         secondary:
-          "bg-secondary text-white hover:bg-secondary/80", // Changed to white text for better contrast
+          "bg-secondary text-white hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        maternal: "bg-maternal-600 text-white hover:bg-maternal-700", // New maternal variant with white text
-        "maternal-outline": "border-2 border-maternal-900 text-maternal-900 bg-transparent hover:bg-maternal-100/50", // New maternal outline variant
+        // Navigation buttons (uniform style)
+        navigation: "bg-white text-maternal-900 border border-maternal-200 hover:bg-gray-200 hover:text-maternal-900",
+        // Progress tab buttons
+        "progress-active": "bg-maternal-100 text-maternal-900 hover:bg-maternal-100/80",
+        // Resource buttons with better visibility
+        resource: "bg-maternal-100 text-maternal-900 border border-maternal-300 hover:bg-maternal-200 font-medium",
+        "resource-highlight": "bg-maternal-400 text-white border border-maternal-500 hover:bg-maternal-500 font-medium",
       },
       size: {
         default: "h-10 px-4 py-2",

@@ -51,8 +51,8 @@ export function GuideHeader({ onNavigate, currentTab = "introduction" }: GuideHe
           
           <div className="flex space-x-2">
             <Button 
-              variant="outline" 
-              className="border-brand-black text-brand-black hover:bg-brand-pink/20"
+              variant="navigation" 
+              className="text-maternal-900 hover:bg-gray-200"
               onClick={handlePrint}
             >
               <Printer className="h-4 w-4 mr-2" /> 
@@ -60,8 +60,8 @@ export function GuideHeader({ onNavigate, currentTab = "introduction" }: GuideHe
             </Button>
             
             <Button 
-              variant="outline" 
-              className="border-brand-black text-brand-black hover:bg-brand-pink/20" 
+              variant="navigation" 
+              className="text-maternal-900 hover:bg-gray-200" 
               onClick={handleDownload}
             >
               <Download className="h-4 w-4 mr-2" /> 
@@ -69,8 +69,8 @@ export function GuideHeader({ onNavigate, currentTab = "introduction" }: GuideHe
             </Button>
             
             <Button 
-              variant="outline" 
-              className="border-brand-black text-brand-black hover:bg-brand-pink/20" 
+              variant="navigation" 
+              className="text-maternal-900 hover:bg-gray-200" 
               onClick={handleShare}
             >
               <Share2 className="h-4 w-4 mr-2" /> 

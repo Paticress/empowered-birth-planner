@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { GuideIntroduction } from './GuideIntroduction';
@@ -32,7 +31,6 @@ export function OnlineGuide() {
     resources: "Recursos"
   };
   
-  // Load saved progress on initial render
   useEffect(() => {
     const savedTab = localStorage.getItem('guide-current-tab');
     if (savedTab && tabs.includes(savedTab)) {
@@ -41,7 +39,6 @@ export function OnlineGuide() {
     }
   }, []);
   
-  // Save current tab to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('guide-current-tab', activeTab);
   }, [activeTab]);
@@ -77,7 +74,6 @@ export function OnlineGuide() {
       <GuideHeader onNavigate={handleTabChange} currentTab={activeTab} />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Mobile header with navigation */}
         <div className="flex justify-between items-center mb-4 md:hidden print:hidden">
           <MobileNavigation 
             activeTab={activeTab} 
@@ -97,8 +93,8 @@ export function OnlineGuide() {
             <div className="flex justify-between items-center mb-4 print:hidden">
               {!isFirstTab ? (
                 <Button 
-                  variant="outline" 
-                  className="flex items-center border-brand-tan text-brand-gold hover:bg-brand-beige/20" 
+                  variant="navigation" 
+                  className="flex items-center" 
                   onClick={() => handleNextSection(tabs[currentIndex - 1])}
                   aria-label={`Ir para seção anterior: ${tabNames[tabs[currentIndex - 1]]}`}
                 >
@@ -110,7 +106,8 @@ export function OnlineGuide() {
               
               {!isLastTab ? (
                 <Button 
-                  className="bg-brand-gold hover:bg-brand-tan flex items-center ml-auto" 
+                  className="flex items-center ml-auto" 
+                  variant="navigation"
                   onClick={() => handleNextSection(tabs[currentIndex + 1])}
                   aria-label={`Ir para próxima seção: ${tabNames[tabs[currentIndex + 1]]}`}
                 >
