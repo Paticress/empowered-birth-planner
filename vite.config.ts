@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -28,14 +27,38 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-tooltip',
-          ],
+        manualChunks: (id) => {
+          // Create dynamic chunks based on imports
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-radix';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('date-fns')) {
+              return 'vendor-date';
+            }
+            if (id.includes('@tanstack')) {
+              return 'vendor-tanstack';
+            }
+            // Other third-party libraries go to 'vendor'
+            return 'vendor';
+          }
+          
+          // Group app code by feature areas
+          if (id.includes('/components/Guide/')) {
+            return 'feature-guide';
+          }
+          if (id.includes('/components/Lead/')) {
+            return 'feature-lead';
+          }
+          if (id.includes('/components/ui/')) {
+            return 'ui-components';
+          }
         }
       }
     },
@@ -48,8 +71,24 @@ export default defineConfig({
   },
   // Optimize performance during development
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
+    include: [
+      'react', 
+      'react-dom', 
+      'react-router-dom',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-tabs',
+      'lucide-react',
+      'date-fns',
+      '@tanstack/react-query'
+    ],
+    esbuildOptions: {
+      target: 'esnext'
+    }
   },
   // Enable caching
   cacheDir: '.vite-cache',
+  // Improve dev performance
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+  }
 });

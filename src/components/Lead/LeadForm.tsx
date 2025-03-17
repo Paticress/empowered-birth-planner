@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +18,31 @@ interface LeadFormProps {
   withWhatsapp?: boolean;
 }
 
-export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp = true }: LeadFormProps) {
+// Helper functions moved outside component to avoid recreating on each render
+const formatWhatsAppNumber = (number: string): string => {
+  if (!number) return '';
+  
+  // Remove non-numeric characters
+  const numbers = number.replace(/\D/g, '');
+  
+  // Apply mask based on length
+  if (numbers.length <= 2) {
+    return `(${numbers}`;
+  } else if (numbers.length <= 6) {
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+  } else if (numbers.length <= 10) {
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
+  } else {
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+  }
+};
+
+const validateWhatsapp = (number: string): boolean => {
+  const digits = number.replace(/\D/g, '');
+  return digits.length >= 10 && digits.length <= 11;
+};
+
+export const LeadForm = memo(function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp = true }: LeadFormProps) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -28,34 +52,12 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Aplicar máscara ao número de WhatsApp
+  // Apply mask to WhatsApp number
   useEffect(() => {
-    if (!whatsapp) {
-      setFormattedWhatsapp('');
-      return;
-    }
-
-    // Remove todos os caracteres não numéricos
-    const numbers = whatsapp.replace(/\D/g, '');
-    
-    // Aplica a máscara de acordo com o tamanho da string
-    if (numbers.length <= 2) {
-      setFormattedWhatsapp(`(${numbers}`);
-    } else if (numbers.length <= 6) {
-      setFormattedWhatsapp(`(${numbers.slice(0, 2)}) ${numbers.slice(2)}`);
-    } else if (numbers.length <= 10) {
-      setFormattedWhatsapp(`(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`);
-    } else {
-      setFormattedWhatsapp(`(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`);
-    }
+    setFormattedWhatsapp(formatWhatsAppNumber(whatsapp));
   }, [whatsapp]);
 
-  const validateWhatsapp = (number: string) => {
-    const digits = number.replace(/\D/g, '');
-    return digits.length >= 10 && digits.length <= 11;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !name || !isPregnant || !acceptTerms) {
@@ -105,7 +107,7 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [email, name, whatsapp, isPregnant, dueDate, acceptTerms, withWhatsapp, onSuccess]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md mx-auto">
@@ -148,7 +150,7 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
         </div>
       )}
       
-      {/* Pergunta sobre gravidez */}
+      {/* Pregnancy question */}
       <div className="space-y-2">
         <Label className="text-base">Você está grávida?</Label>
         <RadioGroup 
@@ -171,7 +173,7 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
         </RadioGroup>
       </div>
       
-      {/* Data Prevista do Parto (apenas visível se estiver grávida ou parceira estiver) */}
+      {/* Due Date (only visible if pregnant or partner is pregnant) */}
       {(isPregnant === 'sim' || isPregnant === 'parceira') && (
         <div className="space-y-2">
           <Label>Data Prevista para o Parto (DPP)</Label>
@@ -196,7 +198,7 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
                 initialFocus
                 className={cn("p-3 pointer-events-auto")}
                 disabled={(date) => 
-                  date < new Date() // Não permitir datas no passado
+                  date < new Date() // Don't allow past dates
                 }
               />
             </PopoverContent>
@@ -225,4 +227,6 @@ export function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp
       </Button>
     </form>
   );
-}
+});
+
+export default LeadForm;
