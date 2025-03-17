@@ -30,10 +30,14 @@ export const registerServiceWorker = () => {
                     title: "Update Available",
                     description: "A new version is available. Refresh the page to update.",
                     duration: 10000,
-                    action: {
-                      label: "Update Now",
-                      onClick: () => forceUpdate()
-                    }
+                    action: (
+                      <button
+                        onClick={() => forceUpdate()}
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-1 rounded text-xs font-medium"
+                      >
+                        Update Now
+                      </button>
+                    )
                   });
                 }
               });
@@ -124,11 +128,11 @@ export const forceUpdate = () => {
         // Give the worker time to activate and take control
         window.setTimeout(() => {
           // Force a hard reload to ensure new service worker takes over
-          window.location.reload(true);
+          window.location.reload();
         }, 500);
       } else {
         // Just reload if no waiting worker
-        window.location.reload(true);
+        window.location.reload();
       }
     }).catch(error => {
       console.error('Force update failed:', error);
