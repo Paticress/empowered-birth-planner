@@ -8,14 +8,20 @@ import { registerServiceWorker, updateServiceWorker } from './registerSW.ts';
 // Performance monitoring
 const reportPerformance = () => {
   if (window.performance && 'getEntriesByType' in window.performance) {
-    const metrics = {};
+    const metrics: Record<string, number> = {};
     const navigationEntries = performance.getEntriesByType('navigation');
     
     if (navigationEntries && navigationEntries.length) {
-      const nav = navigationEntries[0];
+      // Cast to PerformanceNavigationTiming to access navigation-specific properties
+      const nav = navigationEntries[0] as PerformanceNavigationTiming;
       metrics['loadTime'] = nav.loadEventEnd - nav.startTime;
       metrics['domContentLoaded'] = nav.domContentLoadedEventEnd - nav.startTime;
-      metrics['firstContentfulPaint'] = performance.getEntriesByName('first-contentful-paint')[0]?.startTime || 0;
+      
+      // Get first contentful paint if available
+      const paintEntries = performance.getEntriesByName('first-contentful-paint');
+      if (paintEntries.length > 0) {
+        metrics['firstContentfulPaint'] = paintEntries[0].startTime;
+      }
     }
     
     console.log('Performance metrics:', metrics);
