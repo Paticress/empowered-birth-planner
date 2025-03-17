@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sparkles, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export function Header() {
@@ -33,9 +33,11 @@ export function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="flex items-center justify-center bg-maternal-100 rounded-full p-1.5">
-                <Sparkles className="h-5 w-5 text-maternal-600" aria-hidden="true" />
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="Energia Materna Logo" 
+                className="h-8 w-auto"
+              />
               <span className="text-maternal-900 font-bold text-xl md:text-2xl">Energia Materna</span>
             </Link>
           </div>
@@ -90,9 +92,11 @@ export function Header() {
               <div className="flex flex-col h-full py-6">
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center space-x-2">
-                    <div className="bg-maternal-100 rounded-full p-1.5">
-                      <Sparkles className="h-4 w-4 text-maternal-600" aria-hidden="true" />
-                    </div>
+                    <img 
+                      src="/logo.png" 
+                      alt="Energia Materna Logo" 
+                      className="h-6 w-auto"
+                    />
                     <span className="text-maternal-900 font-bold text-lg">Energia Materna</span>
                   </div>
                   <button 
