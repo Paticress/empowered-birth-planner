@@ -6,7 +6,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/", // Changed from "./" to "/" for subdomain deployment
+  base: "/", 
   server: {
     host: true, // This enables all network interfaces
     port: 8080, // Setting port to 8080 as required

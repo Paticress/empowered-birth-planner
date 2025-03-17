@@ -5,13 +5,16 @@ import App from './App.tsx'
 import { Toaster } from './components/ui/toaster.tsx';
 import './index.css'
 import { registerServiceWorker } from './registerSW.ts';
+import { HashRouter } from 'react-router-dom';
 
 // Register service worker for offline capabilities
 registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <HashRouter>
+      <App />
+    </HashRouter>
     <Toaster />
   </React.StrictMode>,
 )
