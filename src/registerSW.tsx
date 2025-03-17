@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { toast } from '@/components/ui/use-toast';
 
 // Track whether we've already shown the update toast to avoid duplicates
