@@ -11,6 +11,7 @@ export default defineConfig({
     host: "0.0.0.0", // Garante que o servidor esteja acessível externamente
     port: 8080,       // Porta configurada para 8080
     strictPort: true, // Força o uso desta porta específica
+    open: true,       // Abre o navegador automaticamente
   },
   plugins: [
     react(),
