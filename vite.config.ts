@@ -1,21 +1,15 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
   base: "/", 
   server: {
-    host: "::",
     port: 8080,
     open: true,
   },
-  plugins: [
-    react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -33,26 +27,38 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core React framework
-          'vendor-react': [
-            'react', 
-            'react-dom', 
-            'react-router-dom'
-          ],
-          // UI Library components
-          'vendor-ui': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toast'
-          ],
-          // Icons
-          'vendor-icons': ['lucide-react'],
-          // Data utilities
-          'vendor-data': [
-            'date-fns',
-            '@tanstack/react-query'
-          ]
+        manualChunks: (id) => {
+          // Create dynamic chunks based on imports
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-radix';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('date-fns')) {
+              return 'vendor-date';
+            }
+            if (id.includes('@tanstack')) {
+              return 'vendor-tanstack';
+            }
+            // Other third-party libraries go to 'vendor'
+            return 'vendor';
+          }
+          
+          // Group app code by feature areas
+          if (id.includes('/components/Guide/')) {
+            return 'feature-guide';
+          }
+          if (id.includes('/components/Lead/')) {
+            return 'feature-lead';
+          }
+          if (id.includes('/components/ui/')) {
+            return 'ui-components';
+          }
         }
       }
     },
@@ -85,4 +91,4 @@ export default defineConfig(({ mode }) => ({
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
-}));
+});

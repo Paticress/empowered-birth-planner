@@ -2,12 +2,6 @@
 import React from 'react';
 import { toast } from '@/components/ui/use-toast';
 
-// Constants for better maintainability
-const SW_UPDATE_CHECK_INTERVAL = 60 * 1000; // 1 minute
-const SW_UPDATE_TOAST_DURATION = 10000; // 10 seconds
-const SW_ERROR_TOAST_DURATION = 5000; // 5 seconds
-const SW_SUCCESS_TOAST_DURATION = 3000; // 3 seconds
-
 // Track whether we've already shown the update toast to avoid duplicates
 let updateToastShown = false;
 
@@ -36,7 +30,7 @@ export const registerServiceWorker = () => {
                   toast({
                     title: "Update Available",
                     description: "A new version is available. Refresh the page to update.",
-                    duration: SW_UPDATE_TOAST_DURATION,
+                    duration: 10000,
                     action: (
                       <button
                         onClick={() => forceUpdate()}
@@ -56,7 +50,7 @@ export const registerServiceWorker = () => {
           toast({
             title: "Offline Mode Unavailable",
             description: "Could not enable offline mode. Some features may be unavailable without internet connection.",
-            duration: SW_ERROR_TOAST_DURATION,
+            duration: 5000,
           });
         });
       
@@ -71,13 +65,13 @@ export const registerServiceWorker = () => {
           toast({
             title: "Ready for Offline Use",
             description: `${event.data.count} resources cached for offline use.`,
-            duration: SW_SUCCESS_TOAST_DURATION,
+            duration: 3000,
           });
         } else if (event.data.type === 'ERROR') {
           toast({
             title: "Service Worker Error",
             description: event.data.message || "An error occurred in the service worker",
-            duration: SW_ERROR_TOAST_DURATION,
+            duration: 5000,
           });
         }
       });
@@ -87,7 +81,7 @@ export const registerServiceWorker = () => {
     toast({
       title: "Limited Offline Support",
       description: "Your browser doesn't support offline mode. An internet connection will be required.",
-      duration: SW_ERROR_TOAST_DURATION,
+      duration: 5000,
     });
   }
 };
@@ -106,10 +100,17 @@ export const updateServiceWorker = () => {
     navigator.serviceWorker.ready.then(registration => {
       registration.update();
       
+      // Don't show a toast for routine checks - only show when user explicitly requests
+      // toast({
+      //   title: "Checking for Updates",
+      //   description: "Looking for new content...",
+      //   duration: 2000,
+      // });
+      
       // Reset flag after delay
       updateTimeout = window.setTimeout(() => {
         updateInProgress = false;
-      }, SW_UPDATE_CHECK_INTERVAL);
+      }, 60000); // Prevent checking more than once every minute
     }).catch(error => {
       console.error('Update check failed:', error);
       updateInProgress = false;
