@@ -32,13 +32,12 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center">
               <img 
-                src="/logo.png" 
+                src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
                 alt="Energia Materna Logo" 
-                className="h-8 w-auto"
+                className="h-10 md:h-14 w-auto"
               />
-              <span className="text-maternal-900 font-bold text-xl md:text-2xl">Energia Materna</span>
             </Link>
           </div>
           
@@ -91,13 +90,12 @@ export function Header() {
             <SheetContent side="right" className="w-[250px] sm:w-[300px] bg-white">
               <div className="flex flex-col h-full py-6">
                 <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center">
                     <img 
-                      src="/logo.png" 
+                      src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
                       alt="Energia Materna Logo" 
-                      className="h-6 w-auto"
+                      className="h-8 w-auto"
                     />
-                    <span className="text-maternal-900 font-bold text-lg">Energia Materna</span>
                   </div>
                   <button 
                     className="text-maternal-900 p-1 rounded-md"
