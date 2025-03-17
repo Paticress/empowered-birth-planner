@@ -3,7 +3,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { registerServiceWorker, updateServiceWorker } from './registerSW.ts';
+import { registerServiceWorker, updateServiceWorker } from './registerSW.tsx';
 
 // Performance monitoring
 const reportPerformance = () => {
