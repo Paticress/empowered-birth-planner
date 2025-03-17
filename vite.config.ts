@@ -5,7 +5,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
   base: "/", 
   server: {
     host: "0.0.0.0", // Garante que o servidor esteja acessível externamente
@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
+    process.env.NODE_ENV !== 'production' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -24,4 +24,4 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist",
   },
-}));
+});
