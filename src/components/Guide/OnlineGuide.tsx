@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { GuideIntroduction } from './GuideIntroduction';
@@ -12,7 +13,6 @@ import { GuideProgressBar } from './GuideProgressBar';
 import { BackToTopButton } from './BackToTopButton';
 import { MobileNavigation } from './MobileNavigation';
 import { Footer } from '@/components/Footer';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -72,8 +72,7 @@ export function OnlineGuide() {
 
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Guia do Plano de Parto">
-      <Header />
-      <div className="pt-16 md:pt-20">
+      <div className="pt-4 md:pt-8">
         <GuideHeader onNavigate={handleTabChange} currentTab={activeTab} />
 
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

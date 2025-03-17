@@ -7,9 +7,16 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-maternal-900 font-semibold text-lg mb-4">Energia Materna</h3>
-            <p className="text-maternal-700 mb-4">Apoiando gestantes a terem experiências de parto mais conscientes, respeitosas e transformadoras.</p>
+            <div className="flex flex-col items-start mb-4">
+              <img 
+                src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
+                alt="Energia Materna" 
+                className="h-16 mb-4"
+              />
+              <p className="text-maternal-700">Apoiando gestantes a terem experiências de parto mais conscientes, respeitosas e transformadoras.</p>
+            </div>
           </div>
+          
           <div>
             <h3 className="text-maternal-900 font-semibold text-lg mb-4">Links Rápidos</h3>
             <ul className="space-y-2">
@@ -30,6 +37,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
+          
           <div>
             <h3 className="text-maternal-900 font-semibold text-lg mb-4">Contato</h3>
             <p className="text-maternal-700 mb-2">contato@energiamaterna.com.br</p>
