@@ -10,8 +10,9 @@ import { HashRouter } from 'react-router-dom';
 // Register service worker for offline capabilities
 registerServiceWorker();
 
-// Log para depuração
+// Logs para depuração
 console.log("Inicializando aplicação...");
+console.log("Modo de roteamento: HashRouter");
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
