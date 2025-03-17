@@ -1,9 +1,11 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Change this to your subdomain path (e.g., '/plano-parto/' if your subdomain is plano-parto.yourdomain.com)
   base: "/", 
   server: {
     port: 8080,
