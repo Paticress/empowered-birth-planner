@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
   base: "/", // Changed from "./" to "/" for subdomain deployment
   server: {
     host: true, // This enables all network interfaces
-    port: 5173, // Using Vite's default port for consistency
+    port: 8080, // Using port 8080 as required
   },
   plugins: [
     react(),
