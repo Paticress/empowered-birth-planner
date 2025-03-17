@@ -8,8 +8,8 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   base: "/", // Changed from "./" to "/" for subdomain deployment
   server: {
-    host: "::",
-    port: 8080,
+    host: true, // This enables all network interfaces
+    port: 5173, // Using Vite's default port for consistency
   },
   plugins: [
     react(),
@@ -19,5 +19,8 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    outDir: "dist",
   },
 }));
