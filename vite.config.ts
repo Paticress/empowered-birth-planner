@@ -7,7 +7,7 @@ import path from "path";
 export default defineConfig({
   base: "/", 
   server: {
-    port: 3000,
+    port: 8080,
     open: true,
   },
   plugins: [react()],
