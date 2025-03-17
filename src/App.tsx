@@ -12,6 +12,9 @@ import GuiaGratuito from "./pages/GuiaGratuito";
 
 const queryClient = new QueryClient();
 
+// Log para depuração
+console.log("Renderizando App component");
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
