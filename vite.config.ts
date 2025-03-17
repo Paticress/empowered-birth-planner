@@ -13,9 +13,6 @@ export default defineConfig({
     strictPort: true,    // Forces the use of this specific port
     open: true,          // Opens the browser automatically
   },
-  build: {
-    outDir: "dist",
-  },
   plugins: [
     react(),
     process.env.NODE_ENV !== 'production' && componentTagger(),
@@ -28,8 +25,8 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
   },
-  // Explicitly set the entry point
   build: {
+    outDir: "dist",
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
