@@ -8,10 +8,11 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig({
   base: "/", 
   server: {
-    host: "0.0.0.0",     // Ensures the server is accessible externally
-    port: 8080,          // Port configured to 8080
-    strictPort: true,    // Forces the use of this specific port
-    open: true,          // Opens the browser automatically
+    host: "0.0.0.0",     
+    port: 8080,          
+    strictPort: true,    
+    open: true,          
+    force: true,         // Force the server to use the specified port
   },
   plugins: [
     react(),
@@ -24,6 +25,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
+    force: true, // Force dependency optimization
   },
   build: {
     outDir: "dist",
