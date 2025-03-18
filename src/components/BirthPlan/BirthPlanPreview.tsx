@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Printer, Download, Edit } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface BirthPlanPreviewProps {
   birthPlan: Record<string, any>;
@@ -68,7 +68,7 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
                 </div>
               </div>
             );
-          }}
+          })}
         </div>
       </div>
     );
@@ -82,8 +82,8 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       fields: [
         { key: 'name', label: 'Nome Completo' },
         { key: 'dueDate', label: 'Data Prevista do Parto' },
-        { key: 'healthProvider', label: 'Médico/Obstetra' },
-      ],
+        { key: 'healthProvider', label: 'Médico/Obstetra' }
+      ]
     },
     {
       id: 'preferences',
@@ -92,8 +92,8 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         { key: 'environment', label: 'Ambiente e Atmosfera' },
         { key: 'mobility', label: 'Movimentação durante o Trabalho de Parto' },
         { key: 'pain', label: 'Gerenciamento da Dor' },
-        { key: 'interventions', label: 'Intervenções Médicas' },
-      ],
+        { key: 'interventions', label: 'Intervenções Médicas' }
+      ]
     },
     {
       id: 'medicalConsiderations',
@@ -101,8 +101,8 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       fields: [
         { key: 'conditions', label: 'Condições Médicas' },
         { key: 'medications', label: 'Medicamentos' },
-        { key: 'allergies', label: 'Alergias' },
-      ],
+        { key: 'allergies', label: 'Alergias' }
+      ]
     },
     {
       id: 'postpartum',
@@ -110,9 +110,9 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       fields: [
         { key: 'newbornCare', label: 'Cuidados com o Recém-Nascido' },
         { key: 'feeding', label: 'Amamentação' },
-        { key: 'recovery', label: 'Recuperação' },
-      ],
-    },
+        { key: 'recovery', label: 'Recuperação' }
+      ]
+    }
   ];
   
   return (
