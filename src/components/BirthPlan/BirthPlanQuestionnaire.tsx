@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { QuestionnaireSection } from './QuestionnaireSection';
 import { questionnaireSections } from './questionnaireData';
@@ -15,10 +16,34 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
   const isLastSection = currentSectionIndex === questionnaireSections.length - 1;
   
   const handleSectionSubmit = (data: Record<string, any>) => {
+    // Cleanup checkbox data - convert from form format to clean format
+    const processedData = { ...data };
+    
+    // Process checkbox values for the current section
+    currentSection.questions.forEach(question => {
+      if (question.type === 'checkbox' && question.options) {
+        const checkboxValues: Record<string, boolean> = {};
+        
+        question.options.forEach(option => {
+          const key = `${question.id}.${option}`;
+          if (data[key]) {
+            checkboxValues[option] = true;
+            // Remove the individual checkbox entry
+            delete processedData[key];
+          }
+        });
+        
+        // Add the processed checkbox values
+        if (Object.keys(checkboxValues).length > 0) {
+          processedData[question.id] = checkboxValues;
+        }
+      }
+    });
+    
     // Save data from current section
     const updatedFormData = {
       ...formData,
-      ...data,
+      ...processedData,
     };
     
     setFormData(updatedFormData);
@@ -47,6 +72,7 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
       onPrevious={goToPreviousSection}
       isFirstSection={isFirstSection}
       isLastSection={isLastSection}
+      initialData={formData}
     />
   );
 }

@@ -12,6 +12,10 @@ export type Question = {
   type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select';
   options?: string[];
   isRequired?: boolean;
+  conditionalDisplay?: {
+    dependsOn: string;
+    showWhen: string | string[];
+  };
 };
 
 // Define the builder stages for better type safety
