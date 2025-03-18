@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -27,8 +26,7 @@ export const registerServiceWorker = () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller && !updateToastShown) {
                   // New content is available, notify user (only once)
                   updateToastShown = true;
-                  toast({
-                    title: "Update Available",
+                  toast("Update Available", {
                     description: "A new version is available. Refresh the page to update.",
                     duration: 10000,
                     action: (
@@ -47,8 +45,7 @@ export const registerServiceWorker = () => {
         })
         .catch(error => {
           console.error('Service Worker registration failed:', error);
-          toast({
-            title: "Offline Mode Unavailable",
+          toast("Offline Mode Unavailable", {
             description: "Could not enable offline mode. Some features may be unavailable without internet connection.",
             duration: 5000,
           });
@@ -62,14 +59,12 @@ export const registerServiceWorker = () => {
         
         // Handle specific message types
         if (event.data.type === 'CACHED_RESOURCES') {
-          toast({
-            title: "Ready for Offline Use",
+          toast("Ready for Offline Use", {
             description: `${event.data.count} resources cached for offline use.`,
             duration: 3000,
           });
         } else if (event.data.type === 'ERROR') {
-          toast({
-            title: "Service Worker Error",
+          toast("Service Worker Error", {
             description: event.data.message || "An error occurred in the service worker",
             duration: 5000,
           });
@@ -78,8 +73,7 @@ export const registerServiceWorker = () => {
     });
   } else {
     console.log('Service Workers are not supported in this browser.');
-    toast({
-      title: "Limited Offline Support",
+    toast("Limited Offline Support", {
       description: "Your browser doesn't support offline mode. An internet connection will be required.",
       duration: 5000,
     });

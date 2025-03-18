@@ -1,4 +1,10 @@
 
-import { toast } from "sonner";
+import { toast as sonnerToast, ToastOptions } from "sonner";
 
-export { toast };
+// Wrapper function for sonner toast to handle type issues
+export const toast = (
+  message: string, 
+  options?: ToastOptions
+) => {
+  return sonnerToast(message, options);
+};
