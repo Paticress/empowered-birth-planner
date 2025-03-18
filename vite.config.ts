@@ -5,7 +5,7 @@ import path from "path";
 import fs from "fs";
 
 // Find index.html in the project structure
-function findIndexHtml(dir) {
+function findIndexHtml(dir: string): string | null {
   const files = fs.readdirSync(dir);
   
   // Check if index.html exists in this directory
@@ -32,8 +32,8 @@ function findIndexHtml(dir) {
 }
 
 // Try to find index.html
-const indexPath = findIndexHtml(__dirname);
-const root = indexPath ? path.dirname(indexPath) : __dirname;
+const indexPath: string | null = findIndexHtml(__dirname);
+const root: string = indexPath ? path.dirname(indexPath) : __dirname;
 
 // https://vitejs.dev/config/
 export default defineConfig({
