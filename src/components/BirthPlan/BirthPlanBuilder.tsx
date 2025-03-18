@@ -44,25 +44,25 @@ export function BirthPlanBuilder() {
   }, [currentStage]);
 
   return (
-    <div className="bg-purple-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
+    <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
       <div className="pt-4 md:pt-8">
         <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Ultra-clear visual indicator to show this is the Birth Plan page */}
-          <div className="mb-6 p-6 bg-purple-300 border-l-8 border-purple-600 rounded-md shadow-lg">
-            <h1 className="text-4xl font-bold text-purple-900 mb-2">
+          <div className="mb-6 p-6 bg-maternal-100 border-l-8 border-maternal-400 rounded-md shadow-lg">
+            <h1 className="text-4xl font-bold text-maternal-800 mb-2">
               Construtor de Plano de Parto
             </h1>
-            <p className="text-purple-800 text-xl">
+            <p className="text-maternal-700 text-xl">
               Você está no construtor de plano de parto - crie e personalize seu plano aqui
             </p>
-            <p className="mt-2 text-purple-700 font-medium">
+            <p className="mt-2 text-maternal-600 font-medium">
               Current route: /criar-plano
             </p>
           </div>
           
-          <div className="bg-white shadow-xl rounded-lg p-6 md:p-8 mb-8 border-t-4 border-purple-500">
+          <div className="bg-white shadow-xl rounded-lg p-6 md:p-8 mb-8 border-t-4 border-maternal-400">
             <StageContent 
               currentStage={currentStage}
               birthPlanContent={birthPlanContent}

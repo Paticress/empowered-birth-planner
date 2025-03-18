@@ -14,10 +14,10 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
   const { navigateTo } = useNavigation();
   
   return (
-    <header className="bg-purple-800 text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
+    <header className="bg-maternal-500 text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center">
         <div className="flex items-center space-x-2">
-          <FileText className="h-6 w-6 text-purple-200" />
+          <FileText className="h-6 w-6 text-maternal-100" />
           <h1 className="text-xl font-bold">Construa seu Plano de Parto</h1>
         </div>
         
@@ -26,7 +26,7 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
             variant="outline" 
             size="sm" 
             onClick={() => navigateTo("/guia-online")}
-            className="text-white bg-purple-700 hover:bg-purple-600 border-purple-500"
+            className="text-white bg-maternal-600 hover:bg-maternal-500 border-maternal-300"
           >
             Voltar ao Guia
           </Button>
@@ -38,8 +38,8 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
                 size="sm" 
                 onClick={() => onStageChange('editor')}
                 className={currentStage === 'editor' 
-                  ? "bg-purple-500 hover:bg-purple-400" 
-                  : "text-white bg-purple-700 hover:bg-purple-600 border-purple-500"}
+                  ? "bg-maternal-300 hover:bg-maternal-200 text-maternal-900" 
+                  : "text-white bg-maternal-600 hover:bg-maternal-500 border-maternal-300"}
               >
                 <Edit className="h-4 w-4 mr-2" /> 
                 <span className="hidden sm:inline">Editar</span>
@@ -50,8 +50,8 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
                 size="sm" 
                 onClick={() => onStageChange('preview')}
                 className={currentStage === 'preview' 
-                  ? "bg-purple-500 hover:bg-purple-400" 
-                  : "text-white bg-purple-700 hover:bg-purple-600 border-purple-500"}
+                  ? "bg-maternal-300 hover:bg-maternal-200 text-maternal-900" 
+                  : "text-white bg-maternal-600 hover:bg-maternal-500 border-maternal-300"}
               >
                 <Eye className="h-4 w-4 mr-2" /> 
                 <span className="hidden sm:inline">Visualizar</span>
@@ -62,8 +62,8 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
                 size="sm" 
                 onClick={() => onStageChange('share')}
                 className={currentStage === 'share' 
-                  ? "bg-purple-500 hover:bg-purple-400" 
-                  : "text-white bg-purple-700 hover:bg-purple-600 border-purple-500"}
+                  ? "bg-maternal-300 hover:bg-maternal-200 text-maternal-900" 
+                  : "text-white bg-maternal-600 hover:bg-maternal-500 border-maternal-300"}
               >
                 <Share2 className="h-4 w-4 mr-2" /> 
                 <span className="hidden sm:inline">Compartilhar</span>

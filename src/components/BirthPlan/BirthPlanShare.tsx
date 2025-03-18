@@ -50,7 +50,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
           familiares ou outros cuidadores que estarão envolvidos no nascimento do seu bebê.
         </p>
         
-        <div className="bg-maternal-50 p-4 rounded-lg border-l-4 border-maternal-600 my-6">
+        <div className="bg-maternal-50 p-4 rounded-lg border-l-4 border-maternal-400 my-6">
           <p className="font-medium text-maternal-900 mb-0">
             <strong>Dica:</strong> Compartilhe seu plano de parto com seu médico/obstetra pelo menos um mês antes da sua data prevista.
             Isso dará tempo suficiente para discutir quaisquer ajustes necessários.

@@ -18,7 +18,7 @@ export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
   return (
     <Button 
       onClick={goToBirthPlanBuilder}
-      className={`bg-purple-600 hover:bg-purple-700 flex items-center ${className}`}
+      className={`bg-maternal-400 hover:bg-maternal-500 flex items-center ${className}`}
     >
       <FileText className="mr-2 h-4 w-4" />
       Criar Plano de Parto

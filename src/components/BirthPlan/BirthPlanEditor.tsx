@@ -38,7 +38,7 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
   
   return (
     <div className="animate-fade-in">
-      <h1 className="text-3xl font-bold text-purple-900 mb-6">Edite seu Plano de Parto</h1>
+      <h1 className="text-3xl font-bold text-maternal-800 mb-6">Edite seu Plano de Parto</h1>
       
       <div className="flex overflow-x-auto pb-2 mb-6 gap-2">
         {birthPlanSections.map((section, index) => (
@@ -46,8 +46,8 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
             key={section.id}
             variant={activeSectionIndex === index ? "default" : "outline"}
             className={activeSectionIndex === index 
-              ? `bg-${section.color || 'purple-600'}` 
-              : `hover:bg-${section.color || 'purple-100'} hover:text-purple-900`}
+              ? `bg-maternal-${section.color || '400'}` 
+              : `hover:bg-maternal-${section.color || '100'} hover:text-maternal-800`}
             onClick={() => setActiveSectionIndex(index)}
           >
             {section.title}
@@ -55,8 +55,8 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
         ))}
       </div>
       
-      <div className={`bg-white border-l-4 border-${activeSection.color || 'purple-500'} rounded-lg p-6 mb-6 shadow-md`}>
-        <h2 className="text-2xl font-semibold text-purple-800 mb-4">{activeSection.title}</h2>
+      <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-6 mb-6 shadow-md`}>
+        <h2 className="text-2xl font-semibold text-maternal-700 mb-4">{activeSection.title}</h2>
         
         {activeSection.fields.map((field) => {
           const sectionData = localBirthPlan[activeSection.id] || {};
@@ -66,7 +66,7 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
             <div key={field.key} className="mb-6">
               <label 
                 htmlFor={`${activeSection.id}-${field.key}`} 
-                className="block font-medium text-purple-900 mb-2"
+                className="block font-medium text-maternal-800 mb-2"
               >
                 {field.label}
               </label>
@@ -80,7 +80,7 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
                   e.target.value
                 )}
                 rows={6}
-                className="w-full border-purple-200 focus:border-purple-500 focus:ring-purple-500"
+                className="w-full border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
                 placeholder={`Insira suas preferências para ${field.label.toLowerCase()}`}
               />
             </div>
@@ -88,8 +88,8 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
         })}
       </div>
       
-      <div className="bg-purple-50 p-4 rounded-lg mb-6 border border-purple-200">
-        <p className="text-sm text-purple-800">
+      <div className="bg-maternal-50 p-4 rounded-lg mb-6 border border-maternal-200">
+        <p className="text-sm text-maternal-700">
           <strong>Dica:</strong> Seja específico sobre suas preferências, mas também flexível. 
           Lembre-se de que situações imprevistas podem ocorrer durante o parto.
         </p>
@@ -100,7 +100,7 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
           variant="outline"
           onClick={() => setActiveSectionIndex(Math.max(0, activeSectionIndex - 1))}
           disabled={activeSectionIndex === 0}
-          className="flex items-center border-purple-300 text-purple-700 hover:bg-purple-50"
+          className="flex items-center border-maternal-300 text-maternal-700 hover:bg-maternal-50"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Seção Anterior
         </Button>
@@ -108,7 +108,7 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
         <Button 
           variant="outline"
           onClick={handleSave}
-          className="flex items-center border-purple-300 text-purple-700 hover:bg-purple-50"
+          className="flex items-center border-maternal-300 text-maternal-700 hover:bg-maternal-50"
         >
           <Save className="mr-2 h-4 w-4" /> Salvar Alterações
         </Button>
@@ -119,14 +119,14 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
               handleSave();
               onNext();
             }}
-            className="bg-purple-600 hover:bg-purple-700 flex items-center"
+            className="bg-maternal-400 hover:bg-maternal-500 flex items-center"
           >
             Visualizar Plano Completo <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
         ) : (
           <Button 
             onClick={() => setActiveSectionIndex(Math.min(birthPlanSections.length - 1, activeSectionIndex + 1))}
-            className="bg-purple-600 hover:bg-purple-700 flex items-center"
+            className="bg-maternal-400 hover:bg-maternal-500 flex items-center"
           >
             Próxima Seção <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
