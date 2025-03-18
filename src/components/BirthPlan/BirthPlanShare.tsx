@@ -1,9 +1,9 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Copy, Mail, Share2, WhatsApp } from 'lucide-react';
+import { ArrowLeft, Copy, Mail, Share2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 
 interface BirthPlanShareProps {
@@ -153,7 +153,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
             className="flex flex-col items-center justify-center p-6 border rounded-lg hover:bg-maternal-50 transition-colors"
             onClick={handleShareViaWhatsApp}
           >
-            <WhatsApp className="h-12 w-12 text-maternal-600 mb-4" />
+            <Share2 className="h-12 w-12 text-maternal-600 mb-4" />
             <span className="font-medium text-maternal-900">WhatsApp</span>
             <span className="text-sm text-gray-500 mt-1">Compartilhe via WhatsApp</span>
           </button>

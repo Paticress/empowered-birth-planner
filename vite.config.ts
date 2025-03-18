@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import fs from "fs";
+import { componentTagger } from "lovable-tagger";
 
 // Find index.html in the project structure
 function findIndexHtml(dir: string): string | null {
@@ -36,7 +37,7 @@ const indexPath: string | null = findIndexHtml(__dirname);
 const root: string = indexPath ? path.dirname(indexPath) : __dirname;
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   // Base path for the application
   base: "/", 
   root: root, // Set the root to the directory containing index.html
@@ -44,7 +45,10 @@ export default defineConfig({
     port: 8080,
     open: true,
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    mode === 'development' && componentTagger(),
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -128,4 +132,4 @@ export default defineConfig({
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
-});
+}));
