@@ -74,14 +74,12 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
     
     navigator.clipboard.writeText(text)
       .then(() => {
-        toast({
-          title: "Copiado para a área de transferência",
+        toast("Copiado para a área de transferência", {
           description: "Seu plano de parto foi copiado e está pronto para ser compartilhado.",
         });
       })
       .catch(() => {
-        toast({
-          title: "Erro ao copiar",
+        toast("Erro ao copiar", {
           description: "Não foi possível copiar o texto para a área de transferência.",
           variant: "destructive",
         });
@@ -101,8 +99,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
   
   const handleSendEmail = () => {
     if (!email) {
-      toast({
-        title: "E-mail necessário",
+      toast("E-mail necessário", {
         description: "Por favor, insira um endereço de e-mail válido.",
         variant: "destructive",
       });
@@ -110,8 +107,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
     }
     
     // In a real implementation, this would send an actual email
-    toast({
-      title: "E-mail enviado",
+    toast("E-mail enviado", {
       description: `Seu plano de parto foi enviado para ${email}.`,
     });
     

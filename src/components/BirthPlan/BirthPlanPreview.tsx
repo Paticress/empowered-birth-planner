@@ -12,8 +12,7 @@ interface BirthPlanPreviewProps {
 export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreviewProps) {
   // Functions to handle printing and downloading
   const handlePrint = () => {
-    toast({
-      title: "Preparando para impressão",
+    toast("Preparando para impressão", {
       description: "Seu plano de parto está sendo preparado para impressão.",
     });
     
@@ -21,15 +20,13 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
   };
   
   const handleDownload = () => {
-    toast({
-      title: "Download Iniciado",
+    toast("Download Iniciado", {
       description: "Seu plano de parto está sendo baixado como PDF.",
     });
     
     // In a real implementation, this would generate a PDF
     setTimeout(() => {
-      toast({
-        title: "Download Concluído",
+      toast("Download Concluído", {
         description: "Seu plano de parto foi baixado com sucesso.",
       });
     }, 1500);
