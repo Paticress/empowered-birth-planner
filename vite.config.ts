@@ -19,6 +19,8 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    // Skip type checking during build for faster builds - tsc is run separately
+    skipTypeCheck: true, 
     // Enable these optimizations for production builds
     minify: 'terser',
     terserOptions: {
@@ -94,3 +96,4 @@ export default defineConfig({
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
 });
+
