@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -19,9 +18,9 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    // Skip type checking during build for faster builds - tsc is run separately
-    skipTypeCheck: true, 
-    // Enable these optimizations for production builds
+    // Vite's BuildOptions doesn't have a direct TypeScript type checking option
+    // Instead, we'll remove the incorrect 'skipTypeCheck' property entirely
+    // and rely on the build.js script to handle TypeScript checking separately
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -96,4 +95,3 @@ export default defineConfig({
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
 });
-
