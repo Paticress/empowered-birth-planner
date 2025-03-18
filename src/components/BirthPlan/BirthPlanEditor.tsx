@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Save } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
+import { birthPlanSections } from './utils/birthPlanSections';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -14,47 +15,6 @@ interface BirthPlanEditorProps {
 export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditorProps) {
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [localBirthPlan, setLocalBirthPlan] = useState({ ...birthPlan });
-  
-  // Define sections for the birth plan
-  const sections = [
-    {
-      id: 'personalInfo',
-      title: 'Informações Pessoais',
-      fields: [
-        { key: 'name', label: 'Nome Completo' },
-        { key: 'dueDate', label: 'Data Prevista do Parto' },
-        { key: 'healthProvider', label: 'Médico/Obstetra' },
-      ],
-    },
-    {
-      id: 'preferences',
-      title: 'Preferências para o Parto',
-      fields: [
-        { key: 'environment', label: 'Ambiente e Atmosfera' },
-        { key: 'mobility', label: 'Movimentação durante o Trabalho de Parto' },
-        { key: 'pain', label: 'Gerenciamento da Dor' },
-        { key: 'interventions', label: 'Intervenções Médicas' },
-      ],
-    },
-    {
-      id: 'medicalConsiderations',
-      title: 'Considerações Médicas',
-      fields: [
-        { key: 'conditions', label: 'Condições Médicas' },
-        { key: 'medications', label: 'Medicamentos' },
-        { key: 'allergies', label: 'Alergias' },
-      ],
-    },
-    {
-      id: 'postpartum',
-      title: 'Pós-Parto',
-      fields: [
-        { key: 'newbornCare', label: 'Cuidados com o Recém-Nascido' },
-        { key: 'feeding', label: 'Amamentação' },
-        { key: 'recovery', label: 'Recuperação' },
-      ],
-    },
-  ];
   
   const handleFieldChange = (sectionId: string, fieldKey: string, value: any) => {
     setLocalBirthPlan(prevPlan => ({
@@ -68,20 +28,19 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
   
   const handleSave = () => {
     onUpdate(localBirthPlan);
-    toast({
-      title: "Alterações salvas",
+    toast("Alterações salvas", {
       description: "Seu plano de parto foi atualizado com sucesso.",
     });
   };
   
-  const activeSection = sections[activeSectionIndex];
+  const activeSection = birthPlanSections[activeSectionIndex];
   
   return (
     <div className="animate-fade-in">
       <h1 className="text-3xl font-bold text-maternal-900 mb-6">Edite seu Plano de Parto</h1>
       
       <div className="flex overflow-x-auto pb-2 mb-6 gap-2">
-        {sections.map((section, index) => (
+        {birthPlanSections.map((section, index) => (
           <Button
             key={section.id}
             variant={activeSectionIndex === index ? "default" : "outline"}
@@ -151,7 +110,7 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
           <Save className="mr-2 h-4 w-4" /> Salvar Alterações
         </Button>
         
-        {activeSectionIndex === sections.length - 1 ? (
+        {activeSectionIndex === birthPlanSections.length - 1 ? (
           <Button 
             onClick={() => {
               handleSave();
@@ -163,7 +122,7 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
           </Button>
         ) : (
           <Button 
-            onClick={() => setActiveSectionIndex(Math.min(sections.length - 1, activeSectionIndex + 1))}
+            onClick={() => setActiveSectionIndex(Math.min(birthPlanSections.length - 1, activeSectionIndex + 1))}
             className="bg-maternal-600 hover:bg-maternal-700 flex items-center"
           >
             Próxima Seção <ChevronRight className="ml-2 h-4 w-4" />

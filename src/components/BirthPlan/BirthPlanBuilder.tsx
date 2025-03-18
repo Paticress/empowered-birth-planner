@@ -8,6 +8,7 @@ import { BirthPlanPreview } from './BirthPlanPreview';
 import { BirthPlanShare } from './BirthPlanShare';
 import { Footer } from '@/components/Footer';
 import { PaymentGate } from './PaymentGate';
+import { generateBirthPlanFromAnswers, generateEmptyBirthPlan } from './utils/birthPlanUtils';
 
 // Define the stages of the birth plan creation process
 type BuilderStage = 'welcome' | 'questionnaire' | 'editor' | 'preview' | 'share';
@@ -20,7 +21,7 @@ export function BirthPlanBuilder() {
   // State to store questionnaire answers
   const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, any>>({});
   // State to store the birth plan content
-  const [birthPlanContent, setBirthPlanContent] = useState<Record<string, any>>({});
+  const [birthPlanContent, setBirthPlanContent] = useState<Record<string, any>>(generateEmptyBirthPlan());
 
   // Function to move to the next stage
   const goToNextStage = () => {
@@ -57,39 +58,9 @@ export function BirthPlanBuilder() {
   const handleQuestionnaireSubmit = (answers: Record<string, any>) => {
     setQuestionnaireAnswers(answers);
     // Generate initial birth plan based on answers
-    generateBirthPlan(answers);
-    goToNextStage();
-  };
-
-  // Function to generate birth plan based on questionnaire answers
-  const generateBirthPlan = (answers: Record<string, any>) => {
-    // This is a placeholder - in a real implementation, this would contain logic
-    // to generate different birth plan sections based on the answers
-    const generatedPlan = {
-      personalInfo: {
-        name: answers.name || '',
-        dueDate: answers.dueDate || '',
-        healthProvider: answers.healthProvider || '',
-      },
-      preferences: {
-        environment: answers.environmentPreferences || [],
-        mobility: answers.mobilityPreferences || [],
-        pain: answers.painManagement || [],
-        interventions: answers.interventionsPreferences || [],
-      },
-      medicalConsiderations: {
-        conditions: answers.medicalConditions || [],
-        medications: answers.medications || [],
-        allergies: answers.allergies || [],
-      },
-      postpartum: {
-        newbornCare: answers.newbornCare || [],
-        feeding: answers.feeding || [],
-        recovery: answers.recovery || [],
-      },
-    };
-    
+    const generatedPlan = generateBirthPlanFromAnswers(answers);
     setBirthPlanContent(generatedPlan);
+    goToNextStage();
   };
 
   // If the user hasn't paid, show the payment gate
