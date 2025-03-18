@@ -4,8 +4,16 @@
  */
 const { execSync } = require('child_process');
 const fs = require('fs');
+const path = require('path');
 
 console.log('🚀 Starting build process...');
+
+// Check if index.html exists in the root directory
+const indexPath = path.join(__dirname, 'index.html');
+if (!fs.existsSync(indexPath)) {
+  console.error('❌ index.html not found in the root directory!');
+  process.exit(1);
+}
 
 try {
   // Run TypeScript check without emitting files

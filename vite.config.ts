@@ -1,10 +1,11 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // Change this to '/' when deploying to a subdomain since the app will be at the root of that subdomain
+  // Base path for the application
   base: "/", 
   server: {
     port: 8080,
