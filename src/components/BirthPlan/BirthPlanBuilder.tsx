@@ -14,7 +14,7 @@ import { toast } from '@/components/ui/use-toast';
 type BuilderStage = 'welcome' | 'questionnaire' | 'editor' | 'preview' | 'share';
 
 export function BirthPlanBuilder() {
-  console.log("Rendering BirthPlanBuilder component");
+  console.log("RENDERING BIRTH PLAN BUILDER COMPONENT");
   
   // State for the current stage of the birth plan builder
   const [currentStage, setCurrentStage] = useState<BuilderStage>('welcome');
@@ -31,6 +31,9 @@ export function BirthPlanBuilder() {
     toast("Plano de Parto", {
       description: "Você está na página de criação do plano de parto"
     });
+    
+    // Additional debugging to verify the route
+    console.log("Current pathname:", window.location.pathname);
   }, []);
 
   // Function to move to the next stage
@@ -73,13 +76,13 @@ export function BirthPlanBuilder() {
         <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Clear visual indicator to show this is the Birth Plan page */}
-          <div className="mb-6 p-4 bg-purple-100 border-l-4 border-purple-500 rounded-md">
-            <h1 className="text-2xl font-bold text-purple-800">
-              Plano de Parto - Construtor
+          {/* Very clear visual indicator to show this is the Birth Plan page */}
+          <div className="mb-6 p-4 bg-purple-200 border-l-8 border-purple-600 rounded-md shadow-md">
+            <h1 className="text-3xl font-bold text-purple-800">
+              Construtor de Plano de Parto
             </h1>
-            <p className="text-purple-700">
-              Crie e personalize seu plano de parto de forma simples e rápida
+            <p className="text-purple-700 text-lg mt-2">
+              Você está no construtor de plano de parto - crie e personalize seu plano aqui
             </p>
           </div>
           
