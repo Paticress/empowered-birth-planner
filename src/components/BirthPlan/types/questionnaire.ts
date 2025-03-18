@@ -3,6 +3,7 @@ export type QuestionSection = {
   id: string;
   title: string;
   description: string;
+  icon?: string;
   questions: Question[];
 };
 
@@ -12,6 +13,7 @@ export type Question = {
   type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'select';
   options?: string[];
   isRequired?: boolean;
+  description?: string;
   conditionalDisplay?: {
     dependsOn: string;
     showWhen: string | string[];

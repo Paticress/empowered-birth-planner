@@ -1,11 +1,12 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Copy, Mail, Share2 } from 'lucide-react';
+import { ArrowLeft, Copy, Mail, Share2, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { ShareOption } from './ShareOption';
 import { EmailShareDialog } from './EmailShareDialog';
 import { createShareableText } from './utils/birthPlanUtils';
+import { exportAsPDF, exportAsText } from '@/utils/exportUtils';
 
 interface BirthPlanShareProps {
   birthPlan: Record<string, any>;
@@ -33,11 +34,31 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
       });
   };
   
+  const handleExportPDF = () => {
+    exportAsPDF('birth-plan-content', 'meu-plano-de-parto.pdf');
+  };
+  
+  const handleExportText = () => {
+    exportAsText('birth-plan-content', 'meu-plano-de-parto.txt');
+  };
+  
   const handleShareViaWhatsApp = () => {
-    const text = encodeURIComponent(createShareableText(birthPlan));
-    const whatsappUrl = `https://wa.me/?text=${text}`;
-    
-    window.open(whatsappUrl, '_blank');
+    // First generate and save the PDF
+    exportAsPDF('birth-plan-content', 'meu-plano-de-parto.pdf')
+      .then(() => {
+        // Then create a simple text message for WhatsApp
+        const message = encodeURIComponent("Olá! Compartilho com você meu plano de parto. Acabei de gerar o PDF.");
+        const whatsappUrl = `https://wa.me/?text=${message}`;
+        
+        window.open(whatsappUrl, '_blank');
+      })
+      .catch((error) => {
+        console.error("Erro ao exportar PDF para WhatsApp:", error);
+        toast({
+          title: "Erro ao compartilhar",
+          description: "Não foi possível gerar o PDF para compartilhamento."
+        });
+      });
   };
   
   return (
@@ -58,15 +79,50 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
         </div>
       </div>
       
+      <div id="birth-plan-content" className="hidden">
+        {/* This div will be used to generate the PDF but remains hidden */}
+        <h1 className="text-2xl font-bold text-center mb-4">MEU PLANO DE PARTO</h1>
+        <p className="text-center mb-6">Este documento contém minhas preferências para o trabalho de parto e nascimento.</p>
+        
+        {Object.entries(birthPlan).map(([sectionKey, sectionData]) => {
+          if (!sectionData || typeof sectionData !== 'object') return null;
+          
+          return (
+            <div key={sectionKey} className="mb-6">
+              <h2 className="text-xl font-bold mb-2">{sectionKey}</h2>
+              <div className="pl-4">
+                {Object.entries(sectionData as Record<string, any>).map(([key, value]) => {
+                  if (!value) return null;
+                  
+                  return (
+                    <div key={key} className="mb-2">
+                      <h3 className="font-semibold">{key}</h3>
+                      <p>{Array.isArray(value) ? value.join(", ") : value}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
         <h2 className="text-2xl font-semibold text-maternal-800 mb-6">Opções de Compartilhamento</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <ShareOption
             icon={Copy}
             title="Copiar Texto"
             description="Copie o conteúdo para compartilhar"
             onClick={handleCopyText}
+          />
+          
+          <ShareOption
+            icon={FileText}
+            title="Exportar PDF"
+            description="Salve como documento PDF"
+            onClick={handleExportPDF}
           />
           
           <ShareOption
@@ -110,6 +166,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
       <EmailShareDialog 
         open={emailDialogOpen} 
         onOpenChange={setEmailDialogOpen} 
+        onExportPDF={handleExportPDF}
       />
     </div>
   );

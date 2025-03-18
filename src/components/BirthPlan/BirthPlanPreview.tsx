@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Printer, Download, Edit } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { birthPlanSections } from './utils/birthPlanSections';
+import { getSectionIcon } from './utils/sectionIcons';
+import { exportAsPDF } from '@/utils/exportUtils';
 
 interface BirthPlanPreviewProps {
   birthPlan: Record<string, any>;
@@ -27,22 +29,33 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       description: "Seu plano de parto está sendo baixado como PDF."
     });
     
-    // In a real implementation, this would generate a PDF
-    setTimeout(() => {
-      toast({
-        title: "Download Concluído",
-        description: "Seu plano de parto foi baixado com sucesso."
+    exportAsPDF('birth-plan-preview', 'meu-plano-de-parto.pdf')
+      .then(() => {
+        toast({
+          title: "Download Concluído",
+          description: "Seu plano de parto foi baixado com sucesso."
+        });
+      })
+      .catch((error) => {
+        console.error("Erro ao exportar PDF:", error);
+        toast({
+          title: "Erro no Download",
+          description: "Ocorreu um erro ao gerar o PDF. Por favor, tente novamente."
+        });
       });
-    }, 1500);
   };
   
   // Helper function to render content from birth plan
   const renderSection = (sectionId: string, title: string, fields: { key: string, label: string }[]) => {
     const sectionData = birthPlan[sectionId] || {};
+    const SectionIcon = getSectionIcon(sectionId);
     
     return (
       <div className="mb-8 print:mb-4">
-        <h2 className="text-2xl font-semibold text-maternal-800 mb-4 print:text-xl print:mb-2">{title}</h2>
+        <div className="flex items-center gap-2 mb-4 print:mb-2">
+          {SectionIcon && <SectionIcon className="h-5 w-5 text-maternal-700 print:text-black" />}
+          <h2 className="text-2xl font-semibold text-maternal-800 print:text-xl">{title}</h2>
+        </div>
         
         <div className="space-y-4 print:space-y-2">
           {fields.map((field) => {
@@ -106,7 +119,7 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       </div>
       
       {/* Render all sections */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 print:p-0 print:border-0">
+      <div id="birth-plan-preview" className="bg-white border border-gray-200 rounded-lg p-6 print:p-0 print:border-0">
         {birthPlanSections.map((section) => renderSection(section.id, section.title, section.fields))}
       </div>
       

@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/form';
 import { useEffect } from 'react';
 import { QuestionField } from './QuestionField';
+import { getSectionIcon } from './utils/sectionIcons';
 
 interface QuestionnaireSectionProps {
   section: QuestionSection;
@@ -46,12 +47,17 @@ export function QuestionnaireSection({
     }
   }, [initialData, setValue]);
   
+  const SectionIcon = getSectionIcon(section.id);
+  
   return (
     <div className="animate-fade-in">
       <h1 className="text-3xl font-bold text-maternal-900 mb-2">Questionário do Plano de Parto</h1>
-      <p className="text-lg mb-6 text-maternal-700">
-        {section.title}
-      </p>
+      <div className="flex items-center gap-2 mb-2">
+        {SectionIcon && <SectionIcon className="h-6 w-6 text-maternal-600" />}
+        <p className="text-lg text-maternal-700">
+          {section.title}
+        </p>
+      </div>
       
       <div className="bg-maternal-50 p-4 rounded-lg mb-6">
         <p>{section.description}</p>
@@ -61,7 +67,10 @@ export function QuestionnaireSection({
         <form onSubmit={handleSubmit(onNext)}>
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>{section.title}</CardTitle>
+              <div className="flex items-center gap-2">
+                {SectionIcon && <SectionIcon className="h-5 w-5 text-maternal-600" />}
+                <CardTitle>{section.title}</CardTitle>
+              </div>
               <CardDescription>Responda às perguntas abaixo para personalizar seu plano de parto</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

@@ -17,6 +17,7 @@ export const specialSituationsSection: QuestionSection = {
         'Priorizar a saúde e segurança conforme indicação médica'
       ],
       isRequired: false,
+      description: 'Escolhas para casos em que o parto não ocorre conforme o planejado'
     },
     {
       id: 'nicu',
@@ -30,12 +31,14 @@ export const specialSituationsSection: QuestionSection = {
         'Desejo participar dos cuidados do bebê'
       ],
       isRequired: false,
+      description: 'Preferências para situações em que o bebê necessita de cuidados intensivos'
     },
     {
       id: 'specialWishes',
       text: 'Outros desejos ou pedidos especiais:',
       type: 'textarea',
       isRequired: false,
+      description: 'Qualquer outra solicitação ou informação importante que não tenha sido abordada'
     },
   ],
 };

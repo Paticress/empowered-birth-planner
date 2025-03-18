@@ -8,9 +8,10 @@ import { toast } from '@/components/ui/use-toast';
 interface EmailShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onExportPDF: () => void;
 }
 
-export function EmailShareDialog({ open, onOpenChange }: EmailShareDialogProps) {
+export function EmailShareDialog({ open, onOpenChange, onExportPDF }: EmailShareDialogProps) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   
@@ -23,10 +24,13 @@ export function EmailShareDialog({ open, onOpenChange }: EmailShareDialogProps) 
       return;
     }
     
-    // In a real implementation, this would send an actual email
+    // First generate the PDF
+    onExportPDF();
+    
+    // In a real implementation, this would send an actual email with the PDF attached
     toast({
       title: "E-mail enviado",
-      description: `Seu plano de parto foi enviado para ${email}.`
+      description: `Seu plano de parto foi enviado para ${email} com o PDF anexado.`
     });
     
     onOpenChange(false);
