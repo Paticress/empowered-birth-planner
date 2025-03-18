@@ -2,23 +2,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { Question, QuestionSection } from './types/questionnaire';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { QuestionSection } from './types/questionnaire';
 import { 
   Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
 } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { QuestionField } from './QuestionField';
 
 interface QuestionnaireSectionProps {
   section: QuestionSection;
@@ -41,7 +31,7 @@ export function QuestionnaireSection({
     defaultValues: initialData
   });
   
-  const { register, handleSubmit, formState, watch, control, setValue } = form;
+  const { handleSubmit, formState, watch, control, setValue } = form;
   const { errors } = formState;
   
   // Watch all form values for conditional questions
@@ -94,7 +84,6 @@ export function QuestionnaireSection({
                   <QuestionField 
                     key={question.id} 
                     question={question} 
-                    register={register} 
                     errors={errors}
                     control={control}
                   />
@@ -125,144 +114,5 @@ export function QuestionnaireSection({
         </form>
       </Form>
     </div>
-  );
-}
-
-interface QuestionFieldProps {
-  question: Question;
-  register: any;
-  errors: any;
-  control: any;
-}
-
-function QuestionField({ question, register, errors, control }: QuestionFieldProps) {
-  return (
-    <FormItem key={question.id} className="space-y-2">
-      <FormLabel className="block font-medium text-maternal-900">
-        {question.text} {question.isRequired && <span className="text-red-500">*</span>}
-      </FormLabel>
-      
-      {question.type === 'text' && (
-        <FormField
-          control={control}
-          name={question.id}
-          rules={{ required: question.isRequired }}
-          render={({ field }) => (
-            <FormControl>
-              <Input
-                id={question.id}
-                type="text"
-                className="w-full"
-                {...field}
-              />
-            </FormControl>
-          )}
-        />
-      )}
-      
-      {question.type === 'textarea' && (
-        <FormField
-          control={control}
-          name={question.id}
-          rules={{ required: question.isRequired }}
-          render={({ field }) => (
-            <FormControl>
-              <Textarea
-                id={question.id}
-                className="w-full"
-                rows={4}
-                {...field}
-              />
-            </FormControl>
-          )}
-        />
-      )}
-      
-      {question.type === 'radio' && question.options && (
-        <FormField
-          control={control}
-          name={question.id}
-          rules={{ required: question.isRequired }}
-          render={({ field }) => (
-            <FormControl>
-              <RadioGroup
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                className="space-y-2"
-              >
-                {question.options.map((option) => (
-                  <div key={option} className="flex items-center space-x-2">
-                    <RadioGroupItem value={option} id={`${question.id}-${option}`} />
-                    <label htmlFor={`${question.id}-${option}`} className="text-maternal-800">
-                      {option}
-                    </label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </FormControl>
-          )}
-        />
-      )}
-      
-      {question.type === 'checkbox' && question.options && (
-        <div className="space-y-2">
-          {question.options.map((option) => (
-            <FormField
-              key={option}
-              control={control}
-              name={`${question.id}.${option}`}
-              render={({ field }) => (
-                <div className="flex items-center space-x-2">
-                  <FormControl>
-                    <Checkbox
-                      id={`${question.id}-${option}`}
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <label
-                    htmlFor={`${question.id}-${option}`}
-                    className="text-maternal-800"
-                  >
-                    {option}
-                  </label>
-                </div>
-              )}
-            />
-          ))}
-        </div>
-      )}
-      
-      {question.type === 'select' && question.options && (
-        <FormField
-          control={control}
-          name={question.id}
-          rules={{ required: question.isRequired }}
-          render={({ field }) => (
-            <FormControl>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione uma opção" />
-                </SelectTrigger>
-                <SelectContent>
-                  {question.options.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormControl>
-          )}
-        />
-      )}
-      
-      {errors[question.id] && (
-        <FormMessage>Este campo é obrigatório</FormMessage>
-      )}
-    </FormItem>
   );
 }
