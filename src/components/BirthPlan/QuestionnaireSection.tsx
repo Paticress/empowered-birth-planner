@@ -37,9 +37,12 @@ export function QuestionnaireSection({
   isLastSection,
   initialData = {}
 }: QuestionnaireSectionProps) {
-  const { register, handleSubmit, formState: { errors }, watch, control, setValue } = useForm({
+  const form = useForm({
     defaultValues: initialData
   });
+  
+  const { register, handleSubmit, formState, watch, control, setValue } = form;
+  const { errors } = formState;
   
   // Watch all form values for conditional questions
   const watchedValues = watch();
@@ -64,7 +67,8 @@ export function QuestionnaireSection({
         <p>{section.description}</p>
       </div>
       
-      <Form {...{ control }}>
+      {/* Fixed: Properly passing the full form object to Form component */}
+      <Form {...form}>
         <form onSubmit={handleSubmit(onNext)}>
           <Card className="mb-6">
             <CardHeader>
