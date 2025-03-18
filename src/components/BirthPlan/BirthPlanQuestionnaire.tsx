@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { QuestionnaireSection } from './QuestionnaireSection';
-import { questionnaireSections } from './questionnaireData';
+import { questionnaireSections } from './questionnaire';
 
 interface BirthPlanQuestionnaireProps {
   onSubmit: (data: Record<string, any>) => void;
