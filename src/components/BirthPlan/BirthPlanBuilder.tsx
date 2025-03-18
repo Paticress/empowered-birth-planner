@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BirthPlanHeader } from './BirthPlanHeader';
 import { BirthPlanWelcome } from './BirthPlanWelcome';
@@ -6,7 +7,6 @@ import { BirthPlanEditor } from './BirthPlanEditor';
 import { BirthPlanPreview } from './BirthPlanPreview';
 import { BirthPlanShare } from './BirthPlanShare';
 import { Footer } from '@/components/Footer';
-import { PaymentGate } from './PaymentGate';
 import { generateBirthPlanFromAnswers, generateEmptyBirthPlan } from './utils/birthPlanUtils';
 import { toast } from '@/components/ui/use-toast';
 
@@ -18,8 +18,6 @@ export function BirthPlanBuilder() {
   
   // State for the current stage of the birth plan builder
   const [currentStage, setCurrentStage] = useState<BuilderStage>('welcome');
-  // State to track if the user has paid
-  const [hasPaid, setHasPaid] = useState<boolean>(true); // Setting to true for development
   // State to store questionnaire answers
   const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, any>>({});
   // State to store the birth plan content
@@ -60,12 +58,6 @@ export function BirthPlanBuilder() {
     setCurrentStage(stage);
   };
 
-  // Function to handle payment completion
-  const handlePaymentComplete = () => {
-    setHasPaid(true);
-    setCurrentStage('welcome');
-  };
-
   // Function to handle questionnaire submission
   const handleQuestionnaireSubmit = (answers: Record<string, any>) => {
     setQuestionnaireAnswers(answers);
@@ -75,21 +67,19 @@ export function BirthPlanBuilder() {
     goToNextStage();
   };
 
-  // If the user hasn't paid, show the payment gate
-  if (!hasPaid) {
-    return <PaymentGate onPaymentComplete={handlePaymentComplete} />;
-  }
-
   return (
     <div className="bg-purple-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
       <div className="pt-4 md:pt-8">
         <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Visual indicator that this is the Birth Plan page */}
-          <div className="mb-4 p-3 bg-purple-100 border-l-4 border-purple-500 rounded-md">
-            <p className="text-purple-800 font-medium">
-              Página do Plano de Parto - Crie e personalize seu plano aqui
+          {/* Clear visual indicator to show this is the Birth Plan page */}
+          <div className="mb-6 p-4 bg-purple-100 border-l-4 border-purple-500 rounded-md">
+            <h1 className="text-2xl font-bold text-purple-800">
+              Plano de Parto - Construtor
+            </h1>
+            <p className="text-purple-700">
+              Crie e personalize seu plano de parto de forma simples e rápida
             </p>
           </div>
           

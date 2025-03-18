@@ -14,19 +14,17 @@ interface BirthPlanShareProps {
 export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   
-  const handleCopyToClipboard = () => {
+  const handleCopyText = () => {
     const text = createShareableText(birthPlan);
     
     navigator.clipboard.writeText(text)
       .then(() => {
-        toast({
-          title: "Copiado para a área de transferência",
+        toast("Copiado para a área de transferência", {
           description: "Seu plano de parto foi copiado e está pronto para ser compartilhado."
         });
       })
       .catch(() => {
-        toast({
-          title: "Erro ao copiar",
+        toast("Erro ao copiar", {
           description: "Não foi possível copiar o texto para a área de transferência."
         });
       });
@@ -65,7 +63,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
             icon={Copy}
             title="Copiar Texto"
             description="Copie o conteúdo para compartilhar"
-            onClick={handleCopyToClipboard}
+            onClick={handleCopyText}
           />
           
           <ShareOption
