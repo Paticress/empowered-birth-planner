@@ -73,7 +73,10 @@ export function OnlineGuide() {
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Guia do Plano de Parto">
       <div className="pt-4 md:pt-8">
-        <GuideHeader onNavigate={handleTabChange} currentTab={activeTab} />
+        <GuideHeader 
+          onNavigate={handleTabChange} 
+          currentTab={activeTab} 
+        />
 
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center mb-4 md:hidden print:hidden">

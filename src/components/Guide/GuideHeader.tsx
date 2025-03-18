@@ -6,7 +6,12 @@ import { Search, Menu, X } from 'lucide-react';
 import { GuideSearch } from './Search/GuideSearch';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 
-export function GuideHeader() {
+type GuideHeaderProps = {
+  onNavigate?: (value: string) => void;
+  currentTab?: string;
+};
+
+export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { navigateTo } = useNavigation();
@@ -22,6 +27,14 @@ export function GuideHeader() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const handleNavigation = (path: string) => {
+    if (onNavigate) {
+      onNavigate(path);
+    } else {
+      navigateTo('/guia-online');
+    }
+  };
 
   return (
     <header className="bg-white sticky top-0 z-50 border-b border-gray-200 shadow-sm print:hidden">
@@ -45,7 +58,7 @@ export function GuideHeader() {
           <nav className="hidden md:flex space-x-4 items-center">
             <Button
               variant="ghost"
-              onClick={() => navigateTo('/guia-online')}
+              onClick={() => handleNavigation('/guia-online')}
               className="text-gray-600 hover:text-gray-900"
             >
               Guia Online
@@ -113,7 +126,10 @@ export function GuideHeader() {
 
       {/* Search overlay */}
       {searchOpen && (
-        <GuideSearch onClose={() => setSearchOpen(false)} />
+        <GuideSearch 
+          onClose={() => setSearchOpen(false)} 
+          onNavigate={onNavigate}
+        />
       )}
     </header>
   );

@@ -14,9 +14,10 @@ type SearchResult = {
 
 type GuideSearchProps = {
   onNavigate?: (tab: string) => void;
+  onClose?: () => void;
 };
 
-export function GuideSearch({ onNavigate }: GuideSearchProps) {
+export function GuideSearch({ onNavigate, onClose }: GuideSearchProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -128,7 +129,10 @@ export function GuideSearch({ onNavigate }: GuideSearchProps) {
         </kbd>
       </Button>
       
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(newOpen) => {
+        setOpen(newOpen);
+        if (!newOpen && onClose) onClose();
+      }}>
         <DialogContent className="sm:max-w-[550px] p-0">
           <DialogHeader className="px-4 pt-4">
             <DialogTitle>Pesquisar no Guia</DialogTitle>
