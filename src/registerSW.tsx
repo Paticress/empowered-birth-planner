@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -93,13 +94,6 @@ export const updateServiceWorker = () => {
     
     navigator.serviceWorker.ready.then(registration => {
       registration.update();
-      
-      // Don't show a toast for routine checks - only show when user explicitly requests
-      // toast({
-      //   title: "Checking for Updates",
-      //   description: "Looking for new content...",
-      //   duration: 2000,
-      // });
       
       // Reset flag after delay
       updateTimeout = window.setTimeout(() => {
