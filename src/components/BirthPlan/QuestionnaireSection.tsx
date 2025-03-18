@@ -67,7 +67,6 @@ export function QuestionnaireSection({
         <p>{section.description}</p>
       </div>
       
-      {/* Fixed: Properly passing the full form object to Form component */}
       <Form {...form}>
         <form onSubmit={handleSubmit(onNext)}>
           <Card className="mb-6">
@@ -208,18 +207,28 @@ function QuestionField({ question, register, errors, control }: QuestionFieldPro
       {question.type === 'checkbox' && question.options && (
         <div className="space-y-2">
           {question.options.map((option) => (
-            <div key={option} className="flex items-center space-x-2">
-              <Checkbox
-                id={`${question.id}-${option}`}
-                {...register(`${question.id}.${option}`)}
-              />
-              <label
-                htmlFor={`${question.id}-${option}`}
-                className="text-maternal-800"
-              >
-                {option}
-              </label>
-            </div>
+            <FormField
+              key={option}
+              control={control}
+              name={`${question.id}.${option}`}
+              render={({ field }) => (
+                <div className="flex items-center space-x-2">
+                  <FormControl>
+                    <Checkbox
+                      id={`${question.id}-${option}`}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <label
+                    htmlFor={`${question.id}-${option}`}
+                    className="text-maternal-800"
+                  >
+                    {option}
+                  </label>
+                </div>
+              )}
+            />
           ))}
         </div>
       )}

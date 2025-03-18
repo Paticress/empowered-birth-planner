@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { QuestionnaireSection } from './QuestionnaireSection';
 import { questionnaireSections } from './questionnaireData';
@@ -16,29 +15,10 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
   const isLastSection = currentSectionIndex === questionnaireSections.length - 1;
   
   const handleSectionSubmit = (data: Record<string, any>) => {
-    // Cleanup checkbox data - convert from form format to clean format
-    const processedData = { ...data };
+    console.log("Section submitted with data:", data);
     
-    // Process checkbox values for the current section
-    currentSection.questions.forEach(question => {
-      if (question.type === 'checkbox' && question.options) {
-        const checkboxValues: Record<string, boolean> = {};
-        
-        question.options.forEach(option => {
-          const key = `${question.id}.${option}`;
-          if (data[key]) {
-            checkboxValues[option] = true;
-            // Remove the individual checkbox entry
-            delete processedData[key];
-          }
-        });
-        
-        // Add the processed checkbox values
-        if (Object.keys(checkboxValues).length > 0) {
-          processedData[question.id] = checkboxValues;
-        }
-      }
-    });
+    // Create a clean copy of the data to avoid mutation issues
+    const processedData = { ...data };
     
     // Save data from current section
     const updatedFormData = {
@@ -46,10 +26,12 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
       ...processedData,
     };
     
+    console.log("Updated form data:", updatedFormData);
     setFormData(updatedFormData);
     
     if (isLastSection) {
       // If this is the last section, submit the complete form
+      console.log("Final form submission:", updatedFormData);
       onSubmit(updatedFormData);
     } else {
       // Otherwise, move to the next section
