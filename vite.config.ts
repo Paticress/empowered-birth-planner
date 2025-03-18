@@ -2,11 +2,44 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import fs from "fs";
+
+// Find index.html in the project structure
+function findIndexHtml(dir) {
+  const files = fs.readdirSync(dir);
+  
+  // Check if index.html exists in this directory
+  if (files.includes('index.html')) {
+    return path.join(dir, 'index.html');
+  }
+  
+  // Recursively check subdirectories
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    if (fs.statSync(filePath).isDirectory() && file !== 'node_modules' && file !== '.git' && file !== 'dist') {
+      try {
+        const indexPath = findIndexHtml(filePath);
+        if (indexPath) {
+          return indexPath;
+        }
+      } catch (error) {
+        // Continue searching other directories if error occurs
+      }
+    }
+  }
+  
+  return null;
+}
+
+// Try to find index.html
+const indexPath = findIndexHtml(__dirname);
+const root = indexPath ? path.dirname(indexPath) : __dirname;
 
 // https://vitejs.dev/config/
 export default defineConfig({
   // Base path for the application
   base: "/", 
+  root: root, // Set the root to the directory containing index.html
   server: {
     port: 8080,
     open: true,
@@ -18,7 +51,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "dist",
+    outDir: path.resolve(__dirname, "dist"),
     // Vite's BuildOptions doesn't have a direct TypeScript type checking option
     // Instead, we'll remove the incorrect 'skipTypeCheck' property entirely
     // and rely on the build.js script to handle TypeScript checking separately
