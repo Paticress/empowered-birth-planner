@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { BirthPlanHeader } from './BirthPlanHeader';
 import { BirthPlanWelcome } from './BirthPlanWelcome';
 import { BirthPlanQuestionnaire } from './BirthPlanQuestionnaire';
@@ -7,21 +7,20 @@ import { BirthPlanEditor } from './BirthPlanEditor';
 import { BirthPlanPreview } from './BirthPlanPreview';
 import { BirthPlanShare } from './BirthPlanShare';
 import { Footer } from '@/components/Footer';
-import { generateBirthPlanFromAnswers, generateEmptyBirthPlan } from './utils/birthPlanUtils';
 import { toast } from '@/components/ui/use-toast';
-
-// Define the stages of the birth plan creation process
-type BuilderStage = 'welcome' | 'questionnaire' | 'editor' | 'preview' | 'share';
+import { useBirthPlanState } from './hooks/useBirthPlanState';
 
 export function BirthPlanBuilder() {
   console.log("RENDERING BIRTH PLAN BUILDER COMPONENT - THIS SHOULD BE VISIBLE");
   
-  // State for the current stage of the birth plan builder
-  const [currentStage, setCurrentStage] = useState<BuilderStage>('welcome');
-  // State to store questionnaire answers
-  const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, any>>({});
-  // State to store the birth plan content
-  const [birthPlanContent, setBirthPlanContent] = useState<Record<string, any>>(generateEmptyBirthPlan());
+  const {
+    currentStage,
+    birthPlanContent,
+    goToNextStage,
+    goToStage,
+    handleQuestionnaireSubmit,
+    setBirthPlanContent
+  } = useBirthPlanState();
 
   useEffect(() => {
     // Log when the component mounts to verify it's being rendered
@@ -39,45 +38,10 @@ export function BirthPlanBuilder() {
     // Force a re-render after a short delay to ensure component display
     const timer = setTimeout(() => {
       console.log("Forcing re-render check after timeout");
-      setCurrentStage(prev => prev);
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, []);
-
-  // Function to move to the next stage
-  const goToNextStage = () => {
-    switch (currentStage) {
-      case 'welcome':
-        setCurrentStage('questionnaire');
-        break;
-      case 'questionnaire':
-        setCurrentStage('editor');
-        break;
-      case 'editor':
-        setCurrentStage('preview');
-        break;
-      case 'preview':
-        setCurrentStage('share');
-        break;
-      default:
-        break;
-    }
-  };
-
-  // Function to move to a specific stage
-  const goToStage = (stage: BuilderStage) => {
-    setCurrentStage(stage);
-  };
-
-  // Function to handle questionnaire submission
-  const handleQuestionnaireSubmit = (answers: Record<string, any>) => {
-    setQuestionnaireAnswers(answers);
-    // Generate initial birth plan based on answers
-    const generatedPlan = generateBirthPlanFromAnswers(answers);
-    setBirthPlanContent(generatedPlan);
-    goToNextStage();
-  };
+  }, [currentStage]);
 
   return (
     <div className="bg-purple-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
@@ -99,38 +63,14 @@ export function BirthPlanBuilder() {
           </div>
           
           <div className="bg-white shadow-xl rounded-lg p-6 md:p-8 mb-8 border-t-4 border-purple-500">
-            {currentStage === 'welcome' && (
-              <BirthPlanWelcome onStart={goToNextStage} />
-            )}
-            
-            {currentStage === 'questionnaire' && (
-              <BirthPlanQuestionnaire 
-                onSubmit={handleQuestionnaireSubmit} 
-              />
-            )}
-            
-            {currentStage === 'editor' && (
-              <BirthPlanEditor 
-                birthPlan={birthPlanContent} 
-                onUpdate={setBirthPlanContent} 
-                onNext={goToNextStage} 
-              />
-            )}
-            
-            {currentStage === 'preview' && (
-              <BirthPlanPreview 
-                birthPlan={birthPlanContent} 
-                onEdit={() => goToStage('editor')} 
-                onNext={goToNextStage} 
-              />
-            )}
-            
-            {currentStage === 'share' && (
-              <BirthPlanShare 
-                birthPlan={birthPlanContent} 
-                onEdit={() => goToStage('editor')} 
-              />
-            )}
+            <StageContent 
+              currentStage={currentStage}
+              birthPlanContent={birthPlanContent}
+              onQuestionnaireSubmit={handleQuestionnaireSubmit}
+              onUpdateBirthPlan={setBirthPlanContent}
+              onNextStage={goToNextStage}
+              onGoToStage={goToStage}
+            />
           </div>
         </main>
         
@@ -138,4 +78,60 @@ export function BirthPlanBuilder() {
       </div>
     </div>
   );
+}
+
+// Separate component to render the correct content based on the current stage
+interface StageContentProps {
+  currentStage: string;
+  birthPlanContent: Record<string, any>;
+  onQuestionnaireSubmit: (data: Record<string, any>) => void;
+  onUpdateBirthPlan: (data: Record<string, any>) => void;
+  onNextStage: () => void;
+  onGoToStage: (stage: 'welcome' | 'questionnaire' | 'editor' | 'preview' | 'share') => void;
+}
+
+function StageContent({
+  currentStage,
+  birthPlanContent,
+  onQuestionnaireSubmit,
+  onUpdateBirthPlan,
+  onNextStage,
+  onGoToStage
+}: StageContentProps) {
+  switch (currentStage) {
+    case 'welcome':
+      return <BirthPlanWelcome onStart={onNextStage} />;
+      
+    case 'questionnaire':
+      return <BirthPlanQuestionnaire onSubmit={onQuestionnaireSubmit} />;
+      
+    case 'editor':
+      return (
+        <BirthPlanEditor 
+          birthPlan={birthPlanContent} 
+          onUpdate={onUpdateBirthPlan} 
+          onNext={onNextStage} 
+        />
+      );
+      
+    case 'preview':
+      return (
+        <BirthPlanPreview 
+          birthPlan={birthPlanContent} 
+          onEdit={() => onGoToStage('editor')} 
+          onNext={onNextStage} 
+        />
+      );
+      
+    case 'share':
+      return (
+        <BirthPlanShare 
+          birthPlan={birthPlanContent} 
+          onEdit={() => onGoToStage('editor')} 
+        />
+      );
+      
+    default:
+      return <div>Stage not found</div>;
+  }
 }

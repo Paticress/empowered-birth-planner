@@ -13,3 +13,9 @@ export type Question = {
   options?: string[];
   isRequired?: boolean;
 };
+
+// Define the builder stages for better type safety
+export type BuilderStage = 'welcome' | 'questionnaire' | 'editor' | 'preview' | 'share';
+
+// Define the birth plan data structure
+export type BirthPlanData = Record<string, any>;

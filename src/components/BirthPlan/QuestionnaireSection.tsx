@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Question, QuestionSection } from './types/questionnaire';
+import { Input } from '@/components/ui/input';
 
 interface QuestionnaireSectionProps {
   section: QuestionSection;
@@ -93,10 +94,10 @@ function QuestionField({ question, register, errors }: QuestionFieldProps) {
       </label>
       
       {question.type === 'text' && (
-        <input
+        <Input
           id={question.id}
           type="text"
-          className="w-full p-2 border border-gray-300 rounded-md"
+          className="w-full"
           {...register(question.id, { required: question.isRequired })}
         />
       )}
@@ -125,6 +126,36 @@ function QuestionField({ question, register, errors }: QuestionFieldProps) {
             </div>
           ))}
         </div>
+      )}
+      
+      {question.type === 'checkbox' && question.options && (
+        <div className="space-y-2">
+          {question.options.map((option) => (
+            <div key={option} className="flex items-center">
+              <input
+                type="checkbox"
+                id={`${question.id}-${option}`}
+                value={option}
+                className="mr-2"
+                {...register(question.id)}
+              />
+              <label htmlFor={`${question.id}-${option}`}>{option}</label>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {question.type === 'select' && question.options && (
+        <select 
+          id={question.id}
+          className="w-full p-2 border border-gray-300 rounded-md"
+          {...register(question.id, { required: question.isRequired })}
+        >
+          <option value="">Selecione uma opção</option>
+          {question.options.map((option) => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
       )}
       
       {errors[question.id] && (
