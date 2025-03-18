@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BirthPlanHeader } from './BirthPlanHeader';
 import { BirthPlanWelcome } from './BirthPlanWelcome';
@@ -31,9 +30,8 @@ export function BirthPlanBuilder() {
     console.log("BirthPlanBuilder mounted, current stage:", currentStage);
     
     // Show a toast to confirm the user is on the birth plan page
-    toast({
-      title: "Plano de Parto",
-      description: "Você está na página de criação do plano de parto",
+    toast("Plano de Parto", {
+      description: "Você está na página de criação do plano de parto"
     });
   }, []);
 

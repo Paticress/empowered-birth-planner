@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Copy, Mail, Share2 } from 'lucide-react';
@@ -20,12 +19,14 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
     
     navigator.clipboard.writeText(text)
       .then(() => {
-        toast("Copiado para a área de transferência", {
+        toast({
+          title: "Copiado para a área de transferência",
           description: "Seu plano de parto foi copiado e está pronto para ser compartilhado."
         });
       })
       .catch(() => {
-        toast("Erro ao copiar", {
+        toast({
+          title: "Erro ao copiar",
           description: "Não foi possível copiar o texto para a área de transferência."
         });
       });

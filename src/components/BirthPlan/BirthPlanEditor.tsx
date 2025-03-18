@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Save } from 'lucide-react';
@@ -28,9 +27,8 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
   
   const handleSave = () => {
     onUpdate(localBirthPlan);
-    toast({
-      title: "Alterações salvas",
-      description: "Seu plano de parto foi atualizado com sucesso.",
+    toast("Alterações salvas", {
+      description: "Seu plano de parto foi atualizado com sucesso."
     });
   };
   

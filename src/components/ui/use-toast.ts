@@ -1,10 +1,21 @@
 
 import { toast as sonnerToast, ToastT } from "sonner";
 
-// Wrapper function for sonner toast to handle type issues
+// Wrapper function for sonner toast to handle both string and object formats
 export const toast = (
-  message: string, 
-  options?: Omit<ToastT, "id"> & { description?: string }
+  props: string | { title?: string; description?: string; [key: string]: any }, 
+  options?: Omit<ToastT, "id">
 ) => {
-  return sonnerToast(message, options);
+  // If props is a string, use it as the message
+  if (typeof props === 'string') {
+    return sonnerToast(props, options);
+  }
+  
+  // If props is an object with title/description, format it appropriately
+  const { title, description, ...restProps } = props;
+  return sonnerToast(title || '', {
+    description,
+    ...restProps,
+    ...options
+  });
 };
