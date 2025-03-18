@@ -12,25 +12,37 @@ import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
 
 const queryClient = new QueryClient();
 
-// Log for debugging
-console.log("Rendering App component");
+// Enhanced log for debugging
+console.log("APP COMPONENT INITIALIZING - SETTING UP ROUTES");
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <HashRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/guia-online" replace />} />
-          <Route path="/guia-online" element={<OnlineGuide />} />
-          <Route path="/guia-gratuito" element={<GuiaGratuito />} />
-          <Route path="/criar-plano" element={<BirthPlanBuilder />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </HashRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  console.log("APP COMPONENT RENDERING");
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Sonner />
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/guia-online" replace />} />
+            <Route path="/guia-online" element={<OnlineGuide />} />
+            <Route path="/guia-gratuito" element={<GuiaGratuito />} />
+            <Route 
+              path="/criar-plano" 
+              element={
+                <>
+                  {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
+                  <BirthPlanBuilder />
+                </>
+              } 
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </HashRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

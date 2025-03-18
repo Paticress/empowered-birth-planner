@@ -14,7 +14,7 @@ import { toast } from '@/components/ui/use-toast';
 type BuilderStage = 'welcome' | 'questionnaire' | 'editor' | 'preview' | 'share';
 
 export function BirthPlanBuilder() {
-  console.log("RENDERING BIRTH PLAN BUILDER COMPONENT");
+  console.log("RENDERING BIRTH PLAN BUILDER COMPONENT - THIS SHOULD BE VISIBLE");
   
   // State for the current stage of the birth plan builder
   const [currentStage, setCurrentStage] = useState<BuilderStage>('welcome');
@@ -28,12 +28,21 @@ export function BirthPlanBuilder() {
     console.log("BirthPlanBuilder mounted, current stage:", currentStage);
     
     // Show a toast to confirm the user is on the birth plan page
-    toast("Plano de Parto", {
+    toast({
+      title: "Plano de Parto",
       description: "Você está na página de criação do plano de parto"
     });
     
     // Additional debugging to verify the route
     console.log("Current pathname:", window.location.pathname);
+    
+    // Force a re-render after a short delay to ensure component display
+    const timer = setTimeout(() => {
+      console.log("Forcing re-render check after timeout");
+      setCurrentStage(prev => prev);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Function to move to the next stage
@@ -76,17 +85,20 @@ export function BirthPlanBuilder() {
         <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Very clear visual indicator to show this is the Birth Plan page */}
-          <div className="mb-6 p-4 bg-purple-200 border-l-8 border-purple-600 rounded-md shadow-md">
-            <h1 className="text-3xl font-bold text-purple-800">
+          {/* Ultra-clear visual indicator to show this is the Birth Plan page */}
+          <div className="mb-6 p-6 bg-purple-300 border-l-8 border-purple-600 rounded-md shadow-lg">
+            <h1 className="text-4xl font-bold text-purple-900 mb-2">
               Construtor de Plano de Parto
             </h1>
-            <p className="text-purple-700 text-lg mt-2">
+            <p className="text-purple-800 text-xl">
               Você está no construtor de plano de parto - crie e personalize seu plano aqui
+            </p>
+            <p className="mt-2 text-purple-700 font-medium">
+              Current route: /criar-plano
             </p>
           </div>
           
-          <div className="bg-white shadow-md rounded-lg p-6 md:p-8 mb-8 border-t-4 border-purple-500">
+          <div className="bg-white shadow-xl rounded-lg p-6 md:p-8 mb-8 border-t-4 border-purple-500">
             {currentStage === 'welcome' && (
               <BirthPlanWelcome onStart={goToNextStage} />
             )}

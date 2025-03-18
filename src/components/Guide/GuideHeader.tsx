@@ -1,86 +1,120 @@
 
-import { BookOpen, Printer, Download, Share2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { useNavigation } from '@/hooks/useNavigation';
+import { Search, Menu, X } from 'lucide-react';
 import { GuideSearch } from './Search/GuideSearch';
-import { useState } from 'react';
-import { GuideShare } from './Share/GuideShare';
+import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 
-interface GuideHeaderProps {
-  onNavigate?: (tab: string) => void;
-  currentTab?: string;
-}
+export function GuideHeader() {
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { navigateTo } = useNavigation();
 
-export function GuideHeader({ onNavigate, currentTab = "introduction" }: GuideHeaderProps) {
-  const [shareOpen, setShareOpen] = useState(false);
-  
-  const handlePrint = () => {
-    window.print();
-    toast({
-      title: "Preparando para impressão",
-      description: "Seu guia completo está sendo preparado para impressão.",
-    });
-  };
-  
-  const handleDownload = () => {
-    toast({
-      title: "Download Iniciado",
-      description: "Seu guia completo está sendo baixado.",
-    });
-    
-    // In a real application, this would trigger a PDF download
-    setTimeout(() => {
-      window.open('/guia-plano-parto-humanizado.pdf', '_blank');
-    }, 1500);
-  };
+  // Close mobile menu on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+      }
+    };
 
-  const handleShare = () => {
-    setShareOpen(true);
-  };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <header className="bg-white text-brand-black py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <BookOpen className="h-6 w-6 text-brand-black" />
-          <h1 className="text-xl font-bold text-brand-black">Guia do Plano de Parto</h1>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <GuideSearch onNavigate={onNavigate} />
-          
-          <div className="flex space-x-2">
-            <Button 
-              variant="navigation" 
-              className="text-maternal-900 hover:bg-gray-200"
-              onClick={handlePrint}
+    <header className="bg-white sticky top-0 z-50 border-b border-gray-200 shadow-sm print:hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16 items-center">
+          {/* Logo */}
+          <div className="flex-shrink-0 flex items-center">
+            <img
+              className="h-8 w-auto"
+              src="/placeholder.svg"
+              alt="Logo Guia do Parto Respeitoso"
+              onClick={() => navigateTo('/guia-online')}
+              style={{ cursor: 'pointer' }}
+            />
+            <span className="ml-2 font-semibold text-gray-900 hidden sm:block">
+              Guia do Parto Respeitoso
+            </span>
+          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex space-x-4 items-center">
+            <Button
+              variant="ghost"
+              onClick={() => navigateTo('/guia-online')}
+              className="text-gray-600 hover:text-gray-900"
             >
-              <Printer className="h-4 w-4 mr-2" /> 
-              <span className="hidden sm:inline">Imprimir</span>
+              Guia Online
             </Button>
             
-            <Button 
-              variant="navigation" 
-              className="text-maternal-900 hover:bg-gray-200" 
-              onClick={handleDownload}
-            >
-              <Download className="h-4 w-4 mr-2" /> 
-              <span className="hidden sm:inline">Download</span>
-            </Button>
+            {/* ADDED BIRTH PLAN NAVIGATION BUTTON */}
+            <BirthPlanNavButton />
             
-            <Button 
-              variant="navigation" 
-              className="text-maternal-900 hover:bg-gray-200" 
-              onClick={handleShare}
+            <Button
+              variant="outline"
+              onClick={() => setSearchOpen(true)}
+              className="text-gray-600"
             >
-              <Share2 className="h-4 w-4 mr-2" /> 
-              <span className="hidden sm:inline">Compartilhar</span>
+              <Search className="h-4 w-4 mr-2" />
+              Buscar
+            </Button>
+          </nav>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSearchOpen(true)}
+              className="text-gray-600"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="text-gray-600"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
       </div>
-      
-      <GuideShare open={shareOpen} onOpenChange={setShareOpen} currentTab={currentTab} />
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                navigateTo('/guia-online');
+                setMobileMenuOpen(false);
+              }}
+              className="w-full justify-start text-gray-600 hover:text-gray-900"
+            >
+              Guia Online
+            </Button>
+            
+            {/* ADDED BIRTH PLAN NAVIGATION BUTTON FOR MOBILE */}
+            <BirthPlanNavButton className="w-full justify-start" />
+          </div>
+        </div>
+      )}
+
+      {/* Search overlay */}
+      {searchOpen && (
+        <GuideSearch onClose={() => setSearchOpen(false)} />
+      )}
     </header>
   );
 }

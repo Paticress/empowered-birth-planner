@@ -16,14 +16,16 @@ export function EmailShareDialog({ open, onOpenChange }: EmailShareDialogProps) 
   
   const handleSendEmail = () => {
     if (!email) {
-      toast("E-mail necessário", {
+      toast({
+        title: "E-mail necessário",
         description: "Por favor, insira um endereço de e-mail válido."
       });
       return;
     }
     
     // In a real implementation, this would send an actual email
-    toast("E-mail enviado", {
+    toast({
+      title: "E-mail enviado",
       description: `Seu plano de parto foi enviado para ${email}.`
     });
     
