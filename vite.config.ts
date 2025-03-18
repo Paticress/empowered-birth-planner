@@ -4,7 +4,7 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // Change this to your subdomain path (e.g., '/plano-parto/' if your subdomain is plano-parto.yourdomain.com)
+  // Change this to '/' when deploying to a subdomain since the app will be at the root of that subdomain
   base: "/", 
   server: {
     port: 8080,
