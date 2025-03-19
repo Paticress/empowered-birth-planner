@@ -147,6 +147,7 @@
   @page {
     size: portrait;
     margin: 1.5cm;
+    counter-increment: page;
   }
   
   body {
@@ -185,5 +186,19 @@
   /* Ensure checkbox sections don't break across pages */
   .print\:break-inside-avoid {
     break-inside: avoid;
+  }
+  
+  /* Page numbering */
+  .print-page-number:after {
+    content: "Página " counter(page);
+  }
+  
+  /* Header watermark on each page */
+  @page {
+    @top-right {
+      content: "Energia Materna";
+      font-size: 8pt;
+      color: #999;
+    }
   }
 }

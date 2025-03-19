@@ -49,6 +49,11 @@ export function QuestionnaireSection({
   
   const SectionIcon = getSectionIcon(section.id);
   
+  // Scroll to top when section changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [section.id]);
+  
   return (
     <div className="animate-fade-in">
       <h1 className="text-3xl font-bold text-maternal-900 mb-2">Questionário do Plano de Parto</h1>

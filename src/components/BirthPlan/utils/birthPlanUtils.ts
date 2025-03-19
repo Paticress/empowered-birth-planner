@@ -11,10 +11,18 @@ export const createShareableText = (birthPlan: Record<string, any>) => {
   text += `Nome: ${personalInfo.name || 'Não informado'}\n`;
   text += `Data prevista: ${personalInfo.dueDate || 'Não informada'}\n`;
   text += `Hospital/Maternidade: ${personalInfo.hospital || 'Não informado'}\n`;
+  text += `Endereço: ${personalInfo.hospitalAddress || 'Não informado'}\n`;
+  text += `Telefone: ${personalInfo.hospitalPhone || 'Não informado'}\n`;
   text += `Médico/Obstetra: ${personalInfo.healthProvider || 'Não informado'}\n`;
+  text += `Telefone: ${personalInfo.healthProviderContact || 'Não informado'}\n`;
+  text += `CRM: ${personalInfo.healthProviderRegistry || 'Não informado'}\n`;
+  
   if (personalInfo.doula) {
     text += `Doula: ${personalInfo.doula || 'Não informada'}\n`;
+    text += `Telefone: ${personalInfo.doulaContact || 'Não informado'}\n`;
+    text += `Registro: ${personalInfo.doulaRegistry || 'Não informado'}\n`;
   }
+  
   text += `Acompanhantes: ${personalInfo.companions || 'Não informados'}\n\n`;
   
   // Add other sections
@@ -36,6 +44,14 @@ export const createShareableText = (birthPlan: Record<string, any>) => {
   });
   
   text += `Criado em ${new Date().toLocaleDateString()}`;
+  text += `\n\nEste documento representa minhas preferências para o parto e nascimento do meu bebê.`;
+  text += `\n\nAssinaturas:\n\n`;
+  text += `___________________________        ___________________________\n`;
+  text += `${personalInfo.name || 'Gestante'}                 ${personalInfo.healthProvider || 'Médico/Obstetra'}\n`;
+  text += `                                   CRM: ${personalInfo.healthProviderRegistry || '_________'}\n\n`;
+  text += `___________________________        ___________________________\n`;
+  text += `Enfermeira Obstétrica              ${personalInfo.doula || 'Doula'}\n`;
+  text += `COREN: _________                 Registro: ${personalInfo.doulaRegistry || '_________'}`;
   
   return text;
 };

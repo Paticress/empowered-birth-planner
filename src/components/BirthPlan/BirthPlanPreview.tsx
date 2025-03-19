@@ -51,7 +51,7 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
     const SectionIcon = getSectionIcon(sectionId);
     
     return (
-      <div className="mb-8 print:mb-4">
+      <div className="mb-8 print:mb-4 print:break-inside-avoid">
         <div className="flex items-center gap-2 mb-4 print:mb-2">
           {SectionIcon && <SectionIcon className="h-5 w-5 text-maternal-700 print:text-black" />}
           <h2 className="text-2xl font-semibold text-maternal-800 print:text-xl">{title}</h2>
@@ -87,6 +87,10 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       </div>
     );
   };
+
+  // Get personal info for the signature section
+  const personalInfo = birthPlan.personalInfo || {};
+  const name = personalInfo.name || '';
   
   return (
     <div className="animate-fade-in">
@@ -114,20 +118,71 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       
       {/* Print Title */}
       <div className="hidden print:block mb-6">
-        <h1 className="text-2xl font-bold text-center">PLANO DE PARTO</h1>
-        <p className="text-center text-gray-500">Este documento representa minhas preferências para o parto e nascimento do meu bebê.</p>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">PLANO DE PARTO</h1>
+          <img 
+            src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
+            alt="Energia Materna" 
+            className="h-12"
+          />
+        </div>
+        <p className="text-center text-gray-500 mt-2">Este documento representa minhas preferências para o parto e nascimento do meu bebê.</p>
       </div>
       
       {/* Render all sections */}
       <div id="birth-plan-preview" className="bg-white border border-gray-200 rounded-lg p-6 print:p-0 print:border-0">
         {birthPlanSections.map((section) => renderSection(section.id, section.title, section.fields))}
+        
+        {/* Signature Section - Only displayed in print */}
+        <div className="hidden print:block mt-12 print:break-inside-avoid">
+          <h2 className="text-xl font-semibold mb-8 border-b pb-2">Assinaturas</h2>
+          
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <div className="border-b border-black h-12 mb-2"></div>
+              <p className="text-center">{name}</p>
+              <p className="text-center text-sm text-gray-600">Gestante</p>
+            </div>
+            
+            <div>
+              <div className="border-b border-black h-12 mb-2"></div>
+              <p className="text-center">{personalInfo.healthProvider || '_________________'}</p>
+              <p className="text-center text-sm text-gray-600">Médico/Obstetra</p>
+              <p className="text-center text-sm text-gray-600">CRM: {personalInfo.healthProviderRegistry || '_________________'}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-8 mt-8">
+            <div>
+              <div className="border-b border-black h-12 mb-2"></div>
+              <p className="text-center">_________________</p>
+              <p className="text-center text-sm text-gray-600">Enfermeira Obstétrica</p>
+              <p className="text-center text-sm text-gray-600">COREN: _________________</p>
+            </div>
+            
+            <div>
+              <div className="border-b border-black h-12 mb-2"></div>
+              <p className="text-center">{personalInfo.doula || '_________________'}</p>
+              <p className="text-center text-sm text-gray-600">Doula</p>
+              <p className="text-center text-sm text-gray-600">Registro: {personalInfo.doulaRegistry || '_________________'}</p>
+            </div>
+          </div>
+        </div>
       </div>
       
       {/* Print Footer */}
       <div className="hidden print:block mt-6">
-        <p className="text-center text-gray-600 text-sm">
-          Este plano de parto foi criado em {new Date().toLocaleDateString()}. Agradeço sua compreensão e respeito às minhas escolhas.
-        </p>
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-gray-600">
+            Criado em {new Date().toLocaleDateString()}
+          </p>
+          <p className="text-sm text-gray-600">
+            Energia Materna - www.energiamaterna.com.br
+          </p>
+          <div className="text-sm print:absolute print:bottom-4 print:right-4">
+            <span className="print-page-number"></span>
+          </div>
+        </div>
       </div>
       
       <div className="bg-maternal-100 p-4 rounded-lg border-l-4 border-maternal-600 mt-6 mb-6 print:hidden">

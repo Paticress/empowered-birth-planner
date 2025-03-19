@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Save } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,6 +33,11 @@ export function BirthPlanEditor({ birthPlan, onUpdate, onNext }: BirthPlanEditor
       description: "Seu plano de parto foi atualizado com sucesso."
     });
   };
+  
+  // Scroll to top when section changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeSectionIndex]);
   
   const activeSection = birthPlanSections[activeSectionIndex];
   
