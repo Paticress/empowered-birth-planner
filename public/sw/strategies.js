@@ -1,7 +1,12 @@
 import CONFIG from './config.js';
 
+// Service worker caching strategies
+
+// Imported from config.js through the service worker
+const CONFIG = self.CONFIG;
+
 // Stale-while-revalidate strategy for static assets
-export const staleWhileRevalidate = async (request) => {
+const staleWhileRevalidate = async (request) => {
   const cachedResponse = await caches.match(request);
   
   if (cachedResponse) {
@@ -37,7 +42,7 @@ export const staleWhileRevalidate = async (request) => {
 };
 
 // Network-first with timeout strategy for HTML/dynamic content
-export const networkFirstWithTimeout = async (request) => {
+const networkFirstWithTimeout = async (request) => {
   return Promise.race([
     // Network request with shorter timeout
     new Promise((resolve, reject) => {
@@ -57,7 +62,7 @@ export const networkFirstWithTimeout = async (request) => {
 };
 
 // Cross-origin request handling with timeout
-export const crossOriginWithTimeout = async (request) => {
+const crossOriginWithTimeout = async (request) => {
   return Promise.race([
     new Promise((resolve, reject) => {
       setTimeout(() => reject(new Error('Network timeout')), CONFIG.CROSS_ORIGIN_TIMEOUT);
@@ -84,4 +89,11 @@ export const crossOriginWithTimeout = async (request) => {
       headers: { 'Content-Type': 'text/plain' }
     });
   });
+};
+
+// Export for use in main service worker
+self.strategies = {
+  staleWhileRevalidate,
+  networkFirstWithTimeout,
+  crossOriginWithTimeout
 };

@@ -1,4 +1,5 @@
 
+// Import our modular service worker files
 importScripts('./sw/config.js');
 importScripts('./sw/cacheManager.js');
 importScripts('./sw/strategies.js');

@@ -15,4 +15,5 @@ const CONFIG = {
   CROSS_ORIGIN_TIMEOUT: 3000
 };
 
-export default CONFIG;
+// Export for use in other service worker modules
+self.CONFIG = CONFIG;

@@ -1,8 +1,11 @@
 
-import CONFIG from './config.js';
+// Cache manager functions for service worker
+
+// Imported from config.js through the service worker
+const CONFIG = self.CONFIG;
 
 // Function to limit cache size with improved efficiency
-export const limitCacheSize = async (cacheName, maxItems) => {
+const limitCacheSize = async (cacheName, maxItems) => {
   try {
     const cache = await caches.open(cacheName);
     const keys = await cache.keys();
@@ -18,7 +21,7 @@ export const limitCacheSize = async (cacheName, maxItems) => {
 };
 
 // Clean up old caches
-export const cleanupCaches = async () => {
+const cleanupCaches = async () => {
   const cacheWhitelist = [CONFIG.CACHE_NAME];
   
   const cacheNames = await caches.keys();
@@ -34,4 +37,10 @@ export const cleanupCaches = async () => {
   
   // Manage cache size after activation
   await limitCacheSize(CONFIG.CACHE_NAME, CONFIG.MAX_CACHE_ITEMS);
+};
+
+// Export for use in main service worker
+self.cacheManager = {
+  limitCacheSize,
+  cleanupCaches
 };
