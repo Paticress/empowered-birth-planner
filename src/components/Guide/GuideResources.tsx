@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Download, FileText, BookHeart, Notebook, Calendar, ShoppingCart, CheckCircle, Shield } from 'lucide-react';
+import { ArrowLeft, BookOpen, Download, BookHeart, Notebook, Calendar, CheckCircle, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { ResourceCard } from './ResourceCard';
@@ -93,19 +93,8 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           Confira também estes recursos adicionais para aprofundar ainda mais seus conhecimentos sobre o plano de parto.
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <ResourceCard 
-            title="Modelo de Plano de Parto"
-            description="Um modelo pronto para usar como base para o seu plano de parto, já estruturado com todas as seções importantes."
-            icon={<FileText className="h-6 w-6 text-maternal-600" />}
-            isActive={activeResource === 'template'}
-            buttonText="Adquirir Modelo"
-            buttonIcon={<ShoppingCart className="mr-2 h-4 w-4" />}
-            buttonVariant="resource-highlight"
-            onClick={() => handleResourceClick('template')}
-            onButtonClick={() => window.open('https://www.energiamaterna.com.br/challenge-page/personalize-seu-plano-de-parto', '_blank')}
-          />
-          
+        {/* Single resource card for Procedures Guide */}
+        <div className="mb-8">
           <ResourceCard 
             title="Guia de Procedimentos"
             description="Glossário com explicações sobre os procedimentos mais comuns do parto, para você entender melhor suas opções."
