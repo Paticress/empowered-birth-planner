@@ -1,28 +1,42 @@
 
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { useNavigation } from "@/hooks/useNavigation";
 
 const NotFound = () => {
   const location = useLocation();
+  const { navigateTo } = useNavigation();
 
   useEffect(() => {
     console.error(
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
+    
+    // Log additional information that might help with debugging
+    console.log("Current URL:", window.location.href);
+    console.log("Hostname:", window.location.hostname);
+    console.log("React Router Path:", location.pathname);
   }, [location.pathname]);
+
+  const handleBackToHome = () => {
+    navigateTo("/");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Página não encontrada</p>
-        <p className="text-gray-500 mb-6">
-          O endereço solicitado não existe neste site.
+      <div className="text-center max-w-md p-8 bg-white rounded-lg shadow-md">
+        <h1 className="text-6xl font-bold text-red-500 mb-4">404</h1>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Página não encontrada</h2>
+        <p className="text-gray-600 mb-6">
+          O endereço <span className="font-mono bg-gray-100 px-2 py-1 rounded">{location.pathname}</span> não existe neste site.
         </p>
-        <Link to="/" className="text-blue-500 hover:text-blue-700 underline">
+        <button 
+          onClick={handleBackToHome}
+          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
           Voltar para o Início
-        </Link>
+        </button>
       </div>
     </div>
   );
