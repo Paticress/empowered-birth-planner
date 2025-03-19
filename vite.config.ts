@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -38,7 +37,7 @@ const root: string = indexPath ? path.dirname(indexPath) : __dirname;
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Base path for the application
+  // Set base path to root - important for GitHub Pages with custom domain
   base: "/", 
   root: root, // Set the root to the directory containing index.html
   server: {
@@ -107,7 +106,7 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     // Generate CSS separately
     cssCodeSplit: true,
-    // Enable source maps in production for easier debugging
+    // Generate source maps for easier debugging
     sourcemap: true,
   },
   // Optimize performance during development
