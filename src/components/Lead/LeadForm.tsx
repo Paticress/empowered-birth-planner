@@ -1,16 +1,15 @@
 
 import { useState, useEffect, useCallback, memo } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { formatWhatsAppNumber, validateWhatsapp } from './utils/formatters';
+import { NameField } from './FormFields/NameField';
+import { EmailField } from './FormFields/EmailField';
+import { WhatsAppField } from './FormFields/WhatsAppField';
+import { PregnancyField } from './FormFields/PregnancyField';
+import { DueDateField } from './FormFields/DueDateField';
+import { TermsField } from './FormFields/TermsField';
+import { SubmitButton } from './FormFields/SubmitButton';
 
 interface LeadFormProps {
   onSuccess?: () => void;
@@ -18,31 +17,11 @@ interface LeadFormProps {
   withWhatsapp?: boolean;
 }
 
-// Helper functions moved outside component to avoid recreating on each render
-const formatWhatsAppNumber = (number: string): string => {
-  if (!number) return '';
-  
-  // Remove non-numeric characters
-  const numbers = number.replace(/\D/g, '');
-  
-  // Apply mask based on length
-  if (numbers.length <= 2) {
-    return `(${numbers}`;
-  } else if (numbers.length <= 6) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-  } else if (numbers.length <= 10) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
-  } else {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-  }
-};
-
-const validateWhatsapp = (number: string): boolean => {
-  const digits = number.replace(/\D/g, '');
-  return digits.length >= 10 && digits.length <= 11;
-};
-
-export const LeadForm = memo(function LeadForm({ onSuccess, buttonText = "Acessar Agora", withWhatsapp = true }: LeadFormProps) {
+export const LeadForm = memo(function LeadForm({ 
+  onSuccess, 
+  buttonText = "Acessar Agora", 
+  withWhatsapp = true 
+}: LeadFormProps) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -111,120 +90,22 @@ export const LeadForm = memo(function LeadForm({ onSuccess, buttonText = "Acessa
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md mx-auto">
-      <div className="space-y-2">
-        <Label htmlFor="name">Nome</Label>
-        <Input
-          id="name"
-          placeholder="Seu nome completo"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="rounded-xl border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
-          required
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="seu@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="rounded-xl border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
-          required
-        />
-      </div>
+      <NameField value={name} onChange={setName} />
+      <EmailField value={email} onChange={setEmail} />
       
       {withWhatsapp && (
-        <div className="space-y-2">
-          <Label htmlFor="whatsapp">WhatsApp</Label>
-          <Input
-            id="whatsapp"
-            placeholder="(00) 00000-0000"
-            value={formattedWhatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-            className="rounded-xl border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
-            required
-          />
-        </div>
+        <WhatsAppField value={formattedWhatsapp} onChange={setWhatsapp} />
       )}
       
-      {/* Pregnancy question */}
-      <div className="space-y-2">
-        <Label className="text-base">Você está grávida?</Label>
-        <RadioGroup 
-          value={isPregnant || ""} 
-          onValueChange={setIsPregnant}
-          className="flex flex-col space-y-1"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="sim" id="pregnant-yes" />
-            <Label htmlFor="pregnant-yes">Sim</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="nao" id="pregnant-no" />
-            <Label htmlFor="pregnant-no">Não</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="parceira" id="pregnant-partner" />
-            <Label htmlFor="pregnant-partner">Minha parceira está</Label>
-          </div>
-        </RadioGroup>
-      </div>
+      <PregnancyField value={isPregnant} onChange={setIsPregnant} />
       
-      {/* Due Date (only visible if pregnant or partner is pregnant) */}
       {(isPregnant === 'sim' || isPregnant === 'parceira') && (
-        <div className="space-y-2">
-          <Label>Data Prevista para o Parto (DPP)</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal rounded-xl border-maternal-200",
-                  !dueDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dueDate ? format(dueDate, "dd/MM/yyyy") : <span>Selecione a data</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={dueDate}
-                onSelect={setDueDate}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-                disabled={(date) => 
-                  date < new Date() // Don't allow past dates
-                }
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+        <DueDateField value={dueDate} onChange={setDueDate} />
       )}
       
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="terms" 
-          checked={acceptTerms} 
-          onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
-          className="text-maternal-600 focus:ring-maternal-400"
-        />
-        <Label htmlFor="terms" className="text-sm text-maternal-700">
-          Concordo em receber conteúdos sobre maternidade e parto humanizado
-        </Label>
-      </div>
+      <TermsField checked={acceptTerms} onChange={setAcceptTerms} />
       
-      <Button 
-        type="submit" 
-        disabled={isSubmitting}
-        className="w-full bg-maternal-600 hover:bg-maternal-700 text-white rounded-full py-6 transition-all duration-300 shadow-md hover:shadow-lg"
-      >
-        {isSubmitting ? "Processando..." : buttonText}
-      </Button>
+      <SubmitButton isSubmitting={isSubmitting} text={buttonText} />
     </form>
   );
 });
