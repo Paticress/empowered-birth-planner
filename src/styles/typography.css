@@ -1,0 +1,18 @@
+
+@layer components {
+  .heading-primary {
+    @apply text-4xl md:text-5xl font-bold text-foreground leading-tight mb-4;
+  }
+  
+  .heading-secondary {
+    @apply text-3xl md:text-4xl font-bold text-foreground leading-tight mb-4;
+  }
+  
+  .subheading {
+    @apply text-xl md:text-2xl text-muted-foreground mb-8;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-beige text-brand-black;
+  }
+}
