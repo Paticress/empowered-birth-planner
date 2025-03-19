@@ -1,11 +1,13 @@
 
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useNavigation } from "@/hooks/useNavigation";
+import { useDomainDebug } from "@/hooks/useDomainDebug";
 
 const NotFound = () => {
   const location = useLocation();
   const { navigateTo } = useNavigation();
+  useDomainDebug(); // Add domain debugging
 
   useEffect(() => {
     console.error(
@@ -17,6 +19,7 @@ const NotFound = () => {
     console.log("Current URL:", window.location.href);
     console.log("Hostname:", window.location.hostname);
     console.log("React Router Path:", location.pathname);
+    console.log("Using HashRouter:", window.location.hash !== "");
   }, [location.pathname]);
 
   const handleBackToHome = () => {

@@ -6,20 +6,30 @@
   <title>Redirecionando...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript">
-    // Single Page Apps for GitHub Pages or custom domain
-    // MIT License
-    // https://github.com/rafgraph/spa-github-pages
-    // Adjusted for custom domain with subdomain
-    var pathSegmentsToKeep = 0;
-
+    // Single Page Apps for GitHub Pages with custom domain
+    // Modified version of the script from https://github.com/rafgraph/spa-github-pages
+    
+    // Redirect to index.html with hash route
+    var segmentCount = 0;
     var l = window.location;
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-      l.hash
-    );
+    
+    // Handle custom domain redirects differently
+    if (l.hostname === 'planodeparto.energiamaterna.com.br') {
+      // For custom domain, redirect to hashtag-based routing
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        '/#' + l.pathname
+      );
+    } else {
+      // For GitHub Pages domain
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    }
   </script>
   <style>
     body {
