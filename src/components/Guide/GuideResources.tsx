@@ -49,28 +49,28 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="mb-6 md:mb-0 md:mr-6 md:w-2/3">
             <h2 className="text-2xl font-bold text-maternal-800 mb-3">
-              Crie seu Plano de Parto Personalizado
+              Crie seu Plano de Parto em Minutos
             </h2>
             <p className="text-maternal-700 mb-4">
-              Um plano de parto bem estruturado aumenta suas chances de ter uma experiência de parto positiva e respeitosa. 
-              Nosso construtor de plano de parto facilita esse processo com:
+              Nosso construtor de plano de parto simplifica todo o processo - em apenas alguns passos rápidos, 
+              você terá um documento profissional pronto para compartilhar com toda sua equipe médica:
             </p>
             <ul className="space-y-2 mb-4">
               <li className="flex items-center">
                 <CheckCircle className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
-                <span>Questionário personalizado que identifica suas preferências</span>
+                <span>Apenas <strong>5 minutos</strong> para criar um plano completo e personalizado</span>
               </li>
               <li className="flex items-center">
                 <CheckCircle className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
-                <span>Modelos profissionais baseados nas melhores práticas</span>
+                <span>Compartilhe facilmente por <strong>WhatsApp, e-mail ou PDF</strong> com sua equipe</span>
               </li>
               <li className="flex items-center">
                 <CheckCircle className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
-                <span>Editor intuitivo para personalizar cada detalhe</span>
+                <span>Interface intuitiva que <strong>elimina a confusão</strong> de criar do zero</span>
               </li>
               <li className="flex items-center">
                 <Shield className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
-                <span>Documentação reconhecida por equipes médicas</span>
+                <span>Formato respeitado por profissionais de saúde e maternidades</span>
               </li>
             </ul>
           </div>
@@ -157,8 +157,8 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
         </p>
         
         <ol className="list-decimal pl-5 space-y-2 mb-6">
-          <li>Utilize nosso construtor de plano de parto para criar um documento personalizado</li>
-          <li>Converse com seu parceiro/acompanhante sobre suas preferências</li>
+          <li><strong>Crie seu plano rapidamente</strong> com nosso construtor em apenas 5 minutos</li>
+          <li>Compartilhe facilmente com seu parceiro/acompanhante por e-mail ou WhatsApp</li>
           <li>Discuta seu plano de parto com seu médico/obstetra na próxima consulta</li>
           <li>Faça ajustes conforme necessário após essa conversa</li>
           <li>Imprima várias cópias e leve para o hospital no dia do parto</li>
@@ -166,10 +166,10 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
         
         <div className="bg-maternal-50 border border-maternal-200 rounded-lg p-6 mt-6 mb-8">
           <h3 className="text-xl font-semibold text-maternal-800 mb-3">
-            Comece agora mesmo!
+            Pronta para criar seu plano em minutos?
           </h3>
           <p className="mb-4">
-            Nosso construtor de plano de parto guiará você em todo o processo, gerando um documento personalizado baseado em suas preferências.
+            Não perca tempo tentando fazer tudo do zero! Nosso construtor simplifica todo o processo, desde a criação até o compartilhamento.
           </p>
           <div className="flex justify-center">
             <BirthPlanNavButton className="py-6" />
