@@ -64,12 +64,16 @@ export default defineConfig(({ mode }) => ({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console.log in production
+        drop_console: mode === 'production', // Only remove console logs in production, not during debugging
         drop_debugger: true,
       }
     },
     rollupOptions: {
       output: {
+        // Generate specific filenames for better caching
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]',
         manualChunks: (id) => {
           // Create dynamic chunks based on imports
           if (id.includes('node_modules')) {
