@@ -1,6 +1,7 @@
 
 import { ChecklistSection } from './ChecklistSection';
 import { ChecklistItem } from './ChecklistItem';
+import { ChecklistTip } from './ChecklistTip';
 
 export function ChecklistSections() {
   return (
@@ -41,6 +42,17 @@ export function ChecklistSections() {
         <ChecklistItem id="csection-2" label="Estabeleci a presença do acompanhante durante a cesárea" />
         <ChecklistItem id="csection-3" label="Defini se quero visualizar o nascimento (ex. abaixando o campo cirúrgico)" />
         <ChecklistItem id="csection-4" label="Especifiquei preferências sobre contato pele a pele na cesárea" />
+      </ChecklistSection>
+      
+      <ChecklistSection title="Emergências e Situações Inesperadas">
+        <ChecklistTip>
+          Embora muitas mulheres vivenciem partos naturais tranquilos, é importante estar preparada para possíveis intercorrências. Compreender essas situações fortalece sua comunicação com a equipe médica.
+        </ChecklistTip>
+        <ChecklistItem id="emergency-1" label="Defini minhas preferências para situações de emergência obstétrica (hemorragia, sofrimento fetal, etc.)" />
+        <ChecklistItem id="emergency-2" label="Estabeleci como quero ser informada sobre situações inesperadas" />
+        <ChecklistItem id="emergency-3" label="Especifiquei quem deve tomar decisões caso eu não esteja em condições de fazê-lo" />
+        <ChecklistItem id="emergency-4" label="Incluí preferências específicas para caso o bebê precise de cuidados intensivos" />
+        <ChecklistItem id="emergency-5" label="Considerei a flexibilidade do plano caso aconteçam intercorrências" />
       </ChecklistSection>
     </div>
   );

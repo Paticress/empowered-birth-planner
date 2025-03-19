@@ -82,6 +82,9 @@ export const birthPlanSections = [
     fields: [
       { key: 'complications', label: 'Em Caso de Complicações' },
       { key: 'nicu', label: 'Se o Bebê Precisar ir para UTI' },
+      { key: 'emergencyScenarios', label: 'Situações de Emergência' },
+      { key: 'highRiskComplications', label: 'Complicações de Alto Risco' },
+      { key: 'lowRiskOccurrences', label: 'Ocorrências de Baixo Risco' },
       { key: 'specialWishes', label: 'Desejos Especiais' },
     ],
   },
