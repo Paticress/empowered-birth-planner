@@ -1,6 +1,6 @@
 import CONFIG from './config.js';
 
-// Service worker caching strategies
+// Service worker fetch strategies
 
 // Imported from config.js through the service worker
 const CONFIG = self.CONFIG;
