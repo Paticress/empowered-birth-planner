@@ -22,7 +22,7 @@ export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
       className={`flex items-center ${className}`}
     >
       <FileText className="mr-2 h-4 w-4" />
-      Criar Plano de Parto
+      Criar Meu Plano de Parto
     </Button>
   );
 }
