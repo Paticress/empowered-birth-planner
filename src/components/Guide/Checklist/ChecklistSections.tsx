@@ -44,6 +44,19 @@ export function ChecklistSections() {
         <ChecklistItem id="csection-4" label="Especifiquei preferências sobre contato pele a pele na cesárea" />
       </ChecklistSection>
       
+      <ChecklistSection title="Prevenção de Intervenções Desnecessárias">
+        <ChecklistTip>
+          O chamado "efeito cascata" ocorre quando uma intervenção desnecessária leva a outras, aumentando riscos. 
+          Um plano de parto bem elaborado pode ajudar a prevenir esse ciclo, garantindo que intervenções sejam feitas 
+          apenas quando realmente necessárias.
+        </ChecklistTip>
+        <ChecklistItem id="interventions-1" label="Especifiquei que desejo ser consultada antes de qualquer intervenção" />
+        <ChecklistItem id="interventions-2" label="Defini preferências sobre indução artificial do trabalho de parto" />
+        <ChecklistItem id="interventions-3" label="Estabeleci preferências sobre uso de ocitocina sintética" />
+        <ChecklistItem id="interventions-4" label="Indiquei preferências sobre ruptura artificial da bolsa" />
+        <ChecklistItem id="interventions-5" label="Especifiquei preferências sobre posições de parto (evitando a posição de litotomia se não necessário)" />
+      </ChecklistSection>
+      
       <ChecklistSection title="Emergências e Situações Inesperadas">
         <ChecklistTip>
           Embora muitas mulheres vivenciem partos naturais tranquilos, é importante estar preparada para possíveis intercorrências. Compreender essas situações fortalece sua comunicação com a equipe médica.
@@ -53,6 +66,7 @@ export function ChecklistSections() {
         <ChecklistItem id="emergency-3" label="Especifiquei quem deve tomar decisões caso eu não esteja em condições de fazê-lo" />
         <ChecklistItem id="emergency-4" label="Incluí preferências específicas para caso o bebê precise de cuidados intensivos" />
         <ChecklistItem id="emergency-5" label="Considerei a flexibilidade do plano caso aconteçam intercorrências" />
+        <ChecklistItem id="emergency-6" label="Diferenciei entre situações de emergência real e intervenções de rotina que podem ser discutidas" />
       </ChecklistSection>
     </div>
   );
