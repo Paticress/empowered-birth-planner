@@ -130,7 +130,8 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
             </div>
             
             <Button 
-              className="w-full bg-maternal-600 hover:bg-maternal-700 py-6 text-lg"
+              className="w-full text-white py-6 text-lg"
+              variant="resource-highlight"
               disabled={!paymentMethod}
               onClick={handlePaymentProcessing}
             >

@@ -38,7 +38,7 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
                 size="sm" 
                 onClick={() => onStageChange('editor')}
                 className={currentStage === 'editor' 
-                  ? "bg-maternal-300 hover:bg-maternal-200 text-maternal-900" 
+                  ? "bg-maternal-100 text-maternal-900" 
                   : "text-white bg-maternal-600 hover:bg-maternal-500 border-maternal-300"}
               >
                 <Edit className="h-4 w-4 mr-2" /> 
@@ -50,7 +50,7 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
                 size="sm" 
                 onClick={() => onStageChange('preview')}
                 className={currentStage === 'preview' 
-                  ? "bg-maternal-300 hover:bg-maternal-200 text-maternal-900" 
+                  ? "bg-maternal-100 text-maternal-900" 
                   : "text-white bg-maternal-600 hover:bg-maternal-500 border-maternal-300"}
               >
                 <Eye className="h-4 w-4 mr-2" /> 
@@ -62,7 +62,7 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
                 size="sm" 
                 onClick={() => onStageChange('share')}
                 className={currentStage === 'share' 
-                  ? "bg-maternal-300 hover:bg-maternal-200 text-maternal-900" 
+                  ? "bg-maternal-100 text-maternal-900" 
                   : "text-white bg-maternal-600 hover:bg-maternal-500 border-maternal-300"}
               >
                 <Share2 className="h-4 w-4 mr-2" /> 
