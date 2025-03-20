@@ -1,5 +1,4 @@
 
-
 import { QuestionSection } from '../types/questionnaire';
 
 export const personalSection: QuestionSection = {
@@ -39,6 +38,44 @@ export const personalSection: QuestionSection = {
       type: 'text',
       isRequired: true,
       description: 'Hospital que você irá caso precise, mesmo se planeja parto domiciliar ou em casa de parto.'
+    },
+    {
+      id: 'pediatrician',
+      text: 'Você terá acompanhamento de um(a) Pediatra Neonatal particular?',
+      type: 'radio',
+      options: ['Sim', 'Não'],
+      isRequired: false,
+      description: 'Contratar um pediatra neonatal particular garante continuidade nos cuidados, desde o nascimento até o acompanhamento pediátrico posterior.'
+    },
+    {
+      id: 'pediatricianName',
+      text: 'Nome do(a) Pediatra Neonatal:',
+      type: 'text',
+      conditionalDisplay: {
+        dependsOn: 'pediatrician',
+        showWhen: 'Sim',
+      },
+      isRequired: false,
+    },
+    {
+      id: 'pediatricianRegistry',
+      text: 'Registro profissional (CRM) do(a) Pediatra:',
+      type: 'text',
+      conditionalDisplay: {
+        dependsOn: 'pediatrician',
+        showWhen: 'Sim',
+      },
+      isRequired: false,
+    },
+    {
+      id: 'pediatricianContact',
+      text: 'Telefone do(a) Pediatra:',
+      type: 'text',
+      conditionalDisplay: {
+        dependsOn: 'pediatrician',
+        showWhen: 'Sim',
+      },
+      isRequired: false,
     },
     {
       id: 'midwife',
