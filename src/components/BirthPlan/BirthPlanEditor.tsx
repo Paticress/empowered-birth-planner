@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Save, Plus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import { birthPlanSections } from './utils/birthPlanSections';
 import { questionnaireSections } from './questionnaire';
 import { 
@@ -53,8 +52,7 @@ export function BirthPlanEditor({
   const handleSave = () => {
     onUpdate(localBirthPlan);
     toast({
-      title: "Alterações salvas",
-      description: "Seu plano de parto foi atualizado com sucesso."
+      description: "Seu plano de parto foi atualizado com sucesso.",
     });
   };
   
@@ -109,27 +107,21 @@ export function BirthPlanEditor({
     Object.entries(selectedQuestionOptions).forEach(([questionId, isSelected]) => {
       if (!isSelected) return;
       
-      // Encontrar a pergunta e a seção original
       const questionData = findQuestionById(questionId);
       if (!questionData) return;
       
       const { question, sectionId } = questionData;
       const mappedSectionId = mapQuestionnaireToSectionId(sectionId);
       
-      // Obter o valor da resposta do questionário
       const answer = questionnaireAnswers[questionId];
       if (!answer && answer !== false) return;
       
-      // Formato da resposta
       const formattedAnswer = formatSelectedOptions(questionId, answer);
       
-      // Adicionar ou atualizar o valor no plano
       const currentValue = updatedPlan[mappedSectionId][fieldKey];
       if (currentValue) {
-        // Se já existe um valor, acrescente a nova opção
         updatedPlan[mappedSectionId][fieldKey] = `${currentValue}\n${formattedAnswer}`;
       } else {
-        // Se não existe, defina o novo valor
         updatedPlan[mappedSectionId][fieldKey] = formattedAnswer;
       }
     });
@@ -138,7 +130,6 @@ export function BirthPlanEditor({
     setSelectedQuestionOptions({});
     
     toast({
-      title: "Opções adicionadas",
       description: "As opções selecionadas foram adicionadas ao seu plano de parto."
     });
   };
@@ -158,9 +149,7 @@ export function BirthPlanEditor({
   const getRelevantQuestionsForField = (fieldKey: string) => {
     console.log("Getting relevant questions for field:", fieldKey);
     
-    // Mapeamento de chaves de campo para IDs de perguntas relevantes
     const fieldToQuestionMap: Record<string, string[]> = {
-      // personalInfo
       'name': ['name'],
       'dueDate': ['dueDate'],
       'healthProvider': ['healthProvider'],
@@ -168,41 +157,35 @@ export function BirthPlanEditor({
       'doula': ['doula', 'doulaName'],
       'companions': ['companions'],
       
-      // atmosfera
       'lighting': ['lighting'],
       'sound': ['sound'],
       'clothing': ['clothing'],
       'photos': ['photos'],
       
-      // trabalhoDeParto
       'mobility': ['mobility'],
       'positions': ['positions'],
       'hydration': ['hydration'],
       'monitoring': ['monitoring'],
       'interventions': ['painRelief', 'interventions', 'informedConsent'],
       
-      // nascimento
       'birthPositions': ['birthPositions'],
       'episiotomy': ['episiotomy'],
       'cordCutting': ['cordCutting'],
       'skinToSkin': ['skinToSkin'],
       'placenta': ['placenta'],
       
-      // cesarea
       'cesareanPreferences': ['cesareanPreferences'],
       'anesthesia': ['anesthesia'],
       'cesareanCompanion': ['cesareanCompanion'],
       'curtain': ['curtain'],
       'cesareanSkinToSkin': ['cesareanSkinToSkin'],
       
-      // posParto
       'firstHour': ['firstHour'],
       'breastfeeding': ['breastfeeding'],
       'newbornCare': ['newbornCare'],
       'vaccination': ['vaccination'],
       'motherCare': ['motherCare'],
       
-      // situacoesEspeciais
       'complications': ['complications', 'cascadeInterventions'],
       'nicu': ['nicu'],
       'emergencyScenarios': ['unexpectedScenarios'],
@@ -229,30 +212,23 @@ export function BirthPlanEditor({
     return relevantQuestions;
   };
   
-  // Lista de campos para os quais não queremos mostrar o botão de adicionar do questionário
-  // Estes são campos de entrada de texto livre do questionário inicial que não precisam do botão adicionar
   const excludedFields = ['name', 'dueDate', 'healthProvider', 'hospital', 'companions'];
   
-  // Verifica se o botão de adicionar do questionário deve ser mostrado para um campo específico
   const shouldShowAddButton = (fieldKey: string) => {
-    // Não mostrar para campos excluídos (texto livre inicial)
     if (excludedFields.includes(fieldKey)) {
       return false;
     }
     
-    // Verificar se existem perguntas relevantes para este campo
     const relevantQuestions = getRelevantQuestionsForField(fieldKey);
     return relevantQuestions.length > 0;
   };
   
-  // Renderiza as opções de um checkbox ou radio group para exibição no diálogo
   const renderQuestionOptions = (question: any, answer: any) => {
     if (!question.options || question.options.length === 0) {
       return null;
     }
     
     if (typeof answer === 'object' && !Array.isArray(answer)) {
-      // Resposta de checkbox - mostra todas as opções
       return (
         <div className="ml-8 mt-2 space-y-2">
           {question.options.map((option: string) => {
@@ -267,7 +243,6 @@ export function BirthPlanEditor({
         </div>
       );
     } else if (typeof answer === 'string') {
-      // Resposta de radio - mostra a opção selecionada
       return (
         <div className="ml-8 mt-2">
           <div className="flex items-center gap-2">
@@ -351,9 +326,7 @@ export function BirthPlanEditor({
                             const answer = questionnaireAnswers[question.id];
                             let displayValue = '';
                             
-                            // Formatar o valor de exibição com base no tipo de resposta
                             if (typeof answer === 'object' && !Array.isArray(answer)) {
-                              // Resposta de checkbox
                               const selectedOptions = Object.entries(answer)
                                 .filter(([_, selected]) => selected)
                                 .map(([option]) => option);
@@ -383,7 +356,6 @@ export function BirthPlanEditor({
                                     {question.text}
                                   </Label>
                                   
-                                  {/* Renderizar as opções disponíveis */}
                                   {renderQuestionOptions(question, answer)}
                                   
                                   {!question.options && displayValue && (
