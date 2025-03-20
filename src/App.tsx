@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import { OnlineGuide } from "./components/Guide/OnlineGuide";
 import GuiaGratuito from "./pages/GuiaGratuito";
 import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
+import { Header } from "./components/Header";
 
 const queryClient = new QueryClient();
 
@@ -23,22 +24,25 @@ const App = () => {
       <TooltipProvider>
         <Sonner />
         <HashRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/guia-online" replace />} />
-            <Route path="/guia-online" element={<OnlineGuide />} />
-            <Route path="/guia-gratuito" element={<GuiaGratuito />} />
-            <Route 
-              path="/criar-plano" 
-              element={
-                <>
-                  {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
-                  <BirthPlanBuilder />
-                </>
-              } 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Header />
+          <div className="pt-16 md:pt-20">
+            <Routes>
+              <Route path="/" element={<Navigate to="/guia-online" replace />} />
+              <Route path="/guia-online" element={<OnlineGuide />} />
+              <Route path="/guia-gratuito" element={<GuiaGratuito />} />
+              <Route 
+                path="/criar-plano" 
+                element={
+                  <>
+                    {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
+                    <BirthPlanBuilder />
+                  </>
+                } 
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
         </HashRouter>
       </TooltipProvider>
     </QueryClientProvider>
