@@ -37,7 +37,8 @@
   .preview-footer,
   .links-rapidos,
   #header,
-  nav {
+  nav,
+  .back-to-top-button {
     display: none !important;
   }
   
@@ -98,5 +99,15 @@
   /* Make sure section icons appear */
   .print\:text-black {
     color: black !important;
+  }
+  
+  /* Force show hidden elements that should be visible in print */
+  .hidden.print\:block {
+    display: block !important;
+  }
+  
+  /* Make sure SVG icons appear in print */
+  .print\:inline-block svg {
+    display: inline-block !important;
   }
 }

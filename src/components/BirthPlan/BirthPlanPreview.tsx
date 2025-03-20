@@ -21,14 +21,17 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
   
   return (
     <div className="animate-fade-in">
+      {/* Only show in screen view, not in print */}
       <div className="print:hidden">
         <PreviewHeader title="Visualização do Plano de Parto" />
       </div>
       
-      <div className="hidden print:block">
+      {/* Only show in print view */}
+      <div className="hidden print:block print:mb-6">
         <PrintTitle />
       </div>
       
+      {/* Main content - visible in both screen and print */}
       <div id="birth-plan-preview" className="bg-white border border-gray-200 rounded-lg p-6 print:p-0 print:border-0">
         {birthPlanSections.map((section) => (
           <PreviewSection
@@ -43,13 +46,16 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         <SignatureSection personalInfo={personalInfo} />
       </div>
       
-      <div className="hidden print:block">
+      {/* Only show in print view */}
+      <div className="hidden print:block print:mt-6">
         <PrintFooter />
       </div>
       
+      {/* Screen-only elements */}
       <div className="print:hidden info-alert">
         <InfoAlert />
       </div>
+      
       <div className="print:hidden preview-footer">
         <PreviewFooter onEdit={onEdit} onNext={onNext} />
       </div>
