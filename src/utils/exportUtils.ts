@@ -1,6 +1,7 @@
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, ImageRun, Table, TableRow, TableCell } from 'docx';
+import { birthPlanSections } from '../components/BirthPlan/utils/birthPlanSections';
 
 /**
  * Exports an HTML element as a PDF file

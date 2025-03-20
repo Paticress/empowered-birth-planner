@@ -1,5 +1,9 @@
 
-export function PrintTitle() {
+interface PrintTitleProps {
+  personName?: string;
+}
+
+export function PrintTitle({ personName }: PrintTitleProps) {
   return (
     <div className="hidden print:block mb-6">
       <div className="flex justify-between items-center">
@@ -10,6 +14,9 @@ export function PrintTitle() {
           className="h-12 energia-materna-logo"
         />
       </div>
+      {personName && (
+        <h2 className="text-xl mt-2">{personName}</h2>
+      )}
       <p className="text-sm text-gray-700 mt-2 mb-4">
         Este documento reflete minhas preferências para o parto e nascimento do meu bebê. Ele foi elaborado após 
         cuidadosa pesquisa e reflexão, em colaboração com meu parceiro e equipe de saúde. Compreendo que 

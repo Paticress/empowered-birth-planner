@@ -54,8 +54,9 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         {/* Personal information section */}
         <PreviewSection 
           title="Informações Pessoais" 
-          content={birthPlan.personalInfo || {}}
+          sectionData={birthPlan.personalInfo || {}}
           sectionId="personalInfo"
+          fields={birthPlanSections.find(section => section.id === 'personalInfo')?.fields || []}
         />
         
         {/* All other sections */}
@@ -65,8 +66,9 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
             <PreviewSection 
               key={section.id}
               title={section.title} 
-              content={birthPlan[section.id] || {}}
+              sectionData={birthPlan[section.id] || {}}
               sectionId={section.id}
+              fields={section.fields}
             />
           ))
         }

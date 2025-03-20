@@ -1,14 +1,14 @@
 
 import { getSectionIcon } from '../utils/sectionIcons';
 
-interface PreviewSectionProps {
+export interface PreviewSectionProps {
   sectionId: string;
   title: string;
-  fields: { key: string; label: string }[];
-  sectionData: Record<string, any>;
+  sectionData?: Record<string, any>;
+  fields?: { key: string; label: string }[];
 }
 
-export function PreviewSection({ sectionId, title, fields, sectionData }: PreviewSectionProps) {
+export function PreviewSection({ sectionId, title, sectionData = {}, fields = [] }: PreviewSectionProps) {
   const SectionIcon = getSectionIcon(sectionId);
   
   return (
