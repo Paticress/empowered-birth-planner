@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Save, Plus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { birthPlanSections } from './utils/birthPlanSections';
 import { questionnaireSections } from './questionnaire';
 import { 
@@ -101,6 +101,9 @@ export function BirthPlanEditor({
 
   // Adicionar opções selecionadas do questionário ao plano para um campo específico
   const handleAddQuestionnaireOptionsForField = (fieldKey: string) => {
+    console.log("Adding options for field:", fieldKey);
+    console.log("Selected options:", selectedQuestionOptions);
+    
     const updatedPlan = { ...localBirthPlan };
     
     Object.entries(selectedQuestionOptions).forEach(([questionId, isSelected]) => {
@@ -153,6 +156,8 @@ export function BirthPlanEditor({
 
   // Encontrar questões relevantes para um campo específico
   const getRelevantQuestionsForField = (fieldKey: string) => {
+    console.log("Getting relevant questions for field:", fieldKey);
+    
     // Mapeamento de chaves de campo para IDs de perguntas relevantes
     const fieldToQuestionMap: Record<string, string[]> = {
       // personalInfo
@@ -205,6 +210,8 @@ export function BirthPlanEditor({
     };
     
     const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
+    console.log("Relevant question IDs:", relevantQuestionIds);
+    
     const relevantQuestions: Array<{question: any, sectionId: string}> = [];
     
     for (const section of questionnaireSections) {
@@ -218,6 +225,7 @@ export function BirthPlanEditor({
       }
     }
     
+    console.log("Found relevant questions:", relevantQuestions.length);
     return relevantQuestions;
   };
   
@@ -235,6 +243,44 @@ export function BirthPlanEditor({
     // Verificar se existem perguntas relevantes para este campo
     const relevantQuestions = getRelevantQuestionsForField(fieldKey);
     return relevantQuestions.length > 0;
+  };
+  
+  // Renderiza as opções de um checkbox ou radio group para exibição no diálogo
+  const renderQuestionOptions = (question: any, answer: any) => {
+    if (!question.options || question.options.length === 0) {
+      return null;
+    }
+    
+    if (typeof answer === 'object' && !Array.isArray(answer)) {
+      // Resposta de checkbox - mostra todas as opções
+      return (
+        <div className="ml-8 mt-2 space-y-2">
+          {question.options.map((option: string) => {
+            const isSelected = answer[option] === true;
+            return (
+              <div key={option} className="flex items-center gap-2">
+                <div className={`h-4 w-4 border ${isSelected ? 'bg-maternal-500 border-maternal-500' : 'border-gray-300'} rounded-sm`} />
+                <span className={`text-sm ${isSelected ? 'font-medium' : 'text-gray-600'}`}>{option}</span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    } else if (typeof answer === 'string') {
+      // Resposta de radio - mostra a opção selecionada
+      return (
+        <div className="ml-8 mt-2">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full border border-maternal-500 bg-maternal-500 flex items-center justify-center">
+              <div className="h-2 w-2 rounded-full bg-white" />
+            </div>
+            <span className="text-sm font-medium">{answer}</span>
+          </div>
+        </div>
+      );
+    }
+    
+    return null;
   };
   
   return (
@@ -282,7 +328,11 @@ export function BirthPlanEditor({
                         variant="outline" 
                         size="sm"
                         className="flex items-center gap-1 border-maternal-300 text-maternal-600 text-xs"
-                        onClick={() => setActiveFieldKey(field.key)}
+                        onClick={() => {
+                          setActiveFieldKey(field.key);
+                          setSelectedQuestionOptions({});
+                          console.log("Opening dialog for field:", field.key);
+                        }}
                       >
                         <Plus className="h-3 w-3" /> Adicionar do Questionário
                       </Button>
@@ -296,49 +346,60 @@ export function BirthPlanEditor({
                       </DialogHeader>
                       
                       <div className="max-h-[60vh] overflow-y-auto py-4">
-                        {relevantQuestions.map(({ question }) => {
-                          const answer = questionnaireAnswers[question.id];
-                          let displayValue = '';
-                          
-                          // Formatar o valor de exibição com base no tipo de resposta
-                          if (typeof answer === 'object' && !Array.isArray(answer)) {
-                            // Resposta de checkbox
-                            const selectedOptions = Object.entries(answer)
-                              .filter(([_, selected]) => selected)
-                              .map(([option]) => option);
-                              
-                            displayValue = selectedOptions.join(', ');
-                          } else if (Array.isArray(answer)) {
-                            displayValue = answer.join(', ');
-                          } else {
-                            displayValue = String(answer || '');
-                          }
-                          
-                          return (
-                            <div key={question.id} className="flex items-start space-x-2 py-2 border-b border-gray-100">
-                              <Checkbox 
-                                id={`add-${question.id}`}
-                                checked={!!selectedQuestionOptions[question.id]}
-                                onCheckedChange={(checked) => {
-                                  setSelectedQuestionOptions(prev => ({
-                                    ...prev,
-                                    [question.id]: checked
-                                  }));
-                                }}
-                              />
-                              <div className="grid gap-1.5 leading-none">
-                                <Label htmlFor={`add-${question.id}`} className="font-medium">
-                                  {question.text}
-                                </Label>
-                                {displayValue && (
-                                  <p className="text-sm text-gray-500 mt-1">
-                                    {displayValue}
-                                  </p>
-                                )}
+                        {relevantQuestions.length > 0 ? (
+                          relevantQuestions.map(({ question }) => {
+                            const answer = questionnaireAnswers[question.id];
+                            let displayValue = '';
+                            
+                            // Formatar o valor de exibição com base no tipo de resposta
+                            if (typeof answer === 'object' && !Array.isArray(answer)) {
+                              // Resposta de checkbox
+                              const selectedOptions = Object.entries(answer)
+                                .filter(([_, selected]) => selected)
+                                .map(([option]) => option);
+                                
+                              displayValue = selectedOptions.join(', ');
+                            } else if (Array.isArray(answer)) {
+                              displayValue = answer.join(', ');
+                            } else {
+                              displayValue = String(answer || '');
+                            }
+                            
+                            return (
+                              <div key={question.id} className="flex items-start space-x-2 py-2 border-b border-gray-100">
+                                <Checkbox 
+                                  id={`add-${question.id}`}
+                                  checked={!!selectedQuestionOptions[question.id]}
+                                  onCheckedChange={(checked) => {
+                                    setSelectedQuestionOptions(prev => ({
+                                      ...prev,
+                                      [question.id]: checked
+                                    }));
+                                  }}
+                                  className="mt-1"
+                                />
+                                <div className="grid gap-1.5 leading-none">
+                                  <Label htmlFor={`add-${question.id}`} className="font-medium">
+                                    {question.text}
+                                  </Label>
+                                  
+                                  {/* Renderizar as opções disponíveis */}
+                                  {renderQuestionOptions(question, answer)}
+                                  
+                                  {!question.options && displayValue && (
+                                    <p className="text-sm text-gray-500 mt-1">
+                                      {displayValue}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })
+                        ) : (
+                          <p className="text-center py-4 text-gray-500">
+                            Não há respostas disponíveis do questionário para este campo.
+                          </p>
+                        )}
                       </div>
                       
                       <DialogFooter>
