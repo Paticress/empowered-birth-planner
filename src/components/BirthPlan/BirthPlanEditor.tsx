@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Save, Plus } from 'lucide-react';
@@ -17,7 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -38,6 +38,7 @@ export function BirthPlanEditor({
   const [localBirthPlan, setLocalBirthPlan] = useState({ ...birthPlan });
   const [selectedOptions, setSelectedOptions] = useState<Record<string, Record<string, boolean>>>({});
   const [activeFieldKey, setActiveFieldKey] = useState<string>('');
+  const [dialogOpen, setDialogOpen] = useState(false);
   
   const handleFieldChange = (sectionId: string, fieldKey: string, value: any) => {
     setLocalBirthPlan(prevPlan => ({
@@ -85,37 +86,45 @@ export function BirthPlanEditor({
       .join(', ');
   };
 
-  // Adicionar opções selecionadas do questionário ao plano para um campo específico
+  // Adicionar opções selecionadas ao plano para um campo específico
   const handleAddSelectedOptions = () => {
     console.log("Adding options for field:", activeFieldKey);
     console.log("Selected options:", selectedOptions);
     
     const updatedPlan = { ...localBirthPlan };
     
+    // Extrair todas as opções selecionadas de todas as perguntas relevantes
+    const allSelectedOptions: string[] = [];
+    
     Object.entries(selectedOptions).forEach(([questionId, options]) => {
       if (Object.values(options).some(value => value)) {
-        const questionData = findQuestionById(questionId);
-        if (!questionData) return;
+        const selectedForQuestion = Object.entries(options)
+          .filter(([_, isSelected]) => isSelected)
+          .map(([option]) => option);
         
-        const { sectionId } = questionData;
-        const mappedSectionId = mapQuestionnaireToSectionId(sectionId);
-        
-        const formattedOptions = formatSelectedOptions(options);
-        if (!formattedOptions) return;
-        
-        const currentValue = updatedPlan[mappedSectionId][activeFieldKey];
-        if (currentValue) {
-          updatedPlan[mappedSectionId][activeFieldKey] = `${currentValue}\n${formattedOptions}`;
-        } else {
-          updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
-        }
+        allSelectedOptions.push(...selectedForQuestion);
       }
     });
     
-    setLocalBirthPlan(updatedPlan);
-    setSelectedOptions({});
+    // Se há opções selecionadas, atualizar o campo com a nova lista completa
+    if (allSelectedOptions.length > 0) {
+      const formattedOptions = allSelectedOptions.join(', ');
+      
+      // Definir o valor diretamente sem concatenar com o valor existente
+      const mappedSectionId = mapQuestionnaireToSectionId(
+        Object.keys(selectedOptions).map(id => findQuestionById(id)?.sectionId || '')[0]
+      );
+      
+      updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
+      setLocalBirthPlan(updatedPlan);
+      
+      toast("As opções selecionadas foram adicionadas ao seu plano de parto.");
+    } else {
+      toast("Nenhuma opção foi selecionada.");
+    }
     
-    toast("As opções selecionadas foram adicionadas ao seu plano de parto.");
+    setSelectedOptions({});
+    setDialogOpen(false);
   };
 
   // Ajuda a encontrar a pergunta pelo ID
@@ -207,27 +216,54 @@ export function BirthPlanEditor({
     return relevantQuestions.length > 0;
   };
   
-  // Inicializar as opções selecionáveis para uma pergunta
-  const initializeSelectableOptions = (questionId: string, answer: any) => {
-    // Para respostas de checkbox que já são objetos
-    if (typeof answer === 'object' && !Array.isArray(answer)) {
-      return { ...answer };
-    }
+  // Analisa o conteúdo atual do campo para determinar quais opções estão selecionadas
+  const parseCurrentFieldOptions = (fieldKey: string, sectionId: string): string[] => {
+    const currentValue = localBirthPlan[sectionId][fieldKey];
+    if (!currentValue) return [];
     
-    // Para respostas de radio ou texto
-    if (typeof answer === 'string') {
-      const question = findQuestionById(questionId)?.question;
-      if (!question || !question.options) return {};
+    // Dividir o texto atual por vírgulas e limpar espaços extras
+    return currentValue.split(',').map(option => option.trim());
+  };
+  
+  // Inicializar as opções selecionáveis com base no conteúdo atual do campo e respostas do questionário
+  const initializeOptionsFromCurrentField = (fieldKey: string, sectionId: string) => {
+    // Obter as opções atualmente presentes no campo
+    const currentFieldOptions = parseCurrentFieldOptions(fieldKey, sectionId);
+    
+    // Obter questões relevantes para este campo
+    const relevantQuestions = getRelevantQuestionsForField(fieldKey);
+    const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
+    
+    relevantQuestions.forEach(({ question }) => {
+      const questionId = question.id;
+      initialSelectedOptions[questionId] = {};
       
-      // Criar um objeto com todas as opções como false, exceto a selecionada
-      const options: Record<string, boolean> = {};
-      question.options.forEach(option => {
-        options[option] = option === answer;
-      });
-      return options;
-    }
+      if (question.options) {
+        question.options.forEach((option: string) => {
+          // Marcar como selecionado se estiver no conteúdo atual do campo
+          initialSelectedOptions[questionId][option] = currentFieldOptions.includes(option);
+        });
+      }
+    });
     
-    return {};
+    return initialSelectedOptions;
+  };
+  
+  // Resetar as opções selecionadas quando o usuário abre o diálogo
+  const resetOptionsForField = (fieldKey: string) => {
+    setActiveFieldKey(fieldKey);
+    
+    // Inicializa as opções com base no conteúdo atual do campo
+    const initialSelectedOptions = initializeOptionsFromCurrentField(
+      fieldKey, 
+      activeSection.id
+    );
+    
+    setSelectedOptions(initialSelectedOptions);
+    setDialogOpen(true);
+    
+    console.log("Opening dialog for field:", fieldKey);
+    console.log("Initial selected options:", initialSelectedOptions);
   };
   
   // Renderiza as opções selecionáveis para uma pergunta
@@ -236,44 +272,6 @@ export function BirthPlanEditor({
       return null;
     }
     
-    // Para perguntas do tipo radio
-    if (question.type === 'radio') {
-      return (
-        <div className="space-y-2 ml-8 mt-2">
-          {question.options.map((option: string) => {
-            const isSelected = selectedOptions[questionId]?.[option] || false;
-            return (
-              <div key={option} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`option-${questionId}-${option}`}
-                  checked={isSelected}
-                  onCheckedChange={(checked) => {
-                    // Para radio, desmarca os outros
-                    const newOptions: Record<string, boolean> = {};
-                    question.options.forEach((opt: string) => {
-                      newOptions[opt] = opt === option ? !!checked : false;
-                    });
-                    
-                    setSelectedOptions(prev => ({
-                      ...prev,
-                      [questionId]: newOptions
-                    }));
-                  }}
-                />
-                <Label 
-                  htmlFor={`option-${questionId}-${option}`}
-                  className={`text-sm ${isSelected ? 'font-medium' : 'text-gray-600'}`}
-                >
-                  {option}
-                </Label>
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
-    
-    // Para perguntas do tipo checkbox
     return (
       <div className="space-y-2 ml-8 mt-2">
         {question.options.map((option: string) => {
@@ -304,28 +302,6 @@ export function BirthPlanEditor({
         })}
       </div>
     );
-  };
-  
-  // Função para resetar as opções selecionadas quando o usuário abre o diálogo
-  const resetOptionsForField = (fieldKey: string) => {
-    setActiveFieldKey(fieldKey);
-    
-    // Inicializa as opções com base nas respostas existentes do questionário
-    const relevantQuestions = getRelevantQuestionsForField(fieldKey);
-    const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
-    
-    relevantQuestions.forEach(({ question }) => {
-      const questionId = question.id;
-      const answer = questionnaireAnswers[questionId];
-      
-      if (answer !== undefined) {
-        initialSelectedOptions[questionId] = initializeSelectableOptions(questionId, answer);
-      }
-    });
-    
-    setSelectedOptions(initialSelectedOptions);
-    console.log("Opening dialog for field:", fieldKey);
-    console.log("Initial selected options:", initialSelectedOptions);
   };
   
   return (
@@ -366,7 +342,13 @@ export function BirthPlanEditor({
                 </label>
                 
                 {showAddButton && (
-                  <Dialog>
+                  <Dialog open={dialogOpen && activeFieldKey === field.key} onOpenChange={(open) => {
+                    if (open && activeFieldKey !== field.key) {
+                      resetOptionsForField(field.key);
+                    } else if (!open) {
+                      setDialogOpen(false);
+                    }
+                  }}>
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline" 
@@ -408,12 +390,12 @@ export function BirthPlanEditor({
                       </div>
                       
                       <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant="outline">Cancelar</Button>
-                        </DialogClose>
-                        <DialogClose asChild>
-                          <Button onClick={handleAddSelectedOptions}>Adicionar Selecionados</Button>
-                        </DialogClose>
+                        <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                          Cancelar
+                        </Button>
+                        <Button onClick={handleAddSelectedOptions}>
+                          Adicionar Selecionados
+                        </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -484,4 +466,3 @@ export function BirthPlanEditor({
     </div>
   );
 }
-
