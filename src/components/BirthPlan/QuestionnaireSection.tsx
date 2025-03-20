@@ -41,11 +41,28 @@ export function QuestionnaireSection({
   // Set up initial values if provided
   useEffect(() => {
     if (Object.keys(initialData).length > 0) {
+      // For regular fields, just set the value
       Object.entries(initialData).forEach(([key, value]) => {
-        setValue(key, value);
+        // Skip checkbox array values as they need special handling
+        if (!Array.isArray(value)) {
+          setValue(key, value);
+        }
+      });
+      
+      // For checkbox type questions that return arrays, we need to set individual option values
+      section.questions.forEach(question => {
+        if (question.type === 'checkbox' && question.options && Array.isArray(initialData[question.id])) {
+          const selectedOptions = initialData[question.id] as string[];
+          
+          // For each option in the question, set it to true if it's in the selected options
+          question.options.forEach(option => {
+            const isSelected = selectedOptions.includes(option);
+            setValue(`${question.id}.${option}`, isSelected);
+          });
+        }
       });
     }
-  }, [initialData, setValue]);
+  }, [initialData, section.questions, setValue]);
   
   const SectionIcon = getSectionIcon(section.id);
   

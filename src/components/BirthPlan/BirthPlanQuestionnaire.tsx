@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { QuestionnaireSection } from './QuestionnaireSection';
 import { questionnaireSections } from './questionnaire';
@@ -17,10 +18,33 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
   const handleSectionSubmit = (data: Record<string, any>) => {
     console.log("Section submitted with data:", data);
     
-    // Create a clean copy of the data to avoid mutation issues
+    // Process checkbox data to convert from individual boolean fields to arrays
     const processedData = { ...data };
     
-    // Save data from current section
+    // Process checkbox type questions for current section
+    currentSection.questions.forEach(question => {
+      if (question.type === 'checkbox' && question.options) {
+        const selectedOptions: string[] = [];
+        
+        // Go through each option and check if it's selected
+        question.options.forEach(option => {
+          const optionKey = `${question.id}.${option}`;
+          if (data[optionKey]) {
+            selectedOptions.push(option);
+          }
+          
+          // Remove the individual option from processed data
+          delete processedData[optionKey];
+        });
+        
+        // Add the array of selected options to processed data
+        if (selectedOptions.length > 0) {
+          processedData[question.id] = selectedOptions;
+        }
+      }
+    });
+    
+    // Save processed data
     const updatedFormData = {
       ...formData,
       ...processedData,
