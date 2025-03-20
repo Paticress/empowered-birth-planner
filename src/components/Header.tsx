@@ -27,7 +27,8 @@ export function Header() {
     return location.pathname === path;
   };
 
-  const handleNavigation = (path: string) => {
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
     navigateTo(path);
     setMobileMenuOpen(false);
   };
@@ -39,10 +40,11 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center" onClick={(e) => {
-              e.preventDefault();
-              handleNavigation('/guia-online');
-            }}>
+            <Link 
+              to="/" 
+              className="flex items-center" 
+              onClick={(e) => handleLinkClick(e, '/guia-online')}
+            >
               <img 
                 src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
                 alt="Energia Materna Logo" 
@@ -58,10 +60,7 @@ export function Header() {
               className={`transition-colors ${isActive('/guia-gratuito') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation('/guia-gratuito');
-              }}
+              onClick={(e) => handleLinkClick(e, '/guia-gratuito')}
             >
               Guia Gratuito
             </Link>
@@ -70,10 +69,7 @@ export function Header() {
               className={`transition-colors ${isActive('/guia-online') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation('/guia-online');
-              }}
+              onClick={(e) => handleLinkClick(e, '/guia-online')}
             >
               Guia Online
             </Link>
@@ -82,10 +78,7 @@ export function Header() {
               className={`transition-colors ${isActive('/plano-personalizado') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation('/plano-personalizado');
-              }}
+              onClick={(e) => handleLinkClick(e, '/plano-personalizado')}
             >
               Plano Personalizado
             </Link>
@@ -94,10 +87,7 @@ export function Header() {
               className={`transition-colors ${isActive('/depoimentos') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation('/depoimentos');
-              }}
+              onClick={(e) => handleLinkClick(e, '/depoimentos')}
             >
               Depoimentos
             </Link>
@@ -136,7 +126,10 @@ export function Header() {
                     className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/guia-gratuito') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => handleNavigation('/guia-gratuito')}
+                    onClick={() => {
+                      navigateTo('/guia-gratuito');
+                      setMobileMenuOpen(false);
+                    }}
                   >
                     Guia Gratuito
                   </button>
@@ -144,7 +137,10 @@ export function Header() {
                     className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/guia-online') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => handleNavigation('/guia-online')}
+                    onClick={() => {
+                      navigateTo('/guia-online');
+                      setMobileMenuOpen(false);
+                    }}
                   >
                     Guia Online
                   </button>
@@ -152,7 +148,10 @@ export function Header() {
                     className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/plano-personalizado') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => handleNavigation('/plano-personalizado')}
+                    onClick={() => {
+                      navigateTo('/plano-personalizado');
+                      setMobileMenuOpen(false);
+                    }}
                   >
                     Plano Personalizado
                   </button>
@@ -160,7 +159,10 @@ export function Header() {
                     className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/depoimentos') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => handleNavigation('/depoimentos')}
+                    onClick={() => {
+                      navigateTo('/depoimentos');
+                      setMobileMenuOpen(false);
+                    }}
                   >
                     Depoimentos
                   </button>

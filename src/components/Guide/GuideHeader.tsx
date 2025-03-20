@@ -30,16 +30,15 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
 
   const handleNavigation = (path: string) => {
     if (onNavigate) {
+      // Se estamos dentro do OnlineGuide e queremos ir para 'guia-online',
+      // vamos apenas definir a tab como 'introduction'
+      if (path === '/guia-online' && currentTab) {
+        onNavigate('introduction');
+        return;
+      }
       onNavigate(path);
     } else {
-      // Se estivermos no componente GuideHeader dentro do OnlineGuide, não precisamos navegar,
-      // apenas garantir que estamos na tab correta
-      if (path === '/guia-online' && currentTab) {
-        // Permanece na página atual
-        console.log('Já estamos na página do guia online');
-      } else {
-        navigateTo(path);
-      }
+      navigateTo(path);
     }
   };
 
@@ -53,7 +52,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
               className="h-8 w-auto"
               src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png"
               alt="Logo Guia do Parto Respeitoso"
-              onClick={() => navigateTo('/guia-online')}
+              onClick={() => handleNavigation('/guia-online')}
               style={{ cursor: 'pointer' }}
             />
             <span className="ml-2 font-semibold text-gray-900 hidden sm:block">
