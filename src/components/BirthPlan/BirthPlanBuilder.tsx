@@ -6,6 +6,7 @@ import { BirthPlanQuestionnaire } from './BirthPlanQuestionnaire';
 import { BirthPlanEditor } from './BirthPlanEditor';
 import { BirthPlanPreview } from './BirthPlanPreview';
 import { BirthPlanShare } from './BirthPlanShare';
+import { BirthPlanProgressBar } from './BirthPlanProgressBar';
 import { Footer } from '@/components/Footer';
 import { toast } from '@/components/ui/use-toast';
 import { useBirthPlanState } from './hooks/useBirthPlanState';
@@ -47,6 +48,9 @@ export function BirthPlanBuilder() {
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
       <div className="pt-4 md:pt-8">
         <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
+        
+        {/* Adiciona a barra de progresso logo após o cabeçalho */}
+        <BirthPlanProgressBar currentStage={currentStage} />
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Ultra-clear visual indicator to show this is the Birth Plan page */}
