@@ -58,26 +58,6 @@ export const personalSection: QuestionSection = {
       isRequired: false,
     },
     {
-      id: 'pediatricianRegistry',
-      text: 'Registro profissional (CRM) do(a) Pediatra:',
-      type: 'text',
-      conditionalDisplay: {
-        dependsOn: 'pediatrician',
-        showWhen: 'Sim',
-      },
-      isRequired: false,
-    },
-    {
-      id: 'pediatricianContact',
-      text: 'Telefone do(a) Pediatra:',
-      type: 'text',
-      conditionalDisplay: {
-        dependsOn: 'pediatrician',
-        showWhen: 'Sim',
-      },
-      isRequired: false,
-    },
-    {
       id: 'midwife',
       text: 'Você terá acompanhamento de uma Enfermeira Obstetriz?',
       type: 'radio',
