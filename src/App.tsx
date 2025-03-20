@@ -11,7 +11,15 @@ import GuiaGratuito from "./pages/GuiaGratuito";
 import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
 import { Header } from "./components/Header";
 
-const queryClient = new QueryClient();
+// Create a new query client with specific settings
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 // Enhanced log for debugging
 console.log("APP COMPONENT INITIALIZING - SETTING UP ROUTES");
@@ -24,24 +32,58 @@ const App = () => {
       <TooltipProvider>
         <Sonner />
         <HashRouter>
-          <Header />
-          <div className="pt-16 md:pt-20">
-            <Routes>
-              <Route path="/" element={<Navigate to="/guia-online" replace />} />
-              <Route path="/guia-online" element={<OnlineGuide />} />
-              <Route path="/guia-gratuito" element={<GuiaGratuito />} />
-              <Route 
-                path="/criar-plano" 
-                element={
-                  <>
-                    {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
-                    <BirthPlanBuilder />
-                  </>
-                } 
-              />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <div className="flex-grow pt-16 md:pt-20">
+              <Routes>
+                <Route 
+                  path="/" 
+                  element={
+                    <>
+                      {console.log("ROUTE / ACCESSED - REDIRECTING TO GUIDE")}
+                      <Navigate to="/guia-online" replace />
+                    </>
+                  } 
+                />
+                <Route 
+                  path="/guia-online" 
+                  element={
+                    <>
+                      {console.log("ROUTE /guia-online ACCESSED - RENDERING ONLINE GUIDE")}
+                      <OnlineGuide />
+                    </>
+                  } 
+                />
+                <Route 
+                  path="/guia-gratuito" 
+                  element={
+                    <>
+                      {console.log("ROUTE /guia-gratuito ACCESSED - RENDERING FREE GUIDE")}
+                      <GuiaGratuito />
+                    </>
+                  } 
+                />
+                <Route 
+                  path="/criar-plano" 
+                  element={
+                    <>
+                      {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
+                      <BirthPlanBuilder />
+                    </>
+                  } 
+                />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route 
+                  path="*" 
+                  element={
+                    <>
+                      {console.log("ROUTE NOT FOUND - RENDERING 404 PAGE")}
+                      <NotFound />
+                    </>
+                  } 
+                />
+              </Routes>
+            </div>
           </div>
         </HashRouter>
       </TooltipProvider>
