@@ -21,7 +21,9 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
   
   return (
     <div className="animate-fade-in">
-      <PreviewHeader title="Visualização do Plano de Parto" />
+      <div className="print:hidden">
+        <PreviewHeader title="Visualização do Plano de Parto" />
+      </div>
       
       <PrintTitle />
       
@@ -41,9 +43,10 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       
       <PrintFooter />
       
-      <InfoAlert />
-      
-      <PreviewFooter onEdit={onEdit} onNext={onNext} />
+      <div className="print:hidden">
+        <InfoAlert />
+        <PreviewFooter onEdit={onEdit} onNext={onNext} />
+      </div>
       
       <BackToTopButton />
     </div>

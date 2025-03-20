@@ -10,7 +10,14 @@ export function PrintTitle() {
           className="h-12"
         />
       </div>
-      <p className="text-center text-gray-500 mt-2">Este documento representa minhas preferências para o parto e nascimento do meu bebê.</p>
+      <p className="text-sm text-gray-700 mt-2 mb-4">
+        Este documento reflete minhas preferências para o parto e nascimento do meu bebê. Ele foi elaborado após 
+        cuidadosa pesquisa e reflexão, em colaboração com meu parceiro e equipe de saúde. Compreendo que 
+        situações imprevistas podem surgir durante o trabalho de parto, e que a saúde e bem-estar do 
+        bebê e meu são prioridade. Peço gentilmente que, na ausência de emergências médicas, minhas 
+        escolhas sejam respeitadas, e que quaisquer intervenções necessárias sejam discutidas comigo 
+        antes de serem realizadas.
+      </p>
     </div>
   );
 }

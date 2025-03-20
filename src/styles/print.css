@@ -27,7 +27,7 @@
   }
   
   p {
-    margin-bottom: 0.5cm;
+    margin-bottom: 0.3cm;
   }
   
   .print:hidden {
@@ -50,12 +50,25 @@
     content: "Página " counter(page);
   }
   
-  /* Header watermark on each page */
-  @page {
-    @top-right {
-      content: "Energia Materna";
-      font-size: 8pt;
-      color: #999;
-    }
+  /* Brand watermark on each page except first */
+  @page:not(:first) {
+    background: url('/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png') no-repeat;
+    background-position: top right;
+    background-size: 80px;
+    background-opacity: 0.1;
+  }
+  
+  /* Reduce spacing between elements */
+  .mb-8 {
+    margin-bottom: 0.5cm !important;
+  }
+  
+  .p-6 {
+    padding: 0.5cm !important;
+  }
+  
+  /* Make the document more compact */
+  .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.3cm !important;
   }
 }
