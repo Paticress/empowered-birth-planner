@@ -101,7 +101,7 @@ export function GuideStructure({ onPrevious, onNext }: GuideStructureProps) {
       
       <div className="mt-8 flex justify-between">
         <Button 
-          variant="outline" 
+          variant="navigation" 
           onClick={onPrevious}
           className="flex items-center"
         >

@@ -112,7 +112,7 @@ export function GuideRights({ onPrevious, onNext }: GuideRightsProps) {
       
       <div className="mt-8 flex justify-between">
         <Button 
-          variant="outline" 
+          variant="navigation" 
           onClick={onPrevious}
           className="flex items-center"
         >
