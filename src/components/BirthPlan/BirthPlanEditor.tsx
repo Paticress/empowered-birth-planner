@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Save, Plus } from 'lucide-react';
@@ -52,9 +51,7 @@ export function BirthPlanEditor({
   
   const handleSave = () => {
     onUpdate(localBirthPlan);
-    toast({
-      description: "Seu plano de parto foi atualizado com sucesso.",
-    });
+    toast("Seu plano de parto foi atualizado com sucesso.");
   };
   
   // Scroll to top when section changes
@@ -118,9 +115,7 @@ export function BirthPlanEditor({
     setLocalBirthPlan(updatedPlan);
     setSelectedOptions({});
     
-    toast({
-      description: "As opções selecionadas foram adicionadas ao seu plano de parto."
-    });
+    toast("As opções selecionadas foram adicionadas ao seu plano de parto.");
   };
 
   // Ajuda a encontrar a pergunta pelo ID

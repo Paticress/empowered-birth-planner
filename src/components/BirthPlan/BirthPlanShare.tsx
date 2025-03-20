@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Copy, Mail, Share2, FileText } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { ShareOption } from './ShareOption';
 import { EmailShareDialog } from './EmailShareDialog';
 import { createShareableText } from './utils/birthPlanUtils';
@@ -21,16 +20,10 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
     
     navigator.clipboard.writeText(text)
       .then(() => {
-        toast({
-          title: "Copiado para a área de transferência",
-          description: "Seu plano de parto foi copiado e está pronto para ser compartilhado."
-        });
+        toast("Seu plano de parto foi copiado e está pronto para ser compartilhado.");
       })
       .catch(() => {
-        toast({
-          title: "Erro ao copiar",
-          description: "Não foi possível copiar o texto para a área de transferência."
-        });
+        toast("Não foi possível copiar o texto para a área de transferência.");
       });
   };
   
@@ -54,10 +47,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
       })
       .catch((error) => {
         console.error("Erro ao exportar PDF para WhatsApp:", error);
-        toast({
-          title: "Erro ao compartilhar",
-          description: "Não foi possível gerar o PDF para compartilhamento."
-        });
+        toast("Não foi possível gerar o PDF para compartilhamento.");
       });
   };
   
