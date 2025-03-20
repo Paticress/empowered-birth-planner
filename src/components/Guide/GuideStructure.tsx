@@ -1,7 +1,6 @@
 
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ArrowLeft } from 'lucide-react';
-import { GuideRisksInterventions } from './GuideRisksInterventions';
 
 interface GuideStructureProps {
   onPrevious: () => void;
@@ -18,8 +17,6 @@ export function GuideStructure({ onPrevious, onNext }: GuideStructureProps) {
           Um plano de parto bem estruturado facilita a comunicação com a equipe médica e 
           aumenta as chances de que seus desejos sejam respeitados.
         </p>
-        
-        <GuideRisksInterventions />
         
         <h2 className="text-2xl font-semibold text-maternal-800 mt-8 mb-4">Seções Essenciais</h2>
         
