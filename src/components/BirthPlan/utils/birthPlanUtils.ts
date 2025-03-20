@@ -17,6 +17,16 @@ export const formatBirthPlanSection = (section: Record<string, string>): string 
 };
 
 /**
+ * Parse text content into an array of options
+ */
+export const parseOptionsFromText = (text: string): string[] => {
+  if (!text) return [];
+  
+  // Split the text by commas and trim each option
+  return text.split(',').map(option => option.trim()).filter(option => option.length > 0);
+};
+
+/**
  * Creates a shareable text version of the birth plan
  */
 export const createShareableText = (birthPlan: Record<string, any>) => {

@@ -6,10 +6,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { birthPlanSections } from './utils/birthPlanSections';
 import { questionnaireSections } from './questionnaire';
+import { parseOptionsFromText } from './utils/birthPlanUtils';
 import { 
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -76,72 +76,8 @@ export function BirthPlanEditor({
     return mapping[questionnaireId] || questionnaireId;
   };
 
-  // Função para formatar opções selecionadas
-  const formatSelectedOptions = (options: Record<string, boolean>): string => {
-    if (!options) return '';
-    
-    return Object.entries(options)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([option]) => option)
-      .join(', ');
-  };
-
-  // Adicionar opções selecionadas ao plano para um campo específico
-  const handleAddSelectedOptions = () => {
-    console.log("Adding options for field:", activeFieldKey);
-    console.log("Selected options:", selectedOptions);
-    
-    const updatedPlan = { ...localBirthPlan };
-    
-    // Extrair todas as opções selecionadas de todas as perguntas relevantes
-    const allSelectedOptions: string[] = [];
-    
-    Object.entries(selectedOptions).forEach(([questionId, options]) => {
-      if (Object.values(options).some(value => value)) {
-        const selectedForQuestion = Object.entries(options)
-          .filter(([_, isSelected]) => isSelected)
-          .map(([option]) => option);
-        
-        allSelectedOptions.push(...selectedForQuestion);
-      }
-    });
-    
-    // Se há opções selecionadas, atualizar o campo com a nova lista completa
-    if (allSelectedOptions.length > 0) {
-      const formattedOptions = allSelectedOptions.join(', ');
-      
-      // Definir o valor diretamente sem concatenar com o valor existente
-      const mappedSectionId = mapQuestionnaireToSectionId(
-        Object.keys(selectedOptions).map(id => findQuestionById(id)?.sectionId || '')[0]
-      );
-      
-      updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
-      setLocalBirthPlan(updatedPlan);
-      
-      toast("As opções selecionadas foram adicionadas ao seu plano de parto.");
-    } else {
-      toast("Nenhuma opção foi selecionada.");
-    }
-    
-    setSelectedOptions({});
-    setDialogOpen(false);
-  };
-
-  // Ajuda a encontrar a pergunta pelo ID
-  const findQuestionById = (questionId: string) => {
-    for (const section of questionnaireSections) {
-      const question = section.questions.find(q => q.id === questionId);
-      if (question) {
-        return { question, sectionId: section.id };
-      }
-    }
-    return null;
-  };
-
-  // Encontrar questões relevantes para um campo específico
+  // Função para encontrar questões relevantes para um campo específico
   const getRelevantQuestionsForField = (fieldKey: string) => {
-    console.log("Getting relevant questions for field:", fieldKey);
-    
     const fieldToQuestionMap: Record<string, string[]> = {
       'name': ['name'],
       'dueDate': ['dueDate'],
@@ -186,7 +122,6 @@ export function BirthPlanEditor({
     };
     
     const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
-    console.log("Relevant question IDs:", relevantQuestionIds);
     
     const relevantQuestions: Array<{question: any, sectionId: string}> = [];
     
@@ -201,7 +136,6 @@ export function BirthPlanEditor({
       }
     }
     
-    console.log("Found relevant questions:", relevantQuestions.length);
     return relevantQuestions;
   };
   
@@ -216,22 +150,57 @@ export function BirthPlanEditor({
     return relevantQuestions.length > 0;
   };
   
+  // Ajuda a encontrar a pergunta pelo ID
+  const findQuestionById = (questionId: string) => {
+    for (const section of questionnaireSections) {
+      const question = section.questions.find(q => q.id === questionId);
+      if (question) {
+        return { question, sectionId: section.id };
+      }
+    }
+    return null;
+  };
+  
+  // Função para obter os valores das respostas do questionário para um determinado campo
+  const getQuestionnaireValueForField = (fieldKey: string): string[] => {
+    const relevantQuestions = getRelevantQuestionsForField(fieldKey);
+    let selectedValues: string[] = [];
+    
+    relevantQuestions.forEach(({ question }) => {
+      const questionId = question.id;
+      const answer = questionnaireAnswers[questionId];
+      
+      if (answer) {
+        if (typeof answer === 'object' && !Array.isArray(answer)) {
+          // Handle checkbox answers
+          Object.entries(answer).forEach(([option, selected]) => {
+            if (selected) {
+              selectedValues.push(option);
+            }
+          });
+        } else if (typeof answer === 'string') {
+          // Handle string answers
+          selectedValues.push(answer);
+        }
+      }
+    });
+    
+    return selectedValues;
+  };
+  
   // Analisa o conteúdo atual do campo para determinar quais opções estão selecionadas
   const parseCurrentFieldOptions = (fieldKey: string, sectionId: string): string[] => {
-    const currentValue = localBirthPlan[sectionId][fieldKey];
-    if (!currentValue) return [];
-    
-    // Dividir o texto atual por vírgulas e limpar espaços extras
-    return currentValue.split(',').map(option => option.trim());
+    const currentValue = localBirthPlan[sectionId][fieldKey] || '';
+    return parseOptionsFromText(currentValue);
   };
   
   // Inicializar as opções selecionáveis com base no conteúdo atual do campo e respostas do questionário
   const initializeOptionsFromCurrentField = (fieldKey: string, sectionId: string) => {
     // Obter as opções atualmente presentes no campo
     const currentFieldOptions = parseCurrentFieldOptions(fieldKey, sectionId);
-    
     // Obter questões relevantes para este campo
     const relevantQuestions = getRelevantQuestionsForField(fieldKey);
+    
     const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
     
     relevantQuestions.forEach(({ question }) => {
@@ -241,7 +210,16 @@ export function BirthPlanEditor({
       if (question.options) {
         question.options.forEach((option: string) => {
           // Marcar como selecionado se estiver no conteúdo atual do campo
-          initialSelectedOptions[questionId][option] = currentFieldOptions.includes(option);
+          // OU se estiver nas respostas originais do questionário (para questões do tipo checkbox)
+          let isSelected = currentFieldOptions.includes(option);
+          
+          // Verificar também respostas do questionário para questões do tipo checkbox
+          const answer = questionnaireAnswers[questionId];
+          if (typeof answer === 'object' && !Array.isArray(answer) && answer[option]) {
+            isSelected = true;
+          }
+          
+          initialSelectedOptions[questionId][option] = isSelected;
         });
       }
     });
@@ -249,11 +227,49 @@ export function BirthPlanEditor({
     return initialSelectedOptions;
   };
   
+  // Adicionar opções selecionadas ao plano para um campo específico
+  const handleAddSelectedOptions = () => {
+    const updatedPlan = { ...localBirthPlan };
+    
+    // Extrair todas as opções selecionadas de todas as perguntas relevantes
+    const allSelectedOptions: string[] = [];
+    
+    Object.entries(selectedOptions).forEach(([questionId, options]) => {
+      if (Object.values(options).some(value => value)) {
+        const selectedForQuestion = Object.entries(options)
+          .filter(([_, isSelected]) => isSelected)
+          .map(([option]) => option);
+        
+        allSelectedOptions.push(...selectedForQuestion);
+      }
+    });
+    
+    // Se há opções selecionadas, atualizar o campo
+    if (allSelectedOptions.length > 0) {
+      const formattedOptions = allSelectedOptions.join(', ');
+      
+      // Mapear a seção do questionário para a seção correspondente no plano
+      const mappedSectionId = mapQuestionnaireToSectionId(
+        Object.keys(selectedOptions).map(id => findQuestionById(id)?.sectionId || '')[0]
+      );
+      
+      updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
+      setLocalBirthPlan(updatedPlan);
+      
+      toast("As opções selecionadas foram adicionadas ao seu plano de parto.");
+    } else {
+      toast("Nenhuma opção foi selecionada.");
+    }
+    
+    setSelectedOptions({});
+    setDialogOpen(false);
+  };
+  
   // Resetar as opções selecionadas quando o usuário abre o diálogo
   const resetOptionsForField = (fieldKey: string) => {
     setActiveFieldKey(fieldKey);
     
-    // Inicializa as opções com base no conteúdo atual do campo
+    // Inicializa as opções com base no conteúdo atual do campo e respostas do questionário
     const initialSelectedOptions = initializeOptionsFromCurrentField(
       fieldKey, 
       activeSection.id
@@ -261,9 +277,6 @@ export function BirthPlanEditor({
     
     setSelectedOptions(initialSelectedOptions);
     setDialogOpen(true);
-    
-    console.log("Opening dialog for field:", fieldKey);
-    console.log("Initial selected options:", initialSelectedOptions);
   };
   
   // Renderiza as opções selecionáveis para uma pergunta
@@ -362,9 +375,6 @@ export function BirthPlanEditor({
                     <DialogContent className="max-w-md">
                       <DialogHeader>
                         <DialogTitle>Adicionar Respostas do Questionário</DialogTitle>
-                        <DialogDescription>
-                          Selecione as opções do questionário para adicionar ao campo "{field.label}".
-                        </DialogDescription>
                       </DialogHeader>
                       
                       <div className="max-h-[60vh] overflow-y-auto py-4">
