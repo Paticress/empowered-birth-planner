@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Save, Plus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { birthPlanSections } from './utils/birthPlanSections';
 import { questionnaireSections } from './questionnaire';
@@ -317,6 +317,12 @@ export function BirthPlanEditor({
     );
   };
   
+  // Campos que devem usar o componente Input (uma linha) em vez de Textarea
+  const singleLineFields = [
+    'name', 'dueDate', 'healthProvider', 'healthProviderRegistry', 
+    'hospital', 'hospitalPhone', 'doula', 'doulaContact', 'doulaRegistry'
+  ];
+  
   return (
     <div className="animate-fade-in">
       <h1 className="text-3xl font-bold text-maternal-800 mb-6">Edite seu Plano de Parto</h1>
@@ -343,6 +349,7 @@ export function BirthPlanEditor({
           const sectionData = localBirthPlan[activeSection.id] || {};
           const fieldValue = sectionData[field.key] || '';
           const showAddButton = shouldShowAddButton(field.key);
+          const useSingleLineInput = singleLineFields.includes(field.key);
           
           return (
             <div key={field.key} className="mb-6 border border-maternal-100 rounded-lg p-4 bg-maternal-50/30">
@@ -412,18 +419,32 @@ export function BirthPlanEditor({
                 )}
               </div>
               
-              <Textarea
-                id={`${activeSection.id}-${field.key}`}
-                value={Array.isArray(fieldValue) ? fieldValue.join('\n') : fieldValue}
-                onChange={(e) => handleFieldChange(
-                  activeSection.id, 
-                  field.key, 
-                  e.target.value
-                )}
-                rows={6}
-                className="w-full border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
-                placeholder={`Insira suas preferências para ${field.label.toLowerCase()}`}
-              />
+              {useSingleLineInput ? (
+                <Input
+                  id={`${activeSection.id}-${field.key}`}
+                  value={fieldValue}
+                  onChange={(e) => handleFieldChange(
+                    activeSection.id, 
+                    field.key, 
+                    e.target.value
+                  )}
+                  className="w-full border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
+                  placeholder={`Insira ${field.label.toLowerCase()}`}
+                />
+              ) : (
+                <Textarea
+                  id={`${activeSection.id}-${field.key}`}
+                  value={Array.isArray(fieldValue) ? fieldValue.join('\n') : fieldValue}
+                  onChange={(e) => handleFieldChange(
+                    activeSection.id, 
+                    field.key, 
+                    e.target.value
+                  )}
+                  rows={6}
+                  className="w-full border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
+                  placeholder={`Insira suas preferências para ${field.label.toLowerCase()}`}
+                />
+              )}
             </div>
           );
         })}

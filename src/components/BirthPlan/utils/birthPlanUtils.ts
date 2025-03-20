@@ -45,7 +45,7 @@ export const createShareableText = (birthPlan: Record<string, any>) => {
   if (personalInfo.doula) {
     text += `Doula: ${personalInfo.doula || 'Não informada'}\n`;
     text += `Telefone: ${personalInfo.doulaContact || 'Não informado'}\n`;
-    text += `Registro: ${personalInfo.doulaRegistry || 'Não informado'}\n`;
+    text += `Certificação: ${personalInfo.doulaRegistry || 'Não informada'}\n`;
   }
   
   text += `Acompanhantes: ${personalInfo.companions || 'Não informados'}\n\n`;
@@ -76,7 +76,7 @@ export const createShareableText = (birthPlan: Record<string, any>) => {
   text += `                                   CRM: ${personalInfo.healthProviderRegistry || '_________'}\n\n`;
   text += `___________________________        ___________________________\n`;
   text += `Enfermeira Obstétrica              ${personalInfo.doula || 'Doula'}\n`;
-  text += `COREN: _________                 Registro: ${personalInfo.doulaRegistry || '_________'}`;
+  text += `COREN: _________                 Certificação: ${personalInfo.doulaRegistry || '_________'}`;
   
   return text;
 };

@@ -18,7 +18,7 @@ export const birthPlanSections = [
       { key: 'hospitalPhone', label: 'Telefone da Maternidade' },
       { key: 'doula', label: 'Doula' },
       { key: 'doulaContact', label: 'Telefone da Doula' },
-      { key: 'doulaRegistry', label: 'Registro Profissional da Doula' },
+      { key: 'doulaRegistry', label: 'Certificação da Doula' },
       { key: 'companions', label: 'Acompanhantes' },
     ],
   },
