@@ -75,16 +75,6 @@ export const personalSection: QuestionSection = {
       isRequired: false,
     },
     {
-      id: 'midwifeRegistry',
-      text: 'Registro profissional (COREN) da Enfermeira Obstetriz:',
-      type: 'text',
-      conditionalDisplay: {
-        dependsOn: 'midwife',
-        showWhen: 'Sim',
-      },
-      isRequired: false,
-    },
-    {
       id: 'doula',
       text: 'Você terá acompanhamento de uma doula?',
       type: 'radio',
