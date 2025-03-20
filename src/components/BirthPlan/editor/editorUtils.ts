@@ -1,6 +1,6 @@
-
 import { parseOptionsFromText } from '../utils/birthPlanUtils';
 import { questionnaireSections } from '../questionnaire';
+import { birthPlanSections } from '../utils/birthPlanSections';
 
 export const mapQuestionnaireToSectionId = (questionnaireId: string): string => {
   const mapping: Record<string, string> = {
@@ -151,4 +151,25 @@ export const getSingleLineFields = () => {
     'midwife', 'midwifeContact', 'midwifeRegistry',
     'doula', 'doulaContact', 'doulaRegistry'
   ];
+};
+
+export const checkSectionCompletion = (
+  sectionId: string, 
+  plan: Record<string, any>,
+  completedSections: string[],
+  setCompletedSections: React.Dispatch<React.SetStateAction<string[]>>
+) => {
+  const section = birthPlanSections.find(section => section.id === sectionId);
+  if (!section) return;
+  
+  const filledFields = section.fields.filter(field => {
+    const value = plan[sectionId]?.[field.key];
+    return value && value.trim() !== '';
+  });
+  
+  if (filledFields.length >= 3 && !completedSections.includes(sectionId)) {
+    setCompletedSections(prev => [...prev, sectionId]);
+  } else if (filledFields.length < 3 && completedSections.includes(sectionId)) {
+    setCompletedSections(prev => prev.filter(id => id !== sectionId));
+  }
 };
