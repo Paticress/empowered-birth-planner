@@ -1,4 +1,5 @@
 
+
 import { QuestionSection } from '../types/questionnaire';
 
 export const personalSection: QuestionSection = {

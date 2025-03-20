@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { BuilderStage, BirthPlanData } from '../types/questionnaire';
-import { generateEmptyBirthPlan, generateBirthPlanFromAnswers } from '../utils/birthPlanUtils';
+import { generateEmptyBirthPlan, generateBirthPlanFromAnswers } from '../utils/birthPlanGenerationUtils';
 import { toast } from '@/components/ui/use-toast';
 
 export function useBirthPlanState() {
@@ -39,10 +39,19 @@ export function useBirthPlanState() {
 
   // Function to handle questionnaire submission
   const handleQuestionnaireSubmit = (answers: Record<string, any>) => {
+    console.log("Questionnaire submitted with answers:", answers);
     setQuestionnaireAnswers(answers);
+    
     // Generate initial birth plan based on answers
     const generatedPlan = generateBirthPlanFromAnswers(answers);
+    console.log("Generated birth plan:", generatedPlan);
     setBirthPlanContent(generatedPlan);
+    
+    toast({
+      title: "Questionário concluído",
+      description: "Seu plano de parto inicial foi gerado com sucesso!"
+    });
+    
     goToNextStage();
   };
 

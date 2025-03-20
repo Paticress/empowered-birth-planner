@@ -37,10 +37,20 @@ const updatePersonalInfo = (birthPlan: Record<string, any>, answers: Record<stri
   if (answers.name) birthPlan.personalInfo.name = answers.name;
   if (answers.dueDate) birthPlan.personalInfo.dueDate = answers.dueDate;
   if (answers.healthProvider) birthPlan.personalInfo.healthProvider = answers.healthProvider;
+  if (answers.birthLocation) birthPlan.personalInfo.birthLocation = answers.birthLocation;
   if (answers.hospital) birthPlan.personalInfo.hospital = answers.hospital;
-  if (answers.doula === 'Sim' && answers.doulaName) {
-    birthPlan.personalInfo.doula = answers.doulaName;
+  
+  // Enfermeira Obstetriz
+  if (answers.midwife === 'Sim') {
+    if (answers.midwifeName) birthPlan.personalInfo.midwife = answers.midwifeName;
+    if (answers.midwifeRegistry) birthPlan.personalInfo.midwifeRegistry = answers.midwifeRegistry;
   }
+  
+  // Doula
+  if (answers.doula === 'Sim') {
+    if (answers.doulaName) birthPlan.personalInfo.doula = answers.doulaName;
+  }
+  
   if (answers.companions) birthPlan.personalInfo.companions = answers.companions;
 };
 
@@ -171,6 +181,7 @@ const updateSpecialSituations = (birthPlan: Record<string, any>, answers: Record
  * Generates an initial birth plan from questionnaire answers
  */
 export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Record<string, any> => {
+  console.log("Gerando plano de parto a partir das respostas:", answers);
   const birthPlan = generateEmptyBirthPlan();
   
   // Update each section with relevant answers
@@ -182,5 +193,6 @@ export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Reco
   updatePostpartumPreferences(birthPlan, answers);
   updateSpecialSituations(birthPlan, answers);
   
+  console.log("Plano de parto gerado:", birthPlan);
   return birthPlan;
 };
