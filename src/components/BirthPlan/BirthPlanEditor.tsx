@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -39,6 +38,11 @@ export function BirthPlanEditor({
   const [localBirthPlan, setLocalBirthPlan] = useState({ ...birthPlan });
   const [selectedQuestionOptions, setSelectedQuestionOptions] = useState<Record<string, any>>({});
   const [activeFieldKey, setActiveFieldKey] = useState<string>('');
+  
+  // Debug logs para entender o conteúdo e estrutura das respostas do questionário
+  useEffect(() => {
+    console.log("Respostas do questionário carregadas:", questionnaireAnswers);
+  }, [questionnaireAnswers]);
   
   const handleFieldChange = (sectionId: string, fieldKey: string, value: any) => {
     setLocalBirthPlan(prevPlan => ({
@@ -65,7 +69,7 @@ export function BirthPlanEditor({
   
   const activeSection = birthPlanSections[activeSectionIndex];
 
-  // Função para mapear seções do questionário para seções do plano de parto
+  // Função para mapear seções do questionário para seções do plano de parto - corrigido
   const mapQuestionnaireToSectionId = (questionnaireId: string): string => {
     const mapping: Record<string, string> = {
       'personal': 'personalInfo',
@@ -90,6 +94,7 @@ export function BirthPlanEditor({
     }
     
     if (typeof data === 'object') {
+      // Caso específico para checkbox onde o valor é um objeto de opções
       return Object.entries(data)
         .filter(([_, value]) => value)
         .map(([key]) => key)
@@ -101,6 +106,9 @@ export function BirthPlanEditor({
 
   // Adicionar opções selecionadas do questionário ao plano para um campo específico
   const handleAddQuestionnaireOptionsForField = (fieldKey: string) => {
+    console.log(`Adicionando opções para o campo ${fieldKey}`);
+    console.log(`Opções selecionadas:`, selectedQuestionOptions);
+    
     const updatedPlan = { ...localBirthPlan };
     
     Object.entries(selectedQuestionOptions).forEach(([questionId, isSelected]) => {
@@ -108,17 +116,28 @@ export function BirthPlanEditor({
       
       // Encontrar a pergunta e a seção original
       const questionData = findQuestionById(questionId);
-      if (!questionData) return;
+      if (!questionData) {
+        console.log(`Pergunta não encontrada: ${questionId}`);
+        return;
+      }
       
       const { question, sectionId } = questionData;
       const mappedSectionId = mapQuestionnaireToSectionId(sectionId);
       
+      console.log(`Pergunta encontrada: ${questionId} na seção ${sectionId}, mapeada para ${mappedSectionId}`);
+      
       // Obter o valor da resposta do questionário
       const answer = questionnaireAnswers[questionId];
-      if (!answer && answer !== false) return;
+      if (answer === undefined) {
+        console.log(`Resposta não encontrada para ${questionId}`);
+        return;
+      }
+      
+      console.log(`Resposta para ${questionId}:`, answer);
       
       // Formato da resposta
       const formattedAnswer = formatSelectedOptions(questionId, answer);
+      console.log(`Resposta formatada: ${formattedAnswer}`);
       
       // Adicionar ou atualizar o valor no plano
       const currentValue = updatedPlan[mappedSectionId][fieldKey];
@@ -131,6 +150,7 @@ export function BirthPlanEditor({
       }
     });
     
+    console.log("Plano atualizado:", updatedPlan);
     setLocalBirthPlan(updatedPlan);
     setSelectedQuestionOptions({});
     
@@ -148,68 +168,95 @@ export function BirthPlanEditor({
         return { question, sectionId: section.id };
       }
     }
+    console.log(`Pergunta não encontrada para ID: ${questionId}`);
     return null;
   };
 
-  // Encontrar questões relevantes para um campo específico
-  const getRelevantQuestionsForField = (fieldKey: string) => {
-    // Mapeamento de chaves de campo para IDs de perguntas relevantes
-    const fieldToQuestionMap: Record<string, string[]> = {
-      // personalInfo
-      'name': ['name'],
-      'dueDate': ['dueDate'],
-      'healthProvider': ['healthProvider'],
-      'hospital': ['hospital'],
-      'doula': ['doula', 'doulaName'],
-      'companions': ['companions'],
+  // Encontrar questões relevantes para um campo específico - melhorado
+  const getRelevantQuestionsForField = (fieldKey: string, sectionId: string) => {
+    console.log(`Buscando questões relevantes para o campo ${fieldKey} na seção ${sectionId}`);
+    
+    // Mapeamento aprimorado de campos para perguntas relevantes por seção
+    const fieldToQuestionMap: Record<string, Record<string, string[]>> = {
+      // Seção: personalInfo
+      'personalInfo': {
+        'name': ['name'],
+        'dueDate': ['dueDate'],
+        'healthProvider': ['healthProvider'],
+        'hospital': ['hospital'],
+        'doula': ['doula', 'doulaName'],
+        'companions': ['companions'],
+      },
       
-      // atmosfera
-      'lighting': ['lighting'],
-      'sound': ['sound'],
-      'clothing': ['clothing'],
-      'photos': ['photos'],
+      // Seção: atmosfera
+      'atmosfera': {
+        'lighting': ['lighting'],
+        'sound': ['sound', 'music'],
+        'clothing': ['clothing'],
+        'photos': ['photos', 'filming'],
+      },
       
-      // trabalhoDeParto
-      'mobility': ['mobility'],
-      'positions': ['positions'],
-      'hydration': ['hydration'],
-      'monitoring': ['monitoring'],
-      'interventions': ['painRelief', 'interventions', 'informedConsent'],
+      // Seção: trabalhoDeParto
+      'trabalhoDeParto': {
+        'mobility': ['mobility', 'movementFreedom'],
+        'positions': ['laborPositions'],
+        'hydration': ['hydration', 'eating'],
+        'monitoring': ['monitoring', 'continuousMonitoring'],
+        'interventions': ['painRelief', 'interventions', 'informedConsent', 'induction'],
+      },
       
-      // nascimento
-      'birthPositions': ['birthPositions'],
-      'episiotomy': ['episiotomy'],
-      'cordCutting': ['cordCutting'],
-      'skinToSkin': ['skinToSkin'],
-      'placenta': ['placenta'],
+      // Seção: nascimento
+      'nascimento': {
+        'birthPositions': ['birthPositions', 'squatPosition', 'waterBirth'],
+        'episiotomy': ['episiotomy', 'perinealProtection'],
+        'cordCutting': ['cordCutting', 'delayedCordClamping'],
+        'skinToSkin': ['skinToSkin', 'immediateContact'],
+        'placenta': ['placenta', 'placentaDestiny'],
+      },
       
-      // cesarea
-      'cesareanPreferences': ['cesareanPreferences'],
-      'anesthesia': ['anesthesia'],
-      'cesareanCompanion': ['cesareanCompanion'],
-      'curtain': ['curtain'],
-      'cesareanSkinToSkin': ['cesareanSkinToSkin'],
+      // Seção: cesarea
+      'cesarea': {
+        'cesareanPreferences': ['cesareanPreferences', 'cesareanReason', 'previousCesarean'],
+        'anesthesia': ['anesthesia', 'anesthesiaType'],
+        'cesareanCompanion': ['cesareanCompanion', 'partnerPresence'],
+        'curtain': ['curtain', 'seeingBirth'],
+        'cesareanSkinToSkin': ['cesareanSkinToSkin', 'immediateContactCesarean'],
+      },
       
-      // posParto
-      'firstHour': ['firstHour'],
-      'breastfeeding': ['breastfeeding'],
-      'newbornCare': ['newbornCare'],
-      'vaccination': ['vaccination'],
-      'motherCare': ['motherCare'],
+      // Seção: posParto
+      'posParto': {
+        'firstHour': ['firstHour', 'goldenHour'],
+        'breastfeeding': ['breastfeeding', 'breastfeedingSupport', 'formulaUse'],
+        'newbornCare': ['newbornCare', 'bathing', 'rooming'],
+        'vaccination': ['vaccination', 'delayedVaccination'],
+        'motherCare': ['motherCare', 'postpartumRest'],
+      },
       
-      // situacoesEspeciais
-      'complications': ['complications', 'cascadeInterventions'],
-      'nicu': ['nicu'],
-      'emergencyScenarios': ['unexpectedScenarios'],
-      'specialWishes': ['specialWishes']
+      // Seção: situacoesEspeciais
+      'situacoesEspeciais': {
+        'complications': ['complications', 'cascadeInterventions', 'highRiskManagement'],
+        'nicu': ['nicu', 'neonatalCare'],
+        'emergencyScenarios': ['unexpectedScenarios', 'emergencyPlan'],
+        'specialWishes': ['specialWishes', 'culturalPreferences'],
+      }
     };
     
-    const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
+    // Obtém os IDs de perguntas relevantes para esta seção e campo específicos
+    const relevantQuestionIds = fieldToQuestionMap[sectionId]?.[fieldKey] || [];
+    
+    if (relevantQuestionIds.length === 0) {
+      console.log(`Nenhuma pergunta mapeada para o campo ${fieldKey} na seção ${sectionId}`);
+    } else {
+      console.log(`IDs de perguntas relevantes para ${fieldKey}:`, relevantQuestionIds);
+    }
+    
     const relevantQuestions: Array<{question: any, sectionId: string}> = [];
     
+    // Varre todas as seções do questionário para encontrar as perguntas relevantes
     for (const section of questionnaireSections) {
       for (const question of section.questions) {
         if (relevantQuestionIds.includes(question.id) && questionnaireAnswers[question.id] !== undefined) {
+          console.log(`Encontrou pergunta relevante: ${question.id} - ${question.text}`);
           relevantQuestions.push({
             question,
             sectionId: section.id
@@ -218,6 +265,7 @@ export function BirthPlanEditor({
       }
     }
     
+    console.log(`Total de perguntas relevantes encontradas: ${relevantQuestions.length}`);
     return relevantQuestions;
   };
   
@@ -226,14 +274,14 @@ export function BirthPlanEditor({
   const excludedFields = ['name', 'dueDate', 'healthProvider', 'hospital', 'companions'];
   
   // Verifica se o botão de adicionar do questionário deve ser mostrado para um campo específico
-  const shouldShowAddButton = (fieldKey: string) => {
+  const shouldShowAddButton = (fieldKey: string, sectionId: string) => {
     // Não mostrar para campos excluídos (texto livre inicial)
     if (excludedFields.includes(fieldKey)) {
       return false;
     }
     
     // Verificar se existem perguntas relevantes para este campo
-    const relevantQuestions = getRelevantQuestionsForField(fieldKey);
+    const relevantQuestions = getRelevantQuestionsForField(fieldKey, sectionId);
     return relevantQuestions.length > 0;
   };
   
@@ -262,8 +310,8 @@ export function BirthPlanEditor({
         {activeSection.fields.map((field) => {
           const sectionData = localBirthPlan[activeSection.id] || {};
           const fieldValue = sectionData[field.key] || '';
-          const relevantQuestions = getRelevantQuestionsForField(field.key);
-          const showAddButton = shouldShowAddButton(field.key);
+          const relevantQuestions = getRelevantQuestionsForField(field.key, activeSection.id);
+          const showAddButton = shouldShowAddButton(field.key, activeSection.id);
           
           return (
             <div key={field.key} className="mb-6 border border-maternal-100 rounded-lg p-4 bg-maternal-50/30">
@@ -282,7 +330,11 @@ export function BirthPlanEditor({
                         variant="outline" 
                         size="sm"
                         className="flex items-center gap-1 border-maternal-300 text-maternal-600 text-xs"
-                        onClick={() => setActiveFieldKey(field.key)}
+                        onClick={() => {
+                          console.log(`Abrindo diálogo para o campo ${field.key}`);
+                          setActiveFieldKey(field.key);
+                          setSelectedQuestionOptions({});
+                        }}
                       >
                         <Plus className="h-3 w-3" /> Adicionar do Questionário
                       </Button>
@@ -296,49 +348,56 @@ export function BirthPlanEditor({
                       </DialogHeader>
                       
                       <div className="max-h-[60vh] overflow-y-auto py-4">
-                        {relevantQuestions.map(({ question }) => {
-                          const answer = questionnaireAnswers[question.id];
-                          let displayValue = '';
-                          
-                          // Formatar o valor de exibição com base no tipo de resposta
-                          if (typeof answer === 'object' && !Array.isArray(answer)) {
-                            // Resposta de checkbox
-                            const selectedOptions = Object.entries(answer)
-                              .filter(([_, selected]) => selected)
-                              .map(([option]) => option);
-                              
-                            displayValue = selectedOptions.join(', ');
-                          } else if (Array.isArray(answer)) {
-                            displayValue = answer.join(', ');
-                          } else {
-                            displayValue = String(answer || '');
-                          }
-                          
-                          return (
-                            <div key={question.id} className="flex items-start space-x-2 py-2 border-b border-gray-100">
-                              <Checkbox 
-                                id={`add-${question.id}`}
-                                checked={!!selectedQuestionOptions[question.id]}
-                                onCheckedChange={(checked) => {
-                                  setSelectedQuestionOptions(prev => ({
-                                    ...prev,
-                                    [question.id]: checked
-                                  }));
-                                }}
-                              />
-                              <div className="grid gap-1.5 leading-none">
-                                <Label htmlFor={`add-${question.id}`} className="font-medium">
-                                  {question.text}
-                                </Label>
-                                {displayValue && (
-                                  <p className="text-sm text-gray-500 mt-1">
-                                    {displayValue}
-                                  </p>
-                                )}
+                        {relevantQuestions.length > 0 ? (
+                          relevantQuestions.map(({ question }) => {
+                            const answer = questionnaireAnswers[question.id];
+                            let displayValue = '';
+                            
+                            // Formatar o valor de exibição com base no tipo de resposta
+                            if (typeof answer === 'object' && !Array.isArray(answer)) {
+                              // Resposta de checkbox
+                              const selectedOptions = Object.entries(answer)
+                                .filter(([_, selected]) => selected)
+                                .map(([option]) => option);
+                                
+                              displayValue = selectedOptions.join(', ');
+                            } else if (Array.isArray(answer)) {
+                              displayValue = answer.join(', ');
+                            } else {
+                              displayValue = String(answer || '');
+                            }
+                            
+                            return (
+                              <div key={question.id} className="flex items-start space-x-2 py-2 border-b border-gray-100">
+                                <Checkbox 
+                                  id={`add-${question.id}`}
+                                  checked={!!selectedQuestionOptions[question.id]}
+                                  onCheckedChange={(checked) => {
+                                    console.log(`Opção ${question.id} selecionada: ${checked}`);
+                                    setSelectedQuestionOptions(prev => ({
+                                      ...prev,
+                                      [question.id]: checked
+                                    }));
+                                  }}
+                                />
+                                <div className="grid gap-1.5 leading-none">
+                                  <Label htmlFor={`add-${question.id}`} className="font-medium">
+                                    {question.text}
+                                  </Label>
+                                  {displayValue && (
+                                    <p className="text-sm text-gray-500 mt-1">
+                                      {displayValue}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })
+                        ) : (
+                          <p className="text-center text-gray-500 py-4">
+                            Não foram encontradas respostas relevantes no questionário para este campo.
+                          </p>
+                        )}
                       </div>
                       
                       <DialogFooter>
@@ -346,7 +405,15 @@ export function BirthPlanEditor({
                           <Button variant="outline">Cancelar</Button>
                         </DialogClose>
                         <DialogClose asChild>
-                          <Button onClick={() => handleAddQuestionnaireOptionsForField(activeFieldKey)}>Adicionar Selecionados</Button>
+                          <Button 
+                            onClick={() => {
+                              console.log(`Adicionando opções selecionadas para ${activeFieldKey}`);
+                              handleAddQuestionnaireOptionsForField(activeFieldKey);
+                            }}
+                            disabled={Object.values(selectedQuestionOptions).filter(Boolean).length === 0}
+                          >
+                            Adicionar Selecionados
+                          </Button>
                         </DialogClose>
                       </DialogFooter>
                     </DialogContent>
