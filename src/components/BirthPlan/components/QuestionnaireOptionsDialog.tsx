@@ -10,12 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { QuestionnaireOptionItem } from './QuestionnaireOptionItem';
+import { QuestionnaireOptionsList } from './QuestionnaireOptionsList';
 import { 
   findQuestionById, 
   formatSelectedOptions, 
-  getRelevantQuestionsForField,
-  getFormattedDisplayValue
+  getRelevantQuestionsForField
 } from '../utils/questionnaireUtils';
 
 interface QuestionnaireOptionsDialogProps {
@@ -90,16 +89,12 @@ export function QuestionnaireOptionsDialog({
       </DialogHeader>
       
       <div className="max-h-[60vh] overflow-y-auto py-4">
-        {relevantQuestions.map(({ question }) => (
-          <QuestionnaireOptionItem
-            key={question.id}
-            questionId={question.id}
-            questionText={question.text}
-            displayValue={getFormattedDisplayValue(question, questionnaireAnswers)}
-            isSelected={!!selectedQuestionOptions[question.id]}
-            onSelectionChange={handleSelectionChange}
-          />
-        ))}
+        <QuestionnaireOptionsList 
+          questions={relevantQuestions}
+          questionnaireAnswers={questionnaireAnswers}
+          selectedOptions={selectedQuestionOptions}
+          onSelectionChange={handleSelectionChange}
+        />
       </div>
       
       <DialogFooter>
