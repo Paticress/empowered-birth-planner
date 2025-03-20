@@ -26,8 +26,8 @@ const buttonVariants = cva(
         // Resource buttons with better visibility
         resource: "bg-maternal-100 text-maternal-900 border border-maternal-300 hover:bg-maternal-200 font-medium",
         "resource-highlight": "bg-maternal-400 text-white border border-maternal-500 hover:bg-maternal-500 font-medium",
-        // Nova variante para o botão do construtor de plano de parto
-        "birth-plan-builder": "bg-gradient-to-r from-maternal-500 to-maternal-600 text-white border border-maternal-600 hover:from-maternal-600 hover:to-maternal-700 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 rounded-full",
+        // Nova variante para o botão do construtor de plano de parto com rosa escuro
+        "birth-plan-builder": "bg-gradient-to-r from-pink-800 to-pink-900 text-white border border-pink-900 hover:from-pink-700 hover:to-pink-800 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 rounded-full",
       },
       size: {
         default: "h-10 px-4 py-2",
