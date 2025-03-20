@@ -40,6 +40,12 @@ const updatePersonalInfo = (birthPlan: Record<string, any>, answers: Record<stri
   if (answers.birthLocation) birthPlan.personalInfo.birthLocation = answers.birthLocation;
   if (answers.hospital) birthPlan.personalInfo.hospital = answers.hospital;
   
+  // Pediatra
+  if (answers.pediatrician === 'Sim') {
+    if (answers.pediatricianName) birthPlan.personalInfo.pediatrician = answers.pediatricianName;
+    if (answers.pediatricianRegistry) birthPlan.personalInfo.pediatricianRegistry = answers.pediatricianRegistry;
+  }
+  
   // Enfermeira Obstetriz
   if (answers.midwife === 'Sim') {
     if (answers.midwifeName) birthPlan.personalInfo.midwife = answers.midwifeName;

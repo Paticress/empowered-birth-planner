@@ -11,6 +11,7 @@ export function ChecklistSections() {
         <ChecklistItem id="general-2" label="Identifiquei claramente quem será meu acompanhante" />
         <ChecklistItem id="general-3" label="Defini se terei doula e incluí seus dados de contato" />
         <ChecklistItem id="general-4" label="Organizei o plano em seções claras e objetivas" />
+        <ChecklistItem id="general-5" label="Considerei contratar um(a) pediatra neonatal particular para acompanhar o nascimento e o pós-parto" />
       </ChecklistSection>
       
       <ChecklistSection title="Trabalho de Parto">
@@ -35,6 +36,12 @@ export function ChecklistSections() {
         <ChecklistItem id="postpartum-3" label="Defini se quero que o bebê permaneça comigo o tempo todo" />
         <ChecklistItem id="postpartum-4" label="Estabeleci quando e como deve ser feito o primeiro banho do bebê" />
         <ChecklistItem id="postpartum-5" label="Especifiquei preferências sobre visitas no pós-parto" />
+        <ChecklistItem id="postpartum-6" label="Defini qual pediatra acompanhará o bebê durante a internação e dará alta" />
+        <ChecklistTip>
+          Contratar um(a) pediatra neonatal particular pode garantir continuidade nos cuidados, desde o nascimento até o acompanhamento
+          pediátrico posterior. Este profissional pode estar presente no momento do parto, realizar todos os exames iniciais, acompanhar
+          diariamente durante a internação e dar alta ao bebê, tornando-se posteriormente o pediatra regular da criança.
+        </ChecklistTip>
       </ChecklistSection>
       
       <ChecklistSection title="Cesárea (se necessária)">

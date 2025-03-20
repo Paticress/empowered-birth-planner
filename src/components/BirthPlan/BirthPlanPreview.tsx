@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Printer, Download, Edit } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -155,9 +154,9 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
           <div className="grid grid-cols-2 gap-8 mt-8">
             <div>
               <div className="border-b border-black h-12 mb-2"></div>
-              <p className="text-center">_________________</p>
-              <p className="text-center text-sm text-gray-600">Enfermeira Obstétrica</p>
-              <p className="text-center text-sm text-gray-600">COREN: _________________</p>
+              <p className="text-center">{personalInfo.pediatrician || '_________________'}</p>
+              <p className="text-center text-sm text-gray-600">Pediatra Neonatal</p>
+              <p className="text-center text-sm text-gray-600">CRM: {personalInfo.pediatricianRegistry || '_________________'}</p>
             </div>
             
             <div>
