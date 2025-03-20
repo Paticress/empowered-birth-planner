@@ -30,16 +30,14 @@
     margin-bottom: 0.3cm;
   }
   
-  /* Hide all elements with print:hidden class */
-  .print\:hidden {
-    display: none !important;
-  }
-  
-  /* Hide header in print view */
+  /* Hide elements explicitly */
+  .print\:hidden,
   header, 
   .info-alert,
   .preview-footer,
-  .links-rapidos {
+  .links-rapidos,
+  #header,
+  nav {
     display: none !important;
   }
   
@@ -61,9 +59,10 @@
   }
   
   /* Brand watermark on each page except first and last */
-  @page:not(:first) {
+  @page:not(:first):not(:last) {
     background-image: url('/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png');
-    background-position: top right;
+    background-position: top 1cm right 1cm;
+    background-repeat: no-repeat;
     background-size: 80px;
   }
   
@@ -85,6 +84,8 @@
   svg {
     display: inline-block !important;
     visibility: visible !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
   
   /* Remove border and background from answers */

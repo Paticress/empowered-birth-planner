@@ -25,7 +25,9 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         <PreviewHeader title="Visualização do Plano de Parto" />
       </div>
       
-      <PrintTitle />
+      <div className="hidden print:block">
+        <PrintTitle />
+      </div>
       
       <div id="birth-plan-preview" className="bg-white border border-gray-200 rounded-lg p-6 print:p-0 print:border-0">
         {birthPlanSections.map((section) => (
@@ -41,7 +43,9 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         <SignatureSection personalInfo={personalInfo} />
       </div>
       
-      <PrintFooter />
+      <div className="hidden print:block">
+        <PrintFooter />
+      </div>
       
       <div className="print:hidden info-alert">
         <InfoAlert />
@@ -50,7 +54,9 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         <PreviewFooter onEdit={onEdit} onNext={onNext} />
       </div>
       
-      <BackToTopButton />
+      <div className="print:hidden">
+        <BackToTopButton />
+      </div>
     </div>
   );
 }

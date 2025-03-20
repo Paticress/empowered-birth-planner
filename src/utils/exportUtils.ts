@@ -35,7 +35,7 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       const clone = element.cloneNode(true) as HTMLElement;
       
       // Add print title manually
-      const printTitle = document.querySelector('.print\\:block');
+      const printTitle = document.querySelector('.print\\:block') || document.querySelector('.hidden.print\\:block');
       if (printTitle) {
         const printTitleClone = printTitle.cloneNode(true) as HTMLElement;
         printTitleClone.classList.remove('hidden');
@@ -44,7 +44,7 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       }
       
       // Hide elements with print:hidden class
-      Array.from(clone.querySelectorAll('.print\\:hidden, .info-alert, .preview-footer, .links-rapidos')).forEach(el => {
+      Array.from(clone.querySelectorAll('.print\\:hidden, header, .info-alert, .preview-footer, .links-rapidos')).forEach(el => {
         (el as HTMLElement).style.display = 'none';
       });
       
@@ -87,10 +87,10 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
         compress: true,
       });
       
-      // A4 dimensions with margins
+      // A4 dimensions with larger margins
       const pageWidth = 210;
       const pageHeight = 297;
-      const margin = 15; // 1.5cm margin
+      const margin = 20; // 2cm margin
       
       const contentWidth = pageWidth - (margin * 2);
       const contentHeight = pageHeight - (margin * 2);
@@ -111,6 +111,18 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
         heightLeft -= (pageHeight - (margin * 2));
+      }
+      
+      // Add watermark to all pages except first and last
+      const pageCount = pdf.getNumberOfPages();
+      if (pageCount > 2) {
+        for (let i = 2; i < pageCount; i++) {
+          pdf.setPage(i);
+          // Add watermark image to top right corner
+          const img = new Image();
+          img.src = '/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png';
+          pdf.addImage(img, 'PNG', pageWidth - margin - 30, margin, 30, 30);
+        }
       }
       
       pdf.save(filename);
