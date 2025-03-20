@@ -221,6 +221,22 @@ export function BirthPlanEditor({
     return relevantQuestions;
   };
   
+  // Lista de campos para os quais não queremos mostrar o botão de adicionar do questionário
+  // Estes são campos de entrada de texto livre do questionário inicial que não precisam do botão adicionar
+  const excludedFields = ['name', 'dueDate', 'healthProvider', 'hospital', 'companions'];
+  
+  // Verifica se o botão de adicionar do questionário deve ser mostrado para um campo específico
+  const shouldShowAddButton = (fieldKey: string) => {
+    // Não mostrar para campos excluídos (texto livre inicial)
+    if (excludedFields.includes(fieldKey)) {
+      return false;
+    }
+    
+    // Verificar se existem perguntas relevantes para este campo
+    const relevantQuestions = getRelevantQuestionsForField(fieldKey);
+    return relevantQuestions.length > 0;
+  };
+  
   return (
     <div className="animate-fade-in">
       <h1 className="text-3xl font-bold text-maternal-800 mb-6">Edite seu Plano de Parto</h1>
@@ -247,6 +263,7 @@ export function BirthPlanEditor({
           const sectionData = localBirthPlan[activeSection.id] || {};
           const fieldValue = sectionData[field.key] || '';
           const relevantQuestions = getRelevantQuestionsForField(field.key);
+          const showAddButton = shouldShowAddButton(field.key);
           
           return (
             <div key={field.key} className="mb-6 border border-maternal-100 rounded-lg p-4 bg-maternal-50/30">
@@ -258,7 +275,7 @@ export function BirthPlanEditor({
                   {field.label}
                 </label>
                 
-                {relevantQuestions.length > 0 && (
+                {showAddButton && (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button 
