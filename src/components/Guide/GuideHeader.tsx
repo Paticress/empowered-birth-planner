@@ -44,7 +44,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
           <div className="flex-shrink-0 flex items-center">
             <img
               className="h-8 w-auto"
-              src="/placeholder.svg"
+              src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png"
               alt="Logo Guia do Parto Respeitoso"
               onClick={() => navigateTo('/guia-online')}
               style={{ cursor: 'pointer' }}
