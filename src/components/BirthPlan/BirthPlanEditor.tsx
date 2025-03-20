@@ -2,6 +2,8 @@
 import { birthPlanSections } from './utils/birthPlanSections';
 import { EditorContent } from './editor/EditorContent';
 import { EditorFooter } from './editor/EditorFooter';
+import { EditorHeader } from './editor/EditorHeader';
+import { EditorTip } from './editor/EditorTip';
 import { BirthPlanSectionProgress } from './BirthPlanSectionProgress';
 import { useEditorState } from './hooks/useEditorState';
 import { handleAddSelectedOptions } from './editor/editorHelpers';
@@ -56,7 +58,7 @@ export function BirthPlanEditor({
   
   return (
     <div className="animate-fade-in">
-      <h1 className="text-3xl font-bold text-maternal-800 mb-6">Edite seu Plano de Parto</h1>
+      <EditorHeader />
       
       <BirthPlanSectionProgress 
         sections={birthPlanSections}
@@ -82,12 +84,7 @@ export function BirthPlanEditor({
         handleAddSelectedOptions={processAddSelectedOptions}
       />
       
-      <div className="bg-maternal-50 p-4 rounded-lg mb-6 border border-maternal-200">
-        <p className="text-sm text-maternal-700">
-          <strong>Dica:</strong> Seja específico sobre suas preferências, mas também flexível. 
-          Lembre-se de que situações imprevistas podem ocorrer durante o parto.
-        </p>
-      </div>
+      <EditorTip />
       
       <EditorFooter 
         activeSectionIndex={activeSectionIndex}
