@@ -117,4 +117,30 @@
     height: 30px !important;
     display: inline-block !important;
   }
+  
+  /* PDF-specific styles */
+  .pdf-header, .pdf-footer {
+    display: block !important;
+  }
+}
+
+/* PDF Export styles - these apply to elements outside of print media query */
+.pdf-header, .pdf-footer {
+  display: block;
+}
+
+.pdf-header h1 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.pdf-header img, .pdf-footer img {
+  height: auto;
+}
+
+.pdf-footer {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  font-size: 10px;
+  color: #666;
 }
