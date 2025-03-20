@@ -1,3 +1,4 @@
+
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, ImageRun, Table, TableRow, TableCell } from 'docx';
@@ -574,7 +575,7 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
               ],
               width: {
                 size: 50,
-                type: "percentage",
+                type: "pct", // Changed from "percentage" to "pct"
               },
             }),
             new TableCell({
@@ -611,7 +612,7 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
               ],
               width: {
                 size: 50,
-                type: "percentage",
+                type: "pct", // Changed from "percentage" to "pct"
               },
             }),
           ],
@@ -652,7 +653,7 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
               ],
               width: {
                 size: 50,
-                type: "percentage",
+                type: "pct", // Changed from "percentage" to "pct"
               },
             }),
             new TableCell({
@@ -689,7 +690,7 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
               ],
               width: {
                 size: 50,
-                type: "percentage",
+                type: "pct", // Changed from "percentage" to "pct"
               },
             }),
           ],
@@ -697,8 +698,9 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
       ],
       width: {
         size: 100,
-        type: "percentage",
+        type: "pct", // Changed from "percentage" to "pct" 
       },
     }),
   ];
 };
+
