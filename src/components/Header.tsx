@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useNavigation } from '@/hooks/useNavigation';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { navigateTo } = useNavigation();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +27,11 @@ export function Header() {
     return location.pathname === path;
   };
 
+  const handleNavigation = (path: string) => {
+    navigateTo(path);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm' : 'bg-white'
@@ -32,7 +39,10 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center" onClick={(e) => {
+              e.preventDefault();
+              handleNavigation('/guia-online');
+            }}>
               <img 
                 src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
                 alt="Energia Materna Logo" 
@@ -48,6 +58,10 @@ export function Header() {
               className={`transition-colors ${isActive('/guia-gratuito') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigation('/guia-gratuito');
+              }}
             >
               Guia Gratuito
             </Link>
@@ -56,6 +70,10 @@ export function Header() {
               className={`transition-colors ${isActive('/guia-online') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigation('/guia-online');
+              }}
             >
               Guia Online
             </Link>
@@ -64,6 +82,10 @@ export function Header() {
               className={`transition-colors ${isActive('/plano-personalizado') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigation('/plano-personalizado');
+              }}
             >
               Plano Personalizado
             </Link>
@@ -72,6 +94,10 @@ export function Header() {
               className={`transition-colors ${isActive('/depoimentos') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigation('/depoimentos');
+              }}
             >
               Depoimentos
             </Link>
@@ -106,42 +132,38 @@ export function Header() {
                   </button>
                 </div>
                 <nav className="flex flex-col space-y-4">
-                  <Link 
-                    to="/guia-gratuito" 
-                    className={`py-2 px-3 rounded-md transition-colors ${isActive('/guia-gratuito') 
+                  <button 
+                    className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/guia-gratuito') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={() => handleNavigation('/guia-gratuito')}
                   >
                     Guia Gratuito
-                  </Link>
-                  <Link 
-                    to="/guia-online" 
-                    className={`py-2 px-3 rounded-md transition-colors ${isActive('/guia-online') 
+                  </button>
+                  <button 
+                    className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/guia-online') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={() => handleNavigation('/guia-online')}
                   >
                     Guia Online
-                  </Link>
-                  <Link 
-                    to="/plano-personalizado" 
-                    className={`py-2 px-3 rounded-md transition-colors ${isActive('/plano-personalizado') 
+                  </button>
+                  <button 
+                    className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/plano-personalizado') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={() => handleNavigation('/plano-personalizado')}
                   >
                     Plano Personalizado
-                  </Link>
-                  <Link 
-                    to="/depoimentos" 
-                    className={`py-2 px-3 rounded-md transition-colors ${isActive('/depoimentos') 
+                  </button>
+                  <button 
+                    className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/depoimentos') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={() => handleNavigation('/depoimentos')}
                   >
                     Depoimentos
-                  </Link>
+                  </button>
                 </nav>
               </div>
             </SheetContent>

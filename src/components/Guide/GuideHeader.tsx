@@ -32,7 +32,14 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
     if (onNavigate) {
       onNavigate(path);
     } else {
-      navigateTo('/guia-online');
+      // Se estivermos no componente GuideHeader dentro do OnlineGuide, não precisamos navegar,
+      // apenas garantir que estamos na tab correta
+      if (path === '/guia-online' && currentTab) {
+        // Permanece na página atual
+        console.log('Já estamos na página do guia online');
+      } else {
+        navigateTo(path);
+      }
     }
   };
 
@@ -110,7 +117,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
             <Button
               variant="ghost"
               onClick={() => {
-                navigateTo('/guia-online');
+                handleNavigation('/guia-online');
                 setMobileMenuOpen(false);
               }}
               className="w-full justify-start text-gray-600 hover:text-gray-900"
