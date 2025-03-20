@@ -32,16 +32,19 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       
       // Create a clone of the element with print styles
       const clone = element.cloneNode(true) as HTMLElement;
+      clone.style.position = 'relative';
       clone.style.width = '100%';
+      clone.style.maxWidth = '210mm'; // A4 width
       clone.style.padding = '20px';
-      clone.style.margin = '0';
+      clone.style.margin = '0 auto';
       clone.style.background = '#fff';
       clone.style.border = 'none';
       
-      // Create a temporary container with proper structure
+      // Create a temporary container with A4 proportions
       const container = document.createElement('div');
       container.style.width = '210mm'; // A4 width
-      container.style.margin = '0';
+      container.style.minHeight = '297mm'; // A4 height
+      container.style.margin = '0 auto';
       container.style.padding = '0';
       container.style.backgroundColor = '#fff';
       container.style.position = 'absolute';
@@ -70,10 +73,47 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       
       // Apply print styles to content
       Array.from(container.querySelectorAll('.bg-maternal-50')).forEach(el => {
-        (el as HTMLElement).style.backgroundColor = 'transparent';
-        (el as HTMLElement).style.padding = '0';
-        (el as HTMLElement).style.borderRadius = '0';
+        (el as HTMLElement).style.backgroundColor = '#f8f7ff';
+        (el as HTMLElement).style.padding = '10px';
+        (el as HTMLElement).style.borderRadius = '5px';
       });
+      
+      // Add Energia Materna branding
+      const logoContainer = document.createElement('div');
+      logoContainer.style.position = 'absolute';
+      logoContainer.style.top = '20px';
+      logoContainer.style.right = '20px';
+      logoContainer.style.width = '120px';
+      logoContainer.style.height = 'auto';
+      logoContainer.style.zIndex = '999';
+      
+      const logo = document.createElement('img');
+      logo.src = '/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png';
+      logo.alt = 'Energia Materna';
+      logo.style.width = '100%';
+      logo.style.height = 'auto';
+      
+      logoContainer.appendChild(logo);
+      container.appendChild(logoContainer);
+      
+      // Add footer with branding
+      const footerContainer = document.createElement('div');
+      footerContainer.style.position = 'absolute';
+      footerContainer.style.bottom = '20px';
+      footerContainer.style.left = '0';
+      footerContainer.style.width = '100%';
+      footerContainer.style.textAlign = 'center';
+      footerContainer.style.padding = '10px 0';
+      footerContainer.style.borderTop = '1px solid #eee';
+      
+      const footerText = document.createElement('p');
+      footerText.textContent = `© ${new Date().getFullYear()} Energia Materna - www.energiamaterna.com.br`;
+      footerText.style.fontSize = '10px';
+      footerText.style.color = '#666';
+      footerText.style.margin = '0';
+      
+      footerContainer.appendChild(footerText);
+      container.appendChild(footerContainer);
       
       // Render the content to canvas
       const canvas = await html2canvas(container, {
@@ -95,7 +135,7 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       document.body.removeChild(container);
       document.body.classList.remove('print-preview-mode');
       
-      // Create PDF with appropriate margins
+      // Create PDF with A4 size
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -104,16 +144,16 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
         compress: true,
       });
       
-      // A4 dimensions with adequate margins
+      // A4 dimensions with margins
       const pageWidth = 210;
       const pageHeight = 297;
-      const margin = 20; // 2cm margin
+      const margin = 15; // 1.5cm margin
       
       // Calculate content dimensions
       const contentWidth = pageWidth - (margin * 2);
       const contentHeight = (canvas.height * contentWidth) / canvas.width;
       
-      // Add the content as a single image on the first page
+      // Add the content as an image on the first page
       pdf.addImage(
         imgData, 
         'PNG', 

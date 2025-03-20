@@ -7,7 +7,7 @@ export function PrintTitle() {
         <img 
           src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
           alt="Energia Materna" 
-          className="h-12"
+          className="h-12 energia-materna-logo"
         />
       </div>
       <p className="text-sm text-gray-700 mt-2 mb-4">

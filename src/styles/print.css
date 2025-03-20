@@ -2,7 +2,7 @@
 /* Print styles */
 @media print {
   @page {
-    size: portrait;
+    size: A4 portrait;
     margin: 1.5cm;
     counter-increment: page;
   }
@@ -60,8 +60,8 @@
     content: "Página " counter(page);
   }
   
-  /* Brand watermark on each page except first and last */
-  @page:not(:first):not(:last) {
+  /* Brand watermark on every page */
+  @page {
     background-image: url('/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png');
     background-position: top 1cm right 1cm;
     background-repeat: no-repeat;
@@ -109,6 +109,12 @@
   
   /* Make sure SVG icons appear in print */
   .print\:inline-block svg {
+    display: inline-block !important;
+  }
+  
+  /* Ensure the Energia Materna logo appears consistently */
+  .print-footer .energia-materna-logo {
+    height: 30px !important;
     display: inline-block !important;
   }
 }
