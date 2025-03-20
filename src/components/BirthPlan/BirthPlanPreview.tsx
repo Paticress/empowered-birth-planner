@@ -51,12 +51,12 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         <PrintFooter />
       </div>
       
-      {/* Screen-only elements */}
-      <div className="print:hidden info-alert">
+      {/* Screen-only elements - ensure these are properly hidden in print */}
+      <div className="print:hidden">
         <InfoAlert />
       </div>
       
-      <div className="print:hidden preview-footer">
+      <div className="print:hidden">
         <PreviewFooter onEdit={onEdit} onNext={onNext} />
       </div>
       

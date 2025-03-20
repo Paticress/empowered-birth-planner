@@ -38,7 +38,8 @@
   .links-rapidos,
   #header,
   nav,
-  .back-to-top-button {
+  .back-to-top-button,
+  .progress-container {
     display: none !important;
   }
   

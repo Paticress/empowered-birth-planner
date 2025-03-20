@@ -15,10 +15,11 @@ export function PreviewSection({ sectionId, title, fields, sectionData }: Previe
     <div className="mb-8 print:mb-3 print:break-inside-avoid">
       <div className="flex items-center gap-2 mb-4 print:mb-2">
         {SectionIcon && (
-          <span className="print:inline-block">
+          <span className="inline-block print:inline-block">
             <SectionIcon 
               className="h-5 w-5 text-maternal-700 print:text-black" 
               aria-hidden="true"
+              style={{ printColorAdjust: 'exact' }}
             />
           </span>
         )}
