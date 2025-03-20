@@ -31,12 +31,9 @@ const formatCheckboxAnswers = (checkboxData: Record<string, boolean>) => {
 };
 
 /**
- * Generates an initial birth plan from questionnaire answers
+ * Updates personal information section of the birth plan
  */
-export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Record<string, any> => {
-  const birthPlan = generateEmptyBirthPlan();
-  
-  // Personal Information
+const updatePersonalInfo = (birthPlan: Record<string, any>, answers: Record<string, any>): void => {
   if (answers.name) birthPlan.personalInfo.name = answers.name;
   if (answers.dueDate) birthPlan.personalInfo.dueDate = answers.dueDate;
   if (answers.healthProvider) birthPlan.personalInfo.healthProvider = answers.healthProvider;
@@ -45,8 +42,12 @@ export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Reco
     birthPlan.personalInfo.doula = answers.doulaName;
   }
   if (answers.companions) birthPlan.personalInfo.companions = answers.companions;
-  
-  // Atmosfera e Ambiente
+};
+
+/**
+ * Updates atmosphere section of the birth plan
+ */
+const updateAtmosphere = (birthPlan: Record<string, any>, answers: Record<string, any>): void => {
   if (answers.lighting) {
     birthPlan.atmosfera.lighting = formatCheckboxAnswers(answers.lighting);
   }
@@ -59,8 +60,12 @@ export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Reco
   if (answers.photos) {
     birthPlan.atmosfera.photos = formatCheckboxAnswers(answers.photos);
   }
-  
-  // Trabalho de Parto
+};
+
+/**
+ * Updates labor section of the birth plan
+ */
+const updateLaborPreferences = (birthPlan: Record<string, any>, answers: Record<string, any>): void => {
   if (answers.mobility) {
     birthPlan.trabalhoDeParto.mobility = formatCheckboxAnswers(answers.mobility);
   }
@@ -82,8 +87,12 @@ export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Reco
     birthPlan.trabalhoDeParto.interventions = currentValue ? 
       `${currentValue}\n${interventions}` : interventions;
   }
-  
-  // Nascimento
+};
+
+/**
+ * Updates birth section of the birth plan
+ */
+const updateBirthPreferences = (birthPlan: Record<string, any>, answers: Record<string, any>): void => {
   if (answers.birthPositions) {
     birthPlan.nascimento.birthPositions = formatCheckboxAnswers(answers.birthPositions);
   }
@@ -99,8 +108,12 @@ export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Reco
   if (answers.placenta) {
     birthPlan.nascimento.placenta = answers.placenta;
   }
-  
-  // Em Caso de Cesárea
+};
+
+/**
+ * Updates cesarean section of the birth plan
+ */
+const updateCesareanPreferences = (birthPlan: Record<string, any>, answers: Record<string, any>): void => {
   if (answers.cesareanPreferences) {
     birthPlan.cesarea.cesareanPreferences = formatCheckboxAnswers(answers.cesareanPreferences);
   }
@@ -116,8 +129,12 @@ export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Reco
   if (answers.cesareanSkinToSkin) {
     birthPlan.cesarea.cesareanSkinToSkin = answers.cesareanSkinToSkin;
   }
-  
-  // Pós-Parto
+};
+
+/**
+ * Updates postpartum section of the birth plan
+ */
+const updatePostpartumPreferences = (birthPlan: Record<string, any>, answers: Record<string, any>): void => {
   if (answers.firstHour) {
     birthPlan.posParto.firstHour = formatCheckboxAnswers(answers.firstHour);
   }
@@ -133,8 +150,12 @@ export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Reco
   if (answers.motherCare) {
     birthPlan.posParto.motherCare = formatCheckboxAnswers(answers.motherCare);
   }
-  
-  // Situações Especiais
+};
+
+/**
+ * Updates special situations section of the birth plan
+ */
+const updateSpecialSituations = (birthPlan: Record<string, any>, answers: Record<string, any>): void => {
   if (answers.complications) {
     birthPlan.situacoesEspeciais.complications = formatCheckboxAnswers(answers.complications);
   }
@@ -144,6 +165,22 @@ export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Reco
   if (answers.specialWishes) {
     birthPlan.situacoesEspeciais.specialWishes = answers.specialWishes;
   }
+};
+
+/**
+ * Generates an initial birth plan from questionnaire answers
+ */
+export const generateBirthPlanFromAnswers = (answers: Record<string, any>): Record<string, any> => {
+  const birthPlan = generateEmptyBirthPlan();
+  
+  // Update each section with relevant answers
+  updatePersonalInfo(birthPlan, answers);
+  updateAtmosphere(birthPlan, answers);
+  updateLaborPreferences(birthPlan, answers);
+  updateBirthPreferences(birthPlan, answers);
+  updateCesareanPreferences(birthPlan, answers);
+  updatePostpartumPreferences(birthPlan, answers);
+  updateSpecialSituations(birthPlan, answers);
   
   return birthPlan;
 };
