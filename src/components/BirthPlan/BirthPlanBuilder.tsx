@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { BirthPlanHeader } from './BirthPlanHeader';
 import { BirthPlanWelcome } from './BirthPlanWelcome';
@@ -53,17 +52,15 @@ export function BirthPlanBuilder() {
         <BirthPlanProgressBar currentStage={currentStage} />
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Ultra-clear visual indicator to show this is the Birth Plan page */}
-          <div className="mb-6 p-6 bg-maternal-100 border-l-8 border-maternal-400 rounded-md shadow-lg">
-            <h1 className="text-4xl font-bold text-maternal-800 mb-2">
-              Construtor de Plano de Parto
+          {/* Versão compacta do banner de informações */}
+          <div className="mb-6 p-3 bg-maternal-100 border-l-4 border-maternal-400 rounded-md">
+            <h1 className="text-xl font-semibold text-maternal-800">
+              {currentStage === 'welcome' ? 'Bem-vinda ao Construtor de Plano de Parto' : 
+               currentStage === 'questionnaire' ? 'Questionário do Plano de Parto' :
+               currentStage === 'editor' ? 'Editor do Plano de Parto' :
+               currentStage === 'preview' ? 'Visualização do Plano de Parto' :
+               'Compartilhar seu Plano de Parto'}
             </h1>
-            <p className="text-maternal-700 text-xl">
-              Você está no construtor de plano de parto - crie e personalize seu plano aqui
-            </p>
-            <p className="mt-2 text-maternal-600 font-medium">
-              Current route: /criar-plano
-            </p>
           </div>
           
           <div className="bg-white shadow-xl rounded-lg p-6 md:p-8 mb-8 border-t-4 border-maternal-400">
