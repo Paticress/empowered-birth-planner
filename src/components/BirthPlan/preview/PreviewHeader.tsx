@@ -1,8 +1,7 @@
-
 import { Button } from '@/components/ui/button';
 import { Printer, Download, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { exportAsPDF, exportAsWord } from '@/utils/exportUtils';
+import { exportAsPDF, exportAsWord } from '@/utils/export';
 
 interface PreviewHeaderProps {
   title: string;

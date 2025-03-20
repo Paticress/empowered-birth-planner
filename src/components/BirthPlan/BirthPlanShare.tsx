@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Copy, Mail, Share2, FileText } from 'lucide-react';
@@ -6,7 +5,7 @@ import { toast } from 'sonner';
 import { ShareOption } from './ShareOption';
 import { EmailShareDialog } from './EmailShareDialog';
 import { createShareableText } from './utils/birthPlanUtils';
-import { exportAsPDF, exportAsText, exportAsWord } from '@/utils/exportUtils';
+import { exportAsPDF, exportAsText, exportAsWord } from '@/utils/export';
 
 interface BirthPlanShareProps {
   birthPlan: Record<string, any>;
