@@ -1,6 +1,20 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Download, BookHeart, Notebook, Calendar, CheckCircle, Shield } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  BookOpen, 
+  Download, 
+  BookHeart, 
+  Notebook, 
+  Calendar, 
+  CheckCircle, 
+  Shield, 
+  Edit, 
+  MessageCircle, 
+  FileEdit, 
+  Printer, 
+  Share2 
+} from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { ResourceCard } from './ResourceCard';
@@ -8,6 +22,8 @@ import { ProceduresGuide } from './ProceduresGuide';
 import { ProductCard } from './ProductCard';
 import { ConsultationSection } from './ConsultationSection';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
+import { StepCard } from './StepCard';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface GuideResourcesProps {
   onPrevious: () => void;
@@ -195,19 +211,49 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           </div>
         </div>
         
-        <h2 className="text-2xl font-semibold text-maternal-800 mt-10 mb-4">Próximos Passos</h2>
+        <h2 className="text-2xl font-semibold text-maternal-800 mt-10 mb-6">Próximos Passos</h2>
         
-        <p className="mb-4">
+        <p className="mb-6">
           Agora que você conhece os elementos essenciais de um plano de parto, recomendamos:
         </p>
         
-        <ol className="list-decimal pl-5 space-y-2 mb-6">
-          <li><strong>Crie seu plano rapidamente</strong> com nosso construtor em apenas 5 minutos</li>
-          <li>Compartilhe facilmente com seu parceiro/acompanhante por e-mail ou WhatsApp</li>
-          <li>Discuta seu plano de parto com seu médico/obstetra na próxima consulta</li>
-          <li>Faça ajustes conforme necessário após essa conversa</li>
-          <li>Imprima várias cópias e leve para o hospital no dia do parto</li>
-        </ol>
+        {/* Visual step cards replacing the previous list */}
+        <div className="grid gap-4 mb-8">
+          <StepCard 
+            stepNumber={1}
+            title="Crie seu plano rapidamente"
+            description="Use nosso construtor para criar seu plano de parto completo em apenas 5 minutos."
+            icon={Edit}
+          />
+          
+          <StepCard 
+            stepNumber={2}
+            title="Compartilhe com seu parceiro/acompanhante"
+            description="Envie facilmente por e-mail ou WhatsApp para que todos estejam alinhados."
+            icon={Share2}
+          />
+          
+          <StepCard 
+            stepNumber={3}
+            title="Discuta com seu médico/obstetra"
+            description="Leve seu plano para a próxima consulta e converse sobre suas preferências."
+            icon={MessageCircle}
+          />
+          
+          <StepCard 
+            stepNumber={4}
+            title="Faça os ajustes necessários"
+            description="Atualize seu plano após conversar com a equipe médica para garantir alinhamento."
+            icon={FileEdit}
+          />
+          
+          <StepCard 
+            stepNumber={5}
+            title="Imprima cópias para o dia do parto"
+            description="Leve várias cópias impressas para entregar na maternidade."
+            icon={Printer}
+          />
+        </div>
         
         <div className="bg-maternal-50 border border-maternal-200 rounded-lg p-6 mt-6 mb-8">
           <h3 className="text-xl font-semibold text-maternal-800 mb-3">
