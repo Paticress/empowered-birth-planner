@@ -4,6 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import { birthPlanSections } from './utils/birthPlanSections';
 import { getSectionIcon } from './utils/sectionIcons';
 import { exportAsPDF } from '@/utils/exportUtils';
+import { BackToTopButton } from './common/BackToTopButton';
 
 interface BirthPlanPreviewProps {
   birthPlan: Record<string, any>;
@@ -206,6 +207,8 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
           Compartilhar Plano <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
+      
+      <BackToTopButton />
     </div>
   );
 }

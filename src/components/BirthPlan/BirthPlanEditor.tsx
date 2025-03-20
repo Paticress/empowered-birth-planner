@@ -5,6 +5,7 @@ import { EditorFooter } from './editor/EditorFooter';
 import { BirthPlanSectionProgress } from './BirthPlanSectionProgress';
 import { useEditorState } from './hooks/useEditorState';
 import { handleAddSelectedOptions } from './editor/editorHelpers';
+import { BackToTopButton } from './common/BackToTopButton';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -95,6 +96,8 @@ export function BirthPlanEditor({
         onNext={onNext}
         setActiveSectionIndex={setActiveSectionIndex}
       />
+      
+      <BackToTopButton />
     </div>
   );
 }
