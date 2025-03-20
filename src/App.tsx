@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate, HashRouter } from "react-router-dom";
 import NotFound from "./pages/NotFound";
-import Header from "./components/Header";
+import { Header } from "./components/Header"; // Changed from default import to named import
 
 // Pages
 import { OnlineGuide } from "./components/Guide/OnlineGuide";
@@ -20,12 +20,7 @@ const queryClient = new QueryClient({
       staleTime: 60000,
     },
   },
-  logger: {
-    log: (message) => console.log(`[Query]: ${message}`),
-    warn: (message) => console.warn(`[Query Warning]: ${message}`),
-    error: (message) => console.error(`[Query Error]: ${message}`),
-  },
-});
+}); // Removed the 'logger' property as it's not supported
 
 // Enhanced log for debugging
 console.log("APP COMPONENT INITIALIZING - SETTING UP ROUTES");
