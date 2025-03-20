@@ -15,8 +15,8 @@ export function ProductsSection() {
           buttonText="Conhecer Diário"
           buttonIcon={<BookHeart className="mr-2 h-4 w-4" />}
           url="https://www.energiamaterna.com.br/especiais/diario-da-maternidade"
-          imageSrc="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-          imageAlt="Mulher gestante em ambiente acolhedor usando um laptop"
+          imageSrc="/lovable-uploads/6b2f6105-ec41-413d-bd52-f974c7aba5ce.png"
+          imageAlt="Capa do Diário da Maternidade"
         />
         
         <ProductCard
