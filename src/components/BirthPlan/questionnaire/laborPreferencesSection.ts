@@ -78,7 +78,21 @@ export const laborPreferencesSection: QuestionSection = {
         'Prefiro evitar ruptura artificial de membranas',
         'Aceito intervenções apenas se explicadas e necessárias',
         'Quero ser informada antes de qualquer procedimento',
+        'Gostaria de tempo para tomar decisões (quando não for emergência)',
+        'Gostaria que alternativas menos invasivas sejam tentadas primeiro',
         'Prefiro seguir as recomendações médicas'
+      ],
+      isRequired: false,
+    },
+    {
+      id: 'informedConsent',
+      text: 'Sobre consentimento informado:',
+      type: 'checkbox',
+      options: [
+        'Quero ser consultada sobre os riscos e benefícios de cada procedimento',
+        'Quero entender por que o procedimento é necessário',
+        'Gostaria de saber quais são as alternativas disponíveis',
+        'Em caso de incapacidade, meu(minha) acompanhante deve ser consultado(a)'
       ],
       isRequired: false,
     },

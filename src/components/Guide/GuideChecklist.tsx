@@ -4,11 +4,10 @@ import { Button } from '@/components/ui/button';
 import { ChecklistSections } from './Checklist/ChecklistSections';
 import { ChecklistTip } from './Checklist/ChecklistTip';
 import { ChecklistNavigation } from './Checklist/ChecklistNavigation';
-import { Printer, Save, RefreshCcw, FileText, Download, Share2, AlertTriangle } from 'lucide-react';
+import { Printer, Save, RefreshCcw, FileText, Download } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { exportAsPDF, exportAsText } from '@/utils/exportUtils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface GuideChecklistProps {
   onPrevious: () => void;
@@ -140,64 +139,10 @@ export function GuideChecklist({ onPrevious, onNext }: GuideChecklistProps) {
           ao elaborar seu plano de parto.
         </p>
         
-        <div className="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-md mb-6 print:hidden">
-          <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="h-5 w-5 text-orange-500" />
-            <h3 className="font-bold text-orange-800 m-0">Entendendo Riscos e Intervenções</h3>
-          </div>
-          <p className="text-orange-700 mb-2">
-            É importante diferenciar entre intervenções necessárias para sua segurança e 
-            procedimentos que podem ser evitados.
-          </p>
-          
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="cascade">
-              <AccordionTrigger className="text-orange-800 font-medium">
-                O efeito cascata de intervenções
-              </AccordionTrigger>
-              <AccordionContent>
-                <p className="text-sm text-orange-700">
-                  Quando uma intervenção desnecessária é realizada, ela pode desencadear a necessidade de outras intervenções, 
-                  criando um "efeito cascata". Por exemplo, uma indução artificial pode levar a contrações mais dolorosas, 
-                  que exigem analgesia, que pode diminuir as contrações, levando à necessidade de mais ocitocina, 
-                  podendo resultar em sofrimento fetal e cesariana de emergência.
-                </p>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="myths">
-              <AccordionTrigger className="text-orange-800 font-medium">
-                Riscos reais vs. mitos
-              </AccordionTrigger>
-              <AccordionContent>
-                <p className="text-sm text-orange-700 mb-2">
-                  Alguns cenários frequentemente apresentados como "de risco" nem sempre exigem intervenções imediatas:
-                </p>
-                <ul className="text-sm text-orange-700 list-disc pl-5">
-                  <li>Bebê grande nem sempre precisa de cesárea</li>
-                  <li>Bolsa rota pode aguardar até 24h se não houver sinais de infecção</li>
-                  <li>Circular de cordão raramente impede parto normal</li>
-                  <li>A posição vertical durante o trabalho de parto é frequentemente mais vantajosa que a deitada</li>
-                </ul>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="prevention">
-              <AccordionTrigger className="text-orange-800 font-medium">
-                Como prevenir intervenções desnecessárias
-              </AccordionTrigger>
-              <AccordionContent>
-                <ul className="text-sm text-orange-700 list-disc pl-5">
-                  <li>Escolha uma equipe que respeite o processo natural do parto</li>
-                  <li>Inclua no plano de parto que deseja ser consultada antes de qualquer intervenção</li>
-                  <li>Tenha um acompanhante e/ou doula informados sobre suas preferências</li>
-                  <li>Questione o motivo e as alternativas para cada intervenção proposta</li>
-                  <li>Solicite tempo para tomar decisões, quando não for emergência</li>
-                </ul>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
+        <ChecklistTip>
+          Para mais informações detalhadas sobre riscos e intervenções, consulte a 
+          seção "Entendendo Riscos e Intervenções" na página "Como Estruturar seu Plano de Parto".
+        </ChecklistTip>
         
         <ChecklistSections />
         
