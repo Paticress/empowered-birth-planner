@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Copy, Mail, Share2, FileText } from 'lucide-react';
@@ -28,14 +29,38 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
   };
   
   const handleExportPDF = () => {
-    exportAsPDF('birth-plan-content', 'meu-plano-de-parto.pdf');
+    // First, render the birth plan content explicitly for PDF export
+    renderBirthPlanForExport(birthPlan);
+    
+    // Then export it
+    exportAsPDF('birth-plan-content', 'meu-plano-de-parto.pdf')
+      .then(() => {
+        toast("PDF gerado com sucesso!");
+      })
+      .catch((error) => {
+        console.error("Erro ao gerar PDF:", error);
+        toast("Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.");
+      });
   };
   
   const handleExportText = () => {
-    exportAsText('birth-plan-content', 'meu-plano-de-parto.txt');
+    // Render content before exporting
+    renderBirthPlanForExport(birthPlan);
+    
+    exportAsText('birth-plan-content', 'meu-plano-de-parto.txt')
+      .then(() => {
+        toast("Arquivo de texto gerado com sucesso!");
+      })
+      .catch((error) => {
+        console.error("Erro ao gerar arquivo de texto:", error);
+        toast("Ocorreu um erro ao gerar o arquivo de texto. Por favor, tente novamente.");
+      });
   };
   
   const handleShareViaWhatsApp = () => {
+    // Render content before exporting
+    renderBirthPlanForExport(birthPlan);
+    
     // First generate and save the PDF
     exportAsPDF('birth-plan-content', 'meu-plano-de-parto.pdf')
       .then(() => {
@@ -44,11 +69,248 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
         const whatsappUrl = `https://wa.me/?text=${message}`;
         
         window.open(whatsappUrl, '_blank');
+        toast("PDF gerado e pronto para compartilhamento no WhatsApp.");
       })
       .catch((error) => {
         console.error("Erro ao exportar PDF para WhatsApp:", error);
         toast("Não foi possível gerar o PDF para compartilhamento.");
       });
+  };
+  
+  // Function to properly render birth plan content for export
+  const renderBirthPlanForExport = (birthPlanData: Record<string, any>) => {
+    const container = document.getElementById('birth-plan-content');
+    if (!container) return;
+    
+    // Clear previous content
+    container.innerHTML = '';
+    
+    // Add title and introduction
+    const title = document.createElement('h1');
+    title.className = 'text-2xl font-bold text-center mb-4';
+    title.textContent = 'MEU PLANO DE PARTO';
+    container.appendChild(title);
+    
+    const intro = document.createElement('p');
+    intro.className = 'text-center mb-6';
+    intro.textContent = 'Este documento contém minhas preferências para o trabalho de parto e nascimento.';
+    container.appendChild(intro);
+    
+    // Add personal info section
+    const personalInfo = birthPlanData.personalInfo || {};
+    const personalSection = document.createElement('div');
+    personalSection.className = 'mb-6';
+    
+    const personalTitle = document.createElement('h2');
+    personalTitle.className = 'text-xl font-bold mb-2';
+    personalTitle.textContent = 'Informações Pessoais';
+    personalSection.appendChild(personalTitle);
+    
+    const personalList = document.createElement('div');
+    personalList.className = 'pl-4';
+    
+    // Add each personal info item
+    const personalFields = [
+      { key: 'name', label: 'Nome' },
+      { key: 'dueDate', label: 'Data prevista' },
+      { key: 'birthLocation', label: 'Local planejado para o parto' },
+      { key: 'hospital', label: 'Hospital/Maternidade' },
+      { key: 'hospitalAddress', label: 'Endereço' },
+      { key: 'hospitalPhone', label: 'Telefone' },
+      { key: 'healthProvider', label: 'Médico/Obstetra' },
+      { key: 'healthProviderContact', label: 'Telefone' },
+      { key: 'healthProviderRegistry', label: 'CRM' }
+    ];
+    
+    personalFields.forEach(field => {
+      if (personalInfo[field.key]) {
+        const item = document.createElement('div');
+        item.className = 'mb-2';
+        
+        const label = document.createElement('h3');
+        label.className = 'font-semibold';
+        label.textContent = field.label;
+        item.appendChild(label);
+        
+        const value = document.createElement('p');
+        value.textContent = personalInfo[field.key];
+        item.appendChild(value);
+        
+        personalList.appendChild(item);
+      }
+    });
+    
+    personalSection.appendChild(personalList);
+    container.appendChild(personalSection);
+    
+    // Loop through all other birth plan sections
+    Object.entries(birthPlanData).forEach(([sectionKey, sectionData]) => {
+      if (sectionKey === 'personalInfo' || !sectionData || typeof sectionData !== 'object') return;
+      
+      const section = document.createElement('div');
+      section.className = 'mb-6';
+      
+      const sectionTitle = document.createElement('h2');
+      sectionTitle.className = 'text-xl font-bold mb-2';
+      sectionTitle.textContent = getSectionDisplayName(sectionKey);
+      section.appendChild(sectionTitle);
+      
+      const sectionContent = document.createElement('div');
+      sectionContent.className = 'pl-4';
+      
+      // Add each field in the section
+      Object.entries(sectionData as Record<string, any>).forEach(([key, value]) => {
+        if (!value) return;
+        
+        const item = document.createElement('div');
+        item.className = 'mb-2';
+        
+        const label = document.createElement('h3');
+        label.className = 'font-semibold';
+        label.textContent = key;
+        item.appendChild(label);
+        
+        const content = document.createElement('p');
+        content.textContent = Array.isArray(value) ? value.join(", ") : value;
+        item.appendChild(content);
+        
+        sectionContent.appendChild(item);
+      });
+      
+      section.appendChild(sectionContent);
+      container.appendChild(section);
+    });
+    
+    // Add signature section
+    const signatureSection = document.createElement('div');
+    signatureSection.className = 'mt-12';
+    
+    const signatureTitle = document.createElement('h2');
+    signatureTitle.className = 'text-xl font-bold mb-4 border-b pb-2';
+    signatureTitle.textContent = 'Assinaturas';
+    signatureSection.appendChild(signatureTitle);
+    
+    const signatureGrid = document.createElement('div');
+    signatureGrid.className = 'grid grid-cols-2 gap-8';
+    
+    // Patient signature
+    const patientSignature = document.createElement('div');
+    const patientLine = document.createElement('div');
+    patientLine.className = 'border-b border-black h-12 mb-2';
+    patientSignature.appendChild(patientLine);
+    
+    const patientName = document.createElement('p');
+    patientName.className = 'text-center';
+    patientName.textContent = personalInfo.name || '';
+    patientSignature.appendChild(patientName);
+    
+    const patientLabel = document.createElement('p');
+    patientLabel.className = 'text-center text-sm text-gray-600';
+    patientLabel.textContent = 'Gestante';
+    patientSignature.appendChild(patientLabel);
+    
+    // Doctor signature
+    const doctorSignature = document.createElement('div');
+    const doctorLine = document.createElement('div');
+    doctorLine.className = 'border-b border-black h-12 mb-2';
+    doctorSignature.appendChild(doctorLine);
+    
+    const doctorName = document.createElement('p');
+    doctorName.className = 'text-center';
+    doctorName.textContent = personalInfo.healthProvider || '_________________';
+    doctorSignature.appendChild(doctorName);
+    
+    const doctorLabel = document.createElement('p');
+    doctorLabel.className = 'text-center text-sm text-gray-600';
+    doctorLabel.textContent = 'Médico/Obstetra';
+    doctorSignature.appendChild(doctorLabel);
+    
+    const doctorCRM = document.createElement('p');
+    doctorCRM.className = 'text-center text-sm text-gray-600';
+    doctorCRM.textContent = `CRM: ${personalInfo.healthProviderRegistry || '_________________'}`;
+    doctorSignature.appendChild(doctorCRM);
+    
+    signatureGrid.appendChild(patientSignature);
+    signatureGrid.appendChild(doctorSignature);
+    
+    // Additional signatures
+    const additionalSignatures = document.createElement('div');
+    additionalSignatures.className = 'grid grid-cols-2 gap-8 mt-8';
+    
+    // Pediatrician signature
+    const pediatricianSignature = document.createElement('div');
+    const pediatricianLine = document.createElement('div');
+    pediatricianLine.className = 'border-b border-black h-12 mb-2';
+    pediatricianSignature.appendChild(pediatricianLine);
+    
+    const pediatricianName = document.createElement('p');
+    pediatricianName.className = 'text-center';
+    pediatricianName.textContent = personalInfo.pediatrician || '_________________';
+    pediatricianSignature.appendChild(pediatricianName);
+    
+    const pediatricianLabel = document.createElement('p');
+    pediatricianLabel.className = 'text-center text-sm text-gray-600';
+    pediatricianLabel.textContent = 'Pediatra Neonatal';
+    pediatricianSignature.appendChild(pediatricianLabel);
+    
+    const pediatricianCRM = document.createElement('p');
+    pediatricianCRM.className = 'text-center text-sm text-gray-600';
+    pediatricianCRM.textContent = `CRM: ${personalInfo.pediatricianRegistry || '_________________'}`;
+    pediatricianSignature.appendChild(pediatricianCRM);
+    
+    // Doula signature
+    const doulaSignature = document.createElement('div');
+    const doulaLine = document.createElement('div');
+    doulaLine.className = 'border-b border-black h-12 mb-2';
+    doulaSignature.appendChild(doulaLine);
+    
+    const doulaName = document.createElement('p');
+    doulaName.className = 'text-center';
+    doulaName.textContent = personalInfo.doula || '_________________';
+    doulaSignature.appendChild(doulaName);
+    
+    const doulaLabel = document.createElement('p');
+    doulaLabel.className = 'text-center text-sm text-gray-600';
+    doulaLabel.textContent = 'Doula';
+    doulaSignature.appendChild(doulaLabel);
+    
+    const doulaRegistry = document.createElement('p');
+    doulaRegistry.className = 'text-center text-sm text-gray-600';
+    doulaRegistry.textContent = `Registro: ${personalInfo.doulaRegistry || '_________________'}`;
+    doulaSignature.appendChild(doulaRegistry);
+    
+    additionalSignatures.appendChild(pediatricianSignature);
+    additionalSignatures.appendChild(doulaSignature);
+    
+    signatureSection.appendChild(signatureGrid);
+    signatureSection.appendChild(additionalSignatures);
+    container.appendChild(signatureSection);
+    
+    // Add footer with date
+    const footer = document.createElement('div');
+    footer.className = 'mt-8 text-center';
+    footer.textContent = `Criado em ${new Date().toLocaleDateString()}`;
+    container.appendChild(footer);
+    
+    // Make the container visible for export
+    container.style.display = 'block';
+  };
+  
+  // Helper function to get user-friendly section names
+  const getSectionDisplayName = (sectionId: string): string => {
+    const sectionNameMap: Record<string, string> = {
+      personalInfo: 'Informações Pessoais',
+      laborPreferences: 'Preferências para o Trabalho de Parto',
+      atmosphere: 'Ambiente e Acompanhamento',
+      painManagement: 'Alívio da Dor',
+      delivery: 'Parto',
+      newborn: 'Cuidados com o Recém-Nascido',
+      cesarean: 'Cesárea (Se Necessária)',
+      postpartum: 'Pós-Parto',
+      specialSituations: 'Situações Especiais'
+    };
+    
+    return sectionNameMap[sectionId] || sectionId;
   };
   
   return (
@@ -71,30 +333,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
       
       <div id="birth-plan-content" className="hidden">
         {/* This div will be used to generate the PDF but remains hidden */}
-        <h1 className="text-2xl font-bold text-center mb-4">MEU PLANO DE PARTO</h1>
-        <p className="text-center mb-6">Este documento contém minhas preferências para o trabalho de parto e nascimento.</p>
-        
-        {Object.entries(birthPlan).map(([sectionKey, sectionData]) => {
-          if (!sectionData || typeof sectionData !== 'object') return null;
-          
-          return (
-            <div key={sectionKey} className="mb-6">
-              <h2 className="text-xl font-bold mb-2">{sectionKey}</h2>
-              <div className="pl-4">
-                {Object.entries(sectionData as Record<string, any>).map(([key, value]) => {
-                  if (!value) return null;
-                  
-                  return (
-                    <div key={key} className="mb-2">
-                      <h3 className="font-semibold">{key}</h3>
-                      <p>{Array.isArray(value) ? value.join(", ") : value}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
+        {/* Content will be dynamically generated before export */}
       </div>
       
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
