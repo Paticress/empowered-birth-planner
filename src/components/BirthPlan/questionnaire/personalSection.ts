@@ -84,16 +84,6 @@ export const personalSection: QuestionSection = {
       isRequired: false,
     },
     {
-      id: 'doulaCertification',
-      text: 'Certificação da Doula:',
-      type: 'text',
-      conditionalDisplay: {
-        dependsOn: 'doula',
-        showWhen: 'Sim',
-      },
-      isRequired: false,
-    },
-    {
       id: 'companions',
       text: 'Quem você gostaria que estivesse presente durante o parto?',
       type: 'textarea',

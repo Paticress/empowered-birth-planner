@@ -1,3 +1,4 @@
+
 import { 
   FormControl,
   FormField,
@@ -66,6 +67,7 @@ export function QuestionField({ question, errors, control }: QuestionFieldProps)
   );
 }
 
+// Specialized components for each question type
 function TextQuestion({ question, control }: { question: Question; control: Control<Record<string, any>, any> }) {
   return (
     <FormField
@@ -149,6 +151,7 @@ function CheckboxQuestion({ question, control }: { question: Question; control: 
                   id={`${question.id}-${option}`}
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  className="rounded-sm" // This ensures checkboxes are square
                 />
               </FormControl>
               <label
