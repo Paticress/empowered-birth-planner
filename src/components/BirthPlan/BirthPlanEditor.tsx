@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight, Save, Plus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { birthPlanSections } from './utils/birthPlanSections';
 import { questionnaireSections } from './questionnaire';
 import { 
@@ -36,7 +37,7 @@ export function BirthPlanEditor({
 }: BirthPlanEditorProps) {
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [localBirthPlan, setLocalBirthPlan] = useState({ ...birthPlan });
-  const [selectedQuestionOptions, setSelectedQuestionOptions] = useState<Record<string, any>>({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, Record<string, boolean>>>({});
   const [activeFieldKey, setActiveFieldKey] = useState<string>('');
   
   const handleFieldChange = (sectionId: string, fieldKey: string, value: any) => {
@@ -78,56 +79,44 @@ export function BirthPlanEditor({
   };
 
   // Função para formatar opções selecionadas
-  const formatSelectedOptions = (questionId: string, data: any): string => {
-    if (typeof data === 'string') {
-      return data;
-    }
+  const formatSelectedOptions = (options: Record<string, boolean>): string => {
+    if (!options) return '';
     
-    if (Array.isArray(data)) {
-      return data.join(', ');
-    }
-    
-    if (typeof data === 'object') {
-      return Object.entries(data)
-        .filter(([_, value]) => value)
-        .map(([key]) => key)
-        .join(', ');
-    }
-    
-    return String(data);
+    return Object.entries(options)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([option]) => option)
+      .join(', ');
   };
 
   // Adicionar opções selecionadas do questionário ao plano para um campo específico
-  const handleAddQuestionnaireOptionsForField = (fieldKey: string) => {
-    console.log("Adding options for field:", fieldKey);
-    console.log("Selected options:", selectedQuestionOptions);
+  const handleAddSelectedOptions = () => {
+    console.log("Adding options for field:", activeFieldKey);
+    console.log("Selected options:", selectedOptions);
     
     const updatedPlan = { ...localBirthPlan };
     
-    Object.entries(selectedQuestionOptions).forEach(([questionId, isSelected]) => {
-      if (!isSelected) return;
-      
-      const questionData = findQuestionById(questionId);
-      if (!questionData) return;
-      
-      const { question, sectionId } = questionData;
-      const mappedSectionId = mapQuestionnaireToSectionId(sectionId);
-      
-      const answer = questionnaireAnswers[questionId];
-      if (!answer && answer !== false) return;
-      
-      const formattedAnswer = formatSelectedOptions(questionId, answer);
-      
-      const currentValue = updatedPlan[mappedSectionId][fieldKey];
-      if (currentValue) {
-        updatedPlan[mappedSectionId][fieldKey] = `${currentValue}\n${formattedAnswer}`;
-      } else {
-        updatedPlan[mappedSectionId][fieldKey] = formattedAnswer;
+    Object.entries(selectedOptions).forEach(([questionId, options]) => {
+      if (Object.values(options).some(value => value)) {
+        const questionData = findQuestionById(questionId);
+        if (!questionData) return;
+        
+        const { sectionId } = questionData;
+        const mappedSectionId = mapQuestionnaireToSectionId(sectionId);
+        
+        const formattedOptions = formatSelectedOptions(options);
+        if (!formattedOptions) return;
+        
+        const currentValue = updatedPlan[mappedSectionId][activeFieldKey];
+        if (currentValue) {
+          updatedPlan[mappedSectionId][activeFieldKey] = `${currentValue}\n${formattedOptions}`;
+        } else {
+          updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
+        }
       }
     });
     
     setLocalBirthPlan(updatedPlan);
-    setSelectedQuestionOptions({});
+    setSelectedOptions({});
     
     toast({
       description: "As opções selecionadas foram adicionadas ao seu plano de parto."
@@ -223,39 +212,125 @@ export function BirthPlanEditor({
     return relevantQuestions.length > 0;
   };
   
-  const renderQuestionOptions = (question: any, answer: any) => {
+  // Inicializar as opções selecionáveis para uma pergunta
+  const initializeSelectableOptions = (questionId: string, answer: any) => {
+    // Para respostas de checkbox que já são objetos
+    if (typeof answer === 'object' && !Array.isArray(answer)) {
+      return { ...answer };
+    }
+    
+    // Para respostas de radio ou texto
+    if (typeof answer === 'string') {
+      const question = findQuestionById(questionId)?.question;
+      if (!question || !question.options) return {};
+      
+      // Criar um objeto com todas as opções como false, exceto a selecionada
+      const options: Record<string, boolean> = {};
+      question.options.forEach(option => {
+        options[option] = option === answer;
+      });
+      return options;
+    }
+    
+    return {};
+  };
+  
+  // Renderiza as opções selecionáveis para uma pergunta
+  const renderSelectableOptions = (question: any, questionId: string) => {
     if (!question.options || question.options.length === 0) {
       return null;
     }
     
-    if (typeof answer === 'object' && !Array.isArray(answer)) {
+    // Para perguntas do tipo radio
+    if (question.type === 'radio') {
       return (
-        <div className="ml-8 mt-2 space-y-2">
+        <div className="space-y-2 ml-8 mt-2">
           {question.options.map((option: string) => {
-            const isSelected = answer[option] === true;
+            const isSelected = selectedOptions[questionId]?.[option] || false;
             return (
-              <div key={option} className="flex items-center gap-2">
-                <div className={`h-4 w-4 border ${isSelected ? 'bg-maternal-500 border-maternal-500' : 'border-gray-300'} rounded-sm`} />
-                <span className={`text-sm ${isSelected ? 'font-medium' : 'text-gray-600'}`}>{option}</span>
+              <div key={option} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`option-${questionId}-${option}`}
+                  checked={isSelected}
+                  onCheckedChange={(checked) => {
+                    // Para radio, desmarca os outros
+                    const newOptions: Record<string, boolean> = {};
+                    question.options.forEach((opt: string) => {
+                      newOptions[opt] = opt === option ? !!checked : false;
+                    });
+                    
+                    setSelectedOptions(prev => ({
+                      ...prev,
+                      [questionId]: newOptions
+                    }));
+                  }}
+                />
+                <Label 
+                  htmlFor={`option-${questionId}-${option}`}
+                  className={`text-sm ${isSelected ? 'font-medium' : 'text-gray-600'}`}
+                >
+                  {option}
+                </Label>
               </div>
             );
           })}
         </div>
       );
-    } else if (typeof answer === 'string') {
-      return (
-        <div className="ml-8 mt-2">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 rounded-full border border-maternal-500 bg-maternal-500 flex items-center justify-center">
-              <div className="h-2 w-2 rounded-full bg-white" />
-            </div>
-            <span className="text-sm font-medium">{answer}</span>
-          </div>
-        </div>
-      );
     }
     
-    return null;
+    // Para perguntas do tipo checkbox
+    return (
+      <div className="space-y-2 ml-8 mt-2">
+        {question.options.map((option: string) => {
+          const isSelected = selectedOptions[questionId]?.[option] || false;
+          return (
+            <div key={option} className="flex items-center space-x-2">
+              <Checkbox
+                id={`option-${questionId}-${option}`}
+                checked={isSelected}
+                onCheckedChange={(checked) => {
+                  setSelectedOptions(prev => ({
+                    ...prev,
+                    [questionId]: {
+                      ...prev[questionId],
+                      [option]: !!checked
+                    }
+                  }));
+                }}
+              />
+              <Label 
+                htmlFor={`option-${questionId}-${option}`}
+                className={`text-sm ${isSelected ? 'font-medium' : 'text-gray-600'}`}
+              >
+                {option}
+              </Label>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+  
+  // Função para resetar as opções selecionadas quando o usuário abre o diálogo
+  const resetOptionsForField = (fieldKey: string) => {
+    setActiveFieldKey(fieldKey);
+    
+    // Inicializa as opções com base nas respostas existentes do questionário
+    const relevantQuestions = getRelevantQuestionsForField(fieldKey);
+    const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
+    
+    relevantQuestions.forEach(({ question }) => {
+      const questionId = question.id;
+      const answer = questionnaireAnswers[questionId];
+      
+      if (answer !== undefined) {
+        initialSelectedOptions[questionId] = initializeSelectableOptions(questionId, answer);
+      }
+    });
+    
+    setSelectedOptions(initialSelectedOptions);
+    console.log("Opening dialog for field:", fieldKey);
+    console.log("Initial selected options:", initialSelectedOptions);
   };
   
   return (
@@ -283,7 +358,6 @@ export function BirthPlanEditor({
         {activeSection.fields.map((field) => {
           const sectionData = localBirthPlan[activeSection.id] || {};
           const fieldValue = sectionData[field.key] || '';
-          const relevantQuestions = getRelevantQuestionsForField(field.key);
           const showAddButton = shouldShowAddButton(field.key);
           
           return (
@@ -303,11 +377,7 @@ export function BirthPlanEditor({
                         variant="outline" 
                         size="sm"
                         className="flex items-center gap-1 border-maternal-300 text-maternal-600 text-xs"
-                        onClick={() => {
-                          setActiveFieldKey(field.key);
-                          setSelectedQuestionOptions({});
-                          console.log("Opening dialog for field:", field.key);
-                        }}
+                        onClick={() => resetOptionsForField(field.key)}
                       >
                         <Plus className="h-3 w-3" /> Adicionar do Questionário
                       </Button>
@@ -321,49 +391,17 @@ export function BirthPlanEditor({
                       </DialogHeader>
                       
                       <div className="max-h-[60vh] overflow-y-auto py-4">
-                        {relevantQuestions.length > 0 ? (
-                          relevantQuestions.map(({ question }) => {
-                            const answer = questionnaireAnswers[question.id];
-                            let displayValue = '';
-                            
-                            if (typeof answer === 'object' && !Array.isArray(answer)) {
-                              const selectedOptions = Object.entries(answer)
-                                .filter(([_, selected]) => selected)
-                                .map(([option]) => option);
-                                
-                              displayValue = selectedOptions.join(', ');
-                            } else if (Array.isArray(answer)) {
-                              displayValue = answer.join(', ');
-                            } else {
-                              displayValue = String(answer || '');
-                            }
+                        {getRelevantQuestionsForField(field.key).length > 0 ? (
+                          getRelevantQuestionsForField(field.key).map(({ question }) => {
+                            const questionId = question.id;
                             
                             return (
-                              <div key={question.id} className="flex items-start space-x-2 py-2 border-b border-gray-100">
-                                <Checkbox 
-                                  id={`add-${question.id}`}
-                                  checked={!!selectedQuestionOptions[question.id]}
-                                  onCheckedChange={(checked) => {
-                                    setSelectedQuestionOptions(prev => ({
-                                      ...prev,
-                                      [question.id]: checked
-                                    }));
-                                  }}
-                                  className="mt-1"
-                                />
-                                <div className="grid gap-1.5 leading-none">
-                                  <Label htmlFor={`add-${question.id}`} className="font-medium">
-                                    {question.text}
-                                  </Label>
-                                  
-                                  {renderQuestionOptions(question, answer)}
-                                  
-                                  {!question.options && displayValue && (
-                                    <p className="text-sm text-gray-500 mt-1">
-                                      {displayValue}
-                                    </p>
-                                  )}
+                              <div key={questionId} className="py-3 border-b border-gray-100">
+                                <div className="font-medium text-maternal-900">
+                                  {question.text}
                                 </div>
+                                
+                                {renderSelectableOptions(question, questionId)}
                               </div>
                             );
                           })
@@ -379,7 +417,7 @@ export function BirthPlanEditor({
                           <Button variant="outline">Cancelar</Button>
                         </DialogClose>
                         <DialogClose asChild>
-                          <Button onClick={() => handleAddQuestionnaireOptionsForField(activeFieldKey)}>Adicionar Selecionados</Button>
+                          <Button onClick={handleAddSelectedOptions}>Adicionar Selecionados</Button>
                         </DialogClose>
                       </DialogFooter>
                     </DialogContent>
@@ -451,3 +489,4 @@ export function BirthPlanEditor({
     </div>
   );
 }
+
