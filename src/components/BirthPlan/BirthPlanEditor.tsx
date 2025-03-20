@@ -32,6 +32,7 @@ export function BirthPlanEditor({
     dialogOpen,
     setDialogOpen,
     completedSections,
+    setCompletedSections,
     handleFieldChange,
     goToPreviousSection,
     goToNextSection,

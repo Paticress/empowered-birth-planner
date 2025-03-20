@@ -95,6 +95,7 @@ export function useEditorState(
     dialogOpen,
     setDialogOpen,
     completedSections,
+    setCompletedSections,
     handleFieldChange,
     goToPreviousSection,
     goToNextSection,
