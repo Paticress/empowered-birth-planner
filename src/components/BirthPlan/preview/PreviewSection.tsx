@@ -14,7 +14,7 @@ export function PreviewSection({ sectionId, title, fields, sectionData }: Previe
   return (
     <div className="mb-8 print:mb-3 print:break-inside-avoid">
       <div className="flex items-center gap-2 mb-4 print:mb-2">
-        {SectionIcon && <SectionIcon className="h-5 w-5 text-maternal-700 print:text-black print:inline-block" />}
+        {SectionIcon && <SectionIcon className="h-5 w-5 text-maternal-700 print:text-black print:inline-block" style={{display: 'inline-block !important'}} />}
         <h2 className="text-2xl font-semibold text-maternal-800 print:text-lg print:font-bold">{title}</h2>
       </div>
       

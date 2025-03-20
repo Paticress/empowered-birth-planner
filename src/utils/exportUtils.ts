@@ -21,17 +21,21 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       // First add a print class to the body to apply print styles
       document.body.classList.add('print-preview-mode');
       
+      // Create a temporary container with proper margins
+      const container = document.createElement('div');
+      container.style.width = '210mm'; // A4 width
+      container.style.padding = '20mm'; // Add margins
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.background = '#fff';
+      document.body.appendChild(container);
+      
       // Create a temporary clone with styling for PDF
       const clone = element.cloneNode(true) as HTMLElement;
-      clone.style.width = '800px';
-      clone.style.padding = '20px';
-      clone.style.position = 'absolute';
-      clone.style.left = '-9999px';
-      clone.style.top = '0';
-      clone.style.background = '#fff';
       
-      // Add logo and print title manually
-      const printTitle = document.querySelector('.print\\:block') as HTMLElement;
+      // Add print title manually
+      const printTitle = document.querySelector('.print\\:block');
       if (printTitle) {
         const printTitleClone = printTitle.cloneNode(true) as HTMLElement;
         printTitleClone.classList.remove('hidden');
@@ -39,36 +43,40 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
         clone.prepend(printTitleClone);
       }
       
-      // Add print footer manually
-      const printFooter = document.querySelector('.print\\:block') as HTMLElement;
-      if (printFooter && printFooter !== printTitle) {
-        const printFooterClone = printFooter.cloneNode(true) as HTMLElement;
-        printFooterClone.classList.remove('hidden');
-        printFooterClone.style.display = 'block';
-        clone.appendChild(printFooterClone);
-      }
-      
-      // Hide elements that should be hidden in print
-      Array.from(clone.querySelectorAll('.print\\:hidden')).forEach(el => {
+      // Hide elements with print:hidden class
+      Array.from(clone.querySelectorAll('.print\\:hidden, .info-alert, .preview-footer, .links-rapidos')).forEach(el => {
         (el as HTMLElement).style.display = 'none';
       });
       
-      // Show elements that should be visible in print
+      // Show elements with print:block class
       Array.from(clone.querySelectorAll('.hidden.print\\:block')).forEach(el => {
         (el as HTMLElement).style.display = 'block';
       });
       
-      document.body.appendChild(clone);
+      // Make sure SVG icons are visible
+      Array.from(clone.querySelectorAll('svg')).forEach(el => {
+        (el as SVGElement).style.display = 'inline-block';
+        (el as SVGElement).style.visibility = 'visible';
+      });
       
-      const canvas = await html2canvas(clone, {
+      // Apply print styles to content
+      Array.from(clone.querySelectorAll('.bg-maternal-50')).forEach(el => {
+        (el as HTMLElement).style.backgroundColor = 'transparent';
+        (el as HTMLElement).style.padding = '0';
+        (el as HTMLElement).style.borderRadius = '0';
+      });
+      
+      container.appendChild(clone);
+      
+      const canvas = await html2canvas(container, {
         scale: 2, // Higher scale for better quality
         useCORS: true, // Allow images from other domains
         logging: false,
         backgroundColor: '#ffffff',
       });
       
-      // Clean up the temporary clone and remove print class
-      document.body.removeChild(clone);
+      // Clean up the temporary elements and remove print class
+      document.body.removeChild(container);
       document.body.classList.remove('print-preview-mode');
       
       const imgData = canvas.toDataURL('image/png');
@@ -76,23 +84,33 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
+        compress: true,
       });
       
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+      // A4 dimensions with margins
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 15; // 1.5cm margin
       
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      const contentWidth = pageWidth - (margin * 2);
+      const contentHeight = pageHeight - (margin * 2);
+      
+      const imgWidth = contentWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = margin; // Start with top margin
+      
+      // Add first page with content
+      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - (margin * 2));
       
       // Add multiple pages if content is longer than one page
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
+      while (heightLeft > 0) {
+        position = margin - (pageHeight - (margin * 2) - heightLeft);
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+        heightLeft -= (pageHeight - (margin * 2));
       }
       
       pdf.save(filename);

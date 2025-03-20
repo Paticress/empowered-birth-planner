@@ -43,8 +43,10 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       
       <PrintFooter />
       
-      <div className="print:hidden">
+      <div className="print:hidden info-alert">
         <InfoAlert />
+      </div>
+      <div className="print:hidden preview-footer">
         <PreviewFooter onEdit={onEdit} onNext={onNext} />
       </div>
       
