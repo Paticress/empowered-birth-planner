@@ -19,7 +19,7 @@ export const birthPlanSections = [
       { key: 'hospitalPhone', label: 'Telefone da Maternidade' },
       { key: 'pediatrician', label: 'Pediatra Neonatal' },
       { key: 'pediatricianContact', label: 'Telefone do Pediatra' },
-      { key: 'pediatricianRegistry', label: 'Registro Profissional do Pediatra (CRM)' },
+      { key: 'pediatricianRegistry', label: 'Registro Profissional (CRM)' },
       { key: 'midwife', label: 'Enfermeira Obstetriz' },
       { key: 'midwifeContact', label: 'Telefone da Enfermeira Obstetriz' },
       { key: 'midwifeRegistry', label: 'Registro Profissional (COREN)' },
