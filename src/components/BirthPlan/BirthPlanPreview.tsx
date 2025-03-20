@@ -8,9 +8,10 @@ import { PrintFooter } from './preview/PrintFooter';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { birthPlanSections } from './utils/birthPlanSections';
+import { BirthPlanData } from './types/questionnaire';
 
 interface BirthPlanPreviewProps {
-  birthPlan: Record<string, any>;
+  birthPlan: BirthPlanData;
   onEdit: () => void;
   onNext: () => void;
 }
@@ -18,6 +19,8 @@ interface BirthPlanPreviewProps {
 export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreviewProps) {
   // Debug log to check if birth plan data is available
   console.log("Birth plan data in Preview component:", birthPlan);
+  
+  const personalInfo = birthPlan.personalInfo || {};
   
   return (
     <div className="animate-fade-in">
@@ -27,7 +30,7 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         id="birth-plan-preview" 
         className="bg-white border border-gray-200 rounded-lg p-6 print:p-0 print:border-0 print:shadow-none"
       >
-        <PrintTitle name={birthPlan.personalInfo?.name} />
+        <PrintTitle personName={personalInfo.name} />
         
         <div className="print:hidden">
           <p className="text-lg mb-6">
@@ -51,7 +54,7 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         {/* Personal information section */}
         <PreviewSection 
           title="Informações Pessoais" 
-          data={birthPlan.personalInfo || {}}
+          content={birthPlan.personalInfo || {}}
           sectionId="personalInfo"
         />
         
@@ -62,7 +65,7 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
             <PreviewSection 
               key={section.id}
               title={section.title} 
-              data={birthPlan[section.id] || {}}
+              content={birthPlan[section.id] || {}}
               sectionId={section.id}
             />
           ))

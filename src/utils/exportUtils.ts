@@ -1,4 +1,3 @@
-
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, ImageRun, Table, TableRow, TableCell } from 'docx';
@@ -452,11 +451,18 @@ const generatePersonalInfoSection = (personalInfo: Record<string, any>) => {
 const generateBirthPlanSections = (birthPlan: Record<string, any>) => {
   const children: Paragraph[] = [];
   
-  // Map section IDs to display names
+  // Map section IDs to display names in Portuguese
   const sectionNameMap: Record<string, string> = {
     personalInfo: 'Informações Pessoais',
-    laborPreferences: 'Preferências para o Trabalho de Parto',
-    atmosphere: 'Ambiente e Acompanhamento',
+    atmosfera: 'Atmosfera e Ambiente',
+    trabalhoDeParto: 'Trabalho de Parto',
+    nascimento: 'Nascimento',
+    cesarea: 'Em Caso de Cesárea',
+    posParto: 'Pós-Parto',
+    situacoesEspeciais: 'Situações Especiais',
+    // Legacy names - keeping for backward compatibility
+    atmosphere: 'Atmosfera e Ambiente',
+    laborPreferences: 'Trabalho de Parto',
     painManagement: 'Alívio da Dor',
     delivery: 'Parto',
     newborn: 'Cuidados com o Recém-Nascido',
@@ -471,7 +477,7 @@ const generateBirthPlanSections = (birthPlan: Record<string, any>) => {
       return;
     }
     
-    // Add section title
+    // Add section title in Portuguese
     children.push(
       new Paragraph({
         text: sectionNameMap[sectionKey] || sectionKey,
@@ -483,15 +489,23 @@ const generateBirthPlanSections = (birthPlan: Record<string, any>) => {
       })
     );
     
+    // Debug log to see which fields we're processing
+    console.log(`Processing section ${sectionKey} with data:`, sectionData);
+    
     // Add each field in the section
     Object.entries(sectionData as Record<string, any>).forEach(([key, value]) => {
       if (!value) return;
+      
+      // Find the display label for this field from birthPlanSections
+      const section = birthPlanSections.find(s => s.id === sectionKey);
+      const fieldDef = section?.fields.find(f => f.key === key);
+      const fieldLabel = fieldDef?.label || key;
       
       children.push(
         new Paragraph({
           children: [
             new TextRun({
-              text: key,
+              text: fieldLabel,
               bold: true,
             }),
           ],
@@ -575,7 +589,7 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
               ],
               width: {
                 size: 50,
-                type: "pct", // Changed from "percentage" to "pct"
+                type: "pct",
               },
             }),
             new TableCell({
@@ -612,7 +626,7 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
               ],
               width: {
                 size: 50,
-                type: "pct", // Changed from "percentage" to "pct"
+                type: "pct",
               },
             }),
           ],
@@ -653,7 +667,7 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
               ],
               width: {
                 size: 50,
-                type: "pct", // Changed from "percentage" to "pct"
+                type: "pct",
               },
             }),
             new TableCell({
@@ -690,7 +704,7 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
               ],
               width: {
                 size: 50,
-                type: "pct", // Changed from "percentage" to "pct"
+                type: "pct",
               },
             }),
           ],
@@ -698,9 +712,8 @@ const generateSignatureSection = (personalInfo: Record<string, any>) => {
       ],
       width: {
         size: 100,
-        type: "pct", // Changed from "percentage" to "pct" 
+        type: "pct",
       },
     }),
   ];
 };
-
