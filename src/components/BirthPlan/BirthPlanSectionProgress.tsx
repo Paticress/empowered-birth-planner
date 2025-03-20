@@ -9,7 +9,9 @@ import {
   Baby, 
   Stethoscope, 
   Heart, 
-  AlertCircle
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
 
 type Section = {
@@ -25,6 +27,8 @@ interface BirthPlanSectionProgressProps {
   onSectionClick: (index: number) => void;
   stageType: 'questionnaire' | 'editor';
   completedSections?: string[];
+  onPrevious?: () => void;
+  onNext?: () => void;
 }
 
 export function BirthPlanSectionProgress({
@@ -32,7 +36,9 @@ export function BirthPlanSectionProgress({
   currentSectionIndex,
   onSectionClick,
   stageType,
-  completedSections = []
+  completedSections = [],
+  onPrevious,
+  onNext
 }: BirthPlanSectionProgressProps) {
   // Calculate progress percentage based on completed sections or current index
   const calculateProgress = () => {
@@ -76,18 +82,48 @@ export function BirthPlanSectionProgress({
   return (
     <div className="mb-6 print:hidden">
       <div className="max-w-6xl mx-auto mb-2">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-maternal-800">Seu progresso</span>
-          <span className="text-sm font-medium text-maternal-800" aria-live="polite">{Math.round(progress)}%</span>
-        </div>
-        <Progress 
-          value={progress} 
-          className="h-2.5 bg-maternal-100" 
-          indicatorClassName="bg-maternal-500"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={progress}
-        />
+        {/* Only show progress bar for questionnaire stage */}
+        {stageType === 'questionnaire' && (
+          <>
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-maternal-800">Seu progresso</span>
+              <span className="text-sm font-medium text-maternal-800" aria-live="polite">{Math.round(progress)}%</span>
+            </div>
+            <Progress 
+              value={progress} 
+              className="h-2.5 bg-maternal-100" 
+              indicatorClassName="bg-maternal-500"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+            />
+          </>
+        )}
+        
+        {/* Navigation buttons for editor top section */}
+        {stageType === 'editor' && onPrevious && onNext && (
+          <div className="flex justify-between mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onPrevious}
+              disabled={currentSectionIndex === 0}
+              className="flex items-center border-maternal-300 text-maternal-700 hover:bg-maternal-50"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Seção Anterior
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onNext}
+              disabled={currentSectionIndex === sections.length - 1}
+              className="flex items-center border-maternal-300 text-maternal-700 hover:bg-maternal-50"
+            >
+              Próxima Seção <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        )}
         
         <div className="flex justify-between mt-4 gap-2 overflow-x-auto pb-2">
           {sections.map((section, index) => {

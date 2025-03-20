@@ -53,6 +53,20 @@ export function BirthPlanEditor({
     });
   };
   
+  // Navigate to previous section
+  const goToPreviousSection = () => {
+    if (activeSectionIndex > 0) {
+      setActiveSectionIndex(activeSectionIndex - 1);
+    }
+  };
+  
+  // Navigate to next section
+  const goToNextSection = () => {
+    if (activeSectionIndex < birthPlanSections.length - 1) {
+      setActiveSectionIndex(activeSectionIndex + 1);
+    }
+  };
+  
   // Verifica se a seção está completa com base nos campos preenchidos
   const checkSectionCompletion = (sectionId: string, plan: Record<string, any>) => {
     const section = birthPlanSections.find(section => section.id === sectionId);
@@ -152,6 +166,8 @@ export function BirthPlanEditor({
         onSectionClick={setActiveSectionIndex}
         stageType="editor"
         completedSections={completedSections}
+        onPrevious={goToPreviousSection}
+        onNext={goToNextSection}
       />
       
       <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-6 mb-6 shadow-md`}>
