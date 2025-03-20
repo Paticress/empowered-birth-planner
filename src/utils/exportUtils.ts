@@ -18,6 +18,9 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
     }
     
     try {
+      // First add a print class to the body to apply print styles
+      document.body.classList.add('print-preview-mode');
+      
       // Create a temporary clone with styling for PDF
       const clone = element.cloneNode(true) as HTMLElement;
       clone.style.width = '800px';
@@ -27,10 +30,32 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       clone.style.top = '0';
       clone.style.background = '#fff';
       
-      // Make hidden elements visible in the clone
-      clone.classList.remove('hidden');
-      Array.from(clone.querySelectorAll('.hidden')).forEach(el => {
-        (el as HTMLElement).classList.remove('hidden');
+      // Add logo and print title manually
+      const printTitle = document.querySelector('.print\\:block') as HTMLElement;
+      if (printTitle) {
+        const printTitleClone = printTitle.cloneNode(true) as HTMLElement;
+        printTitleClone.classList.remove('hidden');
+        printTitleClone.style.display = 'block';
+        clone.prepend(printTitleClone);
+      }
+      
+      // Add print footer manually
+      const printFooter = document.querySelector('.print\\:block') as HTMLElement;
+      if (printFooter && printFooter !== printTitle) {
+        const printFooterClone = printFooter.cloneNode(true) as HTMLElement;
+        printFooterClone.classList.remove('hidden');
+        printFooterClone.style.display = 'block';
+        clone.appendChild(printFooterClone);
+      }
+      
+      // Hide elements that should be hidden in print
+      Array.from(clone.querySelectorAll('.print\\:hidden')).forEach(el => {
+        (el as HTMLElement).style.display = 'none';
+      });
+      
+      // Show elements that should be visible in print
+      Array.from(clone.querySelectorAll('.hidden.print\\:block')).forEach(el => {
+        (el as HTMLElement).style.display = 'block';
       });
       
       document.body.appendChild(clone);
@@ -42,8 +67,9 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
         backgroundColor: '#ffffff',
       });
       
-      // Clean up the temporary clone
+      // Clean up the temporary clone and remove print class
       document.body.removeChild(clone);
+      document.body.classList.remove('print-preview-mode');
       
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
