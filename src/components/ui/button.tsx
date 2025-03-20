@@ -19,8 +19,8 @@ const buttonVariants = cva(
           "bg-secondary text-white hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        // Navigation buttons (uniform style)
-        navigation: "bg-white text-maternal-900 border border-maternal-200 hover:bg-gray-200 hover:text-maternal-900",
+        // Navigation buttons (uniform style with white text)
+        navigation: "bg-maternal-600 text-white border border-maternal-700 hover:bg-maternal-700 hover:text-white",
         // Progress tab buttons
         "progress-active": "bg-maternal-100 text-maternal-900 hover:bg-maternal-100/80",
         // Resource buttons with better visibility

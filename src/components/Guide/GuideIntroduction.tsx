@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 
@@ -66,7 +65,8 @@ export function GuideIntroduction({ onNext }: GuideIntroductionProps) {
       <div className="mt-8 text-center">
         <Button 
           onClick={onNext}
-          className="bg-maternal-600 hover:bg-maternal-700 flex items-center mx-auto"
+          variant="navigation"
+          className="flex items-center mx-auto"
         >
           Próximo: Como Estruturar seu Plano de Parto <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
