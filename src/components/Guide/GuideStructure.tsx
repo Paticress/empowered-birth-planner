@@ -110,7 +110,8 @@ export function GuideStructure({ onPrevious, onNext }: GuideStructureProps) {
         
         <Button 
           onClick={onNext}
-          className="bg-maternal-600 hover:bg-maternal-700 flex items-center"
+          variant="navigation"
+          className="flex items-center"
         >
           Próximo: Seus Direitos <ChevronRight className="ml-2 h-4 w-4" />
         </Button>

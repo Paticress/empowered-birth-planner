@@ -121,7 +121,8 @@ export function GuideRights({ onPrevious, onNext }: GuideRightsProps) {
         
         <Button 
           onClick={onNext}
-          className="bg-maternal-600 hover:bg-maternal-700 flex items-center"
+          variant="navigation"
+          className="flex items-center"
         >
           Próximo: Comunicação Eficaz <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
