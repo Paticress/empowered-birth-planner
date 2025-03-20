@@ -10,9 +10,9 @@ import {
   shouldShowAddButton,
   getSingleLineFields
 } from './editor/editorUtils';
-import { SectionNavigation } from './editor/SectionNavigation';
 import { EditorField } from './editor/EditorField';
 import { EditorFooter } from './editor/EditorFooter';
+import { BirthPlanSectionProgress } from './BirthPlanSectionProgress';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -34,16 +34,49 @@ export function BirthPlanEditor({
   const [selectedOptions, setSelectedOptions] = useState<Record<string, Record<string, boolean>>>({});
   const [activeFieldKey, setActiveFieldKey] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [completedSections, setCompletedSections] = useState<string[]>([]);
   
   const handleFieldChange = (sectionId: string, fieldKey: string, value: any) => {
-    setLocalBirthPlan(prevPlan => ({
-      ...prevPlan,
-      [sectionId]: {
-        ...prevPlan[sectionId],
-        [fieldKey]: value,
-      },
-    }));
+    setLocalBirthPlan(prevPlan => {
+      const updatedPlan = {
+        ...prevPlan,
+        [sectionId]: {
+          ...prevPlan[sectionId],
+          [fieldKey]: value,
+        },
+      };
+      
+      // Marcar seção como concluída se todos os campos obrigatórios estiverem preenchidos
+      checkSectionCompletion(sectionId, updatedPlan);
+      
+      return updatedPlan;
+    });
   };
+  
+  // Verifica se a seção está completa com base nos campos preenchidos
+  const checkSectionCompletion = (sectionId: string, plan: Record<string, any>) => {
+    const section = birthPlanSections.find(section => section.id === sectionId);
+    if (!section) return;
+    
+    // Uma seção é considerada completa se pelo menos 3 campos estiverem preenchidos
+    const filledFields = section.fields.filter(field => {
+      const value = plan[sectionId]?.[field.key];
+      return value && value.trim() !== '';
+    });
+    
+    if (filledFields.length >= 3 && !completedSections.includes(sectionId)) {
+      setCompletedSections(prev => [...prev, sectionId]);
+    } else if (filledFields.length < 3 && completedSections.includes(sectionId)) {
+      setCompletedSections(prev => prev.filter(id => id !== sectionId));
+    }
+  };
+  
+  // Inicializar seções completas na montagem do componente
+  useEffect(() => {
+    birthPlanSections.forEach(section => {
+      checkSectionCompletion(section.id, localBirthPlan);
+    });
+  }, []);
   
   const handleSave = () => {
     onUpdate(localBirthPlan);
@@ -95,6 +128,9 @@ export function BirthPlanEditor({
       updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
       setLocalBirthPlan(updatedPlan);
       
+      // Verificar se a seção foi concluída após adicionar opções
+      checkSectionCompletion(mappedSectionId, updatedPlan);
+      
       toast("As opções selecionadas foram adicionadas ao seu plano de parto.");
     } else {
       toast("Nenhuma opção foi selecionada.");
@@ -110,10 +146,12 @@ export function BirthPlanEditor({
     <div className="animate-fade-in">
       <h1 className="text-3xl font-bold text-maternal-800 mb-6">Edite seu Plano de Parto</h1>
       
-      <SectionNavigation 
-        birthPlanSections={birthPlanSections}
-        activeSectionIndex={activeSectionIndex}
-        setActiveSectionIndex={setActiveSectionIndex}
+      <BirthPlanSectionProgress 
+        sections={birthPlanSections}
+        currentSectionIndex={activeSectionIndex}
+        onSectionClick={setActiveSectionIndex}
+        stageType="editor"
+        completedSections={completedSections}
       />
       
       <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-6 mb-6 shadow-md`}>

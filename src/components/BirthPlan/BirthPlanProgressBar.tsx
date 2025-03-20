@@ -8,6 +8,11 @@ type BirthPlanProgressBarProps = {
 };
 
 export function BirthPlanProgressBar({ currentStage }: BirthPlanProgressBarProps) {
+  // Não exibir a barra de progresso durante as fases de questionário e editor
+  if (currentStage === 'questionnaire' || currentStage === 'editor') {
+    return null;
+  }
+  
   // Calcula o progresso com base no estágio atual
   const getProgress = (stage: BuilderStage): number => {
     switch (stage) {

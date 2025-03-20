@@ -1,6 +1,8 @@
+
 import { useState } from 'react';
 import { QuestionnaireSection } from './QuestionnaireSection';
 import { questionnaireSections } from './questionnaire';
+import { BirthPlanSectionProgress } from './BirthPlanSectionProgress';
 
 interface BirthPlanQuestionnaireProps {
   onSubmit: (data: Record<string, any>) => void;
@@ -9,6 +11,7 @@ interface BirthPlanQuestionnaireProps {
 export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps) {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [completedSections, setCompletedSections] = useState<string[]>([]);
   
   const currentSection = questionnaireSections[currentSectionIndex];
   const isFirstSection = currentSectionIndex === 0;
@@ -29,6 +32,11 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
     console.log("Updated form data:", updatedFormData);
     setFormData(updatedFormData);
     
+    // Mark this section as completed
+    if (!completedSections.includes(currentSection.id)) {
+      setCompletedSections([...completedSections, currentSection.id]);
+    }
+    
     if (isLastSection) {
       // If this is the last section, submit the complete form
       console.log("Final form submission:", updatedFormData);
@@ -47,14 +55,34 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
     }
   };
   
+  const handleSectionClick = (index: number) => {
+    // Only allow navigating to completed sections or the current + 1 section
+    if (completedSections.includes(questionnaireSections[index].id) || 
+        index === currentSectionIndex || 
+        index === currentSectionIndex + 1 && completedSections.includes(questionnaireSections[currentSectionIndex].id)) {
+      setCurrentSectionIndex(index);
+      window.scrollTo(0, 0);
+    }
+  };
+  
   return (
-    <QuestionnaireSection
-      section={currentSection}
-      onNext={handleSectionSubmit}
-      onPrevious={goToPreviousSection}
-      isFirstSection={isFirstSection}
-      isLastSection={isLastSection}
-      initialData={formData}
-    />
+    <>
+      <BirthPlanSectionProgress 
+        sections={questionnaireSections}
+        currentSectionIndex={currentSectionIndex}
+        onSectionClick={handleSectionClick}
+        stageType="questionnaire"
+        completedSections={completedSections}
+      />
+      
+      <QuestionnaireSection
+        section={currentSection}
+        onNext={handleSectionSubmit}
+        onPrevious={goToPreviousSection}
+        isFirstSection={isFirstSection}
+        isLastSection={isLastSection}
+        initialData={formData}
+      />
+    </>
   );
 }

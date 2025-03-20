@@ -12,6 +12,8 @@ interface SectionNavigationProps {
   setActiveSectionIndex: (index: number) => void;
 }
 
+// Esta função foi substituída pelo BirthPlanSectionProgress em BirthPlanEditor.tsx
+// Mantida apenas para compatibilidade com código existente
 export function SectionNavigation({
   birthPlanSections,
   activeSectionIndex,
