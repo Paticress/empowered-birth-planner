@@ -38,6 +38,7 @@ export function BirthPlanEditor({
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [localBirthPlan, setLocalBirthPlan] = useState({ ...birthPlan });
   const [selectedQuestionOptions, setSelectedQuestionOptions] = useState<Record<string, any>>({});
+  const [activeFieldKey, setActiveFieldKey] = useState<string>('');
   
   const handleFieldChange = (sectionId: string, fieldKey: string, value: any) => {
     setLocalBirthPlan(prevPlan => ({
@@ -98,8 +99,8 @@ export function BirthPlanEditor({
     return String(data);
   };
 
-  // Adicionar opções selecionadas do questionário ao plano
-  const handleAddQuestionnaireOptions = () => {
+  // Adicionar opções selecionadas do questionário ao plano para um campo específico
+  const handleAddQuestionnaireOptionsForField = (fieldKey: string) => {
     const updatedPlan = { ...localBirthPlan };
     
     Object.entries(selectedQuestionOptions).forEach(([questionId, isSelected]) => {
@@ -115,65 +116,6 @@ export function BirthPlanEditor({
       // Obter o valor da resposta do questionário
       const answer = questionnaireAnswers[questionId];
       if (!answer && answer !== false) return;
-      
-      // Determinar em qual campo do plano isso deve ir
-      let fieldKey = '';
-      switch (questionId) {
-        case 'lighting':
-        case 'sound':
-        case 'photos':
-          fieldKey = questionId;
-          break;
-        case 'clothing':
-          fieldKey = 'clothing';
-          break;
-        case 'mobility':
-        case 'positions':
-        case 'hydration':
-        case 'monitoring':
-          fieldKey = questionId;
-          break;
-        case 'painRelief':
-        case 'interventions':
-          fieldKey = 'interventions';
-          break;
-        case 'birthPositions':
-        case 'episiotomy':
-        case 'cordCutting':
-        case 'skinToSkin':
-        case 'placenta':
-          fieldKey = questionId;
-          break;
-        case 'cesareanPreferences':
-        case 'anesthesia':
-        case 'cesareanCompanion':
-        case 'curtain':
-        case 'cesareanSkinToSkin':
-          fieldKey = questionId;
-          break;
-        case 'firstHour':
-        case 'breastfeeding':
-        case 'newbornCare':
-        case 'vaccination':
-        case 'motherCare':
-          fieldKey = questionId;
-          break;
-        case 'complications':
-        case 'nicu':
-        case 'specialWishes':
-          fieldKey = questionId;
-          break;
-        default:
-          // Para campos de texto simples, use o ID da pergunta como chave
-          fieldKey = questionId;
-      }
-      
-      if (!fieldKey) return;
-      
-      // Se o mapeamento não for encontrado, use um padrão baseado na pergunta
-      if (!updatedPlan[mappedSectionId]) {
-        updatedPlan[mappedSectionId] = {};
-      }
       
       // Formato da resposta
       const formattedAnswer = formatSelectedOptions(questionId, answer);
@@ -209,47 +151,75 @@ export function BirthPlanEditor({
     return null;
   };
 
-  // Encontrar questões relevantes para a seção atual
-  const getRelevantQuestionsForSection = () => {
-    const sectionId = activeSection.id;
-    const mappedQuestionnaireIds: string[] = [];
+  // Encontrar questões relevantes para um campo específico
+  const getRelevantQuestionsForField = (fieldKey: string) => {
+    // Mapeamento de chaves de campo para IDs de perguntas relevantes
+    const fieldToQuestionMap: Record<string, string[]> = {
+      // personalInfo
+      'name': ['name'],
+      'dueDate': ['dueDate'],
+      'healthProvider': ['healthProvider'],
+      'hospital': ['hospital'],
+      'doula': ['doula', 'doulaName'],
+      'companions': ['companions'],
+      
+      // atmosfera
+      'lighting': ['lighting'],
+      'sound': ['sound'],
+      'clothing': ['clothing'],
+      'photos': ['photos'],
+      
+      // trabalhoDeParto
+      'mobility': ['mobility'],
+      'positions': ['positions'],
+      'hydration': ['hydration'],
+      'monitoring': ['monitoring'],
+      'interventions': ['painRelief', 'interventions', 'informedConsent'],
+      
+      // nascimento
+      'birthPositions': ['birthPositions'],
+      'episiotomy': ['episiotomy'],
+      'cordCutting': ['cordCutting'],
+      'skinToSkin': ['skinToSkin'],
+      'placenta': ['placenta'],
+      
+      // cesarea
+      'cesareanPreferences': ['cesareanPreferences'],
+      'anesthesia': ['anesthesia'],
+      'cesareanCompanion': ['cesareanCompanion'],
+      'curtain': ['curtain'],
+      'cesareanSkinToSkin': ['cesareanSkinToSkin'],
+      
+      // posParto
+      'firstHour': ['firstHour'],
+      'breastfeeding': ['breastfeeding'],
+      'newbornCare': ['newbornCare'],
+      'vaccination': ['vaccination'],
+      'motherCare': ['motherCare'],
+      
+      // situacoesEspeciais
+      'complications': ['complications', 'cascadeInterventions'],
+      'nicu': ['nicu'],
+      'emergencyScenarios': ['unexpectedScenarios'],
+      'specialWishes': ['specialWishes']
+    };
     
-    // Mapeamento inverso para encontrar seções de questionário relacionadas
-    Object.entries({
-      'personalInfo': ['personal'],
-      'atmosfera': ['atmosphere'],
-      'trabalhoDeParto': ['laborPreferences'],
-      'nascimento': ['birth'],
-      'cesarea': ['cesarean'],
-      'posParto': ['postpartum'],
-      'situacoesEspeciais': ['specialSituations']
-    }).forEach(([planSectionId, questionnaireSectionIds]) => {
-      if (planSectionId === sectionId) {
-        mappedQuestionnaireIds.push(...questionnaireSectionIds);
-      }
-    });
-    
-    // Obter todas as perguntas relevantes
+    const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
     const relevantQuestions: Array<{question: any, sectionId: string}> = [];
-    mappedQuestionnaireIds.forEach(qSectionId => {
-      const section = questionnaireSections.find(s => s.id === qSectionId);
-      if (section) {
-        section.questions.forEach(question => {
-          // Adicione apenas perguntas respondidas
-          if (questionnaireAnswers[question.id] !== undefined) {
-            relevantQuestions.push({
-              question,
-              sectionId: section.id
-            });
-          }
-        });
+    
+    for (const section of questionnaireSections) {
+      for (const question of section.questions) {
+        if (relevantQuestionIds.includes(question.id) && questionnaireAnswers[question.id] !== undefined) {
+          relevantQuestions.push({
+            question,
+            sectionId: section.id
+          });
+        }
       }
-    });
+    }
     
     return relevantQuestions;
   };
-  
-  const relevantQuestions = getRelevantQuestionsForSection();
   
   return (
     <div className="animate-fade-in">
@@ -271,95 +241,101 @@ export function BirthPlanEditor({
       </div>
       
       <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-6 mb-6 shadow-md`}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold text-maternal-700">{activeSection.title}</h2>
-          
-          {relevantQuestions.length > 0 && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2 border-maternal-300 text-maternal-700">
-                  <Plus className="h-4 w-4" /> Adicionar do Questionário
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Adicionar Itens do Questionário</DialogTitle>
-                  <DialogDescription>
-                    Selecione as respostas do questionário que deseja adicionar ao seu plano de parto.
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="max-h-[60vh] overflow-y-auto py-4">
-                  {relevantQuestions.map(({ question }) => {
-                    const answer = questionnaireAnswers[question.id];
-                    let displayValue = '';
-                    
-                    // Formatar o valor de exibição com base no tipo de resposta
-                    if (typeof answer === 'object' && !Array.isArray(answer)) {
-                      // Resposta de checkbox
-                      const selectedOptions = Object.entries(answer)
-                        .filter(([_, selected]) => selected)
-                        .map(([option]) => option);
-                        
-                      displayValue = selectedOptions.join(', ');
-                    } else if (Array.isArray(answer)) {
-                      displayValue = answer.join(', ');
-                    } else {
-                      displayValue = String(answer || '');
-                    }
-                    
-                    return (
-                      <div key={question.id} className="flex items-start space-x-2 py-2 border-b border-gray-100">
-                        <Checkbox 
-                          id={`add-${question.id}`}
-                          checked={!!selectedQuestionOptions[question.id]}
-                          onCheckedChange={(checked) => {
-                            setSelectedQuestionOptions(prev => ({
-                              ...prev,
-                              [question.id]: checked
-                            }));
-                          }}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                          <Label htmlFor={`add-${question.id}`} className="font-medium">
-                            {question.text}
-                          </Label>
-                          {displayValue && (
-                            <p className="text-sm text-gray-500 mt-1">
-                              {displayValue}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancelar</Button>
-                  </DialogClose>
-                  <DialogClose asChild>
-                    <Button onClick={handleAddQuestionnaireOptions}>Adicionar Selecionados</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
+        <h2 className="text-2xl font-semibold text-maternal-700 mb-4">{activeSection.title}</h2>
         
         {activeSection.fields.map((field) => {
           const sectionData = localBirthPlan[activeSection.id] || {};
           const fieldValue = sectionData[field.key] || '';
+          const relevantQuestions = getRelevantQuestionsForField(field.key);
           
           return (
-            <div key={field.key} className="mb-6">
-              <label 
-                htmlFor={`${activeSection.id}-${field.key}`} 
-                className="block font-medium text-maternal-800 mb-2"
-              >
-                {field.label}
-              </label>
+            <div key={field.key} className="mb-6 border border-maternal-100 rounded-lg p-4 bg-maternal-50/30">
+              <div className="flex justify-between items-center mb-2">
+                <label 
+                  htmlFor={`${activeSection.id}-${field.key}`} 
+                  className="block font-medium text-maternal-800"
+                >
+                  {field.label}
+                </label>
+                
+                {relevantQuestions.length > 0 && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex items-center gap-1 border-maternal-300 text-maternal-600 text-xs"
+                        onClick={() => setActiveFieldKey(field.key)}
+                      >
+                        <Plus className="h-3 w-3" /> Adicionar do Questionário
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Adicionar Respostas do Questionário</DialogTitle>
+                        <DialogDescription>
+                          Selecione as opções do questionário para adicionar ao campo "{field.label}".
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="max-h-[60vh] overflow-y-auto py-4">
+                        {relevantQuestions.map(({ question }) => {
+                          const answer = questionnaireAnswers[question.id];
+                          let displayValue = '';
+                          
+                          // Formatar o valor de exibição com base no tipo de resposta
+                          if (typeof answer === 'object' && !Array.isArray(answer)) {
+                            // Resposta de checkbox
+                            const selectedOptions = Object.entries(answer)
+                              .filter(([_, selected]) => selected)
+                              .map(([option]) => option);
+                              
+                            displayValue = selectedOptions.join(', ');
+                          } else if (Array.isArray(answer)) {
+                            displayValue = answer.join(', ');
+                          } else {
+                            displayValue = String(answer || '');
+                          }
+                          
+                          return (
+                            <div key={question.id} className="flex items-start space-x-2 py-2 border-b border-gray-100">
+                              <Checkbox 
+                                id={`add-${question.id}`}
+                                checked={!!selectedQuestionOptions[question.id]}
+                                onCheckedChange={(checked) => {
+                                  setSelectedQuestionOptions(prev => ({
+                                    ...prev,
+                                    [question.id]: checked
+                                  }));
+                                }}
+                              />
+                              <div className="grid gap-1.5 leading-none">
+                                <Label htmlFor={`add-${question.id}`} className="font-medium">
+                                  {question.text}
+                                </Label>
+                                {displayValue && (
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    {displayValue}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancelar</Button>
+                        </DialogClose>
+                        <DialogClose asChild>
+                          <Button onClick={() => handleAddQuestionnaireOptionsForField(activeFieldKey)}>Adicionar Selecionados</Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
               
               <Textarea
                 id={`${activeSection.id}-${field.key}`}
