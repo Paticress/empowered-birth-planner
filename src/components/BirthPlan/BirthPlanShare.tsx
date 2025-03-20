@@ -16,6 +16,9 @@ interface BirthPlanShareProps {
 export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   
+  // Debug log to check birth plan data
+  console.log("Birth plan data in Share component:", birthPlan);
+  
   const handleCopyText = () => {
     const text = createShareableText(birthPlan);
     
@@ -44,6 +47,17 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
   };
   
   const handleExportWord = () => {
+    if (!birthPlan) {
+      toast("Dados do plano de parto não disponíveis.");
+      return;
+    }
+    
+    // Ensure we have valid birth plan data before attempting export
+    if (Object.keys(birthPlan).length === 0) {
+      toast("Dados do plano de parto insuficientes para gerar um documento.");
+      return;
+    }
+    
     exportAsWord(birthPlan, 'meu-plano-de-parto.docx')
       .then(() => {
         toast("Documento Word gerado com sucesso!");

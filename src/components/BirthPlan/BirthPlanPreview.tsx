@@ -1,13 +1,13 @@
 
-import { birthPlanSections } from './utils/birthPlanSections';
-import { BackToTopButton } from './common/BackToTopButton';
 import { PreviewHeader } from './preview/PreviewHeader';
-import { PrintTitle } from './preview/PrintTitle';
 import { PreviewSection } from './preview/PreviewSection';
 import { SignatureSection } from './preview/SignatureSection';
-import { PrintFooter } from './preview/PrintFooter';
-import { InfoAlert } from './preview/InfoAlert';
 import { PreviewFooter } from './preview/PreviewFooter';
+import { PrintTitle } from './preview/PrintTitle';
+import { PrintFooter } from './preview/PrintFooter';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { birthPlanSections } from './utils/birthPlanSections';
 
 interface BirthPlanPreviewProps {
   birthPlan: Record<string, any>;
@@ -16,52 +16,80 @@ interface BirthPlanPreviewProps {
 }
 
 export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreviewProps) {
-  // Get personal info for the signature section
-  const personalInfo = birthPlan.personalInfo || {};
+  // Debug log to check if birth plan data is available
+  console.log("Birth plan data in Preview component:", birthPlan);
   
   return (
     <div className="animate-fade-in">
-      {/* Only show in screen view, not in print */}
-      <div className="print:hidden">
-        <PreviewHeader title="Visualização do Plano de Parto" />
-      </div>
+      <PreviewHeader title="Visualização do Plano de Parto" birthPlan={birthPlan} />
       
-      {/* Only show in print view */}
-      <div className="hidden print:block print:mb-6">
-        <PrintTitle />
-      </div>
-      
-      {/* Main content - visible in both screen and print */}
-      <div id="birth-plan-preview" className="bg-white border border-gray-200 rounded-lg p-6 print:p-0 print:border-0">
-        {birthPlanSections.map((section) => (
-          <PreviewSection
-            key={section.id}
-            sectionId={section.id}
-            title={section.title}
-            fields={section.fields}
-            sectionData={birthPlan[section.id] || {}}
-          />
-        ))}
+      <div 
+        id="birth-plan-preview" 
+        className="bg-white border border-gray-200 rounded-lg p-6 print:p-0 print:border-0 print:shadow-none"
+      >
+        <PrintTitle name={birthPlan.personalInfo?.name} />
         
-        <SignatureSection personalInfo={personalInfo} />
-      </div>
-      
-      {/* Only show in print view */}
-      <div className="hidden print:block print:mt-6">
+        <div className="print:hidden">
+          <p className="text-lg mb-6">
+            Esta é a versão final do seu plano de parto. Revise cuidadosamente todas as seções
+            e verifique se estão de acordo com seus desejos e necessidades.
+          </p>
+        </div>
+        
+        {/* Alert with disclaimer */}
+        <div className="bg-maternal-50 p-4 rounded-lg border-l-4 border-maternal-400 my-6 print:my-4 print:text-sm">
+          <p className="font-medium text-maternal-900">
+            Este documento reflete minhas preferências para o parto e nascimento do meu bebê. Ele foi elaborado após 
+            cuidadosa pesquisa e reflexão, em colaboração com meu parceiro e equipe de saúde. Compreendo que 
+            situações imprevistas podem surgir durante o trabalho de parto, e que a saúde e bem-estar do 
+            bebê e meu são prioridade. Peço gentilmente que, na ausência de emergências médicas, minhas 
+            escolhas sejam respeitadas, e que quaisquer intervenções necessárias sejam discutidas comigo 
+            antes de serem realizadas.
+          </p>
+        </div>
+        
+        {/* Personal information section */}
+        <PreviewSection 
+          title="Informações Pessoais" 
+          data={birthPlan.personalInfo || {}}
+          sectionId="personalInfo"
+        />
+        
+        {/* All other sections */}
+        {birthPlanSections
+          .filter(section => section.id !== 'personalInfo')
+          .map(section => (
+            <PreviewSection 
+              key={section.id}
+              title={section.title} 
+              data={birthPlan[section.id] || {}}
+              sectionId={section.id}
+            />
+          ))
+        }
+        
+        {/* Signature section */}
+        <SignatureSection personalInfo={birthPlan.personalInfo || {}} />
+        
+        {/* Footer only visible in print */}
         <PrintFooter />
       </div>
       
-      {/* Screen-only elements - ensure these are properly hidden in print */}
-      <div className="print:hidden">
-        <InfoAlert />
-      </div>
-      
-      <div className="print:hidden">
-        <PreviewFooter onEdit={onEdit} onNext={onNext} />
-      </div>
-      
-      <div className="print:hidden">
-        <BackToTopButton />
+      <div className="flex justify-between mt-8 print:hidden">
+        <Button 
+          variant="outline"
+          onClick={onEdit}
+          className="flex items-center"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar e Editar
+        </Button>
+        
+        <Button 
+          onClick={onNext}
+          className="flex items-center bg-maternal-600 hover:bg-maternal-700"
+        >
+          Compartilhar <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

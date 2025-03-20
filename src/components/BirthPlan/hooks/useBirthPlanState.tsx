@@ -17,6 +17,10 @@ export function useBirthPlanState() {
 
   // Function to move to the next stage
   const goToNextStage = () => {
+    // Log current state before transitioning
+    console.log("Current stage before transition:", currentStage);
+    console.log("Birth plan content before transition:", birthPlanContent);
+    
     switch (currentStage) {
       case 'welcome':
         setCurrentStage('questionnaire');
@@ -41,6 +45,10 @@ export function useBirthPlanState() {
 
   // Function to move to a specific stage
   const goToStage = (stage: BuilderStage) => {
+    // Log before changing stage
+    console.log(`Changing from stage ${currentStage} to ${stage}`);
+    console.log("Birth plan content during stage change:", birthPlanContent);
+    
     setCurrentStage(stage);
   };
 

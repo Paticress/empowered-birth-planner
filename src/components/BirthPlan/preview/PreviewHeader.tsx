@@ -51,6 +51,9 @@ export function PreviewHeader({ title, birthPlan }: PreviewHeaderProps) {
       return;
     }
     
+    // Debug log to check if birth plan data is available
+    console.log("Birth plan data being sent to Word export:", birthPlan);
+    
     toast({
       title: "Download Iniciado",
       description: "Seu plano de parto está sendo baixado como documento Word."
