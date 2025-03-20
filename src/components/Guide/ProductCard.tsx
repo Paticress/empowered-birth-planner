@@ -10,6 +10,8 @@ interface ProductCardProps {
   buttonText: string;
   buttonIcon: ReactNode;
   url: string;
+  imageSrc: string;
+  imageAlt: string;
 }
 
 export function ProductCard({
@@ -18,21 +20,30 @@ export function ProductCard({
   description,
   buttonText,
   buttonIcon,
-  url
+  url,
+  imageSrc,
+  imageAlt
 }: ProductCardProps) {
   return (
-    <Card className="border-maternal-200 hover:border-maternal-300 transition-all duration-300">
+    <Card className="border-maternal-200 overflow-hidden hover:shadow-md transition-all duration-300">
+      <div className="h-64 overflow-hidden">
+        <img 
+          src={imageSrc}
+          alt={imageAlt}
+          className="w-full h-full object-cover"
+        />
+      </div>
       <CardHeader className="pb-3">
-        <CardTitle className="text-maternal-800">{title}</CardTitle>
+        <CardTitle className="text-xl font-semibold text-maternal-800">{title}</CardTitle>
         <CardDescription>{subtitle}</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-maternal-700 mb-4">
+        <p className="text-maternal-700 mb-4 text-sm">
           {description}
         </p>
         <Button 
           className="w-full"
-          variant="resource-highlight"
+          variant="resource"
           onClick={() => window.open(url, '_blank')}
         >
           {buttonIcon} {buttonText}
