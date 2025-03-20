@@ -1,4 +1,3 @@
-
 import { 
   FormControl,
   FormField,
@@ -13,7 +12,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Question } from './types/questionnaire';
 import { Control } from 'react-hook-form';
-import { Info } from 'lucide-react';
 
 interface QuestionFieldProps {
   question: Question;
@@ -28,17 +26,13 @@ export function QuestionField({ question, errors, control }: QuestionFieldProps)
         <FormLabel className="block font-medium text-maternal-900">
           {question.text} {question.isRequired && <span className="text-red-500">*</span>}
         </FormLabel>
-        
-        {question.description && (
-          <div className="relative group">
-            <Info size={16} className="text-maternal-500 cursor-help mt-1" />
-            <div className="absolute left-0 w-64 p-2 mt-2 text-xs bg-white border rounded-md shadow-sm 
-                           opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-              {question.description}
-            </div>
-          </div>
-        )}
       </div>
+      
+      {question.description && (
+        <div className="text-sm text-maternal-600 italic mb-2">
+          {question.description}
+        </div>
+      )}
       
       {question.type === 'text' && (
         <TextQuestion question={question} control={control} />
@@ -67,7 +61,6 @@ export function QuestionField({ question, errors, control }: QuestionFieldProps)
   );
 }
 
-// Specialized components for each question type
 function TextQuestion({ question, control }: { question: Question; control: Control<Record<string, any>, any> }) {
   return (
     <FormField
@@ -151,7 +144,7 @@ function CheckboxQuestion({ question, control }: { question: Question; control: 
                   id={`${question.id}-${option}`}
                   checked={field.value}
                   onCheckedChange={field.onChange}
-                  className="rounded-sm" // This ensures checkboxes are square
+                  className="rounded-sm"
                 />
               </FormControl>
               <label
