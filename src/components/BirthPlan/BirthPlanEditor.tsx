@@ -55,14 +55,12 @@ export function BirthPlanEditor({
     toast("Seu plano de parto foi atualizado com sucesso.");
   };
   
-  // Scroll to top when section changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeSectionIndex]);
   
   const activeSection = birthPlanSections[activeSectionIndex];
 
-  // Função para mapear seções do questionário para seções do plano de parto
   const mapQuestionnaireToSectionId = (questionnaireId: string): string => {
     const mapping: Record<string, string> = {
       'personal': 'personalInfo',
@@ -76,13 +74,14 @@ export function BirthPlanEditor({
     return mapping[questionnaireId] || questionnaireId;
   };
 
-  // Função para encontrar questões relevantes para um campo específico
   const getRelevantQuestionsForField = (fieldKey: string) => {
     const fieldToQuestionMap: Record<string, string[]> = {
       'name': ['name'],
       'dueDate': ['dueDate'],
       'healthProvider': ['healthProvider'],
+      'birthLocation': ['birthLocation'],
       'hospital': ['hospital'],
+      'midwife': ['midwife', 'midwifeName', 'midwifeRegistry'],
       'doula': ['doula', 'doulaName'],
       'companions': ['companions'],
       
@@ -150,7 +149,6 @@ export function BirthPlanEditor({
     return relevantQuestions.length > 0;
   };
   
-  // Ajuda a encontrar a pergunta pelo ID
   const findQuestionById = (questionId: string) => {
     for (const section of questionnaireSections) {
       const question = section.questions.find(q => q.id === questionId);
@@ -161,7 +159,6 @@ export function BirthPlanEditor({
     return null;
   };
   
-  // Função para obter os valores das respostas do questionário para um determinado campo
   const getQuestionnaireValueForField = (fieldKey: string): string[] => {
     const relevantQuestions = getRelevantQuestionsForField(fieldKey);
     let selectedValues: string[] = [];
@@ -172,14 +169,12 @@ export function BirthPlanEditor({
       
       if (answer) {
         if (typeof answer === 'object' && !Array.isArray(answer)) {
-          // Handle checkbox answers
           Object.entries(answer).forEach(([option, selected]) => {
             if (selected) {
               selectedValues.push(option);
             }
           });
         } else if (typeof answer === 'string') {
-          // Handle string answers
           selectedValues.push(answer);
         }
       }
@@ -188,17 +183,13 @@ export function BirthPlanEditor({
     return selectedValues;
   };
   
-  // Analisa o conteúdo atual do campo para determinar quais opções estão selecionadas
   const parseCurrentFieldOptions = (fieldKey: string, sectionId: string): string[] => {
     const currentValue = localBirthPlan[sectionId][fieldKey] || '';
     return parseOptionsFromText(currentValue);
   };
   
-  // Inicializar as opções selecionáveis com base no conteúdo atual do campo e respostas do questionário
   const initializeOptionsFromCurrentField = (fieldKey: string, sectionId: string) => {
-    // Obter as opções atualmente presentes no campo
     const currentFieldOptions = parseCurrentFieldOptions(fieldKey, sectionId);
-    // Obter questões relevantes para este campo
     const relevantQuestions = getRelevantQuestionsForField(fieldKey);
     
     const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
@@ -209,11 +200,8 @@ export function BirthPlanEditor({
       
       if (question.options) {
         question.options.forEach((option: string) => {
-          // Marcar como selecionado se estiver no conteúdo atual do campo
-          // OU se estiver nas respostas originais do questionário (para questões do tipo checkbox)
           let isSelected = currentFieldOptions.includes(option);
           
-          // Verificar também respostas do questionário para questões do tipo checkbox
           const answer = questionnaireAnswers[questionId];
           if (typeof answer === 'object' && !Array.isArray(answer) && answer[option]) {
             isSelected = true;
@@ -227,11 +215,9 @@ export function BirthPlanEditor({
     return initialSelectedOptions;
   };
   
-  // Adicionar opções selecionadas ao plano para um campo específico
   const handleAddSelectedOptions = () => {
     const updatedPlan = { ...localBirthPlan };
     
-    // Extrair todas as opções selecionadas de todas as perguntas relevantes
     const allSelectedOptions: string[] = [];
     
     Object.entries(selectedOptions).forEach(([questionId, options]) => {
@@ -244,11 +230,9 @@ export function BirthPlanEditor({
       }
     });
     
-    // Se há opções selecionadas, atualizar o campo
     if (allSelectedOptions.length > 0) {
       const formattedOptions = allSelectedOptions.join(', ');
       
-      // Mapear a seção do questionário para a seção correspondente no plano
       const mappedSectionId = mapQuestionnaireToSectionId(
         Object.keys(selectedOptions).map(id => findQuestionById(id)?.sectionId || '')[0]
       );
@@ -265,11 +249,9 @@ export function BirthPlanEditor({
     setDialogOpen(false);
   };
   
-  // Resetar as opções selecionadas quando o usuário abre o diálogo
   const resetOptionsForField = (fieldKey: string) => {
     setActiveFieldKey(fieldKey);
     
-    // Inicializa as opções com base no conteúdo atual do campo e respostas do questionário
     const initialSelectedOptions = initializeOptionsFromCurrentField(
       fieldKey, 
       activeSection.id
@@ -279,7 +261,6 @@ export function BirthPlanEditor({
     setDialogOpen(true);
   };
   
-  // Renderiza as opções selecionáveis para uma pergunta
   const renderSelectableOptions = (question: any, questionId: string) => {
     if (!question.options || question.options.length === 0) {
       return null;
@@ -317,10 +298,11 @@ export function BirthPlanEditor({
     );
   };
   
-  // Campos que devem usar o componente Input (uma linha) em vez de Textarea
   const singleLineFields = [
-    'name', 'dueDate', 'healthProvider', 'healthProviderRegistry', 
-    'hospital', 'hospitalPhone', 'doula', 'doulaContact', 'doulaRegistry'
+    'name', 'dueDate', 'healthProvider', 'healthProviderContact', 'healthProviderRegistry', 
+    'birthLocation', 'hospital', 'hospitalAddress', 'hospitalPhone', 
+    'midwife', 'midwifeContact', 'midwifeRegistry',
+    'doula', 'doulaContact', 'doulaRegistry'
   ];
   
   return (

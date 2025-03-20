@@ -35,12 +35,19 @@ export const createShareableText = (birthPlan: Record<string, any>) => {
   let text = `MEU PLANO DE PARTO\n\n`;
   text += `Nome: ${personalInfo.name || 'Não informado'}\n`;
   text += `Data prevista: ${personalInfo.dueDate || 'Não informada'}\n`;
-  text += `Hospital/Maternidade: ${personalInfo.hospital || 'Não informado'}\n`;
+  text += `Local planejado para o parto: ${personalInfo.birthLocation || 'Não informado'}\n`;
+  text += `Hospital/Maternidade de referência: ${personalInfo.hospital || 'Não informado'}\n`;
   text += `Endereço: ${personalInfo.hospitalAddress || 'Não informado'}\n`;
   text += `Telefone: ${personalInfo.hospitalPhone || 'Não informado'}\n`;
   text += `Médico/Obstetra: ${personalInfo.healthProvider || 'Não informado'}\n`;
   text += `Telefone: ${personalInfo.healthProviderContact || 'Não informado'}\n`;
   text += `CRM: ${personalInfo.healthProviderRegistry || 'Não informado'}\n`;
+  
+  if (personalInfo.midwife) {
+    text += `Enfermeira Obstetriz: ${personalInfo.midwife || 'Não informada'}\n`;
+    text += `Telefone: ${personalInfo.midwifeContact || 'Não informado'}\n`;
+    text += `COREN: ${personalInfo.midwifeRegistry || 'Não informado'}\n`;
+  }
   
   if (personalInfo.doula) {
     text += `Doula: ${personalInfo.doula || 'Não informada'}\n`;
@@ -74,9 +81,16 @@ export const createShareableText = (birthPlan: Record<string, any>) => {
   text += `___________________________        ___________________________\n`;
   text += `${personalInfo.name || 'Gestante'}                 ${personalInfo.healthProvider || 'Médico/Obstetra'}\n`;
   text += `                                   CRM: ${personalInfo.healthProviderRegistry || '_________'}\n\n`;
+  
+  // Add enfermeira obstetriz and doula signatures
   text += `___________________________        ___________________________\n`;
-  text += `Enfermeira Obstétrica              ${personalInfo.doula || 'Doula'}\n`;
-  text += `COREN: _________                 Certificação: ${personalInfo.doulaRegistry || '_________'}`;
+  if (personalInfo.midwife) {
+    text += `${personalInfo.midwife || 'Enfermeira Obstetriz'}            ${personalInfo.doula || 'Doula'}\n`;
+    text += `COREN: ${personalInfo.midwifeRegistry || '_________'}       Certificação: ${personalInfo.doulaRegistry || '_________'}`;
+  } else {
+    text += `Enfermeira Obstétrica              ${personalInfo.doula || 'Doula'}\n`;
+    text += `COREN: _________                 Certificação: ${personalInfo.doulaRegistry || '_________'}`;
+  }
   
   return text;
 };
