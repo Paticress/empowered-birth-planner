@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import { OnlineGuide } from "./components/Guide/OnlineGuide";
 import GuiaGratuito from "./pages/GuiaGratuito";
 import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
+import { BirthPlanSuccess } from "./components/BirthPlan/BirthPlanSuccess";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,15 @@ const App = () => {
                 <>
                   {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
                   <BirthPlanBuilder />
+                </>
+              } 
+            />
+            <Route 
+              path="/plano-concluido" 
+              element={
+                <>
+                  {console.log("ROUTE /plano-concluido ACCESSED - RENDERING SUCCESS PAGE")}
+                  <BirthPlanSuccess />
                 </>
               } 
             />

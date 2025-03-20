@@ -42,14 +42,14 @@ export function EditorFooter({
             handleSave();
             onNext();
           }}
-          className="bg-maternal-400 hover:bg-maternal-500 flex items-center"
+          className="bg-maternal-600 hover:bg-maternal-700 flex items-center"
         >
           Visualizar Plano Completo <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
       ) : (
         <Button 
           onClick={() => setActiveSectionIndex(Math.min(birthPlanSectionLength - 1, activeSectionIndex + 1))}
-          className="bg-maternal-400 hover:bg-maternal-500 flex items-center"
+          className="bg-maternal-600 hover:bg-maternal-700 flex items-center"
         >
           Próxima Seção <ChevronRight className="ml-2 h-4 w-4" />
         </Button>

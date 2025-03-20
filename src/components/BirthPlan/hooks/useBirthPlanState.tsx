@@ -3,8 +3,11 @@ import { useState } from 'react';
 import { BuilderStage, BirthPlanData } from '../types/questionnaire';
 import { generateEmptyBirthPlan, generateBirthPlanFromAnswers } from '../utils/birthPlanGenerationUtils';
 import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export function useBirthPlanState() {
+  const navigate = useNavigate();
+  
   // State for the current stage of the birth plan builder
   const [currentStage, setCurrentStage] = useState<BuilderStage>('welcome');
   // State to store questionnaire answers
@@ -26,6 +29,10 @@ export function useBirthPlanState() {
         break;
       case 'preview':
         setCurrentStage('share');
+        break;
+      case 'share':
+        // Navigate to success page when completed
+        navigate('/plano-concluido');
         break;
       default:
         break;
