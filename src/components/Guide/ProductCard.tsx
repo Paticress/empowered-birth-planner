@@ -26,12 +26,13 @@ export function ProductCard({
 }: ProductCardProps) {
   return (
     <Card className="border-maternal-200 overflow-hidden hover:shadow-md transition-all duration-300">
-      <div className="h-64 overflow-hidden">
+      <div className="h-64 overflow-hidden relative">
         <img 
           src={imageSrc}
           alt={imageAlt}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-50"></div>
       </div>
       <CardHeader className="pb-3">
         <CardTitle className="text-xl font-semibold text-maternal-800">{title}</CardTitle>
