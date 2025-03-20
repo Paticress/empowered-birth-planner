@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { ShareOption } from './ShareOption';
 import { EmailShareDialog } from './EmailShareDialog';
 import { createShareableText } from './utils/birthPlanUtils';
-import { exportAsPDF, exportAsText } from '@/utils/exportUtils';
+import { exportAsPDF, exportAsText, exportAsWord } from '@/utils/exportUtils';
 
 interface BirthPlanShareProps {
   birthPlan: Record<string, any>;
@@ -39,7 +39,18 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
       })
       .catch((error) => {
         console.error("Erro ao gerar PDF:", error);
-        toast("Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.");
+        toast("Ocorreu um erro ao gerar o PDF. Por favor, tente exportar como documento Word.");
+      });
+  };
+  
+  const handleExportWord = () => {
+    exportAsWord(birthPlan, 'meu-plano-de-parto.docx')
+      .then(() => {
+        toast("Documento Word gerado com sucesso!");
+      })
+      .catch((error) => {
+        console.error("Erro ao gerar documento Word:", error);
+        toast("Ocorreu um erro ao gerar o documento Word. Por favor, tente novamente.");
       });
   };
   
@@ -58,22 +69,20 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
   };
   
   const handleShareViaWhatsApp = () => {
-    // Render content before exporting
-    renderBirthPlanForExport(birthPlan);
+    // Create a simple text message for WhatsApp with a mention of the already generated document
+    const message = encodeURIComponent("Olá! Compartilho com você meu plano de parto. Acabei de gerar um documento editável.");
+    const whatsappUrl = `https://wa.me/?text=${message}`;
     
-    // First generate and save the PDF
-    exportAsPDF('birth-plan-content', 'meu-plano-de-parto.pdf')
+    // First generate the Word document
+    exportAsWord(birthPlan, 'meu-plano-de-parto.docx')
       .then(() => {
-        // Then create a simple text message for WhatsApp
-        const message = encodeURIComponent("Olá! Compartilho com você meu plano de parto. Acabei de gerar o PDF.");
-        const whatsappUrl = `https://wa.me/?text=${message}`;
-        
+        // Then open WhatsApp
         window.open(whatsappUrl, '_blank');
-        toast("PDF gerado e pronto para compartilhamento no WhatsApp.");
+        toast("Documento Word gerado e pronto para compartilhamento no WhatsApp.");
       })
       .catch((error) => {
-        console.error("Erro ao exportar PDF para WhatsApp:", error);
-        toast("Não foi possível gerar o PDF para compartilhamento.");
+        console.error("Erro ao exportar documento Word para WhatsApp:", error);
+        toast("Não foi possível gerar o documento para compartilhamento.");
       });
   };
   
@@ -341,8 +350,8 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
         
         <div className="bg-maternal-50 p-4 rounded-lg border-l-4 border-maternal-400 my-6">
           <p className="font-medium text-maternal-900 mb-0">
-            <strong>Dica:</strong> Compartilhe seu plano de parto com seu médico/obstetra pelo menos um mês antes da sua data prevista.
-            Isso dará tempo suficiente para discutir quaisquer ajustes necessários.
+            <strong>Dica:</strong> Exporte seu plano de parto como documento Word para poder editá-lo 
+            conforme suas necessidades específicas antes de compartilhar com sua equipe médica.
           </p>
         </div>
       </div>
@@ -355,7 +364,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
         <h2 className="text-2xl font-semibold text-maternal-800 mb-6">Opções de Compartilhamento</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ShareOption
             icon={Copy}
             title="Copiar Texto"
@@ -365,9 +374,9 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
           
           <ShareOption
             icon={FileText}
-            title="Exportar PDF"
-            description="Salve como documento PDF"
-            onClick={handleExportPDF}
+            title="Word (Editável)"
+            description="Salve como documento editável"
+            onClick={handleExportWord}
           />
           
           <ShareOption
@@ -389,6 +398,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
       <div className="bg-maternal-100 p-6 rounded-lg mb-8">
         <h3 className="text-xl font-semibold text-maternal-800 mb-4">Próximos Passos</h3>
         <ol className="list-decimal pl-5 space-y-2 mb-0">
+          <li>Abra o documento Word e personalize-o conforme necessário</li>
           <li>Discuta seu plano com seu parceiro ou acompanhante de parto</li>
           <li>Agende uma consulta com seu médico para discutir o plano</li>
           <li>Faça as alterações recomendadas pelo seu médico, se necessário</li>
@@ -411,7 +421,7 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
       <EmailShareDialog 
         open={emailDialogOpen} 
         onOpenChange={setEmailDialogOpen} 
-        onExportPDF={handleExportPDF}
+        onExportPDF={handleExportWord} // Changed to export Word instead of PDF
       />
     </div>
   );

@@ -1,14 +1,15 @@
 
 import { Button } from '@/components/ui/button';
-import { Printer, Download } from 'lucide-react';
+import { Printer, Download, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { exportAsPDF } from '@/utils/exportUtils';
+import { exportAsPDF, exportAsWord } from '@/utils/exportUtils';
 
 interface PreviewHeaderProps {
   title: string;
+  birthPlan?: Record<string, any>;
 }
 
-export function PreviewHeader({ title }: PreviewHeaderProps) {
+export function PreviewHeader({ title, birthPlan }: PreviewHeaderProps) {
   // Functions to handle printing and downloading
   const handlePrint = () => {
     toast({
@@ -19,7 +20,7 @@ export function PreviewHeader({ title }: PreviewHeaderProps) {
     window.print();
   };
   
-  const handleDownload = () => {
+  const handleDownloadPDF = () => {
     toast({
       title: "Download Iniciado",
       description: "Seu plano de parto está sendo baixado como PDF."
@@ -36,7 +37,37 @@ export function PreviewHeader({ title }: PreviewHeaderProps) {
         console.error("Erro ao exportar PDF:", error);
         toast({
           title: "Erro no Download",
-          description: "Ocorreu um erro ao gerar o PDF. Por favor, tente novamente."
+          description: "Ocorreu um erro ao gerar o PDF. Por favor, tente baixar como documento Word."
+        });
+      });
+  };
+  
+  const handleDownloadWord = () => {
+    if (!birthPlan) {
+      toast({
+        title: "Erro no Download",
+        description: "Dados do plano de parto não disponíveis."
+      });
+      return;
+    }
+    
+    toast({
+      title: "Download Iniciado",
+      description: "Seu plano de parto está sendo baixado como documento Word."
+    });
+    
+    exportAsWord(birthPlan, 'meu-plano-de-parto.docx')
+      .then(() => {
+        toast({
+          title: "Download Concluído",
+          description: "Seu plano de parto foi baixado com sucesso como documento Word."
+        });
+      })
+      .catch((error) => {
+        console.error("Erro ao exportar Word:", error);
+        toast({
+          title: "Erro no Download",
+          description: "Ocorreu um erro ao gerar o documento Word. Por favor, tente novamente."
         });
       });
   };
@@ -56,10 +87,18 @@ export function PreviewHeader({ title }: PreviewHeaderProps) {
         
         <Button 
           variant="outline" 
-          onClick={handleDownload}
+          onClick={handleDownloadPDF}
           className="flex items-center"
         >
-          <Download className="mr-2 h-4 w-4" /> Baixar PDF
+          <Download className="mr-2 h-4 w-4" /> PDF
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          onClick={handleDownloadWord}
+          className="flex items-center"
+        >
+          <FileText className="mr-2 h-4 w-4" /> Word
         </Button>
       </div>
     </div>
