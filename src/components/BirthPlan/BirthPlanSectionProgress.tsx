@@ -49,7 +49,6 @@ export function BirthPlanSectionProgress({
   };
 
   const progress = calculateProgress();
-  const isLastSection = currentSectionIndex === sections.length - 1;
   
   // Get icon based on section id
   const getSectionIcon = (sectionId: string) => {
@@ -114,16 +113,15 @@ export function BirthPlanSectionProgress({
               <ArrowLeft className="mr-2 h-4 w-4" /> Seção Anterior
             </Button>
             
-            {!isLastSection ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onNext}
-                className="flex items-center border-maternal-300 text-maternal-700 hover:bg-maternal-50"
-              >
-                Próxima Seção <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : null}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onNext}
+              disabled={currentSectionIndex === sections.length - 1}
+              className="flex items-center border-maternal-300 text-maternal-700 hover:bg-maternal-50"
+            >
+              Próxima Seção <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         )}
         

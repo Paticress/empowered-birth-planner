@@ -17,8 +17,6 @@ export function EditorFooter({
   onNext,
   setActiveSectionIndex
 }: EditorFooterProps) {
-  const isLastSection = activeSectionIndex === birthPlanSectionLength - 1;
-
   return (
     <div className="flex justify-between mt-8">
       <Button 
@@ -38,7 +36,7 @@ export function EditorFooter({
         <Save className="mr-2 h-4 w-4" /> Salvar Alterações
       </Button>
       
-      {isLastSection ? (
+      {activeSectionIndex === birthPlanSectionLength - 1 ? (
         <Button 
           onClick={() => {
             handleSave();
@@ -46,7 +44,7 @@ export function EditorFooter({
           }}
           className="bg-maternal-400 hover:bg-maternal-500 flex items-center"
         >
-          Ver Plano <ChevronRight className="ml-2 h-4 w-4" />
+          Visualizar Plano Completo <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
       ) : (
         <Button 
