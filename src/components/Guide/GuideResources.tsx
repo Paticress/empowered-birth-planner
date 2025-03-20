@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { 
   ArrowLeft, 
@@ -60,7 +59,6 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
     <div className="animate-fade-in">
       <h1 className="text-3xl font-bold text-maternal-900 mb-6">Recursos Adicionais</h1>
       
-      {/* Enhanced Birth Plan Builder CTA Section */}
       <div className="bg-gradient-to-r from-maternal-100 to-maternal-50 p-6 rounded-xl border border-maternal-200 mb-8 shadow-md">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="mb-6 md:mb-0 md:mr-6 md:w-2/3">
@@ -109,7 +107,6 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           Confira também estes recursos adicionais para aprofundar ainda mais seus conhecimentos sobre o plano de parto.
         </p>
         
-        {/* Single resource card for Procedures Guide */}
         <div className="mb-8">
           <ResourceCard 
             title="Guia de Procedimentos"
@@ -128,13 +125,10 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           />
         </div>
         
-        {/* Exibição do Guia de Procedimentos quando clicado */}
         {showProceduresGuide && <ProceduresGuide onClose={() => setShowProceduresGuide(false)} />}
         
-        {/* Consulta Acolhedora */}
         <ConsultationSection />
         
-        {/* Products Section */}
         <h2 className="text-2xl font-semibold text-maternal-800 mt-10 mb-6">Produtos para sua Jornada Materna</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -217,7 +211,6 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
           Agora que você conhece os elementos essenciais de um plano de parto, recomendamos:
         </p>
         
-        {/* Visual step cards replacing the previous list */}
         <div className="grid gap-4 mb-8">
           <StepCard 
             stepNumber={1}
@@ -256,14 +249,25 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
         </div>
         
         <div className="bg-maternal-50 border border-maternal-200 rounded-lg p-6 mt-6 mb-8">
-          <h3 className="text-xl font-semibold text-maternal-800 mb-3">
-            Pronta para criar seu plano em minutos?
-          </h3>
-          <p className="mb-4">
-            Não perca tempo tentando fazer tudo do zero! Nosso construtor simplifica todo o processo, desde a criação até o compartilhamento.
-          </p>
-          <div className="flex justify-center">
-            <BirthPlanNavButton className="py-6 px-8 text-base" />
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="md:w-1/3">
+              <img 
+                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" 
+                alt="Gestante usando computador para criar plano de parto" 
+                className="rounded-xl shadow-md object-cover w-full h-auto"
+              />
+            </div>
+            <div className="md:w-2/3">
+              <h3 className="text-xl font-semibold text-maternal-800 mb-3">
+                Pronta para criar seu plano em minutos?
+              </h3>
+              <p className="mb-4">
+                Não perca tempo tentando fazer tudo do zero! Nosso construtor simplifica todo o processo, desde a criação até o compartilhamento.
+              </p>
+              <div className="flex justify-center md:justify-start">
+                <BirthPlanNavButton className="py-6 px-8 text-base" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
