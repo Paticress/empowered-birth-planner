@@ -2,6 +2,7 @@
 /**
  * Utils for exporting and sharing birth plans
  */
+import { birthPlanSections } from './birthPlanSections';
 
 /**
  * Creates a shareable text version of the birth plan
@@ -28,8 +29,6 @@ export const createShareableText = (birthPlan: Record<string, any>) => {
   text += `Acompanhantes: ${personalInfo.companions || 'Não informados'}\n\n`;
   
   // Add other sections
-  import { birthPlanSections } from './birthPlanSections';
-  
   birthPlanSections.forEach((section) => {
     if (section.id === 'personalInfo') return; // Already added above
     
