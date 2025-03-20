@@ -19,6 +19,17 @@ export function SelectableOptions({
     return null;
   }
   
+  const handleCheckedChange = (option: string, checked: boolean) => {
+    const newSelectedOptions = {
+      ...selectedOptions,
+      [questionId]: {
+        ...selectedOptions[questionId],
+        [option]: checked
+      }
+    };
+    setSelectedOptions(newSelectedOptions);
+  };
+  
   return (
     <div className="space-y-2 ml-8 mt-2">
       {question.options.map((option: string) => {
@@ -29,13 +40,7 @@ export function SelectableOptions({
               id={`option-${questionId}-${option}`}
               checked={isSelected}
               onCheckedChange={(checked) => {
-                setSelectedOptions(prev => ({
-                  ...prev,
-                  [questionId]: {
-                    ...prev[questionId],
-                    [option]: !!checked
-                  }
-                }));
+                handleCheckedChange(option, !!checked);
               }}
             />
             <Label 
