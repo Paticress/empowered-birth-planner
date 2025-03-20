@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { BirthPlanHeader } from './BirthPlanHeader';
 import { BirthPlanWelcome } from './BirthPlanWelcome';
@@ -16,6 +17,7 @@ export function BirthPlanBuilder() {
   const {
     currentStage,
     birthPlanContent,
+    questionnaireAnswers,
     goToNextStage,
     goToStage,
     handleQuestionnaireSubmit,
@@ -67,6 +69,7 @@ export function BirthPlanBuilder() {
             <StageContent 
               currentStage={currentStage}
               birthPlanContent={birthPlanContent}
+              questionnaireAnswers={questionnaireAnswers}
               onQuestionnaireSubmit={handleQuestionnaireSubmit}
               onUpdateBirthPlan={setBirthPlanContent}
               onNextStage={goToNextStage}
@@ -85,6 +88,7 @@ export function BirthPlanBuilder() {
 interface StageContentProps {
   currentStage: string;
   birthPlanContent: Record<string, any>;
+  questionnaireAnswers: Record<string, any>;
   onQuestionnaireSubmit: (data: Record<string, any>) => void;
   onUpdateBirthPlan: (data: Record<string, any>) => void;
   onNextStage: () => void;
@@ -94,6 +98,7 @@ interface StageContentProps {
 function StageContent({
   currentStage,
   birthPlanContent,
+  questionnaireAnswers,
   onQuestionnaireSubmit,
   onUpdateBirthPlan,
   onNextStage,
@@ -111,7 +116,9 @@ function StageContent({
         <BirthPlanEditor 
           birthPlan={birthPlanContent} 
           onUpdate={onUpdateBirthPlan} 
-          onNext={onNextStage} 
+          onNext={onNextStage}
+          onBack={() => onGoToStage('questionnaire')}
+          questionnaireAnswers={questionnaireAnswers}
         />
       );
       
