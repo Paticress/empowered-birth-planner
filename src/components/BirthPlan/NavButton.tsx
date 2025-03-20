@@ -18,10 +18,10 @@ export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
   return (
     <Button 
       onClick={goToBirthPlanBuilder}
-      variant="resource-highlight"
-      className={`flex items-center ${className}`}
+      variant="birth-plan-builder"
+      className={`flex items-center font-semibold ${className}`}
     >
-      <FileText className="mr-2 h-4 w-4" />
+      <FileText className="mr-2 h-5 w-5" />
       Criar Meu Plano de Parto
     </Button>
   );

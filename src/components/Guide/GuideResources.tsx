@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, BookOpen, Download, BookHeart, Notebook, Calendar, CheckCircle, Shield } from 'lucide-react';
 import { useState } from 'react';
@@ -172,7 +171,7 @@ export function GuideResources({ onPrevious }: GuideResourcesProps) {
             Não perca tempo tentando fazer tudo do zero! Nosso construtor simplifica todo o processo, desde a criação até o compartilhamento.
           </p>
           <div className="flex justify-center">
-            <BirthPlanNavButton className="py-6" />
+            <BirthPlanNavButton className="py-6 px-8 text-base" />
           </div>
         </div>
       </div>
