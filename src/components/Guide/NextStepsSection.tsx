@@ -53,8 +53,8 @@ export function NextStepsSection() {
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="md:w-1/3">
             <img 
-              src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" 
-              alt="Gestante usando computador para criar plano de parto" 
+              src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7" 
+              alt="Gestante relaxando em casa usando o celular para criar plano de parto" 
               className="rounded-xl shadow-md object-cover w-full h-auto"
             />
           </div>
