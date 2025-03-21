@@ -1,5 +1,5 @@
 
-import { exportAsPDF } from './exportPDF';
+import { exportAsPDF } from './pdf';
 import { exportAsText } from './exportText';
 import { exportAsWord } from './exportWord';
 
