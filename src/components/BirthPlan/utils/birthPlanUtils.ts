@@ -8,6 +8,24 @@ export {
   generateBirthPlanFromAnswers
 };
 
+// Helper function to get user-friendly section names
+export const getSectionDisplayName = (sectionId: string): string => {
+  const sectionNameMap: Record<string, string> = {
+    personalInfo: 'Informações Pessoais',
+    laborPreferences: 'Preferências para o Trabalho de Parto',
+    atmosfera: 'Ambiente e Acompanhamento',
+    trabalhoDeParto: 'Trabalho de Parto',
+    painManagement: 'Alívio da Dor',
+    nascimento: 'Parto',
+    newborn: 'Cuidados com o Recém-Nascido',
+    cesarea: 'Cesárea (Se Necessária)',
+    posParto: 'Pós-Parto',
+    situacoesEspeciais: 'Situações Especiais'
+  };
+  
+  return sectionNameMap[sectionId] || sectionId;
+};
+
 // Add any additional utility functions here if needed
 export const formatBirthPlanSection = (section: Record<string, string>): string => {
   return Object.entries(section)
