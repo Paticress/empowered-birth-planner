@@ -6,7 +6,7 @@ import { EmailShareDialog } from './EmailShareDialog';
 import { NextSteps } from './share/NextSteps';
 import { ShareOptionsGrid } from './share/ShareOptionsGrid';
 import { useExportHandlers } from './share/ExportHandlers';
-import { renderBirthPlanForExport } from './utils/exportRenderUtils';
+import { renderBirthPlanForExport } from './utils/export';
 
 interface BirthPlanShareProps {
   birthPlan: Record<string, any>;

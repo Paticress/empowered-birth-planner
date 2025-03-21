@@ -1,7 +1,6 @@
-
 import { toast } from 'sonner';
 import { exportAsPDF, exportAsText, exportAsWord } from '@/utils/export';
-import { renderBirthPlanForExport } from '../utils/exportRenderUtils';
+import { renderBirthPlanForExport } from '../utils/export';
 
 export const useExportHandlers = (birthPlan: Record<string, any>) => {
   // Handler for copying text to clipboard
