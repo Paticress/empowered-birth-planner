@@ -149,8 +149,14 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
         (el as HTMLElement).style.padding = '10px';
         (el as HTMLElement).style.borderRadius = '5px';
       });
+
+      // Calculate a good scale factor for A4 paper (preserving aspect ratio)
+      const contentWidth = container.scrollWidth;
+      const pdfWidth = 210; // A4 width in mm
+      const pdfContentWidth = pdfWidth - 30; // Content width with margins
+      const scaleFactor = pdfContentWidth / contentWidth;
       
-      // Render the content to canvas
+      // Render the content to canvas with appropriate scaling
       const canvas = await html2canvas(container, {
         scale: 2, // Higher scale for better quality
         useCORS: true, // Allow images from other domains
@@ -184,14 +190,14 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       const pageHeight = 297;
       const margin = 15; // 1.5cm margin
       
-      // Calculate content width and height with margins
-      const contentWidth = pageWidth - (margin * 2);
-      const contentHeight = (canvas.height * contentWidth) / canvas.width;
+      // Calculate content dimensions preserving aspect ratio
+      const contentHeight = (canvas.height * (pageWidth - 2 * margin)) / canvas.width;
       
       // If content doesn't fit in a single page, split it across multiple pages
-      if (contentHeight > (pageHeight - margin * 2)) {
+      if (contentHeight > (pageHeight - 2 * margin)) {
         // Calculate how many pages we need
-        const pageCount = Math.ceil(contentHeight / (pageHeight - margin * 2));
+        const pageCount = Math.ceil(contentHeight / (pageHeight - 2 * margin));
+        const heightPerPage = canvas.height / pageCount;
         
         // For each page, add a portion of the image
         for (let i = 0; i < pageCount; i++) {
@@ -199,19 +205,38 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
             pdf.addPage();
           }
           
-          const sourceY = i * (canvas.height / pageCount);
-          const sourceHeight = canvas.height / pageCount;
+          const sourceY = i * heightPerPage;
           
           pdf.addImage(
             imgData,
             'PNG',
             margin, // left margin
             margin, // top margin
-            contentWidth,
-            contentHeight / pageCount,
+            pageWidth - 2 * margin, // content width with margins
+            (canvas.height / canvas.width) * (pageWidth - 2 * margin) / pageCount, // height preserving aspect ratio
             '',
             'FAST',
-            i === 0 ? 0 : -sourceY * (contentWidth / canvas.width)
+            0
+          );
+          
+          // Instead of using a negative Y offset which causes distortion,
+          // we slice the canvas for each page
+          pdf.setCurrentTransformationMatrix(1, 0, 0, 1, 0, 0);
+          pdf.addImage(
+            imgData,
+            'PNG',
+            margin, // left margin
+            margin, // top margin
+            pageWidth - 2 * margin, // content width
+            (pageHeight - 2 * margin), // content height per page
+            '',
+            'FAST',
+            { 
+              sourceX: 0,
+              sourceY: sourceY,
+              sourceWidth: canvas.width,
+              sourceHeight: heightPerPage
+            }
           );
           
           // Add page number
@@ -226,8 +251,8 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
           'PNG',
           margin, // left margin
           margin, // top margin
-          contentWidth,
-          contentHeight
+          pageWidth - 2 * margin, // content width
+          contentHeight // content height preserving aspect ratio
         );
         
         // Add page number
