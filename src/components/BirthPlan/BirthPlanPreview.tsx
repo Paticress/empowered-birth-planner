@@ -37,18 +37,18 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
             Esta é a versão final do seu plano de parto. Revise cuidadosamente todas as seções
             e verifique se estão de acordo com seus desejos e necessidades.
           </p>
-        </div>
-        
-        {/* Alert with disclaimer */}
-        <div className="bg-maternal-50 p-4 rounded-lg border-l-4 border-maternal-400 my-6 print:my-4 print:text-sm">
-          <p className="font-medium text-maternal-900">
-            Este documento reflete minhas preferências para o parto e nascimento do meu bebê. Ele foi elaborado após 
-            cuidadosa pesquisa e reflexão, em colaboração com meu parceiro e equipe de saúde. Compreendo que 
-            situações imprevistas podem surgir durante o trabalho de parto, e que a saúde e bem-estar do 
-            bebê e meu são prioridade. Peço gentilmente que, na ausência de emergências médicas, minhas 
-            escolhas sejam respeitadas, e que quaisquer intervenções necessárias sejam discutidas comigo 
-            antes de serem realizadas.
-          </p>
+          
+          {/* Alert with disclaimer - Visible only on screen, not in print */}
+          <div className="bg-maternal-50 p-4 rounded-lg border-l-4 border-maternal-400 my-6">
+            <p className="font-medium text-maternal-900">
+              Este documento reflete minhas preferências para o parto e nascimento do meu bebê. Ele foi elaborado após 
+              cuidadosa pesquisa e reflexão, em colaboração com meu parceiro e equipe de saúde. Compreendo que 
+              situações imprevistas podem surgir durante o trabalho de parto, e que a saúde e bem-estar do 
+              bebê e meu são prioridade. Peço gentilmente que, na ausência de emergências médicas, minhas 
+              escolhas sejam respeitadas, e que quaisquer intervenções necessárias sejam discutidas comigo 
+              antes de serem realizadas.
+            </p>
+          </div>
         </div>
         
         {/* Personal information section */}

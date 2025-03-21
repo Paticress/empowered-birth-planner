@@ -43,7 +43,6 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       // Create a temporary container with A4 proportions
       const container = document.createElement('div');
       container.style.width = '210mm'; // A4 width
-      container.style.minHeight = '297mm'; // A4 height
       container.style.margin = '0 auto';
       container.style.padding = '0';
       container.style.backgroundColor = '#fff';
@@ -180,32 +179,61 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
         compress: true,
       });
       
-      // A4 dimensions with margins
+      // A4 dimensions
       const pageWidth = 210;
       const pageHeight = 297;
       const margin = 15; // 1.5cm margin
       
-      // Calculate content dimensions
+      // Calculate content width and height with margins
       const contentWidth = pageWidth - (margin * 2);
       const contentHeight = (canvas.height * contentWidth) / canvas.width;
       
-      // Add the content as an image on the first page
-      pdf.addImage(
-        imgData, 
-        'PNG', 
-        margin, // left margin
-        margin, // top margin
-        contentWidth, 
-        contentHeight
-      );
-      
-      // Add page numbers
-      const totalPages = pdf.getNumberOfPages();
-      for (let i = 1; i <= totalPages; i++) {
-        pdf.setPage(i);
+      // If content doesn't fit in a single page, split it across multiple pages
+      if (contentHeight > (pageHeight - margin * 2)) {
+        // Calculate how many pages we need
+        const pageCount = Math.ceil(contentHeight / (pageHeight - margin * 2));
+        
+        // For each page, add a portion of the image
+        for (let i = 0; i < pageCount; i++) {
+          if (i > 0) {
+            pdf.addPage();
+          }
+          
+          const sourceY = i * (canvas.height / pageCount);
+          const sourceHeight = canvas.height / pageCount;
+          
+          pdf.addImage(
+            imgData,
+            'PNG',
+            margin, // left margin
+            margin, // top margin
+            contentWidth,
+            contentHeight / pageCount,
+            '',
+            'FAST',
+            i === 0 ? 0 : -sourceY * (contentWidth / canvas.width)
+          );
+          
+          // Add page number
+          pdf.setFontSize(10);
+          pdf.setTextColor(100);
+          pdf.text(`Página ${i + 1} de ${pageCount}`, pageWidth - 40, pageHeight - 10);
+        }
+      } else {
+        // Content fits in a single page
+        pdf.addImage(
+          imgData,
+          'PNG',
+          margin, // left margin
+          margin, // top margin
+          contentWidth,
+          contentHeight
+        );
+        
+        // Add page number
         pdf.setFontSize(10);
         pdf.setTextColor(100);
-        pdf.text(`Página ${i}`, pageWidth - 25, pageHeight - 10);
+        pdf.text('Página 1 de 1', pageWidth - 40, pageHeight - 10);
       }
       
       // Save the PDF
