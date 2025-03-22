@@ -1,16 +1,18 @@
-import { useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { BirthPlanHeader } from './BirthPlanHeader';
 import { BirthPlanWelcome } from './BirthPlanWelcome';
 import { BirthPlanQuestionnaire } from './BirthPlanQuestionnaire';
 import { BirthPlanEditor } from './BirthPlanEditor';
 import { BirthPlanPreview } from './BirthPlanPreview';
 import { BirthPlanShare } from './BirthPlanShare';
+import { PaymentGate } from './PaymentGate';
 import { Footer } from '@/components/Footer';
 import { toast } from '@/components/ui/use-toast';
 import { useBirthPlanState } from './hooks/useBirthPlanState';
 
 export function BirthPlanBuilder() {
-  console.log("RENDERING BIRTH PLAN BUILDER COMPONENT - THIS SHOULD BE VISIBLE");
+  const [hasPaid, setHasPaid] = useState(false);
   
   const {
     currentStage,
@@ -40,15 +42,30 @@ export function BirthPlanBuilder() {
       console.log("Forcing re-render check after timeout");
     }, 1000);
     
+    // Check if user has previously completed payment (in a real app, this would be a server check)
+    const paidStatus = localStorage.getItem('birthPlanPaid');
+    if (paidStatus === 'true') {
+      setHasPaid(true);
+    }
+    
     return () => clearTimeout(timer);
   }, [currentStage]);
+
+  // Handle successful payment
+  const handlePaymentComplete = () => {
+    setHasPaid(true);
+    localStorage.setItem('birthPlanPaid', 'true');
+  };
+
+  // If user hasn't paid, show payment gate
+  if (!hasPaid) {
+    return <PaymentGate onPaymentComplete={handlePaymentComplete} />;
+  }
 
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
       <div className="pt-4 md:pt-8">
         <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
-        
-        {/* Progress bar removed */}
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Versão compacta do banner de informações */}

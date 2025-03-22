@@ -3,26 +3,21 @@ import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
 import { FileText } from 'lucide-react';
 
-interface NavButtonProps {
+interface BirthPlanNavButtonProps {
   className?: string;
 }
 
-export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
+export function BirthPlanNavButton({ className = '' }: BirthPlanNavButtonProps) {
   const { navigateTo } = useNavigation();
   
-  const goToBirthPlanBuilder = () => {
-    console.log("Navigating to birth plan builder");
-    navigateTo('/criar-plano');
-  };
-  
   return (
-    <Button 
-      onClick={goToBirthPlanBuilder}
-      variant="birth-plan-builder"
-      className={`flex items-center font-semibold ${className}`}
+    <Button
+      variant="resource-highlight"
+      className={`flex items-center gap-2 ${className}`}
+      onClick={() => navigateTo('/criar-plano')}
     >
-      <FileText className="mr-2 h-5 w-5" />
-      Criar Meu Plano de Parto
+      <FileText className="h-4 w-4" />
+      <span>Criar Plano de Parto</span>
     </Button>
   );
 }

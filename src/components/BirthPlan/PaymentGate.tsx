@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Footer } from '@/components/Footer';
 import { useNavigation } from '@/hooks/useNavigation';
 import { CreditCard, Landmark, QrCode } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface PaymentGateProps {
   onPaymentComplete: () => void;
@@ -11,13 +12,23 @@ interface PaymentGateProps {
 
 export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { navigateTo } = useNavigation();
   
   // This is a placeholder for demonstration purposes
   // In a real implementation, this would connect to a payment gateway
   const handlePaymentProcessing = () => {
+    if (!paymentMethod) {
+      toast.error("Por favor, selecione um método de pagamento");
+      return;
+    }
+    
+    setIsProcessing(true);
+    
     // Simulate payment processing
     setTimeout(() => {
+      setIsProcessing(false);
+      toast.success("Pagamento realizado com sucesso!");
       onPaymentComplete();
     }, 1500);
   };
@@ -38,16 +49,16 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
         </div>
       </header>
       
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12">
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <div className="bg-maternal-600 p-6 text-white text-center">
-            <h2 className="text-2xl font-bold mb-2">Construa seu Plano de Parto Personalizado</h2>
+          <div className="bg-maternal-600 p-4 md:p-6 text-white text-center">
+            <h2 className="text-xl md:text-2xl font-bold mb-2">Construa seu Plano de Parto Personalizado</h2>
             <p className="mb-0">Acesso único por apenas R$ 97,00</p>
           </div>
           
-          <div className="p-6 md:p-8">
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4">O que você vai receber:</h3>
+          <div className="p-4 md:p-8">
+            <div className="mb-6 md:mb-8">
+              <h3 className="text-lg md:text-xl font-semibold mb-4">O que você vai receber:</h3>
               <ul className="space-y-2">
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
@@ -55,7 +66,7 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <span>Questionário personalizado para entender suas necessidades específicas</span>
+                  <span className="text-sm md:text-base">Questionário personalizado para entender suas necessidades específicas</span>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
@@ -63,7 +74,7 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <span>Plano de parto gerado automaticamente com base em suas respostas</span>
+                  <span className="text-sm md:text-base">Plano de parto gerado automaticamente com base em suas respostas</span>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
@@ -71,7 +82,7 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <span>Editor para personalizar cada aspecto do seu plano</span>
+                  <span className="text-sm md:text-base">Editor para personalizar cada aspecto do seu plano</span>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
@@ -79,7 +90,7 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <span>Opções para compartilhar com sua equipe médica e imprimir</span>
+                  <span className="text-sm md:text-base">Opções para compartilhar com sua equipe médica e imprimir</span>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
@@ -87,12 +98,12 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <span>Acesso ilimitado para fazer alterações ao seu plano</span>
+                  <span className="text-sm md:text-base">Acesso ilimitado para fazer alterações ao seu plano</span>
                 </li>
               </ul>
             </div>
             
-            <h3 className="text-xl font-semibold mb-4">Escolha uma forma de pagamento:</h3>
+            <h3 className="text-lg md:text-xl font-semibold mb-4">Escolha uma forma de pagamento:</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <button
@@ -130,12 +141,12 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
             </div>
             
             <Button 
-              className="w-full text-white py-6 text-lg"
+              className="w-full text-white py-4 md:py-6 text-base md:text-lg"
               variant="resource-highlight"
-              disabled={!paymentMethod}
+              disabled={!paymentMethod || isProcessing}
               onClick={handlePaymentProcessing}
             >
-              Realizar Pagamento
+              {isProcessing ? 'Processando...' : 'Realizar Pagamento'}
             </Button>
             
             <p className="text-sm text-center text-gray-500 mt-4">

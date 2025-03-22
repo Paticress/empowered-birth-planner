@@ -10,6 +10,7 @@ import { OnlineGuide } from "./components/Guide/OnlineGuide";
 import GuiaGratuito from "./pages/GuiaGratuito";
 import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
 import { BirthPlanSuccess } from "./components/BirthPlan/BirthPlanSuccess";
+import PlanoPersonalizado from "./pages/PlanoPersonalizado";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => {
             <Route path="/" element={<Navigate to="/guia-online" replace />} />
             <Route path="/guia-online" element={<OnlineGuide />} />
             <Route path="/guia-gratuito" element={<GuiaGratuito />} />
+            <Route path="/plano-personalizado" element={<PlanoPersonalizado />} />
             <Route 
               path="/criar-plano" 
               element={

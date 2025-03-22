@@ -5,6 +5,7 @@ import { useNavigation } from '@/hooks/useNavigation';
 import { Search, Menu, X } from 'lucide-react';
 import { GuideSearch } from './Search/GuideSearch';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type GuideHeaderProps = {
   onNavigate?: (value: string) => void;
@@ -15,6 +16,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { navigateTo } = useNavigation();
+  const isMobile = useIsMobile();
 
   // Close mobile menu on window resize
   useEffect(() => {
@@ -70,7 +72,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
               Guia Online
             </Button>
             
-            {/* ADDED BIRTH PLAN NAVIGATION BUTTON */}
+            {/* BIRTH PLAN NAVIGATION BUTTON */}
             <BirthPlanNavButton />
             
             <Button
@@ -125,7 +127,20 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
             </Button>
             
             {/* ADDED BIRTH PLAN NAVIGATION BUTTON FOR MOBILE */}
-            <BirthPlanNavButton className="w-full justify-start" />
+            <BirthPlanNavButton 
+              className="w-full justify-start" 
+            />
+            
+            <Button
+              variant="ghost"
+              onClick={() => {
+                handleNavigation('/plano-personalizado');
+                setMobileMenuOpen(false);
+              }}
+              className="w-full justify-start text-gray-600 hover:text-gray-900"
+            >
+              Plano Personalizado
+            </Button>
           </div>
         </div>
       )}

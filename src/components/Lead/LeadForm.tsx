@@ -15,12 +15,14 @@ interface LeadFormProps {
   onSuccess?: () => void;
   buttonText?: string;
   withWhatsapp?: boolean;
+  isAdminMode?: boolean;
 }
 
 export const LeadForm = memo(function LeadForm({ 
   onSuccess, 
   buttonText = "Acessar Agora", 
-  withWhatsapp = true 
+  withWhatsapp = true,
+  isAdminMode = false
 }: LeadFormProps) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -67,6 +69,11 @@ export const LeadForm = memo(function LeadForm({
       
       console.log("Form data for CRM:", formData);
       
+      // If in admin mode, set the paid status to true for testing
+      if (isAdminMode) {
+        localStorage.setItem('birthPlanPaid', 'true');
+      }
+      
       toast.success("Obrigado! Seu guia está pronto para acesso.");
       
       if (onSuccess) {
@@ -86,7 +93,7 @@ export const LeadForm = memo(function LeadForm({
     } finally {
       setIsSubmitting(false);
     }
-  }, [email, name, whatsapp, isPregnant, dueDate, acceptTerms, withWhatsapp, onSuccess]);
+  }, [email, name, whatsapp, isPregnant, dueDate, acceptTerms, withWhatsapp, onSuccess, isAdminMode]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md mx-auto">
@@ -106,6 +113,12 @@ export const LeadForm = memo(function LeadForm({
       <TermsField checked={acceptTerms} onChange={setAcceptTerms} />
       
       <SubmitButton isSubmitting={isSubmitting} text={buttonText} />
+      
+      {isAdminMode && (
+        <div className="text-xs text-gray-400 text-center mt-2">
+          Modo administrador ativado. O pagamento será ignorado para fins de teste.
+        </div>
+      )}
     </form>
   );
 });
