@@ -5,6 +5,8 @@ import { Footer } from '@/components/Footer';
 import { useNavigation } from '@/hooks/useNavigation';
 import { CreditCard, Landmark, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
+import { StripeProvider } from '@/components/Payment/StripeProvider';
+import { PaymentForm } from '@/components/Payment/PaymentForm';
 
 interface PaymentGateProps {
   onPaymentComplete: () => void;
@@ -12,25 +14,13 @@ interface PaymentGateProps {
 
 export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const { navigateTo } = useNavigation();
   
-  // This is a placeholder for demonstration purposes
-  // In a real implementation, this would connect to a payment gateway
   const handlePaymentProcessing = () => {
     if (!paymentMethod) {
       toast.error("Por favor, selecione um método de pagamento");
       return;
     }
-    
-    setIsProcessing(true);
-    
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      toast.success("Pagamento realizado com sucesso!");
-      onPaymentComplete();
-    }, 1500);
   };
   
   return (
@@ -140,14 +130,37 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
               </button>
             </div>
             
-            <Button 
-              className="w-full text-white py-4 md:py-6 text-base md:text-lg"
-              variant="resource-highlight"
-              disabled={!paymentMethod || isProcessing}
-              onClick={handlePaymentProcessing}
-            >
-              {isProcessing ? 'Processando...' : 'Realizar Pagamento'}
-            </Button>
+            {paymentMethod === 'card' ? (
+              <div className="animate-fade-in">
+                <StripeProvider>
+                  <PaymentForm onPaymentSuccess={onPaymentComplete} />
+                </StripeProvider>
+              </div>
+            ) : paymentMethod ? (
+              <div className="animate-fade-in text-center">
+                <p className="mb-4 text-sm md:text-base">
+                  {paymentMethod === 'pix' ? 
+                    'O pagamento por PIX está temporariamente indisponível. Por favor, escolha outra forma de pagamento.' :
+                    'O pagamento por Boleto está temporariamente indisponível. Por favor, escolha outra forma de pagamento.'}
+                </p>
+                <Button 
+                  variant="outline"
+                  onClick={() => setPaymentMethod(null)}
+                  className="text-maternal-700"
+                >
+                  Voltar
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                className="w-full text-white py-4 md:py-6 text-base md:text-lg"
+                variant="resource-highlight"
+                disabled={!paymentMethod}
+                onClick={handlePaymentProcessing}
+              >
+                Continuar
+              </Button>
+            )}
             
             <p className="text-sm text-center text-gray-500 mt-4">
               Pagamento único e seguro. Acesso imediato após confirmação.

@@ -46,6 +46,9 @@ export function BirthPlanCTA() {
             <p className="text-maternal-900 font-bold text-2xl md:text-3xl mb-4">R$ 97,00</p>
           </div>
           <BirthPlanNavButton className={`w-full py-3 ${isMobile ? 'text-sm' : 'text-base'}`} />
+          <p className="text-xs text-maternal-600 mt-2 text-center">
+            *Pagamento único - acesso imediato após confirmação
+          </p>
         </div>
       </div>
     </div>
