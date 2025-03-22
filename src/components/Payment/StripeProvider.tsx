@@ -3,25 +3,23 @@ import React, { ReactNode } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
-// Replace with your publishable key from Stripe Dashboard
-// Go to: https://dashboard.stripe.com/apikeys
-const stripePromise = loadStripe('pk_test_REPLACE_WITH_YOUR_PUBLISHABLE_KEY');
+// Use environment variable or a secure way to store the key
+const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
 
 interface StripeProviderProps {
   children: ReactNode;
-  amount?: number; // Allow custom amount to be passed
+  amount?: number;
 }
 
 export function StripeProvider({ children, amount = 9700 }: StripeProviderProps) {
-  // Configure payment options
   const options = {
-    mode: 'payment' as const,
+    mode: 'payment',
     currency: 'brl',
-    amount: amount, // R$ 97,00 in cents
+    amount: amount,
     appearance: {
-      theme: 'stripe',
+      theme: 'stripe' as const,
       variables: {
-        colorPrimary: '#a667e4', // Adjust to match your maternal theme
+        colorPrimary: '#a667e4',
         colorBackground: '#ffffff',
         colorText: '#424770',
         colorDanger: '#df1b41',
