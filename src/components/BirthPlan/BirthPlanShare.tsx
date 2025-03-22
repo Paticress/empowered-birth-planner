@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { EmailShareDialog } from './EmailShareDialog';
@@ -18,6 +18,11 @@ export function BirthPlanShare({ birthPlan, onEdit }: BirthPlanShareProps) {
   
   // Debug log to check birth plan data
   console.log("Birth plan data in Share component:", birthPlan);
+  
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   // Get all export handlers
   const {

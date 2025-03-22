@@ -8,7 +8,6 @@ import {
   createOptimizedClone,
   enhanceElementsForPDF
 } from './domUtils';
-import { createDocumentHeader, createDocumentFooter } from './documentParts';
 import { addContentToPDF } from './multiPage';
 
 /**
@@ -39,16 +38,8 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       // Create a temporary container with A4 proportions
       const container = createTemporaryContainer();
       
-      // Create and add header
-      const header = createDocumentHeader();
-      container.appendChild(header);
-      
-      // Add the main content
+      // Add the main content (without adding extra header/footer since they're already in the print version)
       container.appendChild(clone);
-      
-      // Add the footer
-      const footer = createDocumentFooter();
-      container.appendChild(footer);
       
       // Enhance elements for PDF rendering
       enhanceElementsForPDF(container);
@@ -61,6 +52,7 @@ export const exportAsPDF = async (elementId: string, filename: string): Promise<
       
       // Clean up the temporary elements and remove print class
       cleanupTemporaryContainer(container);
+      document.body.classList.remove('print-preview-mode');
       
       // Create PDF with A4 size
       const imgData = canvas.toDataURL('image/png');

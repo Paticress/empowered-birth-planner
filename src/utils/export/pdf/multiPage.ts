@@ -66,18 +66,6 @@ const renderMultiPageContent = (pdf: jsPDF, imgData: string, canvas: HTMLCanvasE
     
     const sourceY = i * heightPerPage;
     
-    // Fix for error on line 84: Use proper addImage parameters
-    // The 'FAST' mode and transformation options are causing issues
-    pdf.addImage(
-      imgData,
-      'PNG',
-      margin, // left margin
-      margin, // top margin
-      pageWidth - 2 * margin, // content width
-      pageHeight - 2 * margin // content height per page
-    );
-    
-    // Fix for error on line 97: Use proper addImage parameters
     // Create a clipping mask to show only the portion of the image that belongs on this page
     pdf.saveGraphicsState();
     pdf.rect(
