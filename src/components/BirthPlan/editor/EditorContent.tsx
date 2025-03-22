@@ -2,7 +2,7 @@
 import { EditorField } from './EditorField';
 import { birthPlanSections } from '../utils/birthPlanSections';
 import { getSingleLineFields, shouldShowAddButton, getRelevantQuestionsForField } from './editorUtils';
-import { mapQuestionnaireToSectionId, findQuestionById } from './editorUtils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EditorContentProps {
   activeSectionIndex: number;
@@ -33,10 +33,13 @@ export function EditorContent({
 }: EditorContentProps) {
   const activeSection = birthPlanSections[activeSectionIndex];
   const singleLineFields = getSingleLineFields();
+  const isMobile = useIsMobile();
 
   return (
-    <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-6 mb-6 shadow-md`}>
-      <h2 className="text-2xl font-semibold text-maternal-700 mb-4">{activeSection.title}</h2>
+    <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-4 md:p-6 mb-4 md:mb-6 shadow-md`}>
+      <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-semibold text-maternal-700 mb-3 md:mb-4`}>
+        {activeSection.title}
+      </h2>
       
       {activeSection.fields.map((field) => {
         const sectionData = localBirthPlan[activeSection.id] || {};

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Plus } from 'lucide-react';
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { OptionsDialog } from './OptionsDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EditorFieldProps {
   field: { key: string; label: string };
@@ -42,13 +43,14 @@ export function EditorField({
 }: EditorFieldProps) {
   const fieldValue = sectionData[field.key] || '';
   const showAddButton = shouldShowAddButton(field.key);
+  const isMobile = useIsMobile();
   
   return (
-    <div className="mb-6 border border-maternal-100 rounded-lg p-4 bg-maternal-50/30">
-      <div className="flex justify-between items-center mb-2">
+    <div className="mb-4 md:mb-6 border border-maternal-100 rounded-lg p-3 md:p-4 bg-maternal-50/30">
+      <div className={`flex flex-col ${!isMobile ? 'sm:flex-row sm:justify-between sm:items-center' : ''} mb-2`}>
         <label 
           htmlFor={`${activeSection.id}-${field.key}`} 
-          className="block font-medium text-maternal-800"
+          className="block font-medium text-maternal-800 text-sm md:text-base mb-2 sm:mb-0"
         >
           {field.label}
         </label>
@@ -65,7 +67,7 @@ export function EditorField({
               <Button 
                 variant="outline" 
                 size="sm"
-                className="flex items-center gap-1 border-maternal-300 text-maternal-600 text-xs"
+                className="flex items-center gap-1 border-maternal-300 text-maternal-600 text-xs w-full sm:w-auto justify-center sm:justify-start mt-1 sm:mt-0"
                 onClick={() => resetOptionsForField(field.key)}
               >
                 <Plus className="h-3 w-3" /> Adicionar do Questionário
@@ -105,7 +107,7 @@ export function EditorField({
             field.key, 
             e.target.value
           )}
-          rows={6}
+          rows={isMobile ? 4 : 6}
           className="w-full border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
           placeholder={`Insira suas preferências para ${field.label.toLowerCase()}`}
         />

@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { birthPlanSections } from './utils/birthPlanSections';
 import { BirthPlanData } from './types/questionnaire';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useEffect } from 'react';
 
 interface BirthPlanPreviewProps {
   birthPlan: BirthPlanData;
@@ -17,10 +19,17 @@ interface BirthPlanPreviewProps {
 }
 
 export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreviewProps) {
+  const isMobile = useIsMobile();
+  
   // Debug log to check if birth plan data is available
   console.log("Birth plan data in Preview component:", birthPlan);
   
   const personalInfo = birthPlan.personalInfo || {};
+  
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   return (
     <div className="animate-fade-in">
@@ -28,19 +37,19 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
       
       <div 
         id="birth-plan-preview" 
-        className="bg-white border border-gray-200 rounded-lg p-6 print:p-0 print:border-0 print:shadow-none"
+        className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 print:p-0 print:border-0 print:shadow-none"
       >
         <PrintTitle personName={personalInfo.name} />
         
         <div className="print:hidden">
-          <p className="text-lg mb-6">
+          <p className={`${isMobile ? 'text-base' : 'text-lg'} mb-4 md:mb-6`}>
             Esta é a versão final do seu plano de parto. Revise cuidadosamente todas as seções
             e verifique se estão de acordo com seus desejos e necessidades.
           </p>
           
           {/* Alert with disclaimer - Visible only on screen, not in print */}
-          <div className="bg-maternal-50 p-4 rounded-lg border-l-4 border-maternal-400 my-6">
-            <p className="font-medium text-maternal-900">
+          <div className="bg-maternal-50 p-3 md:p-4 rounded-lg border-l-4 border-maternal-400 my-4 md:my-6">
+            <p className="font-medium text-maternal-900 text-sm md:text-base">
               Este documento reflete minhas preferências para o parto e nascimento do meu bebê. Ele foi elaborado após 
               cuidadosa pesquisa e reflexão, em colaboração com meu parceiro e equipe de saúde. Compreendo que 
               situações imprevistas podem surgir durante o trabalho de parto, e que a saúde e bem-estar do 
@@ -80,18 +89,18 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
         <PrintFooter />
       </div>
       
-      <div className="flex justify-between mt-8 print:hidden">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6 md:mt-8 print:hidden">
         <Button 
           variant="outline"
           onClick={onEdit}
-          className="flex items-center"
+          className="flex items-center justify-center"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar e Editar
         </Button>
         
         <Button 
           onClick={onNext}
-          className="flex items-center bg-maternal-600 hover:bg-maternal-700"
+          className="flex items-center justify-center bg-maternal-600 hover:bg-maternal-700"
         >
           Compartilhar <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

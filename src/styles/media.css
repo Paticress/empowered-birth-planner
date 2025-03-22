@@ -1,0 +1,58 @@
+
+/* Responsive Media Queries */
+
+@layer components {
+  /* Mobile-first design approach */
+  .mobile-container {
+    @apply px-4 py-3;
+  }
+  
+  .mobile-heading {
+    @apply text-xl font-bold;
+  }
+  
+  .mobile-text {
+    @apply text-sm leading-relaxed;
+  }
+  
+  /* Tablet */
+  @media (min-width: 640px) {
+    .mobile-container {
+      @apply px-6 py-4;
+    }
+    
+    .mobile-heading {
+      @apply text-2xl;
+    }
+    
+    .mobile-text {
+      @apply text-base;
+    }
+  }
+  
+  /* Desktop */
+  @media (min-width: 1024px) {
+    .mobile-container {
+      @apply px-8 py-6;
+    }
+    
+    .mobile-heading {
+      @apply text-3xl;
+    }
+    
+    .mobile-text {
+      @apply text-lg;
+    }
+  }
+  
+  /* Print */
+  @media print {
+    .print-only {
+      @apply block;
+    }
+    
+    .no-print {
+      @apply hidden;
+    }
+  }
+}

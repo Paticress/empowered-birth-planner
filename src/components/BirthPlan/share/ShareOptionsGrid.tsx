@@ -2,6 +2,7 @@
 import React from 'react';
 import { Copy, FileText, Share2, Mail } from 'lucide-react';
 import { ShareOption } from '../ShareOption';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ShareOptionsGridProps {
   onCopyText: () => void;
@@ -16,11 +17,15 @@ export function ShareOptionsGrid({
   onShareWhatsApp,
   onOpenEmailDialog
 }: ShareOptionsGridProps) {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-      <h2 className="text-2xl font-semibold text-maternal-800 mb-6">Opções de Compartilhamento</h2>
+    <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+      <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-semibold text-maternal-800 mb-4 md:mb-6`}>
+        Opções de Compartilhamento
+      </h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
         <ShareOption
           icon={Copy}
           title="Copiar Texto"
