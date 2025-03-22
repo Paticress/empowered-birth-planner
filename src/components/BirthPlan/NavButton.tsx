@@ -17,7 +17,7 @@ export function BirthPlanNavButton({ className = '' }: BirthPlanNavButtonProps) 
       onClick={() => navigateTo('/criar-plano')}
     >
       <FileText className="h-4 w-4" />
-      <span>Acessar por R$ 97,00</span>
+      <span>Criar Meu Plano de Parto</span>
       <CreditCard className="h-4 w-4 ml-1" />
     </Button>
   );

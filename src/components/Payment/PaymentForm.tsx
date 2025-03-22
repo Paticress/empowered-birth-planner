@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { CardElement, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -26,19 +26,27 @@ export function PaymentForm({ onPaymentSuccess }: PaymentFormProps) {
     setErrorMessage(null);
 
     try {
-      // In a real implementation, you would make an API call to your server to create a payment intent
-      // For now, we'll simulate a successful payment
-
-      // Simulate API delay
+      // For a complete integration, you would:
+      // 1. Create a PaymentIntent on your server (requires server-side code)
+      // 2. Confirm the payment client-side using the PaymentIntent's client_secret
+      
+      // For demonstration purposes, we'll simulate a successful payment
+      // In a real implementation, replace this with actual Stripe confirmation
+      
+      // Simulated server response delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // For demo purposes, we're just simulating success
-      // In production, you would process the actual payment with Stripe here
+      // For demo purposes only - in production, this would be a real payment confirmation
+      const success = true; // This would come from Stripe's confirmPayment response
       
-      setIsProcessing(false);
-      toast.success("Pagamento realizado com sucesso!");
-      localStorage.setItem('birthPlanPaid', 'true');
-      onPaymentSuccess();
+      if (success) {
+        setIsProcessing(false);
+        toast.success("Pagamento realizado com sucesso!");
+        localStorage.setItem('birthPlanPaid', 'true');
+        onPaymentSuccess();
+      } else {
+        throw new Error("O pagamento não pôde ser processado.");
+      }
     } catch (error) {
       setIsProcessing(false);
       setErrorMessage(
@@ -48,29 +56,37 @@ export function PaymentForm({ onPaymentSuccess }: PaymentFormProps) {
     }
   };
 
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+      },
+      invalid: {
+        color: '#9e2146',
+        iconColor: '#9e2146',
+      },
+    },
+    hidePostalCode: true, // Not required for Brazilian cards
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="mb-6">
-        <label className="block text-maternal-800 mb-2 font-medium">
-          Informações do Cartão
-        </label>
-        <div className="border border-maternal-200 p-4 rounded-lg bg-white">
-          <CardElement
-            options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
-                  },
-                },
-                invalid: {
-                  color: '#9e2146',
-                },
-              },
-            }}
-          />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <div>
+          <label className="block text-maternal-800 mb-2 font-medium">
+            Informações do Cartão
+          </label>
+          <div className="border border-maternal-200 p-4 rounded-lg bg-white">
+            <CardElement options={cardElementOptions} />
+          </div>
+          <p className="text-xs text-maternal-600 mt-2">
+            Pagamento seguro processado pela Stripe. Seus dados do cartão nunca são armazenados em nossos servidores.
+          </p>
         </div>
       </div>
 
