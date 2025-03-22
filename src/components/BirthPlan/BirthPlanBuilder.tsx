@@ -28,25 +28,34 @@ export function BirthPlanBuilder() {
     // Log when the component mounts to verify it's being rendered
     console.log("BirthPlanBuilder mounted, current stage:", currentStage);
     
-    // Show a toast to confirm the user is on the birth plan page
-    toast({
-      title: "Plano de Parto",
-      description: "Você está na página de criação do plano de parto"
-    });
+    // Check URL parameters for payment confirmation from Wix
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment_status');
+    
+    if (paymentStatus === 'success') {
+      // Payment was just completed via Wix
+      localStorage.setItem('birthPlanPaid', 'true');
+      setHasPaid(true);
+      toast({
+        title: "Pagamento Confirmado",
+        description: "Seu acesso ao plano de parto foi liberado com sucesso!"
+      });
+    } else {
+      // Check if user has previously completed payment
+      const paidStatus = localStorage.getItem('birthPlanPaid');
+      if (paidStatus === 'true') {
+        setHasPaid(true);
+      }
+    }
     
     // Additional debugging to verify the route
     console.log("Current pathname:", window.location.pathname);
+    console.log("Current search params:", window.location.search);
     
     // Force a re-render after a short delay to ensure component display
     const timer = setTimeout(() => {
       console.log("Forcing re-render check after timeout");
     }, 1000);
-    
-    // Check if user has previously completed payment (in a real app, this would be a server check)
-    const paidStatus = localStorage.getItem('birthPlanPaid');
-    if (paidStatus === 'true') {
-      setHasPaid(true);
-    }
     
     return () => clearTimeout(timer);
   }, [currentStage]);
@@ -54,7 +63,6 @@ export function BirthPlanBuilder() {
   // Handle successful payment
   const handlePaymentComplete = () => {
     setHasPaid(true);
-    localStorage.setItem('birthPlanPaid', 'true');
   };
 
   // If user hasn't paid, show payment gate

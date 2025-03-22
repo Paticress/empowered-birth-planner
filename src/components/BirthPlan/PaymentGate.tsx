@@ -1,27 +1,59 @@
 
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Footer } from '@/components/Footer';
 import { useNavigation } from '@/hooks/useNavigation';
-import { CreditCard, Landmark, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
-import { StripeProvider } from '@/components/Payment/StripeProvider';
-import { PaymentForm } from '@/components/Payment/PaymentForm';
 
 interface PaymentGateProps {
   onPaymentComplete: () => void;
 }
 
+// URL to your Wix payment page
+const WIX_PAYMENT_URL = "https://your-wix-site.com/payment-page";
+
 export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
-  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
   const { navigateTo } = useNavigation();
+  const [checkingPayment, setCheckingPayment] = useState(true);
   
-  const handlePaymentProcessing = () => {
-    if (!paymentMethod) {
-      toast.error("Por favor, selecione um método de pagamento");
-      return;
+  // Check if the user has already paid
+  useEffect(() => {
+    // Check for payment from URL parameter (when returning from Wix)
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment_status');
+    
+    // Check localStorage for existing payment record
+    const paidStatus = localStorage.getItem('birthPlanPaid');
+    
+    if (paymentStatus === 'success') {
+      // Payment was just completed via Wix
+      localStorage.setItem('birthPlanPaid', 'true');
+      toast.success("Pagamento realizado com sucesso!");
+      onPaymentComplete();
+    } else if (paidStatus === 'true') {
+      // User has already paid in a previous session
+      onPaymentComplete();
     }
+    
+    setCheckingPayment(false);
+  }, [onPaymentComplete]);
+
+  // Redirect to Wix payment page
+  const handlePaymentRedirect = () => {
+    // You can add any tracking parameters here if needed
+    window.location.href = WIX_PAYMENT_URL;
   };
+  
+  if (checkingPayment) {
+    return (
+      <div className="bg-maternal-50 min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-maternal-600 mx-auto mb-4"></div>
+          <p className="text-maternal-700">Verificando status do pagamento...</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="bg-maternal-50 min-h-screen">
@@ -93,74 +125,13 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
               </ul>
             </div>
             
-            <h3 className="text-lg md:text-xl font-semibold mb-4">Escolha uma forma de pagamento:</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <button
-                className={`p-4 border rounded-lg flex flex-col items-center text-center transition-all ${
-                  paymentMethod === 'card' ? 'border-maternal-600 bg-maternal-50' : 'border-gray-200 hover:border-maternal-300'
-                }`}
-                onClick={() => setPaymentMethod('card')}
-              >
-                <CreditCard className="h-8 w-8 text-maternal-600 mb-2" />
-                <span className="font-medium">Cartão de Crédito</span>
-                <span className="text-sm text-gray-500 mt-1">Parcele em até 12x</span>
-              </button>
-              
-              <button
-                className={`p-4 border rounded-lg flex flex-col items-center text-center transition-all ${
-                  paymentMethod === 'pix' ? 'border-maternal-600 bg-maternal-50' : 'border-gray-200 hover:border-maternal-300'
-                }`}
-                onClick={() => setPaymentMethod('pix')}
-              >
-                <QrCode className="h-8 w-8 text-maternal-600 mb-2" />
-                <span className="font-medium">PIX</span>
-                <span className="text-sm text-gray-500 mt-1">Pagamento instantâneo</span>
-              </button>
-              
-              <button
-                className={`p-4 border rounded-lg flex flex-col items-center text-center transition-all ${
-                  paymentMethod === 'boleto' ? 'border-maternal-600 bg-maternal-50' : 'border-gray-200 hover:border-maternal-300'
-                }`}
-                onClick={() => setPaymentMethod('boleto')}
-              >
-                <Landmark className="h-8 w-8 text-maternal-600 mb-2" />
-                <span className="font-medium">Boleto Bancário</span>
-                <span className="text-sm text-gray-500 mt-1">Vence em 3 dias</span>
-              </button>
-            </div>
-            
-            {paymentMethod === 'card' ? (
-              <div className="animate-fade-in">
-                <StripeProvider>
-                  <PaymentForm onPaymentSuccess={onPaymentComplete} />
-                </StripeProvider>
-              </div>
-            ) : paymentMethod ? (
-              <div className="animate-fade-in text-center">
-                <p className="mb-4 text-sm md:text-base">
-                  {paymentMethod === 'pix' ? 
-                    'O pagamento por PIX está temporariamente indisponível. Por favor, escolha outra forma de pagamento.' :
-                    'O pagamento por Boleto está temporariamente indisponível. Por favor, escolha outra forma de pagamento.'}
-                </p>
-                <Button 
-                  variant="outline"
-                  onClick={() => setPaymentMethod(null)}
-                  className="text-maternal-700"
-                >
-                  Voltar
-                </Button>
-              </div>
-            ) : (
-              <Button 
-                className="w-full text-white py-4 md:py-6 text-base md:text-lg"
-                variant="resource-highlight"
-                disabled={!paymentMethod}
-                onClick={handlePaymentProcessing}
-              >
-                Continuar
-              </Button>
-            )}
+            <Button 
+              onClick={handlePaymentRedirect}
+              className="w-full text-white py-4 md:py-6 text-base md:text-lg"
+              variant="resource-highlight"
+            >
+              Ir para Página de Pagamento
+            </Button>
             
             <p className="text-sm text-center text-gray-500 mt-4">
               Pagamento único e seguro. Acesso imediato após confirmação.
