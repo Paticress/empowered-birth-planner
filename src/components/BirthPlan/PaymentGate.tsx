@@ -128,7 +128,7 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
             <Button 
               onClick={handlePaymentRedirect}
               className="w-full text-white py-4 md:py-6 text-base md:text-lg"
-              variant="resource-highlight"
+              variant="birth-plan-builder"
             >
               Ir para Página de Pagamento
             </Button>
