@@ -1,3 +1,4 @@
+
 import { parseOptionsFromText } from '../utils/birthPlanUtils';
 import { questionnaireSections } from '../questionnaire';
 import { birthPlanSections } from '../utils/birthPlanSections';
@@ -60,7 +61,10 @@ export const getRelevantQuestionsForField = (
     
     'complications': ['complications', 'cascadeInterventions'],
     'nicu': ['nicu'],
-    'emergencyScenarios': ['unexpectedScenarios'],
+    'emergencyScenarios': ['emergencyPreferences'],
+    'highRiskComplications': ['highRiskComplications'],
+    'lowRiskOccurrences': ['lowRiskOccurrences'],
+    'cascadeInterventions': ['cascadeInterventions'],
     'specialWishes': ['specialWishes']
   };
   
