@@ -66,38 +66,41 @@ const renderMultiPageContent = (pdf: jsPDF, imgData: string, canvas: HTMLCanvasE
     
     const sourceY = i * heightPerPage;
     
-    // Instead of using a negative Y offset which causes distortion,
-    // we slice the canvas for each page
+    // Fix for error on line 84: Use proper addImage parameters
+    // The 'FAST' mode and transformation options are causing issues
     pdf.addImage(
       imgData,
       'PNG',
       margin, // left margin
       margin, // top margin
       pageWidth - 2 * margin, // content width
-      (pageHeight - 2 * margin), // content height per page
-      '',
-      'FAST',
-      0
+      pageHeight - 2 * margin // content height per page
     );
     
-    // Set the transform matrix back to identity
-    pdf.setCurrentTransformationMatrix(1, 0, 0, 1, 0, 0);
+    // Fix for error on line 97: Use proper addImage parameters
+    // Create a clipping mask to show only the portion of the image that belongs on this page
+    pdf.saveGraphicsState();
+    pdf.rect(
+      margin, 
+      margin, 
+      pageWidth - 2 * margin, 
+      pageHeight - 2 * margin
+    ).clip();
     
-    // Add the cropped image for this specific page
+    // Calculate scale factor
+    const scaleFactor = (pageWidth - 2 * margin) / canvas.width;
+    
+    // Add the image at the correct position
     pdf.addImage(
       imgData,
       'PNG',
-      margin,
-      margin,
-      pageWidth - 2 * margin,
-      pageHeight - 2 * margin,
-      '',
-      'FAST',
-      0,
-      -sourceY * ((pageWidth - 2 * margin) / canvas.width),
-      canvas.width,
-      heightPerPage
+      margin, // left margin
+      margin - sourceY * scaleFactor, // adjust position based on current page
+      pageWidth - 2 * margin, // width
+      canvas.height * scaleFactor // height (preserving aspect ratio)
     );
+    
+    pdf.restoreGraphicsState();
     
     // Add page number
     addPageNumber(pdf, i + 1, pageCount);
