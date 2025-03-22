@@ -3,8 +3,12 @@ import React, { ReactNode } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
-// Use environment variable or a secure way to store the key
-const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
+// Safely store the publishable key
+// For security, we're using a variable - in production, this would be an environment variable
+// The publishable key (pk_*) is safe to include in front-end code
+const STRIPE_PUBLISHABLE_KEY = 'pk_test_placeholder'; // Replace with your actual publishable key for testing
+
+const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 interface StripeProviderProps {
   children: ReactNode;
@@ -13,7 +17,7 @@ interface StripeProviderProps {
 
 export function StripeProvider({ children, amount = 9700 }: StripeProviderProps) {
   const options = {
-    mode: 'payment',
+    mode: 'payment' as const, // Explicitly type as 'payment' literal
     currency: 'brl',
     amount: amount,
     appearance: {
