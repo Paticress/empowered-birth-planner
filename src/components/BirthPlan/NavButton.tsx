@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
-import { FileText, CreditCard } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 interface BirthPlanNavButtonProps {
   className?: string;
@@ -18,7 +18,6 @@ export function BirthPlanNavButton({ className = '' }: BirthPlanNavButtonProps) 
     >
       <FileText className="h-4 w-4" />
       <span>Criar Meu Plano de Parto</span>
-      <CreditCard className="h-4 w-4 ml-1" />
     </Button>
   );
 }

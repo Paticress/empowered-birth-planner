@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { CardElement, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -26,27 +26,18 @@ export function PaymentForm({ onPaymentSuccess }: PaymentFormProps) {
     setErrorMessage(null);
 
     try {
-      // For a complete integration, you would:
-      // 1. Create a PaymentIntent on your server (requires server-side code)
-      // 2. Confirm the payment client-side using the PaymentIntent's client_secret
+      // For this simplified demo version, we'll simulate a payment
+      // In a real application, you would create a PaymentIntent on your server
+      // and use Stripe's confirmCardPayment here
       
-      // For demonstration purposes, we'll simulate a successful payment
-      // In a real implementation, replace this with actual Stripe confirmation
-      
-      // Simulated server response delay
+      // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // For demo purposes only - in production, this would be a real payment confirmation
-      const success = true; // This would come from Stripe's confirmPayment response
-      
-      if (success) {
-        setIsProcessing(false);
-        toast.success("Pagamento realizado com sucesso!");
-        localStorage.setItem('birthPlanPaid', 'true');
-        onPaymentSuccess();
-      } else {
-        throw new Error("O pagamento não pôde ser processado.");
-      }
+      // For demo purposes, we'll always consider the payment successful
+      setIsProcessing(false);
+      toast.success("Pagamento realizado com sucesso!");
+      localStorage.setItem('birthPlanPaid', 'true');
+      onPaymentSuccess();
     } catch (error) {
       setIsProcessing(false);
       setErrorMessage(
