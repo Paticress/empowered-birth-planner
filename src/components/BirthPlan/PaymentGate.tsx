@@ -10,7 +10,7 @@ interface PaymentGateProps {
   onPaymentComplete: () => void;
 }
 
-// URL to your Wix payment page
+// URL to your Wix payment page - replace with your actual payment link
 const WIX_PAYMENT_URL = "https://your-wix-site.com/payment-page";
 
 export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
@@ -24,8 +24,8 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
     let userId = localStorage.getItem('birthPlanUserId');
     
     if (!userId) {
-      // Generate a unique ID for this user
-      userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      // Generate a unique ID for this user with more entropy
+      userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}_${Math.random().toString(36).substring(2, 9)}`;
       localStorage.setItem('birthPlanUserId', userId);
     }
     
@@ -42,17 +42,24 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
     // Check localStorage for existing payment record
     const paidStatus = localStorage.getItem('birthPlanPaid');
     const storedPaymentId = localStorage.getItem('birthPlanPaymentId');
+    const paymentTimestamp = localStorage.getItem('birthPlanPaymentTimestamp');
+    
+    // Add timestamp verification to validate payments aren't too old
+    const isPaymentValid = paidStatus === 'true' && storedPaymentId;
+    const isPaymentFresh = !paymentTimestamp || 
+                          (Date.now() - Number(paymentTimestamp)) < (90 * 24 * 60 * 60 * 1000); // 90 days
     
     if (paymentStatus === 'success' && paymentId) {
       // Payment was just completed via Wix
-      // Store both the payment status and the payment ID
+      // Store both the payment status, ID and timestamp
       localStorage.setItem('birthPlanPaid', 'true');
       localStorage.setItem('birthPlanPaymentId', paymentId);
+      localStorage.setItem('birthPlanPaymentTimestamp', Date.now().toString());
       
       toast.success("Pagamento realizado com sucesso!");
       onPaymentComplete();
-    } else if (paidStatus === 'true' && storedPaymentId) {
-      // User has already paid in a previous session
+    } else if (isPaymentValid && isPaymentFresh) {
+      // User has already paid in a previous session and payment is still valid
       onPaymentComplete();
     }
     
@@ -67,7 +74,7 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
     }
     
     // Append the user identifier to the payment URL
-    const paymentUrl = `${WIX_PAYMENT_URL}?user_id=${uniqueUserIdentifier}`;
+    const paymentUrl = `${WIX_PAYMENT_URL}?user_id=${uniqueUserIdentifier}&timestamp=${Date.now()}`;
     window.location.href = paymentUrl;
   };
   

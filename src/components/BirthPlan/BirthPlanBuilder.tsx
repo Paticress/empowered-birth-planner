@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { BirthPlanHeader } from './BirthPlanHeader';
 import { BirthPlanWelcome } from './BirthPlanWelcome';
@@ -43,6 +42,8 @@ export function BirthPlanBuilder() {
           // Store payment details with the unique payment ID
           localStorage.setItem('birthPlanPaid', 'true');
           localStorage.setItem('birthPlanPaymentId', paymentId);
+          // Add timestamp to verify freshness of payment
+          localStorage.setItem('birthPlanPaymentTimestamp', Date.now().toString());
           setHasPaid(true);
           
           toast({
@@ -56,8 +57,14 @@ export function BirthPlanBuilder() {
           // Check previously stored payment information
           const paidStatus = localStorage.getItem('birthPlanPaid');
           const storedPaymentId = localStorage.getItem('birthPlanPaymentId');
+          const paymentTimestamp = localStorage.getItem('birthPlanPaymentTimestamp');
           
-          if (paidStatus === 'true' && storedPaymentId) {
+          // Verify the payment is valid and not too old (if timestamp exists)
+          const isPaymentValid = paidStatus === 'true' && storedPaymentId;
+          const isPaymentFresh = !paymentTimestamp || 
+                                (Date.now() - Number(paymentTimestamp)) < (90 * 24 * 60 * 60 * 1000); // 90 days
+          
+          if (isPaymentValid && isPaymentFresh) {
             setHasPaid(true);
           }
         }
