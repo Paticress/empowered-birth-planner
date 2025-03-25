@@ -22,7 +22,7 @@
   }
   
   /* Add styles for the birth-plan-builder button */
-  .birth-plan-builder-btn {
+  .birth-plan-builder {
     @apply bg-gradient-to-r from-pink-800 to-pink-900 text-white border border-pink-900 
            hover:from-pink-700 hover:to-pink-800 font-semibold shadow-md hover:shadow-lg 
            transform hover:-translate-y-0.5 transition-all duration-200 rounded-full;

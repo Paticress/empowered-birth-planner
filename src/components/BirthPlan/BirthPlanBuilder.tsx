@@ -13,6 +13,7 @@ import { useBirthPlanState } from './hooks/useBirthPlanState';
 
 export function BirthPlanBuilder() {
   const [hasPaid, setHasPaid] = useState(false);
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(true);
   
   const {
     currentStage,
@@ -28,29 +29,53 @@ export function BirthPlanBuilder() {
     // Log when the component mounts to verify it's being rendered
     console.log("BirthPlanBuilder mounted, current stage:", currentStage);
     
-    // Check URL parameters for payment confirmation from Wix
+    // Get current URL parameters and user ID
     const urlParams = new URLSearchParams(window.location.search);
     const paymentStatus = urlParams.get('payment_status');
+    const paymentId = urlParams.get('payment_id');
+    const userId = localStorage.getItem('birthPlanUserId');
     
-    if (paymentStatus === 'success') {
-      // Payment was just completed via Wix
-      localStorage.setItem('birthPlanPaid', 'true');
-      setHasPaid(true);
-      toast({
-        title: "Pagamento Confirmado",
-        description: "Seu acesso ao plano de parto foi liberado com sucesso!"
-      });
-    } else {
-      // Check if user has previously completed payment
-      const paidStatus = localStorage.getItem('birthPlanPaid');
-      if (paidStatus === 'true') {
-        setHasPaid(true);
+    // Enhanced verification
+    const verifyPayment = async () => {
+      try {
+        // Check if payment was just completed (from URL parameters)
+        if (paymentStatus === 'success' && paymentId) {
+          // Store payment details with the unique payment ID
+          localStorage.setItem('birthPlanPaid', 'true');
+          localStorage.setItem('birthPlanPaymentId', paymentId);
+          setHasPaid(true);
+          
+          toast({
+            title: "Pagamento Confirmado",
+            description: "Seu acesso ao plano de parto foi liberado com sucesso!"
+          });
+          
+          // Optional: You can add a call to your Wix backend here to double-verify the payment
+          // using the paymentId and userId
+        } else {
+          // Check previously stored payment information
+          const paidStatus = localStorage.getItem('birthPlanPaid');
+          const storedPaymentId = localStorage.getItem('birthPlanPaymentId');
+          
+          if (paidStatus === 'true' && storedPaymentId) {
+            setHasPaid(true);
+          }
+        }
+        
+        setIsVerifyingPayment(false);
+      } catch (error) {
+        console.error("Payment verification error:", error);
+        setIsVerifyingPayment(false);
       }
-    }
+    };
     
-    // Additional debugging to verify the route
-    console.log("Current pathname:", window.location.pathname);
-    console.log("Current search params:", window.location.search);
+    verifyPayment();
+    
+    // Clean up URL parameters after processing (to prevent re-usage of the same payment link)
+    if (paymentStatus || paymentId) {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
     
     // Force a re-render after a short delay to ensure component display
     const timer = setTimeout(() => {
@@ -59,6 +84,18 @@ export function BirthPlanBuilder() {
     
     return () => clearTimeout(timer);
   }, [currentStage]);
+
+  // Show loading state while verifying payment
+  if (isVerifyingPayment) {
+    return (
+      <div className="bg-maternal-50 min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-maternal-600 mx-auto mb-4"></div>
+          <p className="text-maternal-700">Verificando seu acesso...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Handle successful payment
   const handlePaymentComplete = () => {
