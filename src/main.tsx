@@ -8,6 +8,8 @@ import { registerServiceWorker } from './registerSW.tsx';
 // Registrar o service worker
 registerServiceWorker();
 
+console.log("Initializing application...");
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />

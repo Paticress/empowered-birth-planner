@@ -54,7 +54,6 @@ const App = () => {
               element={
                 <>
                   {console.log("ROUTE /embedded-plano ACCESSED - RENDERING EMBEDDED BIRTH PLAN BUILDER")}
-                  {/* No Header in this specific route */}
                   <EmbeddedBirthPlanBuilder />
                 </>
               } 
