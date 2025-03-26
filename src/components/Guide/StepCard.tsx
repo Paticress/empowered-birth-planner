@@ -7,7 +7,7 @@ interface StepCardProps {
   stepNumber: number;
   title: string;
   description: string;
-  icon?: LucideIcon;
+  icon: LucideIcon;
   className?: string;
 }
 
@@ -23,15 +23,10 @@ export function StepCard({ stepNumber, title, description, icon: Icon, className
         </div>
       </div>
       <div className="flex-1">
-        {Icon && (
-          <div className="flex items-center mb-2">
-            <Icon className="mr-2 h-5 w-5 text-pink-800" />
-            <h3 className="text-lg font-semibold text-maternal-800">{title}</h3>
-          </div>
-        )}
-        {!Icon && (
-          <h3 className="text-lg font-semibold text-maternal-800 mb-2">{title}</h3>
-        )}
+        <div className="flex items-center mb-2">
+          <Icon className="mr-2 h-5 w-5 text-pink-800" />
+          <h3 className="text-lg font-semibold text-maternal-800">{title}</h3>
+        </div>
         <p className="text-maternal-700">{description}</p>
       </div>
     </div>

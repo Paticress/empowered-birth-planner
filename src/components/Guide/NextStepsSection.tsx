@@ -1,64 +1,76 @@
 
+import { Edit, Share2, MessageCircle, FileEdit, Printer } from 'lucide-react';
 import { StepCard } from './StepCard';
-import { ArrowRight } from 'lucide-react';
+import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 
-interface NextStepsSectionProps {
-  wixPlansUrl?: string;
-}
-
-export function NextStepsSection({ wixPlansUrl = "https://www.energiamaterna.com.br/planos" }: NextStepsSectionProps) {
+export function NextStepsSection() {
   return (
-    <section className="my-8">
-      <h2 className="text-2xl font-bold text-maternal-900 mb-4">Próximos Passos</h2>
+    <>
+      <h2 className="text-2xl font-semibold text-maternal-800 mt-10 mb-6">Próximos Passos</h2>
       
       <p className="mb-6">
-        Agora que você concluiu este guia, aqui estão os próximos passos recomendados 
-        para continuar sua jornada para um parto mais consciente e respeitoso:
+        Agora que você conhece os elementos essenciais de um plano de parto, recomendamos:
       </p>
       
-      <div className="space-y-6 mb-8">
+      <div className="grid gap-4 mb-8">
         <StepCard 
           stepNumber={1}
-          title="Escolha um plano adequado às suas necessidades"
-          description="Avalie os planos disponíveis e escolha o que melhor atende às suas expectativas para o parto."
+          title="Crie seu plano rapidamente"
+          description="Use nosso construtor para criar seu plano de parto completo em apenas 5 minutos."
+          icon={Edit}
         />
         
         <StepCard 
           stepNumber={2}
-          title="Crie seu plano de parto personalizado"
-          description="Com o Plano Essencial ou Especial, utilize o construtor de plano de parto para criar um documento personalizado."
+          title="Compartilhe com seu parceiro/acompanhante"
+          description="Envie facilmente por e-mail ou WhatsApp para que todos estejam alinhados."
+          icon={Share2}
         />
         
         <StepCard 
           stepNumber={3}
-          title="Agende sua Consulta Acolhedora"
-          description="Disponível nos planos Essencial e Especial, converse com especialistas sobre suas dúvidas e revise seu plano de parto."
+          title="Discuta com seu médico/obstetra"
+          description="Leve seu plano para a próxima consulta e converse sobre suas preferências."
+          icon={MessageCircle}
         />
         
         <StepCard 
           stepNumber={4}
-          title="Utilize os materiais complementares"
-          description="Aproveite os produtos virtuais inclusos no Plano Especial para uma preparação completa."
+          title="Faça os ajustes necessários"
+          description="Atualize seu plano após conversar com a equipe médica para garantir alinhamento."
+          icon={FileEdit}
+        />
+        
+        <StepCard 
+          stepNumber={5}
+          title="Imprima cópias para o dia do parto"
+          description="Leve várias cópias impressas para entregar na maternidade."
+          icon={Printer}
         />
       </div>
       
-      <div className="bg-maternal-100 p-6 rounded-lg border-l-4 border-maternal-500">
-        <h3 className="font-bold text-maternal-800 mb-2">Pronta para dar o próximo passo?</h3>
-        <p className="mb-4">
-          O Guia Online é apenas o início da sua jornada. Para um suporte mais completo, 
-          considere um dos nossos planos pagos.
-        </p>
-        <div className="text-center">
-          <a 
-            href={wixPlansUrl}
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="inline-flex items-center bg-maternal-600 text-white px-6 py-2 rounded-md font-medium hover:bg-maternal-700 transition-colors"
-          >
-            Conhecer os Planos <ArrowRight className="ml-2 h-4 w-4" />
-          </a>
+      <div className="bg-maternal-50 border border-maternal-200 rounded-lg p-6 mt-6 mb-8">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="md:w-1/3">
+            <img 
+              src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7" 
+              alt="Gestante relaxando em casa usando o celular para criar plano de parto" 
+              className="rounded-xl shadow-md object-cover w-full h-auto"
+            />
+          </div>
+          <div className="md:w-2/3">
+            <h3 className="text-xl font-semibold text-maternal-800 mb-3">
+              Pronta para criar seu plano em minutos?
+            </h3>
+            <p className="mb-4">
+              Não perca tempo tentando fazer tudo do zero! Nosso construtor simplifica todo o processo, desde a criação até o compartilhamento.
+            </p>
+            <div className="flex justify-center md:justify-start">
+              <BirthPlanNavButton className="py-6 px-8 text-base" />
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </>
   );
 }
