@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
-import { Search, Menu, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { GuideSearch } from './Search/GuideSearch';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,21 +14,8 @@ type GuideHeaderProps = {
 
 export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { navigateTo } = useNavigation();
   const isMobile = useIsMobile();
-
-  // Close mobile menu on window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setMobileMenuOpen(false);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleNavigation = (path: string) => {
     if (onNavigate) {
@@ -48,7 +35,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
     <header className="bg-white sticky top-0 z-50 border-b border-gray-200 shadow-sm print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Logo */}
+          {/* Logo - simplified to avoid duplication */}
           <div className="flex-shrink-0 flex items-center">
             <img
               className="h-8 w-auto"
@@ -62,7 +49,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
             </span>
           </div>
 
-          {/* Desktop actions - simplified */}
+          {/* Desktop actions - search button and birth plan button */}
           <div className="hidden md:flex items-center space-x-4">
             {/* BIRTH PLAN NAVIGATION BUTTON */}
             <BirthPlanNavButton />
@@ -77,8 +64,8 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
             </Button>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
+          {/* Mobile - just search button */}
+          <div className="md:hidden flex items-center">
             <Button
               variant="ghost"
               size="icon"
@@ -87,33 +74,9 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
             >
               <Search className="h-5 w-5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-600"
-            >
-              {mobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
           </div>
         </div>
       </div>
-
-      {/* Mobile menu - simplified */}
-      {mobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50">
-            {/* BIRTH PLAN NAVIGATION BUTTON FOR MOBILE */}
-            <BirthPlanNavButton 
-              className="w-full justify-start" 
-            />
-          </div>
-        </div>
-      )}
 
       {/* Search overlay */}
       {searchOpen && (

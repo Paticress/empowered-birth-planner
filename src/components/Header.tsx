@@ -1,11 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -24,7 +22,6 @@ export function Header() {
   const handleNavigate = (path: string) => {
     console.log('Navigating to:', path);
     navigate(path);
-    setMobileMenuOpen(false);
   };
 
   return (
