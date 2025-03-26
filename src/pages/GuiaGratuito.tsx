@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { LeadForm } from '@/components/Lead/LeadForm';
 import { OnlineGuide } from '@/components/Guide/OnlineGuide';
 import { Testimonial } from '@/components/Testimonial';
@@ -9,10 +9,15 @@ import { OnlineGuideTerms } from '@/components/Terms/OnlineGuideTerms';
 
 const GuiaGratuito = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const handleFormSuccess = () => {
     setFormSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const scrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Debug log to check rendering
@@ -37,7 +42,7 @@ const GuiaGratuito = () => {
                 </p>
               </div>
               
-              <div className="form-section animate-fade-in">
+              <div className="form-section animate-fade-in" ref={formRef} id="form-section">
                 <h2 className="text-2xl font-bold text-maternal-900 mb-4 text-center">
                   Acesse seu guia gratuito
                 </h2>
@@ -92,9 +97,9 @@ const GuiaGratuito = () => {
               <p className="text-maternal-900 font-medium text-lg mb-4">
                 100% GRATUITO – Acesse agora e dê o primeiro passo para um parto consciente!
               </p>
-              <a href="#form-section" className="btn-primary inline-block">
+              <button onClick={scrollToForm} className="btn-primary inline-block">
                 Quero Meu Guia Agora
-              </a>
+              </button>
             </div>
           </section>
           
@@ -117,9 +122,9 @@ const GuiaGratuito = () => {
                 />
                 
                 <div className="mt-8 text-center">
-                  <a href="#form-section" className="btn-primary inline-block" id="form-section">
+                  <button onClick={scrollToForm} className="btn-primary inline-block">
                     Quero Acessar o Guia Agora
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

@@ -28,7 +28,7 @@ const App = () => {
         <Sonner />
         <HashRouter>
           <Routes>
-            <Route path="/" element={<Navigate to="/guia-online" replace />} />
+            <Route path="/" element={<Navigate to="/guia-gratuito" replace />} />
             <Route 
               path="/guia-online" 
               element={
