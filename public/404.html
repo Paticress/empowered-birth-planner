@@ -6,30 +6,21 @@
   <title>Redirecionando...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript">
-    // Single Page Apps for GitHub Pages with custom domain
-    // Modified version of the script from https://github.com/rafgraph/spa-github-pages
-    
-    // Redirect to index.html with hash route
-    var segmentCount = 0;
-    var l = window.location;
-    
-    // Handle custom domain redirects differently
-    if (l.hostname === 'planodeparto.energiamaterna.com.br') {
-      // For custom domain, redirect to hashtag-based routing
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        '/#' + l.pathname
-      );
-    } else {
-      // For GitHub Pages domain
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
-    }
+    // Script for SPA routing with GitHub Pages custom domain
+    (function() {
+      // Log the current URL for debugging
+      console.log('404 page loaded. Redirecting from:', window.location.href);
+      
+      // Get the current URL
+      var l = window.location;
+      
+      // Redirect to the home page with hash routing
+      var redirectUrl = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/#' + l.pathname;
+      console.log('Redirecting to:', redirectUrl);
+      
+      // Perform the redirect
+      window.location.replace(redirectUrl);
+    })();
   </script>
   <style>
     body {
@@ -45,13 +36,31 @@
     .message {
       text-align: center;
       padding: 20px;
+      max-width: 500px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-radius: 50%;
+      border-top-color: #3498db;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
   <div class="message">
     <h1>Redirecionando...</h1>
-    <p>Aguarde enquanto redirecionamos você para o Guia de Plano de Parto.</p>
+    <p>Aguarde enquanto redirecionamos você para o Guia de Plano de Parto <span class="loader"></span></p>
+    <p><small>Se o redirecionamento não funcionar, <a href="/">clique aqui</a> para ir para a página inicial.</small></p>
   </div>
 </body>
 </html>
