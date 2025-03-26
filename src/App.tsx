@@ -7,11 +7,9 @@ import NotFound from "./pages/NotFound";
 
 // Pages
 import { OnlineGuide } from "./components/Guide/OnlineGuide";
-import GuiaGratuito from "./pages/GuiaGratuito";
 import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
 import { EmbeddedBirthPlanBuilder } from "./components/BirthPlan/EmbeddedBirthPlanBuilder";
 import { BirthPlanSuccess } from "./components/BirthPlan/BirthPlanSuccess";
-import PlanoPersonalizado from "./pages/PlanoPersonalizado";
 import { Header } from "./components/Header";
 
 const queryClient = new QueryClient();
@@ -28,7 +26,10 @@ const App = () => {
         <Sonner />
         <HashRouter>
           <Routes>
-            <Route path="/" element={<Navigate to="/guia-gratuito" replace />} />
+            {/* Default route redirects to the guide */}
+            <Route path="/" element={<Navigate to="/guia-online" replace />} />
+            
+            {/* Online guide for free plan users from Wix */}
             <Route 
               path="/guia-online" 
               element={
@@ -40,28 +41,8 @@ const App = () => {
                 </>
               } 
             />
-            <Route 
-              path="/guia-gratuito" 
-              element={
-                <>
-                  <Header />
-                  <div className="pt-16 md:pt-20">
-                    <GuiaGratuito />
-                  </div>
-                </>
-              } 
-            />
-            <Route 
-              path="/plano-personalizado" 
-              element={
-                <>
-                  <Header />
-                  <div className="pt-16 md:pt-20">
-                    <PlanoPersonalizado />
-                  </div>
-                </>
-              } 
-            />
+            
+            {/* Birth plan builder for paid plan users from Wix */}
             <Route 
               path="/criar-plano" 
               element={
@@ -74,16 +55,19 @@ const App = () => {
                 </>
               } 
             />
+            
+            {/* Embedded version for Wix iframe */}
             <Route 
               path="/embedded-plano" 
               element={
                 <>
                   {console.log("ROUTE /embedded-plano ACCESSED - RENDERING EMBEDDED BIRTH PLAN BUILDER")}
-                  {/* Removido o Header nesta rota específica */}
                   <EmbeddedBirthPlanBuilder />
                 </>
               } 
             />
+            
+            {/* Success page after plan creation */}
             <Route 
               path="/plano-concluido" 
               element={
@@ -96,7 +80,8 @@ const App = () => {
                 </>
               } 
             />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            
+            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </HashRouter>

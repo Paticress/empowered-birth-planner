@@ -1,23 +1,58 @@
 
-import { Button } from '@/components/ui/button';
-import { Calendar } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
-export function ConsultationSection() {
+interface ConsultationSectionProps {
+  wixPlansUrl?: string;
+}
+
+export function ConsultationSection({ wixPlansUrl = "https://www.energiamaterna.com.br/planos" }: ConsultationSectionProps) {
   return (
-    <div className="bg-maternal-100 p-6 rounded-lg border-l-4 border-maternal-600 mb-8">
-      <h3 className="text-xl font-semibold text-maternal-800 mb-3">Consulta Acolhedora</h3>
-      <p className="text-maternal-700 mb-4">
-        Um espaço acolhedor para tirar suas dúvidas sobre seu plano de parto com a fundadora do Energia Materna, que criou o modelo de plano de parto personalizado.
-      </p>
-      <p className="text-maternal-700 mb-4">
-        Explore alternativas e receba orientação personalizada para ajustar o que for necessário, tornando seu Plano de Parto um documento ideal para a sua jornada.
-      </p>
-      <Button 
-        className="bg-maternal-700 hover:bg-maternal-800 text-white"
-        onClick={() => window.open('https://www.energiamaterna.com.br/service-page/consulta-acolhedora', '_blank')}
-      >
-        <Calendar className="mr-2 h-4 w-4" /> Agendar Consulta Acolhedora
-      </Button>
-    </div>
+    <section className="my-8">
+      <h2 className="text-2xl font-bold text-maternal-900 mb-4">Consulta Acolhedora</h2>
+      
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-maternal-200 mb-6">
+        <p className="mb-4">
+          Nossa Consulta Acolhedora é um espaço seguro para tirar todas as suas dúvidas sobre o parto,
+          plano de parto e preparativos para o nascimento do seu bebê.
+        </p>
+        
+        <h3 className="text-lg font-semibold text-maternal-800 mb-2">O que você recebe:</h3>
+        <ul className="space-y-2 mb-4">
+          <li className="flex items-start">
+            <span className="text-maternal-500 mr-2">•</span> 
+            <span>Atendimento personalizado com especialista em parto humanizado</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-maternal-500 mr-2">•</span> 
+            <span>Revisão do seu plano de parto com orientações específicas</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-maternal-500 mr-2">•</span> 
+            <span>Orientação sobre o que esperar em diferentes cenários de parto</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-maternal-500 mr-2">•</span> 
+            <span>Dicas para comunicação assertiva com a equipe médica</span>
+          </li>
+        </ul>
+        
+        <div className="text-maternal-700 italic mb-4">
+          <p>
+            A Consulta Acolhedora está incluída nos planos Essencial e Especial.
+          </p>
+        </div>
+        
+        <div className="text-center">
+          <a 
+            href={`${wixPlansUrl}#essencial`} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-flex items-center text-maternal-600 font-medium hover:text-maternal-800"
+          >
+            Ver detalhes no Plano Essencial <ExternalLink className="ml-1 h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    </section>
   );
 }

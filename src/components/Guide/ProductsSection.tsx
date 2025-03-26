@@ -1,46 +1,59 @@
 
-import { BookHeart, BookOpen, Notebook } from 'lucide-react';
 import { ProductCard } from './ProductCard';
+import { ExternalLink } from 'lucide-react';
 
-export function ProductsSection() {
+interface ProductsSectionProps {
+  wixPlansUrl?: string;
+}
+
+export function ProductsSection({ wixPlansUrl = "https://www.energiamaterna.com.br/planos" }: ProductsSectionProps) {
   return (
-    <>
-      <h2 className="text-2xl font-semibold text-maternal-800 mt-10 mb-6">Produtos para sua Jornada Materna</h2>
+    <section className="my-8">
+      <h2 className="text-2xl font-bold text-maternal-900 mb-4">Produtos Virtuais</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <ProductCard
-          title="Meu Diário da Maternidade"
-          subtitle="Registre memórias e sentimentos"
-          description="Este diário foi criado para você registrar suas memórias, sentimentos e aprendizados, criando uma lembrança afetiva desse período tão especial. Escreva, reflita e celebre cada passo do seu caminho."
-          buttonText="Conhecer Diário"
-          buttonIcon={<BookHeart className="mr-2 h-4 w-4" />}
-          url="https://www.energiamaterna.com.br/especiais/diario-da-maternidade"
-          imageSrc="/lovable-uploads/6b2f6105-ec41-413d-bd52-f974c7aba5ce.png"
-          imageAlt="Capa do Diário da Maternidade"
+      <p className="mb-4">
+        Para tornar sua experiência de parto ainda mais positiva, desenvolvemos produtos digitais 
+        que complementam seu plano de parto e preparam você emocionalmente para este momento especial.
+      </p>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
+        <ProductCard 
+          title="Afirmações Positivas para o Parto"
+          description="Conjunto de afirmações para fortalecer sua mente e aumentar a confiança durante o trabalho de parto."
+          icon="heart"
         />
         
-        <ProductCard
-          title="Afirmações para um Parto Positivo"
-          subtitle="64 afirmações poderosas"
-          description="eBook com 64 afirmações poderosas para nutrir sua confiança ao longo da gestação, trazer leveza ao momento do nascimento e fortalecer sua conexão com seu bebê. Deixe que essas palavras te guiem em cada etapa dessa experiência única."
-          buttonText="Obter eBook"
-          buttonIcon={<BookOpen className="mr-2 h-4 w-4" />}
-          url="https://www.energiamaterna.com.br/especiais/afirmacoes-para-um-parto-positivo"
-          imageSrc="/lovable-uploads/fd7784b0-3d05-498e-a352-ea4c018d70b4.png"
-          imageAlt="Introdução do eBook de Afirmações Positivas"
+        <ProductCard 
+          title="Diário da Maternidade"
+          description="Documento digital para registrar emoções, expectativas e memórias desta fase única da sua vida."
+          icon="book"
         />
         
-        <ProductCard
+        <ProductCard 
           title="Caderno de Bem-Estar"
-          subtitle="Seu refúgio para autocuidado"
-          description="Este caderno foi pensado para ser seu refúgio: um espaço para se expressar, aliviar a mente e reencontrar seu equilíbrio. Cuide de você, porque estar bem consigo mesma é vital para cuidar de quem ama."
-          buttonText="Adquirir Caderno"
-          buttonIcon={<Notebook className="mr-2 h-4 w-4" />}
-          url="https://www.energiamaterna.com.br/especiais/caderno-de-bem-estar"
-          imageSrc="/lovable-uploads/88664f99-92f8-4a42-b203-a96d63ecbe3d.png"
-          imageAlt="Capa do Caderno de Bem-Estar"
+          description="Guia prático com exercícios, técnicas de respiração e dicas de relaxamento para gestantes."
+          icon="sun"
         />
       </div>
-    </>
+      
+      <div className="bg-maternal-50 p-6 rounded-lg border border-maternal-200 mb-6">
+        <h3 className="font-semibold text-maternal-900 mb-2">Produtos inclusos no Plano Especial</h3>
+        <p className="mb-4">
+          Todos estes produtos virtuais estão inclusos no Plano Especial (R$ 180,00) e podem fazer toda 
+          a diferença na sua preparação para o parto.
+        </p>
+        
+        <div className="text-center">
+          <a 
+            href={`${wixPlansUrl}#especial`}
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-flex items-center text-maternal-600 font-medium hover:text-maternal-800"
+          >
+            Ver detalhes no Plano Especial <ExternalLink className="ml-1 h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    </section>
   );
 }
