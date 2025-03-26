@@ -81,8 +81,17 @@ INSTRUÇÕES DE USO NO WIX:
 
 ----- FIM DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
 
+INSTRUÇÕES PARA GUIA ONLINE:
+
+Para incorporar o Guia Online, use o mesmo formato, mas altere o URL para:
+https://planodeparto.energiamaterna.com.br/#/guia-online
+
+<div id="guide-container" class="responsive-iframe-container">
+  <iframe id="guide-iframe" src="https://planodeparto.energiamaterna.com.br/#/guia-online" scrolling="no"></iframe>
+</div>
+
 IMPORTANTE: 
 - O URL "https://planodeparto.energiamaterna.com.br/#/embedded-plano" já está pronto para uso.
-- Se você estiver usando outro domínio, substitua apenas o domínio (mantenha o "#/embedded-plano" ao final).
+- Se você estiver usando outro domínio, substitua apenas o domínio (mantenha o "/#/embedded-plano" ao final).
 - O símbolo "#" é necessário porque estamos usando HashRouter para a navegação.
 */

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useNavigation } from '@/hooks/useNavigation';
+import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { GuideSearch } from './Search/GuideSearch';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
@@ -14,7 +14,7 @@ type GuideHeaderProps = {
 
 export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
-  const { navigateTo } = useNavigation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   const handleNavigation = (path: string) => {
@@ -27,7 +27,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
       }
       onNavigate(path);
     } else {
-      navigateTo(path);
+      navigate(path);
     }
   };
 
