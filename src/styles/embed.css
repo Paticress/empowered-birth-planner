@@ -13,6 +13,13 @@
   overflow-x: hidden;
 }
 
+/* Esconder o header principal do site quando em modo embedded */
+.embedded-mode header,
+.embedded-container + header,
+.embedded-container ~ header {
+  display: none !important;
+}
+
 .embedded-mode .footer {
   /* Podemos remover ou simplificar o footer quando incorporado */
   padding: 1rem 0;

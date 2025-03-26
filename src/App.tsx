@@ -29,9 +29,33 @@ const App = () => {
         <HashRouter>
           <Routes>
             <Route path="/" element={<Navigate to="/guia-online" replace />} />
-            <Route path="/guia-online" element={<OnlineGuide />} />
-            <Route path="/guia-gratuito" element={<GuiaGratuito />} />
-            <Route path="/plano-personalizado" element={<PlanoPersonalizado />} />
+            <Route 
+              path="/guia-online" 
+              element={
+                <>
+                  <Header />
+                  <OnlineGuide />
+                </>
+              } 
+            />
+            <Route 
+              path="/guia-gratuito" 
+              element={
+                <>
+                  <Header />
+                  <GuiaGratuito />
+                </>
+              } 
+            />
+            <Route 
+              path="/plano-personalizado" 
+              element={
+                <>
+                  <Header />
+                  <PlanoPersonalizado />
+                </>
+              } 
+            />
             <Route 
               path="/criar-plano" 
               element={
@@ -49,6 +73,7 @@ const App = () => {
               element={
                 <>
                   {console.log("ROUTE /embedded-plano ACCESSED - RENDERING EMBEDDED BIRTH PLAN BUILDER")}
+                  {/* Removido o Header nesta rota específica */}
                   <EmbeddedBirthPlanBuilder />
                 </>
               } 

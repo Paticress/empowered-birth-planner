@@ -21,14 +21,18 @@ export function EmbeddedBirthPlanBuilder() {
     // Verificar periodicamente mudanças de altura no conteúdo
     const resizeInterval = setInterval(sendResizeMessage, 500);
 
+    // Remove o Header padrão do site que pode estar aparecendo
+    document.body.classList.add('embedded-mode');
+
     return () => {
       window.removeEventListener('resize', sendResizeMessage);
       clearInterval(resizeInterval);
+      document.body.classList.remove('embedded-mode');
     };
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative embedded-container">
       {/* Banner de navegação para a versão completa */}
       <div className="bg-maternal-800 text-white p-2 text-center">
         <p className="text-sm">
