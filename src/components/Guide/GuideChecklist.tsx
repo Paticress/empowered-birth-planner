@@ -10,8 +10,8 @@ import { exportAsPDF, exportAsText } from '@/utils/exportUtils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface GuideChecklistProps {
-  onPrevious: () => void;
   onNext: () => void;
+  onPrevious: () => void;
 }
 
 export function GuideChecklist({ onPrevious, onNext }: GuideChecklistProps) {

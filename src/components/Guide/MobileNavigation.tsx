@@ -4,13 +4,27 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, X } from 'lucide-react';
 
+// Default tab names
+const DEFAULT_TAB_NAMES = {
+  'introduction': 'Introdução',
+  'rights': 'Seus Direitos',
+  'structure': 'Estrutura do Plano',
+  'communication': 'Comunicação com a Equipe',
+  'checklist': 'Checklist Essencial',
+  'resources': 'Recursos Adicionais'
+};
+
 type MobileNavigationProps = {
   activeTab: string;
   onTabChange: (tab: string) => void;
-  tabNames: Record<string, string>;
+  tabNames?: Record<string, string>;
 };
 
-export function MobileNavigation({ activeTab, onTabChange, tabNames }: MobileNavigationProps) {
+export function MobileNavigation({ 
+  activeTab, 
+  onTabChange, 
+  tabNames = DEFAULT_TAB_NAMES 
+}: MobileNavigationProps) {
   const [open, setOpen] = useState(false);
   
   const handleTabSelect = (tab: string) => {

@@ -5,8 +5,8 @@ import { EssentialSections } from './Structure/EssentialSections';
 import { StructureTips } from './Structure/StructureTips';
 
 interface GuideStructureProps {
-  onPrevious: () => void;
   onNext: () => void;
+  onPrevious: () => void;
 }
 
 export function GuideStructure({ onPrevious, onNext }: GuideStructureProps) {

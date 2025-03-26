@@ -7,8 +7,8 @@ import { ObstetricViolence } from './Rights/ObstetricViolence';
 import { RisksInterventionsSection } from './Rights/RisksInterventionsSection';
 
 interface GuideRightsProps {
-  onPrevious: () => void;
   onNext: () => void;
+  onPrevious: () => void;
 }
 
 export function GuideRights({ onPrevious, onNext }: GuideRightsProps) {

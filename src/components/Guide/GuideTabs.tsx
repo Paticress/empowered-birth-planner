@@ -18,6 +18,16 @@ interface GuideTabsProps {
   embedded?: boolean;
 }
 
+// Define tab names for navigation
+const TAB_NAMES = {
+  'introduction': 'Introdução',
+  'rights': 'Seus Direitos',
+  'structure': 'Estrutura do Plano',
+  'communication': 'Comunicação com a Equipe',
+  'checklist': 'Checklist Essencial',
+  'resources': 'Recursos Adicionais'
+};
+
 export function GuideTabs({ activeTab, onTabChange, embedded = false }: GuideTabsProps) {
   const tabsRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -50,7 +60,8 @@ export function GuideTabs({ activeTab, onTabChange, embedded = false }: GuideTab
         <div className="mb-6">
           <MobileNavigation 
             activeTab={activeTab} 
-            onTabChange={onTabChange} 
+            onTabChange={onTabChange}
+            tabNames={TAB_NAMES}
           />
         </div>
       )}
@@ -72,27 +83,27 @@ export function GuideTabs({ activeTab, onTabChange, embedded = false }: GuideTab
         )}
         
         <TabsContent value="introduction">
-          <GuideIntroduction onNextClick={() => onTabChange('rights')} />
+          <GuideIntroduction onNext={() => onTabChange('rights')} />
         </TabsContent>
         
         <TabsContent value="rights">
-          <GuideRights onNextClick={() => onTabChange('structure')} onPrevClick={() => onTabChange('introduction')} />
+          <GuideRights onNext={() => onTabChange('structure')} onPrevious={() => onTabChange('introduction')} />
         </TabsContent>
         
         <TabsContent value="structure">
-          <GuideStructure onNextClick={() => onTabChange('communication')} onPrevClick={() => onTabChange('rights')} />
+          <GuideStructure onNext={() => onTabChange('communication')} onPrevious={() => onTabChange('rights')} />
         </TabsContent>
         
         <TabsContent value="communication">
-          <GuideCommunication onNextClick={() => onTabChange('checklist')} onPrevClick={() => onTabChange('structure')} />
+          <GuideCommunication onNext={() => onTabChange('checklist')} onPrevious={() => onTabChange('structure')} />
         </TabsContent>
         
         <TabsContent value="checklist">
-          <GuideChecklist onNextClick={() => onTabChange('resources')} onPrevClick={() => onTabChange('communication')} />
+          <GuideChecklist onNext={() => onTabChange('resources')} onPrevious={() => onTabChange('communication')} />
         </TabsContent>
         
         <TabsContent value="resources">
-          <GuideResources onPrevClick={() => onTabChange('checklist')} />
+          <GuideResources onPrevious={() => onTabChange('checklist')} />
         </TabsContent>
       </Tabs>
       
