@@ -10,6 +10,7 @@ import { Header } from "./components/Header";
 import { OnlineGuide } from "./components/Guide/OnlineGuide";
 import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
 import { EmbeddedBirthPlanBuilder } from "./components/BirthPlan/EmbeddedBirthPlanBuilder";
+import { EmbeddedOnlineGuide } from "./components/Guide/EmbeddedOnlineGuide";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,15 @@ const App = () => {
                   <div className="pt-16 md:pt-20">
                     <OnlineGuide />
                   </div>
+                </>
+              } 
+            />
+            <Route 
+              path="/embedded-guia" 
+              element={
+                <>
+                  {console.log("ROUTE /embedded-guia ACCESSED - RENDERING EMBEDDED ONLINE GUIDE")}
+                  <EmbeddedOnlineGuide />
                 </>
               } 
             />

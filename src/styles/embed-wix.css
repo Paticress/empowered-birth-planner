@@ -84,11 +84,54 @@ INSTRUÇÕES DE USO NO WIX:
 INSTRUÇÕES PARA GUIA ONLINE:
 
 Para incorporar o Guia Online, use o mesmo formato, mas altere o URL para:
-https://planodeparto.energiamaterna.com.br/#/guia-online
+https://planodeparto.energiamaterna.com.br/#/embedded-guia
 
 <div id="guide-container" class="responsive-iframe-container">
-  <iframe id="guide-iframe" src="https://planodeparto.energiamaterna.com.br/#/guia-online" scrolling="no"></iframe>
+  <iframe id="guide-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-guia" scrolling="no"></iframe>
 </div>
+
+<style>
+  .responsive-iframe-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 150%;
+    overflow: hidden;
+  }
+  
+  .responsive-iframe-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+</style>
+
+<script>
+  // Função para ajustar altura do iframe automaticamente
+  function setupIframeResizing() {
+    const iframe = document.getElementById('guide-iframe');
+    
+    // Listener para mensagens do iframe
+    window.addEventListener('message', function(event) {
+      // Verificar se a mensagem é do tipo resize
+      if (event.data && event.data.type === 'resize') {
+        // Ajustar altura do iframe
+        iframe.style.height = event.data.height + 'px';
+        
+        // Ajustar o container se necessário
+        const container = document.getElementById('guide-container');
+        container.style.height = event.data.height + 'px';
+        container.style.paddingBottom = '0';
+      }
+    });
+  }
+  
+  // Iniciar o ajuste de altura quando a página carregar
+  window.addEventListener('load', setupIframeResizing);
+</script>
 
 IMPORTANTE: 
 - O URL "https://planodeparto.energiamaterna.com.br/#/embedded-plano" já está pronto para uso.
