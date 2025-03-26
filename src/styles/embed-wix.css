@@ -33,7 +33,7 @@ INSTRUÇÕES DE USO NO WIX:
 ----- INÍCIO DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
 
 <div id="birth-plan-container" class="responsive-iframe-container">
-  <iframe id="birth-plan-iframe" src="SEU_URL_AQUI/embedded-plano" scrolling="no"></iframe>
+  <iframe id="birth-plan-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-plano" scrolling="no"></iframe>
 </div>
 
 <style>
@@ -81,7 +81,8 @@ INSTRUÇÕES DE USO NO WIX:
 
 ----- FIM DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
 
-5. Substitua "SEU_URL_AQUI" pelo URL completo do seu aplicativo
-   (exemplo: https://planodeparto.energiamaterna.com.br)
+IMPORTANTE: 
+- O URL "https://planodeparto.energiamaterna.com.br/#/embedded-plano" já está pronto para uso.
+- Se você estiver usando outro domínio, substitua apenas o domínio (mantenha o "#/embedded-plano" ao final).
+- O símbolo "#" é necessário porque estamos usando HashRouter para a navegação.
 */
-
