@@ -1,12 +1,7 @@
 
 /**
  * Service Worker Registration for PWA support
- * Optimized for GitHub Pages with custom domain
  */
-
-// Determine if we're on the custom domain
-const isCustomDomain = window.location.hostname === 'planodeparto.energiamaterna.com.br';
-const basePath = isCustomDomain ? '/' : '/guia-plano-parto/'; // Adjust this to your repo name if not using custom domain
 
 // Register the service worker
 export const registerServiceWorker = () => {
@@ -25,12 +20,6 @@ export const registerServiceWorker = () => {
         // Check if this is a new service worker
         if (registration.installing) {
           console.log('Service worker installing');
-          
-          // Inform about loading modules
-          console.log('Service worker will load modules:');
-          console.log('- /sw/config.js');
-          console.log('- /sw/cacheManager.js');
-          console.log('- /sw/strategies.js');
         } else if (registration.waiting) {
           console.log('Service worker installed and waiting');
         } else if (registration.active) {
