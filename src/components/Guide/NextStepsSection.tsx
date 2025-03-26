@@ -18,25 +18,25 @@ export function NextStepsSection({ wixPlansUrl = "https://www.energiamaterna.com
       
       <div className="space-y-6 mb-8">
         <StepCard 
-          number={1}
+          stepNumber={1}
           title="Escolha um plano adequado às suas necessidades"
           description="Avalie os planos disponíveis e escolha o que melhor atende às suas expectativas para o parto."
         />
         
         <StepCard 
-          number={2}
+          stepNumber={2}
           title="Crie seu plano de parto personalizado"
           description="Com o Plano Essencial ou Especial, utilize o construtor de plano de parto para criar um documento personalizado."
         />
         
         <StepCard 
-          number={3}
+          stepNumber={3}
           title="Agende sua Consulta Acolhedora"
           description="Disponível nos planos Essencial e Especial, converse com especialistas sobre suas dúvidas e revise seu plano de parto."
         />
         
         <StepCard 
-          number={4}
+          stepNumber={4}
           title="Utilize os materiais complementares"
           description="Aproveite os produtos virtuais inclusos no Plano Especial para uma preparação completa."
         />
