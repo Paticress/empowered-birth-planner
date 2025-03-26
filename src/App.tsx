@@ -9,6 +9,7 @@ import { Header } from "./components/Header";
 // Pages
 import { OnlineGuide } from "./components/Guide/OnlineGuide";
 import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
+import { EmbeddedBirthPlanBuilder } from "./components/BirthPlan/EmbeddedBirthPlanBuilder";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,16 @@ const App = () => {
                   <div className="pt-16 md:pt-20">
                     <BirthPlanBuilder />
                   </div>
+                </>
+              } 
+            />
+            <Route 
+              path="/embedded-plano" 
+              element={
+                <>
+                  {console.log("ROUTE /embedded-plano ACCESSED - RENDERING EMBEDDED BIRTH PLAN BUILDER")}
+                  {/* No Header in this specific route */}
+                  <EmbeddedBirthPlanBuilder />
                 </>
               } 
             />
