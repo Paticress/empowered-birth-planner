@@ -24,14 +24,14 @@ export function BirthPlanBuilder({ embedded = false }: { embedded?: boolean }) {
 
   // Log when the component mounts to verify it's being rendered
   useEffect(() => {
-    console.log("BirthPlanBuilder mounted, current stage:", currentStage);
-  }, [currentStage]);
+    console.log("BirthPlanBuilder mounted, current stage:", currentStage, "embedded mode:", embedded);
+  }, [currentStage, embedded]);
 
   // Verify if the user has already paid
   useEffect(() => {
     // When embedded, skip payment verification
     if (embedded) {
-      console.log("BirthPlanBuilder running in embedded mode");
+      console.log("BirthPlanBuilder running in embedded mode - skipping payment check");
       setHasAccess(true);
       setCheckingPayment(false);
       return;
@@ -41,6 +41,8 @@ export function BirthPlanBuilder({ embedded = false }: { embedded?: boolean }) {
     const checkPaymentStatus = () => {
       const paidStatus = localStorage.getItem('birthPlanPaid');
       const paymentTimestamp = localStorage.getItem('birthPlanPaymentTimestamp');
+      
+      console.log("Checking payment status:", paidStatus, paymentTimestamp);
       
       // Check if payment is valid (within 9 months)
       if (paidStatus === 'true' && paymentTimestamp) {
@@ -79,14 +81,17 @@ export function BirthPlanBuilder({ embedded = false }: { embedded?: boolean }) {
 
   // If checking payment, show loading indicator
   if (checkingPayment) {
+    console.log("Still checking payment status");
     return <LoadingIndicator />;
   }
 
   // If user doesn't have access, show PaymentGate
   if (!hasAccess && !embedded) {
+    console.log("User doesn't have access, showing payment gate");
     return <PaymentGate onPaymentComplete={handlePaymentComplete} />;
   }
 
+  console.log("Rendering BuilderMainContent with currentStage:", currentStage);
   return (
     <BuilderMainContent
       currentStage={currentStage}

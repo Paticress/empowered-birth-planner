@@ -2,8 +2,8 @@
 /* Estilos específicos para modo incorporado */
 .embedded-mode {
   /* Remove qualquer padding ou margem extra */
-  padding: 0;
-  margin: 0;
+  padding: 0 !important;
+  margin: 0 !important;
   /* Assegura que a altura seja flexível para caber no iframe */
   min-height: 100vh;
   height: auto;
@@ -30,6 +30,11 @@
 .embedded-mode main {
   width: 100%;
   max-width: 100%;
+}
+
+.embedded-container {
+  width: 100%;
+  min-height: 100vh;
 }
 
 .embedded-mode .birth-plan-header,

@@ -3,7 +3,7 @@ import { BirthPlanBuilder } from './BirthPlanBuilder';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import '../../styles/embed.css';  // Updated import path
+import '../../styles/embed.css';
 
 export function EmbeddedBirthPlanBuilder() {
   // Enviar mensagem para o iframe container sobre o tamanho
@@ -12,6 +12,7 @@ export function EmbeddedBirthPlanBuilder() {
       // Envia mensagem para o container (Wix) com altura do conteúdo
       const height = document.body.scrollHeight;
       window.parent.postMessage({ type: 'resize', height }, '*');
+      console.log("Sending resize message, height:", height);
     };
 
     // Envia mensagem inicial e configura listener para resize
@@ -23,6 +24,8 @@ export function EmbeddedBirthPlanBuilder() {
 
     // Remove o Header padrão do site que pode estar aparecendo
     document.body.classList.add('embedded-mode');
+    
+    console.log("EmbeddedBirthPlanBuilder mounted");
 
     return () => {
       window.removeEventListener('resize', sendResizeMessage);
@@ -49,8 +52,8 @@ export function EmbeddedBirthPlanBuilder() {
         </p>
       </div>
       
-      {/* Passando embedded=true para indicar que está sendo usado em um iframe/contexto incorporado */}
-      {/* O modo embedded pula a verificação de pagamento, pois será mostrado apenas para usuários pagantes no Wix */}
+      {/* Passing embedded=true to indicate that it's being used in an iframe/embedded context */}
+      {/* Embedded mode skips payment verification as it will only be shown to paying users in Wix */}
       <BirthPlanBuilder embedded={true} />
     </div>
   );
