@@ -1,7 +1,7 @@
 
 import { BirthPlanBuilder } from './BirthPlanBuilder';
 import { useEffect } from 'react';
-import '../styles/embed.css';
+import '../../styles/embed.css';  // Updated import path
 
 export function EmbeddedBirthPlanBuilder() {
   // Enviar mensagem para o iframe container sobre o tamanho
