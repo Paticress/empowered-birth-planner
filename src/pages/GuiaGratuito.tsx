@@ -14,6 +14,9 @@ const GuiaGratuito = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Debug log to check rendering
+  console.log("Rendering GuiaGratuito, formSubmitted:", formSubmitted);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-maternal-50 via-purple-50 to-indigo-50 page-transition">
       {formSubmitted ? (

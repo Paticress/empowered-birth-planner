@@ -32,19 +32,12 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
   };
 
   return (
-    <header className="bg-white sticky top-0 z-50 border-b border-gray-200 shadow-sm print:hidden">
+    <header className="bg-white sticky top-0 z-40 border-b border-gray-200 shadow-sm print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Logo - simplified to avoid duplication */}
+          {/* Logo - No logo here to prevent overlap with main header */}
           <div className="flex-shrink-0 flex items-center">
-            <img
-              className="h-8 w-auto"
-              src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png"
-              alt="Logo Guia do Parto Respeitoso"
-              onClick={() => handleNavigation('/guia-online')}
-              style={{ cursor: 'pointer' }}
-            />
-            <span className="ml-2 font-semibold text-gray-900 hidden sm:block">
+            <span className="ml-2 font-semibold text-gray-900">
               Guia do Parto Respeitoso
             </span>
           </div>

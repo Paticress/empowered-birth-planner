@@ -34,7 +34,9 @@ const App = () => {
               element={
                 <>
                   <Header />
-                  <OnlineGuide />
+                  <div className="pt-16 md:pt-20">
+                    <OnlineGuide />
+                  </div>
                 </>
               } 
             />
@@ -43,7 +45,9 @@ const App = () => {
               element={
                 <>
                   <Header />
-                  <GuiaGratuito />
+                  <div className="pt-16 md:pt-20">
+                    <GuiaGratuito />
+                  </div>
                 </>
               } 
             />
@@ -52,7 +56,9 @@ const App = () => {
               element={
                 <>
                   <Header />
-                  <PlanoPersonalizado />
+                  <div className="pt-16 md:pt-20">
+                    <PlanoPersonalizado />
+                  </div>
                 </>
               } 
             />
@@ -62,7 +68,7 @@ const App = () => {
                 <>
                   {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
                   <Header />
-                  <div className="mt-16 md:mt-20">
+                  <div className="pt-16 md:pt-20">
                     <BirthPlanBuilder />
                   </div>
                 </>
@@ -84,7 +90,7 @@ const App = () => {
                 <>
                   {console.log("ROUTE /plano-concluido ACCESSED - RENDERING SUCCESS PAGE")}
                   <Header />
-                  <div className="mt-16 md:mt-20">
+                  <div className="pt-16 md:pt-20">
                     <BirthPlanSuccess />
                   </div>
                 </>
