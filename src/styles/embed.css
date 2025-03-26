@@ -7,6 +7,8 @@
   /* Assegura que a altura seja flexível para caber no iframe */
   min-height: 100vh;
   height: auto;
+  width: 100% !important;
+  max-width: 100% !important;
   /* Melhora a responsividade em iframes menores */
   overflow-x: hidden;
 }
@@ -15,6 +17,18 @@
   /* Podemos remover ou simplificar o footer quando incorporado */
   padding: 1rem 0;
   margin-top: 1rem;
+}
+
+/* Elementos responsivos dentro do iframe */
+.embedded-mode main {
+  width: 100%;
+  max-width: 100%;
+}
+
+.embedded-mode .birth-plan-header,
+.embedded-mode .birth-plan-content {
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Ajustes para tamanhos menores quando incorporado */
@@ -26,4 +40,22 @@
   .embedded-mode .birth-plan-header {
     padding: 0.5rem;
   }
+}
+
+/* Classe helper para o código do iframe no Wix */
+.responsive-iframe-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 150%; /* Proporção de aspecto ajustável conforme necessidade */
+  overflow: hidden;
+}
+
+.responsive-iframe-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
 }

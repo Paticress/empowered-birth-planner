@@ -26,15 +26,17 @@ export function BuilderMainContent({
   onGoToStage
 }: BuilderMainContentProps) {
   return (
-    <div className={`bg-maternal-50 min-h-screen ${embedded ? 'embedded-mode' : ''}`} 
-         role="main" 
-         aria-label="Construa seu Plano de Parto">
-      <div className="pt-4 md:pt-8">
+    <div 
+      className={`bg-maternal-50 min-h-screen w-full ${embedded ? 'embedded-mode' : ''}`} 
+      role="main" 
+      aria-label="Construa seu Plano de Parto"
+    >
+      <div className="w-full pt-4 md:pt-8">
         <BirthPlanHeader currentStage={currentStage} onStageChange={onGoToStage} />
         
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Versão compacta do banner de informações */}
-          <div className="mb-6 p-3 bg-maternal-100 border-l-4 border-maternal-400 rounded-md">
+          <div className="w-full mb-6 p-3 bg-maternal-100 border-l-4 border-maternal-400 rounded-md">
             <h1 className="text-xl font-semibold text-maternal-800">
               {currentStage === 'welcome' ? 'Bem-vinda ao Construtor de Plano de Parto' : 
                currentStage === 'questionnaire' ? 'Questionário do Plano de Parto' :
@@ -44,7 +46,7 @@ export function BuilderMainContent({
             </h1>
           </div>
           
-          <div className="bg-white shadow-xl rounded-lg p-6 md:p-8 mb-8 border-t-4 border-maternal-400">
+          <div className="w-full bg-white shadow-xl rounded-lg p-4 sm:p-6 md:p-8 mb-8 border-t-4 border-maternal-400">
             <StageContent 
               currentStage={currentStage}
               birthPlanContent={birthPlanContent}
@@ -57,7 +59,7 @@ export function BuilderMainContent({
           </div>
         </main>
         
-        <Footer />
+        {!embedded && <Footer />}
       </div>
     </div>
   );
