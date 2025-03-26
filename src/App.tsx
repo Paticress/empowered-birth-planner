@@ -4,15 +4,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate, HashRouter } from "react-router-dom";
 import NotFound from "./pages/NotFound";
+import { Header } from "./components/Header";
 
 // Pages
 import { OnlineGuide } from "./components/Guide/OnlineGuide";
-import GuiaGratuito from "./pages/GuiaGratuito";
 import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
-import { EmbeddedBirthPlanBuilder } from "./components/BirthPlan/EmbeddedBirthPlanBuilder";
-import { BirthPlanSuccess } from "./components/BirthPlan/BirthPlanSuccess";
-import PlanoPersonalizado from "./pages/PlanoPersonalizado";
-import { Header } from "./components/Header";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +24,7 @@ const App = () => {
         <Sonner />
         <HashRouter>
           <Routes>
-            <Route path="/" element={<Navigate to="/guia-gratuito" replace />} />
+            <Route path="/" element={<Navigate to="/guia-online" replace />} />
             <Route 
               path="/guia-online" 
               element={
@@ -41,28 +37,6 @@ const App = () => {
               } 
             />
             <Route 
-              path="/guia-gratuito" 
-              element={
-                <>
-                  <Header />
-                  <div className="pt-16 md:pt-20">
-                    <GuiaGratuito />
-                  </div>
-                </>
-              } 
-            />
-            <Route 
-              path="/plano-personalizado" 
-              element={
-                <>
-                  <Header />
-                  <div className="pt-16 md:pt-20">
-                    <PlanoPersonalizado />
-                  </div>
-                </>
-              } 
-            />
-            <Route 
               path="/criar-plano" 
               element={
                 <>
@@ -70,28 +44,6 @@ const App = () => {
                   <Header />
                   <div className="pt-16 md:pt-20">
                     <BirthPlanBuilder />
-                  </div>
-                </>
-              } 
-            />
-            <Route 
-              path="/embedded-plano" 
-              element={
-                <>
-                  {console.log("ROUTE /embedded-plano ACCESSED - RENDERING EMBEDDED BIRTH PLAN BUILDER")}
-                  {/* Removido o Header nesta rota específica */}
-                  <EmbeddedBirthPlanBuilder />
-                </>
-              } 
-            />
-            <Route 
-              path="/plano-concluido" 
-              element={
-                <>
-                  {console.log("ROUTE /plano-concluido ACCESSED - RENDERING SUCCESS PAGE")}
-                  <Header />
-                  <div className="pt-16 md:pt-20">
-                    <BirthPlanSuccess />
                   </div>
                 </>
               } 
