@@ -22,18 +22,38 @@
   border: none;
 }
 
-/* JAVASCRIPT PARA AJUSTE AUTOMÁTICO DE ALTURA (para usar no Wix) */
-/* 
-Para usar este código no Wix:
-1. Adicione um elemento HTML no seu site Wix
-2. Cole o código abaixo no elemento HTML
-3. Substitua "SEU_URL_AQUI" pelo URL do seu aplicativo de plano de parto
-*/
-
 /*
+INSTRUÇÕES DE USO NO WIX:
+
+1. No seu site Wix, adicione um elemento HTML
+2. Clique para editar o HTML
+3. APAGUE todo o conteúdo que estiver lá
+4. COPIE e COLE o código abaixo (SEM incluir as marcações de comentário):
+
+----- INÍCIO DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
+
 <div id="birth-plan-container" class="responsive-iframe-container">
   <iframe id="birth-plan-iframe" src="SEU_URL_AQUI/embedded-plano" scrolling="no"></iframe>
 </div>
+
+<style>
+  .responsive-iframe-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 150%;
+    overflow: hidden;
+  }
+  
+  .responsive-iframe-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+</style>
 
 <script>
   // Função para ajustar altura do iframe automaticamente
@@ -58,4 +78,10 @@ Para usar este código no Wix:
   // Iniciar o ajuste de altura quando a página carregar
   window.addEventListener('load', setupIframeResizing);
 </script>
+
+----- FIM DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
+
+5. Substitua "SEU_URL_AQUI" pelo URL completo do seu aplicativo
+   (exemplo: https://planodeparto.energiamaterna.com.br)
 */
+
