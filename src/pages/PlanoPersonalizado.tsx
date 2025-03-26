@@ -1,57 +1,48 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FeatureCard } from '@/components/FeatureCard';
 import { Testimonial } from '@/components/Testimonial';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useNavigation } from '@/hooks/useNavigation';
 import { toast } from 'sonner';
+import { Check, ArrowRight } from 'lucide-react';
 
 const PlanoPersonalizado = () => {
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    whatsapp: '',
-    acceptTerms: false
-  });
+  const { navigateTo } = useNavigation();
+  const [hasPaid, setHasPaid] = useState(false);
+  const [isCheckingPayment, setIsCheckingPayment] = useState(true);
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  // Verificar se o usuário já pagou
+  useEffect(() => {
+    const checkPaymentStatus = () => {
+      const paidStatus = localStorage.getItem('birthPlanPaid');
+      const paymentTimestamp = localStorage.getItem('birthPlanPaymentTimestamp');
+      
+      if (paidStatus === 'true' && paymentTimestamp) {
+        const paymentDate = Number(paymentTimestamp);
+        const expirationDate = paymentDate + (9 * 30 * 24 * 60 * 60 * 1000); // 9 meses em milissegundos
+        
+        if (Date.now() < expirationDate) {
+          setHasPaid(true);
+        }
+      }
+      
+      setIsCheckingPayment(false);
+    };
+    
+    checkPaymentStatus();
+  }, []);
   
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData(prev => ({ ...prev, acceptTerms: checked }));
+  const handleAccessPlan = () => {
+    navigateTo('/criar-plano');
   };
   
   const handlePurchase = () => {
-    setIsCheckingOut(true);
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.whatsapp || !formData.acceptTerms) {
-      toast.error("Por favor, preencha todos os campos obrigatórios");
-      return;
-    }
-    
-    // Simulate payment processing
-    toast.success("Parabéns! Seu acesso foi liberado com sucesso!");
-    
-    // Reset form and state
-    setFormData({
-      name: '',
-      email: '',
-      whatsapp: '',
-      acceptTerms: false
-    });
-    setIsCheckingOut(false);
+    // Redirecionar para o construtor de plano de parto, que vai verificar o pagamento
+    navigateTo('/criar-plano');
   };
 
   return (
@@ -69,7 +60,27 @@ const PlanoPersonalizado = () => {
             <p className="subheading mb-8">
               Personalize seu plano de parto e garanta que suas vontades sejam respeitadas no momento mais especial da sua vida.
             </p>
-            {!isCheckingOut && (
+            
+            {isCheckingPayment ? (
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-maternal-600"></div>
+              </div>
+            ) : hasPaid ? (
+              <div className="space-y-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 inline-block">
+                  <p className="text-green-800 flex items-center">
+                    <Check className="w-5 h-5 mr-2" /> 
+                    Seu acesso está ativo até {new Date(Number(localStorage.getItem('birthPlanPaymentTimestamp')) + (9 * 30 * 24 * 60 * 60 * 1000)).toLocaleDateString()}
+                  </p>
+                </div>
+                <Button 
+                  onClick={handleAccessPlan}
+                  className="btn-primary"
+                >
+                  Acessar Meu Plano de Parto <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
               <Button 
                 onClick={handlePurchase}
                 className="btn-primary"
@@ -142,9 +153,9 @@ const PlanoPersonalizado = () => {
               <div className="bg-maternal-100 text-maternal-600 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl font-bold">1</span>
               </div>
-              <h3 className="text-xl font-semibold text-maternal-900 mb-3">Baixe o modelo</h3>
+              <h3 className="text-xl font-semibold text-maternal-900 mb-3">Faça seu pagamento</h3>
               <p className="text-maternal-700">
-                Após a compra, você recebe acesso imediato ao modelo personalizável em formato editável
+                Acesso único por R$ 97,00 válido por 9 meses, tempo suficiente para planejar e ajustar seu plano até o nascimento
               </p>
             </div>
             
@@ -154,7 +165,7 @@ const PlanoPersonalizado = () => {
               </div>
               <h3 className="text-xl font-semibold text-maternal-900 mb-3">Personalize</h3>
               <p className="text-maternal-700">
-                Preencha o modelo com suas escolhas e preferências para cada etapa do trabalho de parto
+                Responda algumas perguntas simples e nosso construtor criará automaticamente um plano de parto para você editar
               </p>
             </div>
             
@@ -162,14 +173,27 @@ const PlanoPersonalizado = () => {
               <div className="bg-maternal-100 text-maternal-600 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl font-bold">3</span>
               </div>
-              <h3 className="text-xl font-semibold text-maternal-900 mb-3">Utilize</h3>
+              <h3 className="text-xl font-semibold text-maternal-900 mb-3">Compartilhe</h3>
               <p className="text-maternal-700">
                 Imprima e compartilhe seu plano com sua equipe médica e acompanhantes
               </p>
             </div>
           </div>
           
-          {!isCheckingOut && (
+          {isCheckingPayment ? (
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-maternal-600"></div>
+            </div>
+          ) : hasPaid ? (
+            <div className="text-center">
+              <Button 
+                onClick={handleAccessPlan}
+                className="btn-primary"
+              >
+                Acessar Meu Plano de Parto <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
             <div className="text-center">
               <Button 
                 onClick={handlePurchase}
@@ -182,8 +206,69 @@ const PlanoPersonalizado = () => {
         </div>
       </section>
       
+      {/* Pricing Section */}
+      {!hasPaid && (
+        <section className="py-16 md:py-24">
+          <div className="landing-container">
+            <div className="text-center mb-16 section-transition">
+              <h2 className="heading-secondary text-maternal-900">Investimento</h2>
+              <p className="subheading max-w-3xl mx-auto">
+                Acesso completo ao construtor de plano de parto personalizado
+              </p>
+            </div>
+            
+            <div className="max-w-md mx-auto">
+              <Card className="border-2 border-maternal-300 shadow-xl overflow-hidden">
+                <div className="bg-maternal-600 p-6 text-white text-center">
+                  <h3 className="text-2xl font-bold">Construtor de Plano de Parto</h3>
+                  <p className="text-lg mt-2">Acesso por 9 meses</p>
+                </div>
+                
+                <div className="p-6">
+                  <div className="text-center mb-6">
+                    <p className="text-4xl font-bold text-maternal-900">R$ 97,00</p>
+                    <p className="text-maternal-600">Pagamento único</p>
+                  </div>
+                  
+                  <ul className="space-y-3 mb-6">
+                    {[
+                      "Questionário personalizado",
+                      "Construtor automático de plano",
+                      "Editor intuitivo de texto",
+                      "Compartilhamento fácil",
+                      "Gerador de PDF",
+                      "Acesso por 9 meses",
+                      "Atualizações ilimitadas durante o período"
+                    ].map((feature, index) => (
+                      <li key={index} className="flex items-start">
+                        <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-0.5">
+                          <Check className="h-4 w-4 text-maternal-600" />
+                        </div>
+                        <span className="text-maternal-700">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button 
+                    onClick={handlePurchase}
+                    className="w-full py-6 text-lg"
+                    variant="birth-plan-builder"
+                  >
+                    Obter Acesso Agora
+                  </Button>
+                  
+                  <p className="text-xs text-center text-maternal-500 mt-4">
+                    Acesso imediato após a confirmação do pagamento
+                  </p>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+      )}
+      
       {/* Testimonials Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-maternal-50">
         <div className="landing-container">
           <div className="text-center mb-16 section-transition">
             <h2 className="heading-secondary text-maternal-900">O que as mães estão dizendo</h2>
@@ -191,7 +276,7 @@ const PlanoPersonalizado = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Testimonial 
-              quote="Com o modelo do Energia Materna, finalmente me senti preparada e confiante para o parto. Foi a melhor decisão!"
+              quote="Com o construtor de plano de parto, finalmente me senti preparada e confiante. Levou apenas 15 minutos para criar um documento completo!"
               name="Ana C."
               role="Mãe do Lucas"
             />
@@ -203,149 +288,13 @@ const PlanoPersonalizado = () => {
             />
             
             <Testimonial 
-              quote="Ter um plano de parto bem organizado me deu segurança para viver esse momento tão especial. Valeu muito a pena!"
+              quote="Ter um plano de parto bem organizado me deu segurança para viver esse momento tão especial. O construtor simplificou todo o processo!"
               name="Carolina F."
               role="Mãe do Pedro"
             />
           </div>
         </div>
       </section>
-      
-      {/* Checkout Section */}
-      {isCheckingOut && (
-        <section className="py-16 md:py-24 bg-maternal-50">
-          <div className="landing-container">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div className="form-section animate-fade-in">
-                <h2 className="text-2xl font-bold text-maternal-900 mb-6">Complete sua compra</h2>
-                
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome completo</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      placeholder="Seu nome completo"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="rounded-xl border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="rounded-xl border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="whatsapp">WhatsApp</Label>
-                    <Input
-                      id="whatsapp"
-                      name="whatsapp"
-                      placeholder="(00) 00000-0000"
-                      value={formData.whatsapp}
-                      onChange={handleInputChange}
-                      className="rounded-xl border-maternal-200 focus:border-maternal-400 focus:ring-maternal-400"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="terms" 
-                      checked={formData.acceptTerms} 
-                      onCheckedChange={handleCheckboxChange}
-                      className="text-maternal-600 focus:ring-maternal-400"
-                    />
-                    <Label htmlFor="terms" className="text-sm text-maternal-700">
-                      Concordo com os termos de uso e política de privacidade
-                    </Label>
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-maternal-600 hover:bg-maternal-700 text-white rounded-full py-6 transition-all duration-300 shadow-md hover:shadow-lg"
-                  >
-                    Finalizar Compra
-                  </Button>
-                </form>
-              </div>
-              
-              <div className="animate-fade-in-up">
-                <Card className="bg-white border-maternal-100 shadow-md p-6">
-                  <h3 className="text-xl font-bold text-maternal-900 mb-4">Modelo Personalizado de Plano de Parto</h3>
-                  
-                  <ul className="space-y-3 mb-6">
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-maternal-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-maternal-700">Modelo completo em formato editável</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-maternal-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-maternal-700">Checklist para revisar com a equipe médica</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-maternal-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-maternal-700">Guia de comunicação com a equipe médica</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-maternal-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-maternal-700">Acesso vitalício a atualizações</span>
-                    </li>
-                  </ul>
-                  
-                  <div className="border-t border-maternal-100 pt-4 mb-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-maternal-700">Preço:</span>
-                      <span className="text-maternal-900 font-bold">R$ 97,00</span>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-maternal-50 border border-maternal-100 rounded-lg p-4 mb-4">
-                    <h4 className="text-sm font-semibold text-maternal-800 mb-2">🎁 BÔNUS EXCLUSIVO</h4>
-                    <p className="text-maternal-700 text-sm">
-                      Checklist completo para revisar seu plano com a equipe médica!
-                    </p>
-                  </div>
-                  
-                  <div className="bg-maternal-50 border border-maternal-100 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-maternal-800 mb-1">Garantia de satisfação:</h4>
-                    <p className="text-maternal-700 text-sm">
-                      Se você não gostar do material, devolvemos seu dinheiro em até 7 dias.
-                    </p>
-                  </div>
-                </Card>
-                
-                <Button 
-                  variant="outline"
-                  onClick={() => setIsCheckingOut(false)}
-                  className="mt-4 w-full border-maternal-300 text-maternal-700"
-                >
-                  Voltar
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
       
       <Footer />
     </div>

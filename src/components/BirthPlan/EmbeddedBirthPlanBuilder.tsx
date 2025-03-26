@@ -1,6 +1,7 @@
 
 import { BirthPlanBuilder } from './BirthPlanBuilder';
 import { useEffect } from 'react';
+import '../styles/embed.css';
 
 export function EmbeddedBirthPlanBuilder() {
   // Enviar mensagem para o iframe container sobre o tamanho
@@ -26,6 +27,7 @@ export function EmbeddedBirthPlanBuilder() {
 
   return (
     // Passando embedded=true para indicar que está sendo usado em um iframe/contexto incorporado
+    // O modo embedded pula a verificação de pagamento, pois será mostrado apenas para usuários pagantes no Wix
     <BirthPlanBuilder embedded={true} />
   );
 }

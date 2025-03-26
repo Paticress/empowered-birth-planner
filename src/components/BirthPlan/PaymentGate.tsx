@@ -10,21 +10,21 @@ interface PaymentGateProps {
   onPaymentComplete: () => void;
 }
 
-// URL to your Wix payment page - replace with your actual payment link
-const WIX_PAYMENT_URL = "https://your-wix-site.com/payment-page";
+// URL para a página de pagamento do Wix - substitua pelo seu link real
+const WIX_PAYMENT_URL = "https://www.energiamaterna.com.br/product-page/plano-de-parto";
 
 export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
   const { navigateTo } = useNavigation();
   const [checkingPayment, setCheckingPayment] = useState(true);
   const [uniqueUserIdentifier, setUniqueUserIdentifier] = useState<string | null>(null);
   
-  // Generate or retrieve a unique identifier for the user
+  // Gerar ou recuperar um identificador único para o usuário
   useEffect(() => {
-    // Check if user already has an ID
+    // Verificar se o usuário já tem um ID
     let userId = localStorage.getItem('birthPlanUserId');
     
     if (!userId) {
-      // Generate a unique ID for this user with more entropy
+      // Gerar um ID único para este usuário com mais entropia
       userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}_${Math.random().toString(36).substring(2, 9)}`;
       localStorage.setItem('birthPlanUserId', userId);
     }
@@ -32,26 +32,26 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
     setUniqueUserIdentifier(userId);
   }, []);
   
-  // Check if the user has already paid
+  // Verificar se o usuário já pagou
   useEffect(() => {
-    // Check for payment from URL parameter (when returning from Wix)
+    // Verificar parâmetros de URL (ao retornar do Wix)
     const urlParams = new URLSearchParams(window.location.search);
     const paymentStatus = urlParams.get('payment_status');
     const paymentId = urlParams.get('payment_id');
     
-    // Check localStorage for existing payment record
+    // Verificar localStorage para registro de pagamento existente
     const paidStatus = localStorage.getItem('birthPlanPaid');
     const storedPaymentId = localStorage.getItem('birthPlanPaymentId');
     const paymentTimestamp = localStorage.getItem('birthPlanPaymentTimestamp');
     
-    // Add timestamp verification to validate payments aren't too old
+    // Adicionar verificação de timestamp para validar se os pagamentos não são muito antigos
     const isPaymentValid = paidStatus === 'true' && storedPaymentId;
     const isPaymentFresh = !paymentTimestamp || 
-                          (Date.now() - Number(paymentTimestamp)) < (90 * 24 * 60 * 60 * 1000); // 90 days
+                          (Date.now() - Number(paymentTimestamp)) < (9 * 30 * 24 * 60 * 60 * 1000); // 9 meses
     
     if (paymentStatus === 'success' && paymentId) {
-      // Payment was just completed via Wix
-      // Store both the payment status, ID and timestamp
+      // Pagamento acabou de ser concluído via Wix
+      // Armazenar status do pagamento, ID e timestamp
       localStorage.setItem('birthPlanPaid', 'true');
       localStorage.setItem('birthPlanPaymentId', paymentId);
       localStorage.setItem('birthPlanPaymentTimestamp', Date.now().toString());
@@ -59,21 +59,21 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
       toast.success("Pagamento realizado com sucesso!");
       onPaymentComplete();
     } else if (isPaymentValid && isPaymentFresh) {
-      // User has already paid in a previous session and payment is still valid
+      // O usuário já pagou em uma sessão anterior e o pagamento ainda é válido
       onPaymentComplete();
     }
     
     setCheckingPayment(false);
   }, [onPaymentComplete]);
 
-  // Redirect to Wix payment page with the unique user identifier
+  // Redirecionar para a página de pagamento do Wix com o identificador único do usuário
   const handlePaymentRedirect = () => {
     if (!uniqueUserIdentifier) {
       toast.error("Erro ao processar pagamento. Por favor, tente novamente.");
       return;
     }
     
-    // Append the user identifier to the payment URL
+    // Adicionar o identificador do usuário ao URL de pagamento
     const paymentUrl = `${WIX_PAYMENT_URL}?user_id=${uniqueUserIdentifier}&timestamp=${Date.now()}`;
     window.location.href = paymentUrl;
   };
@@ -110,6 +110,7 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
           <div className="bg-maternal-600 p-4 md:p-6 text-white text-center">
             <h2 className="text-xl md:text-2xl font-bold mb-2">Construa seu Plano de Parto Personalizado</h2>
             <p className="mb-0">Acesso único por apenas R$ 97,00</p>
+            <p className="text-sm text-maternal-100 mt-1">Válido por 9 meses</p>
           </div>
           
           <div className="p-4 md:p-8">
@@ -118,43 +119,33 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
               <ul className="space-y-2">
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
-                    <svg className="w-4 h-4 text-maternal-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                    <Check className="w-4 h-4 text-maternal-600" />
                   </div>
                   <span className="text-sm md:text-base">Questionário personalizado para entender suas necessidades específicas</span>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
-                    <svg className="w-4 h-4 text-maternal-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                    <Check className="w-4 h-4 text-maternal-600" />
                   </div>
                   <span className="text-sm md:text-base">Plano de parto gerado automaticamente com base em suas respostas</span>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
-                    <svg className="w-4 h-4 text-maternal-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                    <Check className="w-4 h-4 text-maternal-600" />
                   </div>
                   <span className="text-sm md:text-base">Editor para personalizar cada aspecto do seu plano</span>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
-                    <svg className="w-4 h-4 text-maternal-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                    <Check className="w-4 h-4 text-maternal-600" />
                   </div>
                   <span className="text-sm md:text-base">Opções para compartilhar com sua equipe médica e imprimir</span>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-maternal-100 rounded-full p-1 mr-3 mt-1">
-                    <svg className="w-4 h-4 text-maternal-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                    <Check className="w-4 h-4 text-maternal-600" />
                   </div>
-                  <span className="text-sm md:text-base">Acesso ilimitado para fazer alterações ao seu plano</span>
+                  <span className="text-sm md:text-base">Acesso por 9 meses para fazer alterações ao seu plano</span>
                 </li>
               </ul>
             </div>
@@ -163,10 +154,10 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
               <div className="flex items-start">
                 <Lock className="w-5 h-5 text-maternal-600 mr-3 mt-1" />
                 <div>
-                  <h4 className="text-maternal-800 font-semibold mb-1">Acesso Individual e Seguro</h4>
+                  <h4 className="text-maternal-800 font-semibold mb-1">Acesso Válido por 9 Meses</h4>
                   <p className="text-sm text-maternal-700">
-                    Seu pagamento dá acesso a uma única conta. Nosso sistema identifica cada usuário individualmente
-                    para garantir a proteção do seu acesso exclusivo.
+                    Seu pagamento dá acesso ao construtor de plano de parto por 9 meses, 
+                    suficiente para planejar, criar e ajustar seu documento até o nascimento do bebê.
                   </p>
                 </div>
               </div>

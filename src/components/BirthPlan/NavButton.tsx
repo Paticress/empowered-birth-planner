@@ -14,7 +14,7 @@ export function BirthPlanNavButton({ className = '' }: BirthPlanNavButtonProps) 
     <Button
       variant="birth-plan-builder"
       className={`flex items-center gap-2 ${className}`}
-      onClick={() => navigateTo('/criar-plano')}
+      onClick={() => navigateTo('/plano-personalizado')}
     >
       <FileText className="h-4 w-4" />
       <span>Criar Meu Plano de Parto</span>
