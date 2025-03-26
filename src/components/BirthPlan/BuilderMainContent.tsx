@@ -25,19 +25,22 @@ export function BuilderMainContent({
   onNextStage,
   onGoToStage
 }: BuilderMainContentProps) {
+  // Log that the component is rendering, especially helpful for embedded mode debugging
+  console.log("BuilderMainContent rendering", { currentStage, embedded });
+  
   return (
     <div 
       className={`bg-maternal-50 min-h-screen w-full ${embedded ? 'embedded-mode' : ''}`} 
       role="main" 
       aria-label="Construa seu Plano de Parto"
     >
-      <div className="w-full pt-4 md:pt-8">
+      <div className="w-full pt-2 md:pt-4">
         <BirthPlanHeader currentStage={currentStage} onStageChange={onGoToStage} />
         
-        <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Versão compacta do banner de informações */}
-          <div className="w-full mb-6 p-3 bg-maternal-100 border-l-4 border-maternal-400 rounded-md">
-            <h1 className="text-xl font-semibold text-maternal-800">
+        <main className="w-full max-w-6xl mx-auto px-2 sm:px-4 lg:px-6 py-4">
+          {/* Versão compacta do banner de informações - mais compacta para modo incorporado */}
+          <div className={`w-full mb-4 p-3 bg-maternal-100 border-l-4 border-maternal-400 rounded-md ${embedded ? 'text-sm' : ''}`}>
+            <h1 className={`${embedded ? 'text-lg' : 'text-xl'} font-semibold text-maternal-800`}>
               {currentStage === 'welcome' ? 'Bem-vinda ao Construtor de Plano de Parto' : 
                currentStage === 'questionnaire' ? 'Questionário do Plano de Parto' :
                currentStage === 'editor' ? 'Editor do Plano de Parto' :
@@ -46,7 +49,7 @@ export function BuilderMainContent({
             </h1>
           </div>
           
-          <div className="w-full bg-white shadow-xl rounded-lg p-4 sm:p-6 md:p-8 mb-8 border-t-4 border-maternal-400">
+          <div className="w-full bg-white shadow-xl rounded-lg p-3 sm:p-4 md:p-6 mb-6 border-t-4 border-maternal-400">
             <StageContent 
               currentStage={currentStage}
               birthPlanContent={birthPlanContent}

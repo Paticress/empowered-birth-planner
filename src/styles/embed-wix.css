@@ -22,6 +22,12 @@
   border: none;
 }
 
+.embedded-root {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
 /*
 INSTRUÇÕES DE USO NO WIX:
 
@@ -33,16 +39,15 @@ INSTRUÇÕES DE USO NO WIX:
 ----- INÍCIO DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
 
 <div id="birth-plan-container" class="responsive-iframe-container">
-  <iframe id="birth-plan-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-plano" scrolling="no"></iframe>
+  <iframe id="birth-plan-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-plano" scrolling="auto" allow="fullscreen"></iframe>
 </div>
 
 <style>
   .responsive-iframe-container {
     position: relative;
     width: 100%;
-    height: 0;
-    padding-bottom: 150%;
-    overflow: hidden;
+    height: 800px; /* Altura inicial antes do ajuste automático */
+    overflow: visible;
   }
   
   .responsive-iframe-container iframe {
@@ -58,25 +63,58 @@ INSTRUÇÕES DE USO NO WIX:
 <script>
   // Função para ajustar altura do iframe automaticamente
   function setupIframeResizing() {
+    console.log("Configurando resize do iframe");
     const iframe = document.getElementById('birth-plan-iframe');
+    const container = document.getElementById('birth-plan-container');
+    
+    if (!iframe || !container) {
+      console.error("Elementos iframe ou container não encontrados");
+      return;
+    }
+    
+    // Definir altura mínima
+    container.style.minHeight = "800px";
     
     // Listener para mensagens do iframe
     window.addEventListener('message', function(event) {
+      console.log("Mensagem recebida do iframe:", event.data);
+      
       // Verificar se a mensagem é do tipo resize
       if (event.data && event.data.type === 'resize') {
-        // Ajustar altura do iframe
-        iframe.style.height = event.data.height + 'px';
+        // Adicionar margem extra para evitar cortes
+        const extraMargin = 50;
+        const newHeight = event.data.height + extraMargin;
         
-        // Ajustar o container se necessário
-        const container = document.getElementById('birth-plan-container');
-        container.style.height = event.data.height + 'px';
+        console.log("Ajustando altura para:", newHeight);
+        
+        // Ajustar altura do iframe e container
+        iframe.style.height = newHeight + 'px';
+        container.style.height = newHeight + 'px';
         container.style.paddingBottom = '0';
       }
+      
+      // Verificar se o app foi carregado completamente
+      if (event.data && event.data.type === 'loaded') {
+        console.log("Aplicativo carregado com sucesso");
+      }
     });
+    
+    // Verificar se o iframe está carregado
+    iframe.onload = function() {
+      console.log("Iframe carregado");
+      setTimeout(function() {
+        // Enviar mensagem para o iframe após carregamento
+        iframe.contentWindow.postMessage({ type: 'checkSize' }, '*');
+      }, 1000);
+    };
   }
   
   // Iniciar o ajuste de altura quando a página carregar
-  window.addEventListener('load', setupIframeResizing);
+  if (document.readyState === 'complete') {
+    setupIframeResizing();
+  } else {
+    window.addEventListener('load', setupIframeResizing);
+  }
 </script>
 
 ----- FIM DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
@@ -85,4 +123,6 @@ IMPORTANTE:
 - O URL "https://planodeparto.energiamaterna.com.br/#/embedded-plano" já está pronto para uso.
 - Se você estiver usando outro domínio, substitua apenas o domínio (mantenha o "#/embedded-plano" ao final).
 - O símbolo "#" é necessário porque estamos usando HashRouter para a navegação.
+- Mudamos "scrolling" de "no" para "auto" e adicionamos "allow="fullscreen"" para melhor compatibilidade.
+- Definimos uma altura inicial de 800px que será ajustada automaticamente.
 */

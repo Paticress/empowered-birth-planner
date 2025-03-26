@@ -22,15 +22,29 @@ export function BirthPlanBuilder({ embedded = false }: { embedded?: boolean }) {
     // When embedded, log additional information
     if (embedded) {
       console.log("BirthPlanBuilder running in embedded mode");
+      
+      // Set a timeout to check if the component is still mounted after a delay
+      const timer = setTimeout(() => {
+        console.log("BirthPlanBuilder still mounted after delay, current stage:", currentStage);
+        
+        // Send a message to the parent window to confirm loading
+        try {
+          window.parent.postMessage({ 
+            type: 'birthPlanStatus', 
+            status: 'ready',
+            stage: currentStage 
+          }, '*');
+        } catch (e) {
+          console.error("Error sending message to parent:", e);
+        }
+      }, 2000);
+      
+      return () => clearTimeout(timer);
     }
-    
-    // Force a re-render after a short delay to ensure component display
-    const timer = setTimeout(() => {
-      console.log("Forcing re-render check after timeout");
-    }, 1000);
-    
-    return () => clearTimeout(timer);
   }, [currentStage, embedded]);
+
+  // Log render
+  console.log("BirthPlanBuilder rendering", { embedded, currentStage });
 
   return (
     <BuilderMainContent

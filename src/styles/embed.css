@@ -13,6 +13,13 @@
   overflow-x: hidden;
 }
 
+.embedded-root {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: block;
+}
+
 .embedded-mode .footer {
   /* Podemos remover ou simplificar o footer quando incorporado */
   padding: 1rem 0;
@@ -23,6 +30,7 @@
 .embedded-mode main {
   width: 100%;
   max-width: 100%;
+  padding: 1rem !important;
 }
 
 .embedded-mode .birth-plan-header,
@@ -31,10 +39,15 @@
   max-width: 100%;
 }
 
+/* Ajustes para maior visibilidade quando incorporado */
+.embedded-mode .bg-maternal-50 {
+  background-color: #fff;
+}
+
 /* Ajustes para tamanhos menores quando incorporado */
 @media (max-width: 768px) {
   .embedded-mode main {
-    padding: 1rem;
+    padding: 0.5rem !important;
   }
   
   .embedded-mode .birth-plan-header {
