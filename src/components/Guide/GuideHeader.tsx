@@ -62,16 +62,8 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
             </span>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-4 items-center">
-            <Button
-              variant="ghost"
-              onClick={() => handleNavigation('/guia-online')}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              Guia Online
-            </Button>
-            
+          {/* Desktop actions - simplified */}
+          <div className="hidden md:flex items-center space-x-4">
             {/* BIRTH PLAN NAVIGATION BUTTON */}
             <BirthPlanNavButton />
             
@@ -83,7 +75,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
               <Search className="h-4 w-4 mr-2" />
               Buscar
             </Button>
-          </nav>
+          </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
@@ -111,36 +103,14 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu - simplified */}
       {mobileMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                handleNavigation('/guia-online');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full justify-start text-gray-600 hover:text-gray-900"
-            >
-              Guia Online
-            </Button>
-            
-            {/* ADDED BIRTH PLAN NAVIGATION BUTTON FOR MOBILE */}
+            {/* BIRTH PLAN NAVIGATION BUTTON FOR MOBILE */}
             <BirthPlanNavButton 
               className="w-full justify-start" 
             />
-            
-            <Button
-              variant="ghost"
-              onClick={() => {
-                handleNavigation('/plano-personalizado');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full justify-start text-gray-600 hover:text-gray-900"
-            >
-              Plano Personalizado
-            </Button>
           </div>
         </div>
       )}
