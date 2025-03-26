@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useNavigation } from '@/hooks/useNavigation';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { Check, Heart, Download, Share2 } from 'lucide-react';
 
 export function BirthPlanSuccess() {
@@ -11,8 +11,7 @@ export function BirthPlanSuccess() {
   
   useEffect(() => {
     // Show a toast to confirm success when the page loads
-    toast({
-      title: "Plano de Parto concluído!",
+    toast.success("Plano de Parto concluído!", {
       description: "Seu plano foi criado com sucesso"
     });
     
@@ -141,4 +140,3 @@ export function BirthPlanSuccess() {
     </div>
   );
 }
-

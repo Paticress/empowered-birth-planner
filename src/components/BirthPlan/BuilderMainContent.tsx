@@ -31,8 +31,10 @@ export function BuilderMainContent({
       role="main" 
       aria-label="Construa seu Plano de Parto"
     >
-      <div className="w-full pt-4 md:pt-8">
-        <BirthPlanHeader currentStage={currentStage} onStageChange={onGoToStage} />
+      <div className="w-full">
+        {!embedded && (
+          <BirthPlanHeader currentStage={currentStage} onStageChange={onGoToStage} />
+        )}
         
         <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Versão compacta do banner de informações */}

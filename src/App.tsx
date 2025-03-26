@@ -12,6 +12,7 @@ import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
 import { EmbeddedBirthPlanBuilder } from "./components/BirthPlan/EmbeddedBirthPlanBuilder";
 import { BirthPlanSuccess } from "./components/BirthPlan/BirthPlanSuccess";
 import PlanoPersonalizado from "./pages/PlanoPersonalizado";
+import { Header } from "./components/Header";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,10 @@ const App = () => {
               element={
                 <>
                   {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
-                  <BirthPlanBuilder />
+                  <Header />
+                  <div className="mt-16 md:mt-20">
+                    <BirthPlanBuilder />
+                  </div>
                 </>
               } 
             />
@@ -54,7 +58,10 @@ const App = () => {
               element={
                 <>
                   {console.log("ROUTE /plano-concluido ACCESSED - RENDERING SUCCESS PAGE")}
-                  <BirthPlanSuccess />
+                  <Header />
+                  <div className="mt-16 md:mt-20">
+                    <BirthPlanSuccess />
+                  </div>
                 </>
               } 
             />
