@@ -1,15 +1,14 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useNavigation } from '@/hooks/useNavigation';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { navigateTo } = useNavigation();
+  const navigate = useNavigate();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -27,9 +26,9 @@ export function Header() {
     return location.pathname === path;
   };
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
-    e.preventDefault();
-    navigateTo(path);
+  const handleNavigate = (path: string) => {
+    console.log('Navigating to:', path);
+    navigate(path);
     setMobileMenuOpen(false);
   };
 
@@ -40,57 +39,52 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
-            <Link 
-              to="/" 
-              className="flex items-center" 
-              onClick={(e) => handleLinkClick(e, '/guia-online')}
+            <button 
+              onClick={() => handleNavigate('/guia-online')}
+              className="flex items-center"
             >
               <img 
                 src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
                 alt="Energia Materna Logo" 
                 className="h-10 md:h-14 w-auto"
               />
-            </Link>
+            </button>
           </div>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link 
-              to="/guia-gratuito" 
+            <button 
               className={`transition-colors ${isActive('/guia-gratuito') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => handleLinkClick(e, '/guia-gratuito')}
+              onClick={() => handleNavigate('/guia-gratuito')}
             >
               Guia Gratuito
-            </Link>
-            <Link 
-              to="/guia-online" 
+            </button>
+            <button 
               className={`transition-colors ${isActive('/guia-online') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => handleLinkClick(e, '/guia-online')}
+              onClick={() => handleNavigate('/guia-online')}
             >
               Guia Online
-            </Link>
-            <Link 
-              to="/plano-personalizado" 
+            </button>
+            <button 
               className={`transition-colors ${isActive('/plano-personalizado') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => handleLinkClick(e, '/plano-personalizado')}
+              onClick={() => handleNavigate('/plano-personalizado')}
             >
               Plano Personalizado
-            </Link>
-            <Link 
-              to="/depoimentos" 
+            </button>
+            <button 
               className={`transition-colors ${isActive('/depoimentos') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => handleLinkClick(e, '/depoimentos')}
+              onClick={() => handleNavigate('/depoimentos')}
             >
               Depoimentos
-            </Link>
+            </button>
           </nav>
           
           {/* Mobile Menu Button */}
@@ -126,10 +120,7 @@ export function Header() {
                     className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/guia-gratuito') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => {
-                      navigateTo('/guia-gratuito');
-                      setMobileMenuOpen(false);
-                    }}
+                    onClick={() => handleNavigate('/guia-gratuito')}
                   >
                     Guia Gratuito
                   </button>
@@ -137,10 +128,7 @@ export function Header() {
                     className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/guia-online') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => {
-                      navigateTo('/guia-online');
-                      setMobileMenuOpen(false);
-                    }}
+                    onClick={() => handleNavigate('/guia-online')}
                   >
                     Guia Online
                   </button>
@@ -148,10 +136,7 @@ export function Header() {
                     className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/plano-personalizado') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => {
-                      navigateTo('/plano-personalizado');
-                      setMobileMenuOpen(false);
-                    }}
+                    onClick={() => handleNavigate('/plano-personalizado')}
                   >
                     Plano Personalizado
                   </button>
@@ -159,10 +144,7 @@ export function Header() {
                     className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/depoimentos') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => {
-                      navigateTo('/depoimentos');
-                      setMobileMenuOpen(false);
-                    }}
+                    onClick={() => handleNavigate('/depoimentos')}
                   >
                     Depoimentos
                   </button>

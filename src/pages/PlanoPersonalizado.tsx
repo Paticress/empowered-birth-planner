@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { useNavigation } from '@/hooks/useNavigation';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 // Imported components
@@ -13,7 +13,7 @@ import { PricingSection } from '@/components/PlanoPersonalizado/PricingSection';
 import { TestimonialsSection } from '@/components/PlanoPersonalizado/TestimonialsSection';
 
 const PlanoPersonalizado = () => {
-  const { navigateTo } = useNavigation();
+  const navigate = useNavigate();
   const [hasPaid, setHasPaid] = useState(false);
   const [isCheckingPayment, setIsCheckingPayment] = useState(true);
   
@@ -35,16 +35,29 @@ const PlanoPersonalizado = () => {
       setIsCheckingPayment(false);
     };
     
+    console.log('Checking payment status');
     checkPaymentStatus();
   }, []);
   
   const handleAccessPlan = () => {
-    navigateTo('/criar-plano');
+    console.log('Redirecting to birth plan builder');
+    navigate('/criar-plano');
   };
   
   const handlePurchase = () => {
-    // Redirecionar para o construtor de plano de parto, que vai verificar o pagamento
-    navigateTo('/criar-plano');
+    console.log('Simulating purchase for demo');
+    // Simulando um pagamento bem-sucedido para propósitos de demonstração
+    localStorage.setItem('birthPlanPaid', 'true');
+    localStorage.setItem('birthPlanPaymentTimestamp', Date.now().toString());
+    
+    toast.success('Pagamento processado com sucesso!', {
+      description: 'Você agora tem acesso ao Plano de Parto Personalizado'
+    });
+    
+    // Redirecionar para o construtor de plano de parto
+    setTimeout(() => {
+      navigate('/criar-plano');
+    }, 1500);
   };
 
   return (

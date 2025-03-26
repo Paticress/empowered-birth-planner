@@ -43,7 +43,8 @@ export function HeroSection({
               </div>
               <Button 
                 onClick={handleAccessPlan}
-                className="btn-primary"
+                variant="birth-plan-builder"
+                className="py-2 px-6"
               >
                 Acessar Meu Plano de Parto <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -51,7 +52,8 @@ export function HeroSection({
           ) : (
             <Button 
               onClick={handlePurchase}
-              className="btn-primary"
+              variant="birth-plan-builder"
+              className="py-2 px-6"
             >
               Quero Meu Plano Agora
             </Button>
