@@ -5,15 +5,11 @@ import { BirthPlanQuestionnaire } from './BirthPlanQuestionnaire';
 import { BirthPlanEditor } from './BirthPlanEditor';
 import { BirthPlanPreview } from './BirthPlanPreview';
 import { BirthPlanShare } from './BirthPlanShare';
-import { PaymentGate } from './PaymentGate';
 import { Footer } from '@/components/Footer';
 import { toast } from '@/components/ui/use-toast';
 import { useBirthPlanState } from './hooks/useBirthPlanState';
 
-export function BirthPlanBuilder() {
-  const [hasPaid, setHasPaid] = useState(false);
-  const [isVerifyingPayment, setIsVerifyingPayment] = useState(true);
-  
+export function BirthPlanBuilder({ embedded = false }: { embedded?: boolean }) {
   const {
     currentStage,
     birthPlanContent,
@@ -28,60 +24,9 @@ export function BirthPlanBuilder() {
     // Log when the component mounts to verify it's being rendered
     console.log("BirthPlanBuilder mounted, current stage:", currentStage);
     
-    // Get current URL parameters and user ID
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('payment_status');
-    const paymentId = urlParams.get('payment_id');
-    const userId = localStorage.getItem('birthPlanUserId');
-    
-    // Enhanced verification
-    const verifyPayment = async () => {
-      try {
-        // Check if payment was just completed (from URL parameters)
-        if (paymentStatus === 'success' && paymentId) {
-          // Store payment details with the unique payment ID
-          localStorage.setItem('birthPlanPaid', 'true');
-          localStorage.setItem('birthPlanPaymentId', paymentId);
-          // Add timestamp to verify freshness of payment
-          localStorage.setItem('birthPlanPaymentTimestamp', Date.now().toString());
-          setHasPaid(true);
-          
-          toast({
-            title: "Pagamento Confirmado",
-            description: "Seu acesso ao plano de parto foi liberado com sucesso!"
-          });
-          
-          // Optional: You can add a call to your Wix backend here to double-verify the payment
-          // using the paymentId and userId
-        } else {
-          // Check previously stored payment information
-          const paidStatus = localStorage.getItem('birthPlanPaid');
-          const storedPaymentId = localStorage.getItem('birthPlanPaymentId');
-          const paymentTimestamp = localStorage.getItem('birthPlanPaymentTimestamp');
-          
-          // Verify the payment is valid and not too old (if timestamp exists)
-          const isPaymentValid = paidStatus === 'true' && storedPaymentId;
-          const isPaymentFresh = !paymentTimestamp || 
-                                (Date.now() - Number(paymentTimestamp)) < (90 * 24 * 60 * 60 * 1000); // 90 days
-          
-          if (isPaymentValid && isPaymentFresh) {
-            setHasPaid(true);
-          }
-        }
-        
-        setIsVerifyingPayment(false);
-      } catch (error) {
-        console.error("Payment verification error:", error);
-        setIsVerifyingPayment(false);
-      }
-    };
-    
-    verifyPayment();
-    
-    // Clean up URL parameters after processing (to prevent re-usage of the same payment link)
-    if (paymentStatus || paymentId) {
-      const cleanUrl = window.location.pathname;
-      window.history.replaceState({}, document.title, cleanUrl);
+    // When embedded, log additional information
+    if (embedded) {
+      console.log("BirthPlanBuilder running in embedded mode");
     }
     
     // Force a re-render after a short delay to ensure component display
@@ -90,32 +35,12 @@ export function BirthPlanBuilder() {
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, [currentStage]);
-
-  // Show loading state while verifying payment
-  if (isVerifyingPayment) {
-    return (
-      <div className="bg-maternal-50 min-h-screen flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-maternal-600 mx-auto mb-4"></div>
-          <p className="text-maternal-700">Verificando seu acesso...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle successful payment
-  const handlePaymentComplete = () => {
-    setHasPaid(true);
-  };
-
-  // If user hasn't paid, show payment gate
-  if (!hasPaid) {
-    return <PaymentGate onPaymentComplete={handlePaymentComplete} />;
-  }
+  }, [currentStage, embedded]);
 
   return (
-    <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
+    <div className={`bg-maternal-50 min-h-screen ${embedded ? 'embedded-mode' : ''}`} 
+         role="main" 
+         aria-label="Construa seu Plano de Parto">
       <div className="pt-4 md:pt-8">
         <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
         
@@ -150,7 +75,6 @@ export function BirthPlanBuilder() {
   );
 }
 
-// Separate component to render the correct content based on the current stage
 interface StageContentProps {
   currentStage: string;
   birthPlanContent: Record<string, any>;

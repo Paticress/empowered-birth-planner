@@ -1,0 +1,29 @@
+
+/* Estilos específicos para modo incorporado */
+.embedded-mode {
+  /* Remove qualquer padding ou margem extra */
+  padding: 0;
+  margin: 0;
+  /* Assegura que a altura seja flexível para caber no iframe */
+  min-height: 100vh;
+  height: auto;
+  /* Melhora a responsividade em iframes menores */
+  overflow-x: hidden;
+}
+
+.embedded-mode .footer {
+  /* Podemos remover ou simplificar o footer quando incorporado */
+  padding: 1rem 0;
+  margin-top: 1rem;
+}
+
+/* Ajustes para tamanhos menores quando incorporado */
+@media (max-width: 768px) {
+  .embedded-mode main {
+    padding: 1rem;
+  }
+  
+  .embedded-mode .birth-plan-header {
+    padding: 0.5rem;
+  }
+}

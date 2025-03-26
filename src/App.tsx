@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import { OnlineGuide } from "./components/Guide/OnlineGuide";
 import GuiaGratuito from "./pages/GuiaGratuito";
 import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
+import { EmbeddedBirthPlanBuilder } from "./components/BirthPlan/EmbeddedBirthPlanBuilder";
 import { BirthPlanSuccess } from "./components/BirthPlan/BirthPlanSuccess";
 import PlanoPersonalizado from "./pages/PlanoPersonalizado";
 
@@ -36,6 +37,15 @@ const App = () => {
                 <>
                   {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
                   <BirthPlanBuilder />
+                </>
+              } 
+            />
+            <Route 
+              path="/embedded-plano" 
+              element={
+                <>
+                  {console.log("ROUTE /embedded-plano ACCESSED - RENDERING EMBEDDED BIRTH PLAN BUILDER")}
+                  <EmbeddedBirthPlanBuilder />
                 </>
               } 
             />
