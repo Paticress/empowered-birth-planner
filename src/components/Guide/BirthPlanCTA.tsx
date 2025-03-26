@@ -43,7 +43,7 @@ export function BirthPlanCTA() {
             </span>
             <h3 className="text-lg md:text-xl font-bold text-maternal-900">Construtor de Plano de Parto</h3>
             <p className="text-maternal-700 text-base md:text-lg mb-2">Acesso Único</p>
-            <p className="text-maternal-900 font-bold text-2xl md:text-3xl mb-4">R$ 97,00</p>
+            <p className="text-maternal-900 font-bold text-2xl md:text-3xl mb-4">A partir de R$ 97,00</p>
           </div>
           <BirthPlanNavButton className={`w-full py-3 ${isMobile ? 'text-sm' : 'text-base'}`} />
           <p className="text-xs text-maternal-600 mt-2 text-center">
@@ -54,3 +54,4 @@ export function BirthPlanCTA() {
     </div>
   );
 }
+
