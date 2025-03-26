@@ -1,4 +1,3 @@
-
 # Termos e Condições de Uso - Construtor de Plano de Parto
 
 ## 1. Introdução
@@ -17,7 +16,19 @@ O Construtor de Plano de Parto é uma ferramenta digital que auxilia gestantes n
 
 4.1. Todas as informações pessoais fornecidas são confidenciais e serão tratadas com absoluto sigilo.
 
-4.2. Os dados são utilizados exclusivamente para a geração do plano de parto e não serão compartilhados com terceiros.
+4.2. Os dados são utilizados exclusivamente para:
+- Geração do plano de parto personalizado
+- Acompanhamento e suporte ao serviço
+- Melhoria da experiência do usuário
+- Comunicações relacionadas ao serviço de plano de parto
+
+4.3. As informações coletadas no processo de compra podem incluir:
+- Data prevista do parto
+- Número de gestação
+- Canal de conhecimento do serviço
+- Informações de contato profissional
+
+4.4. Não compartilharemos suas informações pessoais com terceiros sem consentimento prévio.
 
 ## 5. Uso Responsável
 
@@ -55,4 +66,4 @@ Em caso de dúvidas ou sugestões, entre em contato através do e-mail: suporte@
 
 Ao utilizar o Construtor de Plano de Parto, você declara ter lido, compreendido e concordado com todos os termos aqui descritos.
 
-**Última atualização:** 15 de julho de 2024
+**Última atualização:** 20 de julho de 2024
