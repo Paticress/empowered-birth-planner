@@ -46,6 +46,25 @@ jobs:
             echo "Domain test file - $(date)" > dist/domain-test.txt
           fi
       
+      - name: Copy Service Worker files
+        run: |
+          # Ensure sw.js exists in public and copy to dist
+          if [ -f "public/sw.js" ]; then
+            cp public/sw.js dist/
+            echo "Service worker copied successfully"
+          else
+            echo "Warning: Service worker file not found in public directory"
+          fi
+          
+          # Create sw directory in dist if not exists
+          mkdir -p dist/sw
+          
+          # Copy service worker modules
+          if [ -d "public/sw" ]; then
+            cp -r public/sw/* dist/sw/
+            echo "Service worker modules copied successfully"
+          fi
+      
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
       

@@ -5,8 +5,11 @@ import App from './App.tsx';
 import './index.css';
 import { registerServiceWorker } from './registerSW.tsx';
 
-// Registrar o service worker
-registerServiceWorker();
+// Registrar o service worker quando a janela estiver carregada
+window.addEventListener('load', () => {
+  registerServiceWorker();
+  console.log("Service worker registration initiated");
+});
 
 console.log("Initializing application...");
 
