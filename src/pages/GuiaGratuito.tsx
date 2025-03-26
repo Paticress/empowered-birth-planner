@@ -5,6 +5,7 @@ import { OnlineGuide } from '@/components/Guide/OnlineGuide';
 import { Testimonial } from '@/components/Testimonial';
 import { BookOpen, Shield, MessageCircle, CheckSquare } from 'lucide-react';
 import { FeatureCard } from '@/components/FeatureCard';
+import { OnlineGuideTerms } from '@/components/Terms/OnlineGuideTerms';
 
 const GuiaGratuito = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -47,6 +48,11 @@ const GuiaGratuito = () => {
                   onSuccess={handleFormSuccess} 
                   buttonText="Acessar Meu Guia" 
                 />
+                <div className="text-center mt-4">
+                  <p className="text-xs text-maternal-600">
+                    Ao acessar, você concorda com nossos <OnlineGuideTerms /> e política de privacidade.
+                  </p>
+                </div>
               </div>
             </div>
           </section>
