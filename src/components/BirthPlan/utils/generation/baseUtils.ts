@@ -1,5 +1,12 @@
 
 import { birthPlanSections } from '../birthPlanSections';
+import { updatePersonalInfo } from './personalInfo';
+import { updateAtmosphere } from './atmosphere';
+import { updateLaborPreferences } from './laborPreferences';
+import { updateBirthPreferences } from './birthPreferences';
+import { updateCesareanPreferences } from './cesareanPreferences';
+import { updatePostpartumPreferences } from './postpartumPreferences';
+import { updateSpecialSituations } from './specialSituations';
 
 /**
  * Generates a default empty birth plan structure based on sections
