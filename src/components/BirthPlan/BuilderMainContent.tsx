@@ -25,6 +25,8 @@ export function BuilderMainContent({
   onNextStage,
   onGoToStage
 }: BuilderMainContentProps) {
+  console.log("BuilderMainContent rendering with stage:", currentStage, "embedded:", embedded);
+  
   return (
     <div 
       className={`bg-maternal-50 min-h-screen w-full ${embedded ? 'embedded-mode' : ''}`} 

@@ -1,13 +1,20 @@
 
 import { BirthPlanBuilder } from './BirthPlanBuilder';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import '../../styles/embed.css';
 
 export function EmbeddedBirthPlanBuilder() {
+  const [loaded, setLoaded] = useState(false);
+  
+  // Debug logs to check component rendering
+  console.log("EmbeddedBirthPlanBuilder - Component rendering started");
+  
   // Enviar mensagem para o iframe container sobre o tamanho
   useEffect(() => {
+    console.log("EmbeddedBirthPlanBuilder - useEffect running");
+    
     const sendResizeMessage = () => {
       // Envia mensagem para o container (Wix) com altura do conteúdo
       const height = document.body.scrollHeight;
@@ -25,15 +32,23 @@ export function EmbeddedBirthPlanBuilder() {
     // Remove o Header padrão do site que pode estar aparecendo
     document.body.classList.add('embedded-mode');
     
-    console.log("EmbeddedBirthPlanBuilder mounted");
+    console.log("EmbeddedBirthPlanBuilder mounted completely");
+    setLoaded(true);
 
     return () => {
+      console.log("EmbeddedBirthPlanBuilder - Cleanup running");
       window.removeEventListener('resize', sendResizeMessage);
       clearInterval(resizeInterval);
       document.body.classList.remove('embedded-mode');
     };
   }, []);
 
+  if (!loaded) {
+    console.log("EmbeddedBirthPlanBuilder - Initial loading state");
+    return <div className="p-8 text-center">Carregando...</div>;
+  }
+
+  console.log("EmbeddedBirthPlanBuilder - Rendering main content");
   return (
     <div className="relative embedded-container">
       {/* Banner de navegação para a versão completa */}

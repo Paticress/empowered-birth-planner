@@ -12,10 +12,25 @@ import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
 import { EmbeddedBirthPlanBuilder } from "./components/BirthPlan/EmbeddedBirthPlanBuilder";
 import { EmbeddedOnlineGuide } from "./components/Guide/EmbeddedOnlineGuide";
 
-const queryClient = new QueryClient();
+// Create query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false
+    }
+  }
+});
 
 // Enhanced log for debugging
 console.log("APP COMPONENT INITIALIZING - SETTING UP ROUTES");
+
+// Check if the current environment supports window
+if (typeof window !== 'undefined') {
+  console.log(`Current URL: ${window.location.href}`);
+  console.log(`Current path: ${window.location.pathname}`);
+  console.log(`Current hash: ${window.location.hash}`);
+}
 
 const App = () => {
   console.log("APP COMPONENT RENDERING");
