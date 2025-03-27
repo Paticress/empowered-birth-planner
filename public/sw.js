@@ -1,5 +1,8 @@
 
-// Import our modular service worker files
+// Service Worker for PWA support
+// This file will be automatically copied to the dist folder during build
+
+// Import our modular service worker files from the sw directory
 importScripts('./sw/config.js');
 importScripts('./sw/cacheManager.js');
 importScripts('./sw/strategies.js');
