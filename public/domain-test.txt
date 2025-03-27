@@ -4,3 +4,4 @@ If you can see this file at https://planodeparto.energiamaterna.com.br/domain-te
 then your static files are accessible.
 
 Last updated: ${new Date().toISOString()}
+

@@ -26,6 +26,29 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
     }
   }, [location]);
 
+  // Send resize messages to parent window when in embedded mode
+  useEffect(() => {
+    if (embedded) {
+      const sendResizeMessage = () => {
+        const height = document.body.scrollHeight;
+        window.parent.postMessage({ type: 'resize', height }, '*');
+        console.log("OnlineGuide - Sending resize message, height:", height);
+      };
+      
+      // Send initial message and setup listeners
+      sendResizeMessage();
+      window.addEventListener('resize', sendResizeMessage);
+      
+      // Check for content changes periodically
+      const resizeInterval = setInterval(sendResizeMessage, 500);
+      
+      return () => {
+        window.removeEventListener('resize', sendResizeMessage);
+        clearInterval(resizeInterval);
+      };
+    }
+  }, [embedded, activeTab]);
+
   const handleTabChange = (tab: string) => {
     console.log('Tab changed to:', tab);
     setActiveTab(tab);
