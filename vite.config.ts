@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -58,19 +57,17 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: path.resolve(__dirname, "dist"),
-    // Vite's BuildOptions doesn't have a direct TypeScript type checking option
-    // Instead, we'll remove the incorrect 'skipTypeCheck' property entirely
-    // and rely on the build.js script to handle TypeScript checking separately
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: mode === 'production', // Only remove console logs in production, not during debugging
+        drop_console: mode === 'production',
         drop_debugger: true,
       }
     },
+    // Output format configuration - important change here
     rollupOptions: {
       output: {
-        // Generate specific filenames for better caching
+        format: 'iife', // Change from 'es' to 'iife' (immediately invoked function expression)
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]',

@@ -61,6 +61,27 @@ jobs:
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
       
+      - name: Create netlify.toml for MIME types
+        run: |
+          cat <<EOF > dist/netlify.toml
+          [[headers]]
+            for = "/*.js"
+            [headers.values]
+              Content-Type = "application/javascript"
+          
+          [[headers]]
+            for = "/*.json"
+            [headers.values]
+              Content-Type = "application/json"
+          
+          [[headers]]
+            for = "/*.css"
+            [headers.values]
+              Content-Type = "text/css"
+          EOF
+          
+          echo "netlify.toml created for MIME type handling"
+      
       - name: Set proper MIME types
         run: |
           # Create .htaccess file to set proper MIME types
@@ -69,6 +90,16 @@ jobs:
           echo "AddType text/css .css" >> dist/.htaccess
           
           echo "MIME type configuration created"
+      
+      - name: Create meta refresh fallback
+        run: |
+          # Create a meta refresh fallback for direct script loading
+          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=/">' > dist/assets/index.html
+          echo '<meta charset="UTF-8"><title>Redirecting...</title></head>' >> dist/assets/index.html
+          echo '<body>If you are not redirected automatically, follow this <a href="/">link</a>.' >> dist/assets/index.html
+          echo '</body></html>' >> dist/assets/index.html
+          
+          echo "Meta refresh fallback created"
       
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
