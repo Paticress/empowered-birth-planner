@@ -1,5 +1,6 @@
 
 /* Cache Manager for Service Worker */
+// Content-Type: application/javascript
 
 // Cache manager to handle common caching operations
 const cacheManager = {

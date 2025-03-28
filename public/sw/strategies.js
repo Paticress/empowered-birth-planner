@@ -1,5 +1,6 @@
 
 /* Caching Strategies for Service Worker */
+// Content-Type: application/javascript
 
 // Collection of common caching strategies
 const strategies = {

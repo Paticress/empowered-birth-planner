@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write  # Changed from read to write for GitHub Pages deployment
   pages: write
   id-token: write
 
@@ -43,46 +43,41 @@ jobs:
           echo "Esta é uma verificação de domínio - Criado em $(date)" >> dist/domain-test.txt
           echo "Se você consegue ver este arquivo, os recursos estáticos estão sendo servidos corretamente pelo GitHub Pages." >> dist/domain-test.txt
       
-      - name: Copy Service Worker files with proper Content-Type
+      - name: Copy Service Worker files
         run: |
           # Create sw directory in dist if not exists
           mkdir -p dist/sw
           
-          # Copy service worker file with proper MIME type headers
+          # Copy service worker file
           cp public/sw.js dist/
-          echo "application/javascript" > dist/sw.js.mime
           
-          # Copy service worker modules with proper MIME type headers
+          # Copy service worker modules
           cp public/sw/config.js dist/sw/
-          echo "application/javascript" > dist/sw/config.js.mime
-          
           cp public/sw/cacheManager.js dist/sw/
-          echo "application/javascript" > dist/sw/cacheManager.js.mime
-          
           cp public/sw/strategies.js dist/sw/
-          echo "application/javascript" > dist/sw/strategies.js.mime
           
-          echo "Service worker files copied with proper MIME types"
+          echo "Service worker files copied"
+      
+      - name: Create proper MIME type headers
+        run: |
+          # Set correct MIME types for JavaScript files
+          echo "application/javascript" > dist/sw.js.headers
+          echo "application/javascript" > dist/sw/config.js.headers
+          echo "application/javascript" > dist/sw/cacheManager.js.headers
+          echo "application/javascript" > dist/sw/strategies.js.headers
+          
+          echo "MIME type headers created"
       
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
       
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-          retention-days: 1 # Optional: retain artifact for 1 day
-          
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v3
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+          clean: true
+
+  # Remove the previous deploy job that was using the GitHub Pages deployment API
+  # and replace it with the direct deployment above

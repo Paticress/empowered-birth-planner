@@ -1,5 +1,6 @@
 
 /* Service Worker Configuration */
+// Content-Type: application/javascript
 
 // Configuration settings for the Service Worker
 const config = {

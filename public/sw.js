@@ -1,198 +1,86 @@
 
-// Service Worker file
+// Set proper content type in the response header
+// Type: application/javascript
 
-// Import utility modules
 importScripts('./sw/config.js');
 importScripts('./sw/cacheManager.js');
 importScripts('./sw/strategies.js');
 
-// Cache name with version for better cache management
-const CACHE_NAME = 'energia-materna-cache-v1';
-
-// List of assets to cache on install
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.ico',
-  '/domain-test.txt',
-  // Add CSS and JS entries that will be created by the build
-  // These paths will be populated during runtime
-];
-
-// Additional runtime caching rules
-const RUNTIME_CACHE_RULES = [
-  // Cache images with a cache-first strategy
-  {
-    urlPattern: /\.(?:png|jpg|jpeg|gif|webp|svg|ico)$/,
-    handler: 'CacheFirst',
-    options: {
-      cacheName: 'images-cache',
-      expiration: {
-        maxEntries: 50,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-      },
-    },
-  },
-  // Cache fonts with a cache-first strategy
-  {
-    urlPattern: /\.(?:woff|woff2|ttf|eot)$/,
-    handler: 'CacheFirst',
-    options: {
-      cacheName: 'fonts-cache',
-      expiration: {
-        maxEntries: 20,
-        maxAgeSeconds: 60 * 24 * 60 * 60, // 60 days
-      },
-    },
-  },
-  // Cache API responses with a network-first strategy
-  {
-    urlPattern: /^https:\/\/api\./,
-    handler: 'NetworkFirst',
-    options: {
-      cacheName: 'api-cache',
-      networkTimeoutSeconds: 10,
-      expiration: {
-        maxEntries: 50,
-        maxAgeSeconds: 5 * 60, // 5 minutes
-      },
-    },
-  },
-];
-
-// Install event - cache static assets
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
+// Service Worker main file
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Service Worker: Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      })
+    cacheManager.precache(config.precacheItems, config.cacheName)
       .then(() => {
-        console.log('Service Worker: Static assets cached successfully');
+        logDebug('Precaching completed');
         return self.skipWaiting();
       })
-      .catch((error) => {
-        console.error('Service Worker: Error caching static assets:', error);
+      .catch(err => {
+        logError('Precaching failed', err);
+        throw err;
       })
   );
 });
 
-// Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames
-            .filter((cacheName) => {
-              // Delete old version caches
-              return cacheName.startsWith('energia-materna-cache-') && cacheName !== CACHE_NAME;
-            })
-            .map((cacheName) => {
-              console.log('Service Worker: Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            })
-        );
-      })
+    cacheManager.cleanOldCaches(config.cacheName, 'energia-materna-cache')
       .then(() => {
-        console.log('Service Worker: Claiming clients');
+        logDebug('Old caches cleaned');
         return self.clients.claim();
       })
+      .catch(err => {
+        logError('Failed to clean old caches', err);
+        throw err;
+      })
   );
 });
 
-// Fetch event - respond with cached resources or fetch from network
-self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
+self.addEventListener('fetch', event => {
+  const request = event.request;
 
-  // Skip browser-sync and chrome-extension requests
-  const url = new URL(event.request.url);
+  // Skip cross-origin requests
+  if (!request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // HTML pages - network first strategy
+  if (request.mode === 'navigate' || (request.method === 'GET' && request.headers.get('accept').includes('text/html'))) {
+    event.respondWith(strategies.networkFirst(request, { cacheName: config.cacheName }));
+    return;
+  }
+
+  // CSS, JS, fonts, images - cache first strategy
   if (
-    url.hostname === 'localhost' ||
-    url.hostname.includes('browser-sync') ||
-    event.request.url.includes('chrome-extension')
+    request.url.match(/\.(css|js|woff2?|ttf|eot|png|jpe?g|gif|svg|webp)$/i) ||
+    request.destination === 'style' ||
+    request.destination === 'script' ||
+    request.destination === 'font' ||
+    request.destination === 'image'
   ) {
+    event.respondWith(strategies.cacheFirst(request, { cacheName: config.cacheName }));
     return;
   }
 
-  // For SPA navigation requests, use network-first then fallback to index.html
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.match('/index.html');
-        })
-    );
+  // API requests - network first with timeout
+  if (request.url.includes('/api/')) {
+    event.respondWith(strategies.networkFirst(request, { 
+      cacheName: config.cacheName,
+      networkTimeoutSeconds: 5
+    }));
     return;
   }
 
-  // Apply specific caching strategies based on URL patterns
-  for (const rule of RUNTIME_CACHE_RULES) {
-    if (new RegExp(rule.urlPattern).test(event.request.url)) {
-      let strategy;
-      switch (rule.handler) {
-        case 'CacheFirst':
-          strategy = strategies.cacheFirst;
-          break;
-        case 'NetworkFirst':
-          strategy = strategies.networkFirst;
-          break;
-        case 'StaleWhileRevalidate':
-          strategy = strategies.staleWhileRevalidate;
-          break;
-        default:
-          strategy = strategies.networkFirst;
-      }
-      
-      event.respondWith(strategy(event.request, rule.options));
-      return;
-    }
-  }
-
-  // Default strategy is network first for all other requests
-  event.respondWith(strategies.networkFirst(event.request));
+  // Default - stale-while-revalidate
+  event.respondWith(strategies.staleWhileRevalidate(request, { cacheName: config.cacheName }));
 });
 
-// Listen for message events (e.g., from the main thread)
-self.addEventListener('message', (event) => {
+// Listen for messages from the client
+self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-});
-
-// Periodic sync event (if supported)
-if ('periodicsync' in self.registration) {
-  self.addEventListener('periodicsync', (event) => {
-    if (event.tag === 'content-update') {
-      event.waitUntil(updateContent());
-    }
-  });
-}
-
-// Function to update content
-async function updateContent() {
-  try {
-    // Add logic to update content in the cache
-    const cache = await caches.open(CACHE_NAME);
-    await cache.add('/index.html'); // Re-fetch the main HTML
-    
-    // Notify all clients about the update
-    const clients = await self.clients.matchAll();
-    clients.forEach(client => {
-      client.postMessage({
-        type: 'CONTENT_UPDATED',
-        timestamp: new Date().toISOString()
-      });
-    });
-    
-    return true;
-  } catch (error) {
-    console.error('Error updating content:', error);
-    return false;
+  
+  if (event.data && event.data.type === 'SET_DEBUG') {
+    setDebugMode(event.data.value === true);
   }
-}
+});
