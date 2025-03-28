@@ -1,6 +1,6 @@
 
-// Set proper content type in the response header
-// Type: application/javascript
+// Service Worker main file
+// Content-Type: application/javascript
 
 importScripts('./sw/config.js');
 importScripts('./sw/cacheManager.js');
