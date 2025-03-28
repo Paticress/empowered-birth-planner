@@ -43,24 +43,26 @@ jobs:
           echo "Esta é uma verificação de domínio - Criado em $(date)" >> dist/domain-test.txt
           echo "Se você consegue ver este arquivo, os recursos estáticos estão sendo servidos corretamente pelo GitHub Pages." >> dist/domain-test.txt
       
-      - name: Copy Service Worker files
+      - name: Copy Service Worker files with proper Content-Type
         run: |
-          # Ensure sw.js exists in public and copy to dist
-          if [ -f "public/sw.js" ]; then
-            cp public/sw.js dist/
-            echo "Service worker copied successfully"
-          else
-            echo "Warning: Service worker file not found in public directory"
-          fi
-          
           # Create sw directory in dist if not exists
           mkdir -p dist/sw
           
-          # Copy service worker modules
-          if [ -d "public/sw" ]; then
-            cp -r public/sw/* dist/sw/
-            echo "Service worker modules copied successfully"
-          fi
+          # Copy service worker file with proper MIME type headers
+          cp public/sw.js dist/
+          echo "application/javascript" > dist/sw.js.mime
+          
+          # Copy service worker modules with proper MIME type headers
+          cp public/sw/config.js dist/sw/
+          echo "application/javascript" > dist/sw/config.js.mime
+          
+          cp public/sw/cacheManager.js dist/sw/
+          echo "application/javascript" > dist/sw/cacheManager.js.mime
+          
+          cp public/sw/strategies.js dist/sw/
+          echo "application/javascript" > dist/sw/strategies.js.mime
+          
+          echo "Service worker files copied with proper MIME types"
       
       - name: Create .nojekyll file
         run: touch dist/.nojekyll

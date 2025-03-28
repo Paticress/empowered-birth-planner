@@ -1,19 +1,30 @@
 
-// Service Worker configuration constants
-const CONFIG = {
-  CACHE_NAME: 'plano-parto-cache-v1',
-  STATIC_ASSETS: [
-    './',
-    './index.html',
-    './assets/index.js',
-    './assets/index.css',
-    './favicon.ico',
-    './manifest.json'
-  ],
-  MAX_CACHE_ITEMS: 75,
-  NETWORK_TIMEOUT: 2000,
-  CROSS_ORIGIN_TIMEOUT: 3000
+/* Service Worker Configuration */
+
+// Configuration settings for the Service Worker
+const config = {
+  debug: false,  // Set to true to enable detailed logging
+  version: '1.0.0',
+  cacheName: 'energia-materna-cache-v1',
+  precacheItems: [
+    '/',
+    '/index.html'
+  ]
 };
 
-// Export for use in other service worker modules
-self.CONFIG = CONFIG;
+// Function to enable/disable debug mode
+function setDebugMode(enable) {
+  config.debug = enable;
+}
+
+// Debug logging helper
+function logDebug(message) {
+  if (config.debug) {
+    console.log(`[SW Debug] ${message}`);
+  }
+}
+
+// Error logging helper
+function logError(message, error) {
+  console.error(`[SW Error] ${message}`, error);
+}

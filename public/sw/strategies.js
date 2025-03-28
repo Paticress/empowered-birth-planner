@@ -1,99 +1,89 @@
-import CONFIG from './config.js';
 
-// Service worker fetch strategies
+/* Caching Strategies for Service Worker */
 
-// Imported from config.js through the service worker
-const CONFIG = self.CONFIG;
-
-// Stale-while-revalidate strategy for static assets
-const staleWhileRevalidate = async (request) => {
-  const cachedResponse = await caches.match(request);
-  
-  if (cachedResponse) {
-    // Start a background fetch to update the cache
-    fetch(request)
-      .then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CONFIG.CACHE_NAME).then(cache => {
-            cache.put(request, responseToCache);
-          });
-        }
-      })
-      .catch(() => {/* Silently fail background fetch */});
+// Collection of common caching strategies
+const strategies = {
+  // Network first: Try network, fall back to cache
+  async networkFirst(request, options = {}) {
+    const cacheName = options.cacheName || 'default-cache';
+    const timeout = options.networkTimeoutSeconds || 3;
+    
+    try {
+      // Try network first with timeout
+      const networkPromise = Promise.race([
+        fetch(request.clone()),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Network timeout')), timeout * 1000)
+        )
+      ]);
       
-    return cachedResponse;
-  }
+      const response = await networkPromise;
+      
+      // If successful, clone and cache response
+      if (response.ok) {
+        const responseToCache = response.clone();
+        caches.open(cacheName).then(cache => 
+          cache.put(request, responseToCache)
+        );
+      }
+      
+      return response;
+    } catch (error) {
+      // On network failure, try cache
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      
+      // If no cache, try a simpler fetch as last resort
+      return fetch(request);
+    }
+  },
   
-  // If not in cache, fetch from network
-  const fetchResponse = await fetch(request);
-  if (!fetchResponse || fetchResponse.status !== 200 || fetchResponse.type !== 'basic') {
-    return fetchResponse;
-  }
+  // Cache first: Try cache, fall back to network
+  async cacheFirst(request, options = {}) {
+    const cacheName = options.cacheName || 'default-cache';
+    
+    // Try the cache first
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // On cache miss, use the network
+    try {
+      const networkResponse = await fetch(request.clone());
+      if (networkResponse.ok) {
+        // Cache the network response for future
+        const cache = await caches.open(cacheName);
+        cache.put(request, networkResponse.clone());
+      }
+      return networkResponse;
+    } catch (error) {
+      // Complete failure
+      throw error;
+    }
+  },
   
-  // Cache the fetched response
-  const responseToCache = fetchResponse.clone();
-  caches.open(CONFIG.CACHE_NAME)
-    .then(cache => {
-      cache.put(request, responseToCache);
+  // Stale-while-revalidate: Return cached version immediately, then update
+  async staleWhileRevalidate(request, options = {}) {
+    const cacheName = options.cacheName || 'default-cache';
+    
+    // Try to get from cache
+    const cachedResponse = await caches.match(request);
+    
+    // Fetch from network to update cache
+    const fetchPromise = fetch(request.clone()).then(async response => {
+      if (response.ok) {
+        const cache = await caches.open(cacheName);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    }).catch(error => {
+      console.error('Failed to fetch and update cache:', error);
     });
     
-  return fetchResponse;
-};
-
-// Network-first with timeout strategy for HTML/dynamic content
-const networkFirstWithTimeout = async (request) => {
-  return Promise.race([
-    // Network request with shorter timeout
-    new Promise((resolve, reject) => {
-      setTimeout(() => reject(new Error('Network timeout')), CONFIG.NETWORK_TIMEOUT);
-      fetch(request).then(resolve, reject);
-    }),
-    // Fallback to cache after timeout
-    new Promise(resolve => {
-      setTimeout(() => {
-        caches.match(request).then(cachedResponse => {
-          if (cachedResponse) resolve(cachedResponse);
-        });
-      }, CONFIG.NETWORK_TIMEOUT);
-    })
-  ])
-  .catch(() => caches.match('./index.html'));
-};
-
-// Cross-origin request handling with timeout
-const crossOriginWithTimeout = async (request) => {
-  return Promise.race([
-    new Promise((resolve, reject) => {
-      setTimeout(() => reject(new Error('Network timeout')), CONFIG.CROSS_ORIGIN_TIMEOUT);
-      fetch(request).then(resolve, reject);
-    }),
-    new Promise(resolve => {
-      setTimeout(() => {
-        // After timeout, go with a basic network error
-        resolve(new Response('Network error occurred', {
-          status: 408,
-          headers: { 'Content-Type': 'text/plain' }
-        }));
-      }, CONFIG.CROSS_ORIGIN_TIMEOUT);
-    })
-  ])
-  .catch(() => {
-    // For cross-origin images, try placeholder
-    if (request.url.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
-      return caches.match('/placeholder.svg');
-    }
-    // Otherwise just fail
-    return new Response('Network error occurred', {
-      status: 408,
-      headers: { 'Content-Type': 'text/plain' }
-    });
-  });
-};
-
-// Export for use in main service worker
-self.strategies = {
-  staleWhileRevalidate,
-  networkFirstWithTimeout,
-  crossOriginWithTimeout
+    // Return the cached response immediately or wait for the network
+    return cachedResponse || fetchPromise;
+  }
 };
