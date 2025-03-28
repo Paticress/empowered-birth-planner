@@ -10,7 +10,7 @@ export const registerServiceWorker = () => {
       try {
         console.log('🔧 Attempting to register service worker...');
         
-        // Use absolute path for service worker
+        // Use an absolute path starting with / (not https://)
         const registration = await navigator.serviceWorker.register('/sw.js', {
           scope: '/',
           type: 'classic' // Explicitly set to classic to avoid module type issues

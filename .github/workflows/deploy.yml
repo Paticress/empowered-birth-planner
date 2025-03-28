@@ -38,9 +38,10 @@ jobs:
         
       - name: Make sure favicon is in dist root
         run: |
-          # Ensure favicon is copied to the dist root directory
+          echo "Copying favicon.ico to dist root directory"
           cp public/favicon.ico dist/
-          echo "Favicon copied to dist root"
+          ls -la dist/
+          echo "Favicon copied and verified"
           
       - name: Create and copy domain-test.txt to dist
         run: |
@@ -67,36 +68,58 @@ jobs:
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
       
-      - name: Create content-type configuration for GitHub Pages
+      - name: Create content-type configuration file
         run: |
-          # Create MIME type configuration files
-          cat > dist/.htaccess << EOF
-          AddType application/javascript .js .mjs
-          AddType application/json .json
-          AddType text/css .css
-          
-          # Enable CORS
-          <IfModule mod_headers.c>
-            Header set Access-Control-Allow-Origin "*"
-          </IfModule>
-          
-          # Proper handling of TS/TSX files
-          AddType application/javascript .ts .tsx
-          
-          # Force application/javascript for module scripts
-          <FilesMatch "\.(js|mjs)$">
-            Header set Content-Type "application/javascript"
-          </FilesMatch>
+          # Create a _headers file for proper MIME types
+          cat > dist/_headers << EOF
+          # Headers for all files
+          /*
+            X-Frame-Options: SAMEORIGIN
+            X-XSS-Protection: 1; mode=block
+            X-Content-Type-Options: nosniff
+            Referrer-Policy: strict-origin-when-cross-origin
+
+          # JavaScript files - ensure proper MIME type
+          /*.js
+            Content-Type: application/javascript
+
+          # JSON files  
+          /*.json
+            Content-Type: application/json
+
+          # CSS files
+          /*.css
+            Content-Type: text/css
+
+          # JavaScript modules specifically
+          /*.mjs
+            Content-Type: application/javascript
+
+          # TypeScript files (for development)
+          /*.ts
+            Content-Type: application/javascript
+
+          /*.tsx
+            Content-Type: application/javascript
+
+          # Service worker
+          /sw.js
+            Content-Type: application/javascript
+          /sw/*
+            Content-Type: application/javascript
           EOF
           
-          echo "MIME type configuration created"
-      
-      - name: Update HTML files to properly handle JavaScript modules
-        run: |
-          # Find all HTML files and ensure they properly load modules
-          find dist -name "*.html" -exec sed -i 's/<script src="https:\/\/cdn.gpteng.co\/gptengineer.js"/<script src="https:\/\/cdn.gpteng.co\/gptengineer.js" type="application\/javascript"/g' {} \;
-          
-          echo "HTML files updated for module support"
+          # Create redirects file for SPA
+          cat > dist/_redirects << EOF
+          # Redirect all requests to index.html for SPA routing
+          /*    /index.html   200
+
+          # Set content type headers explicitly
+          /*.js    Content-Type: application/javascript
+          /*.css   Content-Type: text/css
+          /*.json  Content-Type: application/json
+          /*.ico   Content-Type: image/x-icon
+          EOF
       
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
