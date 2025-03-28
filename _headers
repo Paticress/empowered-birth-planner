@@ -1,54 +1,35 @@
-
 # Headers for all files
 /*
   X-Frame-Options: SAMEORIGIN
   X-XSS-Protection: 1; mode=block
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Access-Control-Allow-Origin: *
 
 # JavaScript files - ensure proper MIME type
 /*.js
-  Content-Type: application/javascript; charset=utf-8
+  Content-Type: application/javascript
 
 # JSON files  
 /*.json
-  Content-Type: application/json; charset=utf-8
+  Content-Type: application/json
 
 # CSS files
 /*.css
-  Content-Type: text/css; charset=utf-8
+  Content-Type: text/css
 
 # JavaScript modules specifically
 /*.mjs
-  Content-Type: application/javascript; charset=utf-8
+  Content-Type: application/javascript
 
-# TypeScript files
+# TypeScript files (for development)
 /*.ts
-  Content-Type: application/javascript; charset=utf-8
+  Content-Type: application/javascript
 
 /*.tsx
-  Content-Type: application/javascript; charset=utf-8
+  Content-Type: application/javascript
 
-# Service worker files
+# Service worker
 /sw.js
-  Content-Type: application/javascript; charset=utf-8
-  Access-Control-Allow-Origin: *
+  Content-Type: application/javascript
 /sw/*
-  Content-Type: application/javascript; charset=utf-8
-  Access-Control-Allow-Origin: *
-
-# Assets directory
-/assets/*
-  Cache-Control: public, max-age=31536000
-
-# Favicon specific rule
-/favicon.ico
-  Cache-Control: public, max-age=604800
-  Access-Control-Allow-Origin: *
-  Content-Type: image/x-icon
-
-# Source files
-/src/*
-  Content-Type: application/javascript; charset=utf-8
-  Access-Control-Allow-Origin: *
+  Content-Type: application/javascript
