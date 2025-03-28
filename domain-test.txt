@@ -1,4 +1,12 @@
-Domain test file - Created on Fri Mar 28 19:53:32 UTC 2025
-If you can see this file, static assets are being served correctly from GitHub Pages.
-Esta é uma verificação de domínio - Criado em Fri Mar 28 19:53:32 UTC 2025
-Se você consegue ver este arquivo, os recursos estáticos estão sendo servidos corretamente pelo GitHub Pages.
+
+This file is used to test if static assets are properly served on the custom domain.
+If you can see this file at https://planodeparto.energiamaterna.com.br/domain-test.txt,
+then your static files are accessible.
+
+Last updated: 2023-10-26
+
+Este arquivo é usado para testar se os ativos estáticos estão sendo servidos corretamente no domínio personalizado.
+Se você consegue ver este arquivo em https://planodeparto.energiamaterna.com.br/domain-test.txt,
+então seus arquivos estáticos estão acessíveis.
+
+Última atualização: 2023-10-26

@@ -4,32 +4,22 @@
   X-XSS-Protection: 1; mode=block
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  Access-Control-Allow-Origin: *
 
 # JavaScript files - ensure proper MIME type
 /*.js
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=utf-8
 
 # JSON files  
 /*.json
-  Content-Type: application/json
+  Content-Type: application/json; charset=utf-8
 
 # CSS files
 /*.css
-  Content-Type: text/css
+  Content-Type: text/css; charset=utf-8
 
-# JavaScript modules specifically
-/*.mjs
-  Content-Type: application/javascript
-
-# TypeScript files (for development)
-/*.ts
-  Content-Type: application/javascript
-
-/*.tsx
-  Content-Type: application/javascript
-
-# Service worker
-/sw.js
-  Content-Type: application/javascript
-/sw/*
-  Content-Type: application/javascript
+# Favicon specific rule
+/favicon.ico
+  Cache-Control: public, max-age=604800
+  Access-Control-Allow-Origin: *
+  Content-Type: image/x-icon
