@@ -36,40 +36,40 @@
   <body>
     <div id="root"></div>
     
-    <!-- GPT Engineer Script - using standard script tag to avoid import.meta issues -->
+    <!-- GPT Engineer Script - using standard script tag rather than module -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="text/javascript"></script>
     
-    <!-- App initialization - using a classic script to properly bootstrap the application -->
+    <!-- Always include React and ReactDOM globally for non-module fallback -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- App initialization with feature detection -->
     <script type="text/javascript">
-      // Create a script element for the appropriate entry point
-      document.addEventListener('DOMContentLoaded', function() {
-        var isModern = 'noModule' in HTMLScriptElement.prototype;
-        console.log('Browser supports modules:', isModern);
+      // Feature detection for modern browsers
+      var isModern = 'noModule' in HTMLScriptElement.prototype;
+      console.log('Browser supports ES modules:', isModern);
+      
+      // Load the appropriate entry point
+      if (isModern) {
+        // For modern browsers - load as module and ensure it has priority
+        var moduleScript = document.createElement('script');
+        moduleScript.type = 'module';
+        moduleScript.src = '/src/main.tsx';
+        document.body.appendChild(moduleScript);
         
-        if (isModern) {
-          // For modern browsers, load the module version
-          var script = document.createElement('script');
-          script.type = 'module';
-          script.src = '/src/main.tsx';
-          script.onerror = function(error) {
-            console.error('Error loading module script:', error);
-            // Fallback to classic script if module loading fails
-            loadFallbackScript();
-          };
-          document.body.appendChild(script);
-        } else {
-          // For older browsers, load the non-module version
-          loadFallbackScript();
-        }
+        console.log('Modern browser detected, loading ES module version');
+      } else {
+        // For older browsers - load the fallback non-module version
+        var fallbackScript = document.createElement('script');
+        fallbackScript.src = '/src/main.js';
+        fallbackScript.type = 'text/javascript';
+        document.body.appendChild(fallbackScript);
         
-        function loadFallbackScript() {
-          console.log('Loading fallback script...');
-          var fallback = document.createElement('script');
-          fallback.src = '/src/main.js';
-          fallback.type = 'text/javascript';
-          document.body.appendChild(fallback);
-        }
-      });
+        console.log('Legacy browser detected, loading fallback script');
+      }
+      
+      // Set a global flag indicating initialization has started
+      window.__INITIALIZATION_STARTED = true;
     </script>
   </body>
 </html>

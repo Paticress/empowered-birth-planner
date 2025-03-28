@@ -7,14 +7,31 @@ window.__MAIN_EXECUTED = window.__MAIN_EXECUTED || false;
 
 // Skip if already executed
 if (window.__MAIN_EXECUTED) {
-  console.log("Main.js - Application already initialized by main.tsx");
+  console.log("Main.js - Application already initialized");
 } else {
   window.__MAIN_EXECUTED = true;
   console.log("Main.js - Initializing application using fallback script");
   
-  // Load React and ReactDOM globally for non-module usage
-  var renderApp = function() {
-    console.log("Main.js - Rendering application with global React");
+  // Make sure React and ReactDOM are available globally
+  if (!window.React || !window.ReactDOM) {
+    console.error("Main.js - React or ReactDOM not available globally");
+    
+    // Try to load them dynamically
+    var reactScript = document.createElement('script');
+    reactScript.src = 'https://unpkg.com/react@18/umd/react.production.min.js';
+    reactScript.onload = function() {
+      var reactDOMScript = document.createElement('script');
+      reactDOMScript.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
+      reactDOMScript.onload = renderFallbackApp;
+      document.body.appendChild(reactDOMScript);
+    };
+    document.body.appendChild(reactScript);
+  } else {
+    // React is available, render the app
+    renderFallbackApp();
+  }
+  
+  function renderFallbackApp() {
     var rootElement = document.getElementById('root');
     
     if (!rootElement) {
@@ -28,48 +45,45 @@ if (window.__MAIN_EXECUTED) {
     }
     
     try {
-      // Import App dynamically to avoid ES module syntax
-      var script = document.createElement('script');
-      script.innerHTML = `
-        (function() {
-          try {
-            var React = window.React;
-            var ReactDOM = window.ReactDOM;
-            
-            var App = function() {
-              return React.createElement('div', null, 
-                React.createElement('h1', null, 'Carregando aplicação...'),
-                React.createElement('p', null, 'Por favor, aguarde enquanto carregamos o conteúdo.')
-              );
-            };
-            
-            var root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(React.createElement(App, null));
-            
-            // Redirect to the non-hash version after a short delay
-            setTimeout(function() {
-              window.location.href = '/';
-            }, 3000);
-          } catch (err) {
-            console.error("Error in inline React app:", err);
-            document.getElementById('root').innerHTML = '<div style="text-align: center; padding: 20px;"><h1>Erro ao carregar</h1><p>Tente recarregar a página.</p></div>';
-          }
-        })();
-      `;
-      document.body.appendChild(script);
+      // Simple fallback app using global React
+      var React = window.React;
+      var ReactDOM = window.ReactDOM;
+      
+      // Simple component just to show loading
+      var App = function() {
+        return React.createElement('div', {
+            style: {
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              maxWidth: '600px',
+              margin: '0 auto',
+              padding: '2rem',
+              textAlign: 'center'
+            }
+          },
+          React.createElement('h1', null, 'Carregando Guia de Plano de Parto'),
+          React.createElement('p', null, 'Por favor, aguarde enquanto carregamos o conteúdo.'),
+          React.createElement('p', null, 
+            React.createElement('a', { href: '/' }, 'Recarregar página')
+          )
+        );
+      };
+      
+      // Render using ReactDOM
+      var root = ReactDOM.createRoot(rootElement);
+      root.render(React.createElement(App, null));
+      
+      console.log("Main.js - Fallback app rendered successfully");
+      
+      // Try to redirect to a more compatible version after a short delay
+      setTimeout(function() {
+        window.location.href = '/?legacy=true';
+      }, 5000);
       
     } catch (err) {
       console.error("Main.js - Error rendering application:", err);
       if (rootElement) {
-        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h1>Erro ao carregar</h1><p>Tente recarregar a página.</p></div>';
+        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h1>Erro ao carregar</h1><p>Tente recarregar a página.</p><p><a href="/">Recarregar</a></p></div>';
       }
     }
-  };
-  
-  // Execute rendering
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', renderApp);
-  } else {
-    renderApp();
   }
 }
