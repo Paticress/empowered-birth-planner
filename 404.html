@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecionando...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript">
+    // Single Page Apps for GitHub Pages with custom domain
+    // Modified version of the script from https://github.com/rafgraph/spa-github-pages
+    
+    // Redirect to index.html with hash route
+    var segmentCount = 0;
+    var l = window.location;
+    
+    // Handle custom domain redirects differently
+    if (l.hostname === 'planodeparto.energiamaterna.com.br') {
+      // For custom domain, redirect to hashtag-based routing
+      var pathname = l.pathname;
+      // Remove any trailing slash
+      if (pathname.endsWith('/') && pathname.length > 1) {
+        pathname = pathname.slice(0, -1);
+      }
+      
+      // Default to /guia-gratuito if path is root
+      if (pathname === '' || pathname === '/') {
+        pathname = '/guia-gratuito';
+      }
+      
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        '/#' + pathname
+      );
+    } else {
+      // For GitHub Pages domain
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    }
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .message {
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="message">
+    <h1>Redirecionando...</h1>
+    <p>Aguarde enquanto redirecionamos você para o Guia de Plano de Parto.</p>
+  </div>
+</body>
+</html>
