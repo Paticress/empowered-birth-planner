@@ -35,6 +35,8 @@ export const registerServiceWorker = () => {
         });
       } catch (error) {
         console.error('❌ Service worker registration failed:', error);
+        // Don't let service worker errors block the main application
+        console.warn('Continuing without service worker functionality');
       }
     });
   } else {

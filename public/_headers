@@ -1,0 +1,25 @@
+
+# Headers for all files
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-XSS-Protection: 1; mode=block
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# JavaScript files
+/*.js
+  Content-Type: application/javascript
+
+# JSON files  
+/*.json
+  Content-Type: application/json
+
+# CSS files
+/*.css
+  Content-Type: text/css
+
+# Service worker files
+/sw.js
+  Content-Type: application/javascript
+/sw/*
+  Content-Type: application/javascript

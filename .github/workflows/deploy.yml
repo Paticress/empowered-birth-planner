@@ -58,18 +58,17 @@ jobs:
           
           echo "Service worker files copied"
       
-      - name: Create proper MIME type headers
-        run: |
-          # Set correct MIME types for JavaScript files
-          echo "application/javascript" > dist/sw.js.headers
-          echo "application/javascript" > dist/sw/config.js.headers
-          echo "application/javascript" > dist/sw/cacheManager.js.headers
-          echo "application/javascript" > dist/sw/strategies.js.headers
-          
-          echo "MIME type headers created"
-      
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
+      
+      - name: Set proper MIME types
+        run: |
+          # Create .htaccess file to set proper MIME types
+          echo "AddType application/javascript .js" > dist/.htaccess
+          echo "AddType application/json .json" >> dist/.htaccess
+          echo "AddType text/css .css" >> dist/.htaccess
+          
+          echo "MIME type configuration created"
       
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
@@ -78,6 +77,3 @@ jobs:
           branch: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
           clean: true
-
-  # Remove the previous deploy job that was using the GitHub Pages deployment API
-  # and replace it with the direct deployment above
