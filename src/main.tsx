@@ -14,7 +14,8 @@ window.onerror = function(message, source, lineno, colno, error) {
   console.error('Global error caught:', { message, source, lineno, colno, error });
   
   // If this is a module error, we might want to let the non-module version handle it
-  if (message && (message.includes('import.meta') || message.includes('module'))) {
+  if (typeof message === 'string' && 
+      (message.includes('import.meta') || message.includes('module'))) {
     console.warn('Module error detected, may fall back to non-module version');
   }
   
