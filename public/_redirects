@@ -1,0 +1,9 @@
+
+# Redirect all requests to index.html for SPA routing
+/*    /index.html   200
+
+# Set content type headers explicitly
+/*.js    Content-Type: application/javascript
+/*.css   Content-Type: text/css
+/*.json  Content-Type: application/json
+/*.ico   Content-Type: image/x-icon

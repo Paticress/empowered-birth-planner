@@ -38,8 +38,8 @@ const root: string = indexPath ? path.dirname(indexPath) : __dirname;
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Base path must be "./" for correct relative paths
-  base: "./", 
+  // Base path must be "/" for correct absolute paths
+  base: "/", 
   root: root, // Set the root to the directory containing index.html
   server: {
     port: 8080,

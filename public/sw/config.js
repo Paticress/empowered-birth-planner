@@ -10,7 +10,7 @@ const config = {
   precacheItems: [
     '/',
     '/index.html',
-    './favicon.ico'  // Use relative path for favicon
+    '/favicon.ico'  // Use absolute path for favicon
   ]
 };
 
