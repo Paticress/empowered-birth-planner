@@ -33,8 +33,10 @@
 # Service worker files
 /sw.js
   Content-Type: application/javascript; charset=utf-8
+  Access-Control-Allow-Origin: *
 /sw/*
   Content-Type: application/javascript; charset=utf-8
+  Access-Control-Allow-Origin: *
 
 # Assets directory
 /assets/*
@@ -43,4 +45,9 @@
 # Favicon (without trying to modify the file itself)
 /favicon.ico
   Cache-Control: public, max-age=604800
+  Access-Control-Allow-Origin: *
+  Content-Type: image/x-icon
+
+# Source files
+/src/*
   Access-Control-Allow-Origin: *
