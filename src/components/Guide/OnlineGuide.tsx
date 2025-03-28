@@ -12,6 +12,7 @@ interface OnlineGuideProps {
 export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
   const [activeTab, setActiveTab] = useState('introduction');
   const location = useLocation();
+  const [iframeLoaded, setIframeLoaded] = useState(false);
   
   // Debug logs for component rendering
   console.log("OnlineGuide - Component rendering, embedded:", embedded);
@@ -25,6 +26,29 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
       setActiveTab(hash);
     }
   }, [location]);
+  
+  // Listen for parent window messages
+  useEffect(() => {
+    const handleParentMessages = (event: MessageEvent) => {
+      console.log("OnlineGuide - Received message:", event.data);
+      if (event.data && event.data.type === 'wix-check') {
+        console.log("OnlineGuide - Received check from parent, sending response");
+        setIframeLoaded(true);
+        try {
+          window.parent.postMessage({ 
+            type: 'loaded', 
+            source: 'energia-materna-guide',
+            height: document.body.scrollHeight
+          }, '*');
+        } catch (error) {
+          console.error("OnlineGuide - Error sending load confirmation:", error);
+        }
+      }
+    };
+    
+    window.addEventListener('message', handleParentMessages);
+    return () => window.removeEventListener('message', handleParentMessages);
+  }, [embedded]);
 
   // Send resize messages to parent window when in embedded mode
   useEffect(() => {
@@ -33,7 +57,12 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
         const height = document.body.scrollHeight;
         try {
           // Use a more robust cross-origin communication approach
-          window.parent.postMessage({ type: 'resize', height, source: 'energia-materna-guide' }, '*');
+          window.parent.postMessage({ 
+            type: 'resize', 
+            height, 
+            source: 'energia-materna-guide',
+            url: window.location.href
+          }, '*');
           console.log("OnlineGuide - Sending resize message, height:", height);
         } catch (error) {
           console.error("OnlineGuide - Error sending postMessage:", error);
@@ -63,6 +92,20 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
       // Check for content changes periodically as fallback
       const resizeInterval = setInterval(sendResizeMessage, 500);
       
+      // Send an initial "ready" message
+      try {
+        setTimeout(() => {
+          window.parent.postMessage({ 
+            type: 'ready', 
+            source: 'energia-materna-guide',
+            height: document.body.scrollHeight
+          }, '*');
+          console.log("OnlineGuide - Sent ready message to parent");
+        }, 200);
+      } catch (error) {
+        console.error("OnlineGuide - Error sending ready message:", error);
+      }
+      
       return () => {
         window.removeEventListener('resize', sendResizeMessage);
         clearInterval(resizeInterval);
@@ -80,7 +123,12 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
       setTimeout(() => {
         const height = document.body.scrollHeight;
         try {
-          window.parent.postMessage({ type: 'resize', height, source: 'energia-materna-guide' }, '*');
+          window.parent.postMessage({ 
+            type: 'resize', 
+            height, 
+            source: 'energia-materna-guide',
+            tab: tab
+          }, '*');
         } catch (error) {
           console.error("Error sending postMessage on tab change:", error);
         }

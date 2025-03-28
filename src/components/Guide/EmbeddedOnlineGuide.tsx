@@ -4,9 +4,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import '../../styles/embed.css';
+import { useDomainDebug } from '@/hooks/useDomainDebug';
 
 export function EmbeddedOnlineGuide() {
   const [loaded, setLoaded] = useState(false);
+  
+  // Use debug hook
+  useDomainDebug();
   
   // Debug logs to check component rendering
   console.log("EmbeddedOnlineGuide - Component rendering started");
@@ -22,7 +26,8 @@ export function EmbeddedOnlineGuide() {
         window.parent.postMessage({ 
           type: 'resize', 
           height,
-          source: 'energia-materna-guide'
+          source: 'energia-materna-guide',
+          component: 'EmbeddedOnlineGuide'
         }, '*');
         console.log("EmbeddedOnlineGuide - Sending resize message, height:", height);
       } catch (error) {
@@ -54,6 +59,23 @@ export function EmbeddedOnlineGuide() {
     // Remove o Header padrão do site que pode estar aparecendo
     document.body.classList.add('embedded-mode');
     
+    // Try to detect if we're inside an iframe
+    const isInIframe = window !== window.parent;
+    console.log("EmbeddedOnlineGuide - Is in iframe:", isInIframe);
+    
+    // Send ready signal to parent
+    try {
+      window.parent.postMessage({ 
+        type: 'ready', 
+        source: 'energia-materna-guide',
+        component: 'EmbeddedOnlineGuide',
+        url: window.location.href
+      }, '*');
+      console.log("EmbeddedOnlineGuide - Sent ready message to parent");
+    } catch (error) {
+      console.error("EmbeddedOnlineGuide - Error sending ready message:", error);
+    }
+    
     console.log("EmbeddedOnlineGuide mounted completely");
     setLoaded(true);
 
@@ -71,9 +93,22 @@ export function EmbeddedOnlineGuide() {
     console.log("EmbeddedOnlineGuide is accessible at URL:", window.location.href);
     
     // Listen for messages from parent to ensure two-way communication
-    const handleParentMessages = (event) => {
-      console.log("Received message from parent:", event.data);
-      // Add any specific handling for parent messages here if needed
+    const handleParentMessages = (event: MessageEvent) => {
+      console.log("EmbeddedOnlineGuide - Received message from parent:", event.data);
+      
+      if (event.data && event.data.type === 'wix-check') {
+        try {
+          window.parent.postMessage({ 
+            type: 'loaded', 
+            source: 'energia-materna-guide',
+            component: 'EmbeddedOnlineGuide',
+            height: document.body.scrollHeight
+          }, '*');
+          console.log("EmbeddedOnlineGuide - Sent loaded confirmation to parent");
+        } catch (error) {
+          console.error("EmbeddedOnlineGuide - Error sending loaded confirmation:", error);
+        }
+      }
     };
     
     window.addEventListener('message', handleParentMessages);

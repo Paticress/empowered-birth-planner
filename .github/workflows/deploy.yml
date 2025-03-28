@@ -40,6 +40,8 @@ jobs:
         run: |
           echo "Domain test file - Created on $(date)" > dist/domain-test.txt
           echo "If you can see this file, static assets are being served correctly from GitHub Pages." >> dist/domain-test.txt
+          echo "Esta é uma verificação de domínio - Criado em $(date)" >> dist/domain-test.txt
+          echo "Se você consegue ver este arquivo, os recursos estáticos estão sendo servidos corretamente pelo GitHub Pages." >> dist/domain-test.txt
       
       - name: Copy Service Worker files
         run: |

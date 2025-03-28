@@ -173,8 +173,10 @@ https://planodeparto.energiamaterna.com.br/#/embedded-guia
 
 IMPORTANTE: 
 - O URL "https://planodeparto.energiamaterna.com.br/#/embedded-plano" já está pronto para uso.
+- Verifique se nas configurações avançadas do elemento HTML no Wix, a opção "Permitir scripts externos" está habilitada.
 - Se você estiver usando outro domínio, substitua apenas o domínio (mantenha o "/#/embedded-plano" ao final).
 - O símbolo "#" é necessário porque estamos usando HashRouter para a navegação.
 - Adicione o iframe em uma página restrita apenas para usuários pagantes do Wix.
 - Se o iframe não estiver se ajustando corretamente, verifique se o código acima está completo e sem modificações.
+- Se o iframe não aparecer, verifique o console do navegador (F12) para possíveis erros de CORS ou outras restrições.
 */

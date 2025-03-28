@@ -3,4 +3,10 @@ This file is used to test if static assets are properly served on the custom dom
 If you can see this file at https://planodeparto.energiamaterna.com.br/domain-test.txt,
 then your static files are accessible.
 
-Last updated: ${new Date().toISOString()}
+Last updated: 2023-10-26
+
+Este arquivo é usado para testar se os ativos estáticos estão sendo servidos corretamente no domínio personalizado.
+Se você consegue ver este arquivo em https://planodeparto.energiamaterna.com.br/domain-test.txt,
+então seus arquivos estáticos estão acessíveis.
+
+Última atualização: 2023-10-26

@@ -4,9 +4,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import '../../styles/embed.css';
+import { useDomainDebug } from '@/hooks/useDomainDebug';
 
 export function EmbeddedBirthPlanBuilder() {
   const [loaded, setLoaded] = useState(false);
+  
+  // Use debug hook
+  useDomainDebug();
   
   // Debug logs to check component rendering
   console.log("EmbeddedBirthPlanBuilder - Component rendering started");
@@ -18,19 +22,55 @@ export function EmbeddedBirthPlanBuilder() {
     const sendResizeMessage = () => {
       // Envia mensagem para o container (Wix) com altura do conteúdo
       const height = document.body.scrollHeight;
-      window.parent.postMessage({ type: 'resize', height }, '*');
-      console.log("Sending resize message, height:", height);
+      try {
+        window.parent.postMessage({ 
+          type: 'resize', 
+          height, 
+          source: 'energia-materna-birth-plan',
+          component: 'EmbeddedBirthPlanBuilder'
+        }, '*');
+        console.log("EmbeddedBirthPlanBuilder - Sending resize message, height:", height);
+      } catch (error) {
+        console.error("EmbeddedBirthPlanBuilder - Error sending postMessage:", error);
+      }
     };
 
     // Envia mensagem inicial e configura listener para resize
-    sendResizeMessage();
+    setTimeout(sendResizeMessage, 100);
     window.addEventListener('resize', sendResizeMessage);
+    
+    // Observe DOM changes to detect content changes
+    const observer = new MutationObserver(() => {
+      console.log("EmbeddedBirthPlanBuilder - DOM mutation detected, sending resize");
+      sendResizeMessage();
+    });
+    
+    // Start observing
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true, 
+      attributes: true,
+      characterData: true 
+    });
     
     // Verificar periodicamente mudanças de altura no conteúdo
     const resizeInterval = setInterval(sendResizeMessage, 500);
 
     // Remove o Header padrão do site que pode estar aparecendo
     document.body.classList.add('embedded-mode');
+    
+    // Send ready signal to parent
+    try {
+      window.parent.postMessage({ 
+        type: 'ready', 
+        source: 'energia-materna-birth-plan',
+        component: 'EmbeddedBirthPlanBuilder',
+        url: window.location.href
+      }, '*');
+      console.log("EmbeddedBirthPlanBuilder - Sent ready message to parent");
+    } catch (error) {
+      console.error("EmbeddedBirthPlanBuilder - Error sending ready message:", error);
+    }
     
     console.log("EmbeddedBirthPlanBuilder mounted completely");
     setLoaded(true);
@@ -39,8 +79,34 @@ export function EmbeddedBirthPlanBuilder() {
       console.log("EmbeddedBirthPlanBuilder - Cleanup running");
       window.removeEventListener('resize', sendResizeMessage);
       clearInterval(resizeInterval);
+      observer.disconnect();
       document.body.classList.remove('embedded-mode');
     };
+  }, []);
+
+  // Listen for messages from parent window
+  useEffect(() => {
+    const handleParentMessages = (event: MessageEvent) => {
+      console.log("EmbeddedBirthPlanBuilder - Received message from parent:", event.data);
+      
+      // Handle check message from parent
+      if (event.data && event.data.type === 'wix-check') {
+        try {
+          window.parent.postMessage({ 
+            type: 'loaded', 
+            source: 'energia-materna-birth-plan',
+            component: 'EmbeddedBirthPlanBuilder',
+            height: document.body.scrollHeight
+          }, '*');
+          console.log("EmbeddedBirthPlanBuilder - Sent loaded confirmation to parent");
+        } catch (error) {
+          console.error("EmbeddedBirthPlanBuilder - Error sending loaded confirmation:", error);
+        }
+      }
+    };
+    
+    window.addEventListener('message', handleParentMessages);
+    return () => window.removeEventListener('message', handleParentMessages);
   }, []);
 
   if (!loaded) {
