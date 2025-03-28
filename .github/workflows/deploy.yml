@@ -94,7 +94,7 @@ jobs:
       - name: Update HTML files to properly handle JavaScript modules
         run: |
           # Find all HTML files and ensure they properly load modules
-          find dist -name "*.html" -exec sed -i 's/<script /<script type="module" /g' {} \;
+          find dist -name "*.html" -exec sed -i 's/<script src="https:\/\/cdn.gpteng.co\/gptengineer.js"/<script src="https:\/\/cdn.gpteng.co\/gptengineer.js" type="application\/javascript"/g' {} \;
           
           echo "HTML files updated for module support"
       

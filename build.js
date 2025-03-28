@@ -87,6 +87,12 @@ if (!fs.existsSync('./public/favicon.ico')) {
   }
 }
 
+// Create a copy of the favicon in the root directory as a fallback
+console.log('📝 Copying favicon.ico to project root as fallback...');
+if (fs.existsSync('./public/favicon.ico')) {
+  fs.copyFileSync('./public/favicon.ico', './favicon.ico');
+}
+
 try {
   // Run TypeScript check without emitting files
   console.log('🔍 Running TypeScript check...');
@@ -105,6 +111,12 @@ ${fs.readdirSync('./dist').map(file => `  - ${file}`).join('\n')}
 
 Ready to deploy! You can upload these files to your web server.
     `);
+    
+    // Ensure favicon is in the dist folder
+    if (!fs.existsSync('./dist/favicon.ico') && fs.existsSync('./public/favicon.ico')) {
+      console.log('📝 Copying favicon.ico to dist folder...');
+      fs.copyFileSync('./public/favicon.ico', './dist/favicon.ico');
+    }
   }
   
   // If we copied index.html to root, clean it up
@@ -112,6 +124,12 @@ Ready to deploy! You can upload these files to your web server.
   if (path.dirname(indexPath) !== __dirname && fs.existsSync(tempIndexPath)) {
     console.log(`🧹 Cleaning up temporary index.html...`);
     fs.unlinkSync(tempIndexPath);
+  }
+  
+  // Clean up temporary favicon if we created it
+  if (fs.existsSync('./favicon.ico')) {
+    console.log(`🧹 Cleaning up temporary favicon.ico...`);
+    fs.unlinkSync('./favicon.ico');
   }
 } catch (error) {
   console.error('❌ Build failed:', error.message);
