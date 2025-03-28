@@ -65,14 +65,13 @@ export default defineConfig(({ mode }) => ({
         drop_debugger: true,
       }
     },
-    // Modified output configuration to fix the build error
+    // Fix the output format to support ES modules
     rollupOptions: {
       output: {
-        format: 'iife', // Use IIFE format for compatibility
+        format: 'es', // Using ES modules format
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]',
-        // Removing manualChunks because it conflicts with inlineDynamicImports in IIFE format
+        assetFileNames: 'assets/[name].[hash].[ext]'
       }
     },
     // Optimize chunk size

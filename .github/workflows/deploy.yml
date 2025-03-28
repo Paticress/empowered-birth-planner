@@ -61,45 +61,37 @@ jobs:
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
       
-      - name: Create netlify.toml for MIME types
+      - name: Create content-type configuration for GitHub Pages
         run: |
-          cat <<EOF > dist/netlify.toml
-          [[headers]]
-            for = "/*.js"
-            [headers.values]
-              Content-Type = "application/javascript"
+          # Create MIME type configuration files
+          cat > dist/.htaccess << EOF
+          AddType application/javascript .js .mjs
+          AddType application/json .json
+          AddType text/css .css
           
-          [[headers]]
-            for = "/*.json"
-            [headers.values]
-              Content-Type = "application/json"
+          # Enable CORS
+          <IfModule mod_headers.c>
+            Header set Access-Control-Allow-Origin "*"
+          </IfModule>
           
-          [[headers]]
-            for = "/*.css"
-            [headers.values]
-              Content-Type = "text/css"
+          # Proper handling of TS/TSX files
+          AddType application/javascript .ts .tsx
+          
+          # Force application/javascript for module scripts
+          <FilesMatch "\.(js|mjs)$">
+            Header set Content-Type "application/javascript"
+          </FilesMatch>
           EOF
-          
-          echo "netlify.toml created for MIME type handling"
-      
-      - name: Set proper MIME types
-        run: |
-          # Create .htaccess file to set proper MIME types
-          echo "AddType application/javascript .js" > dist/.htaccess
-          echo "AddType application/json .json" >> dist/.htaccess
-          echo "AddType text/css .css" >> dist/.htaccess
           
           echo "MIME type configuration created"
       
-      - name: Create meta refresh fallback
+      - name: Update HTML files to properly handle JavaScript modules
         run: |
-          # Create a meta refresh fallback for direct script loading
-          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=/">' > dist/assets/index.html
-          echo '<meta charset="UTF-8"><title>Redirecting...</title></head>' >> dist/assets/index.html
-          echo '<body>If you are not redirected automatically, follow this <a href="/">link</a>.' >> dist/assets/index.html
-          echo '</body></html>' >> dist/assets/index.html
+          # Find all HTML files and ensure they properly load modules
+          find dist -name "*.html" -exec sed -i 's/type="text\/javascript"/type="module"/g' {} \;
+          find dist -name "*.html" -exec sed -i 's/defer/type="module"/g' {} \;
           
-          echo "Meta refresh fallback created"
+          echo "HTML files updated for module support"
       
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4

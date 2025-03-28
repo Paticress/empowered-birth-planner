@@ -7,23 +7,34 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Access-Control-Allow-Origin: *
 
-# JavaScript files
+# JavaScript files - ensure proper MIME type
 /*.js
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=utf-8
 
 # JSON files  
 /*.json
-  Content-Type: application/json
+  Content-Type: application/json; charset=utf-8
 
 # CSS files
 /*.css
-  Content-Type: text/css
+  Content-Type: text/css; charset=utf-8
+
+# JavaScript modules specifically
+/*.mjs
+  Content-Type: application/javascript; charset=utf-8
+
+# TypeScript files
+/*.ts
+  Content-Type: application/javascript; charset=utf-8
+
+/*.tsx
+  Content-Type: application/javascript; charset=utf-8
 
 # Service worker files
 /sw.js
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=utf-8
 /sw/*
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=utf-8
 
 # Assets directory
 /assets/*
