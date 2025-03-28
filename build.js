@@ -24,9 +24,13 @@ function findIndexHtml(dir) {
     
     // Skip node_modules and .git directories
     if (stat.isDirectory() && file !== 'node_modules' && file !== '.git' && file !== 'dist') {
-      const indexPath = findIndexHtml(filePath);
-      if (indexPath) {
-        return indexPath;
+      try {
+        const indexPath = findIndexHtml(filePath);
+        if (indexPath) {
+          return indexPath;
+        }
+      } catch (error) {
+        // Continue searching other directories if error occurs
       }
     }
   }
@@ -46,6 +50,40 @@ if (!indexPath) {
   if (path.dirname(indexPath) !== __dirname) {
     console.log(`📝 Copying index.html to project root for build...`);
     fs.copyFileSync(indexPath, path.join(__dirname, 'index.html'));
+  }
+}
+
+// Ensure favicon.ico exists
+if (!fs.existsSync('./public/favicon.ico')) {
+  console.log('⚠️ favicon.ico not found, creating a placeholder...');
+  // Create a simple 1x1 transparent pixel as favicon placeholder
+  const faviconPath = path.join(__dirname, 'public', 'favicon.ico');
+  const faviconDir = path.dirname(faviconPath);
+  
+  if (!fs.existsSync(faviconDir)) {
+    fs.mkdirSync(faviconDir, { recursive: true });
+  }
+  
+  // Copy an existing image to use as favicon if available
+  const possibleImages = [
+    './public/og-image.png',
+    './public/logo.png',
+    './public/icon.png'
+  ];
+  
+  let copied = false;
+  for (const imgPath of possibleImages) {
+    if (fs.existsSync(imgPath)) {
+      console.log(`📝 Using ${imgPath} as favicon`);
+      fs.copyFileSync(imgPath, faviconPath);
+      copied = true;
+      break;
+    }
+  }
+  
+  if (!copied) {
+    console.log('⚠️ No suitable image found for favicon, creating empty file');
+    fs.writeFileSync(faviconPath, '');
   }
 }
 

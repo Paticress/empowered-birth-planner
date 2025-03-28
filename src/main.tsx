@@ -13,6 +13,8 @@ window.onerror = function(message, source, lineno, colno, error) {
 
 window.addEventListener('unhandledrejection', event => {
   console.error('Unhandled Promise Rejection:', event.reason);
+  // Prevent the browser from showing the default error dialog
+  event.preventDefault();
 });
 
 console.log("Main.tsx - Application bootstrapping started");
@@ -43,16 +45,13 @@ const renderApp = () => {
     
     console.log("Main.tsx - React root created, ready to render App");
     
-    // Render with a small delay to ensure DOM is completely ready
-    // This can help with some timing issues in certain browsers
-    setTimeout(() => {
-      root.render(
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
-      );
-      console.log("Main.tsx - App rendered successfully");
-    }, 0);
+    // Render immediately
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+    console.log("Main.tsx - App rendered successfully");
   } catch (error) {
     console.error("Main.tsx - Critical error rendering application:", error);
     
