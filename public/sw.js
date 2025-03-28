@@ -3,7 +3,7 @@
 // Ensures basic offline functionality and proper MIME type handling
 
 // Cache name with version
-const CACHE_NAME = 'energia-materna-cache-v2';
+const CACHE_NAME = 'energia-materna-cache-v3';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -11,7 +11,8 @@ const PRECACHE_ASSETS = [
   '/index.html',
   '/favicon.ico',
   '/src/main.js',
-  '/src/main.jsx'
+  '/src/main.jsx',
+  '/src/main.tsx'
 ];
 
 // Install event - cache critical assets
@@ -94,6 +95,29 @@ self.addEventListener('fetch', event => {
                 headers: new Headers({ 'Content-Type': 'image/x-icon' })
               });
             });
+        })
+    );
+    return;
+  }
+  
+  // Special handling for JavaScript files to ensure proper MIME types
+  if (event.request.url.endsWith('.js') || event.request.url.endsWith('.jsx') || event.request.url.endsWith('.tsx')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Clone the response and set the correct MIME type
+          const clonedResponse = response.clone();
+          const headers = new Headers(clonedResponse.headers);
+          headers.set('Content-Type', 'application/javascript; charset=utf-8');
+          
+          return new Response(clonedResponse.body, {
+            status: clonedResponse.status,
+            statusText: clonedResponse.statusText,
+            headers: headers
+          });
+        })
+        .catch(() => {
+          return caches.match(event.request);
         })
     );
     return;

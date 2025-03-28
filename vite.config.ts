@@ -48,9 +48,8 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react({
-      // Instead of jsxRuntime, use the standard options
-      // that are supported by @vitejs/plugin-react-swc
-      fastRefresh: true,
+      // Use standard configuration options without the jsxRuntime or fastRefresh
+      // which are causing type errors
     }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
