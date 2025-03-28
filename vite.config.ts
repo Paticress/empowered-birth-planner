@@ -48,8 +48,9 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react({
-      // Ensure compatibility with non-module code
-      jsxRuntime: 'classic'
+      // Instead of jsxRuntime, use the standard options
+      // that are supported by @vitejs/plugin-react-swc
+      fastRefresh: true,
     }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
