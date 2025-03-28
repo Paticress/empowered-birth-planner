@@ -11,7 +11,7 @@ export const registerServiceWorker = () => {
         console.log('🔧 Attempting to register service worker...');
         
         // Use the appropriate scope based on the deployment environment
-        const registration = await navigator.serviceWorker.register('/sw.js', {
+        const registration = await navigator.serviceWorker.register('./sw.js', {
           scope: '/',
           type: 'classic' // Explicitly set to classic to avoid module type issues
         });

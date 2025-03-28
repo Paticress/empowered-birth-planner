@@ -72,7 +72,11 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]'
-      }
+      },
+      // Don't bundle the favicon - let it be handled by the build process
+      external: [
+        /\/favicon\.ico$/
+      ]
     },
     // Optimize chunk size
     chunkSizeWarningLimit: 1000,
