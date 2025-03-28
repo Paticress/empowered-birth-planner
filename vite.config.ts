@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -64,46 +65,14 @@ export default defineConfig(({ mode }) => ({
         drop_debugger: true,
       }
     },
-    // Output format configuration - important change here
+    // Modified output configuration to fix the build error
     rollupOptions: {
       output: {
-        format: 'iife', // Change from 'es' to 'iife' (immediately invoked function expression)
+        format: 'iife', // Use IIFE format for compatibility
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]',
-        manualChunks: (id) => {
-          // Create dynamic chunks based on imports
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'vendor-react';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'vendor-radix';
-            }
-            if (id.includes('lucide-react')) {
-              return 'vendor-icons';
-            }
-            if (id.includes('date-fns')) {
-              return 'vendor-date';
-            }
-            if (id.includes('@tanstack')) {
-              return 'vendor-tanstack';
-            }
-            // Other third-party libraries go to 'vendor'
-            return 'vendor';
-          }
-          
-          // Group app code by feature areas
-          if (id.includes('/components/Guide/')) {
-            return 'feature-guide';
-          }
-          if (id.includes('/components/Lead/')) {
-            return 'feature-lead';
-          }
-          if (id.includes('/components/ui/')) {
-            return 'ui-components';
-          }
-        }
+        // Removing manualChunks because it conflicts with inlineDynamicImports in IIFE format
       }
     },
     // Optimize chunk size
