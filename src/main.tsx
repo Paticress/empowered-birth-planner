@@ -13,10 +13,20 @@ window.__MAIN_EXECUTED = window.__MAIN_EXECUTED || false;
 window.onerror = function(message, source, lineno, colno, error) {
   console.error('Global error caught:', { message, source, lineno, colno, error });
   
-  // If this is a module error, we might want to let the non-module version handle it
-  if (typeof message === 'string' && 
-      (message.includes('import.meta') || message.includes('module'))) {
-    console.warn('Module error detected, may fall back to non-module version');
+  // Type guard to ensure message is a string before calling includes
+  if (typeof message === 'string') {
+    if (message.includes('import.meta') || message.includes('module')) {
+      console.warn('Module error detected, falling back to non-module version');
+      
+      // Load the fallback script
+      const fallbackScript = document.createElement('script');
+      fallbackScript.src = '/src/main.js';
+      fallbackScript.type = 'text/javascript';
+      document.body.appendChild(fallbackScript);
+      
+      // Prevent further execution
+      return true;
+    }
   }
   
   return false;

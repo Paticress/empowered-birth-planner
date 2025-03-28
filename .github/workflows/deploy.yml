@@ -30,11 +30,60 @@ jobs:
       - name: Build
         run: npm run build
       
+      - name: Verify build artifacts
+        run: |
+          echo "Checking build artifacts..."
+          ls -la dist/
+          echo "Verifying favicon exists"
+          if [ ! -f "dist/favicon.ico" ]; then
+            echo "Favicon missing, copying from public"
+            cp public/favicon.ico dist/
+          fi
+          
+          echo "Ensuring correct MIME types"
+          cat > dist/_headers << EOF
+          # Headers for all files
+          /*
+            X-Frame-Options: SAMEORIGIN
+            X-XSS-Protection: 1; mode=block
+            X-Content-Type-Options: nosniff
+            Referrer-Policy: strict-origin-when-cross-origin
+            Access-Control-Allow-Origin: *
+
+          # JavaScript files - ensure proper MIME type
+          /*.js
+            Content-Type: application/javascript; charset=utf-8
+
+          # JSON files  
+          /*.json
+            Content-Type: application/json; charset=utf-8
+
+          # CSS files
+          /*.css
+            Content-Type: text/css; charset=utf-8
+
+          # Favicon specific rule
+          /favicon.ico
+            Cache-Control: public, max-age=604800
+            Access-Control-Allow-Origin: *
+            Content-Type: image/x-icon
+          EOF
+          
+          echo "Creating fallback entry points"
+          cp src/main.js dist/main.js
+          cp src/main.jsx dist/main.jsx
+
       - name: Copy CNAME to dist
-        run: cp public/CNAME dist/
+        run: |
+          if [ -f "public/CNAME" ]; then
+            cp public/CNAME dist/
+          fi
 
       - name: Copy 404.html to dist root
-        run: cp public/404.html dist/
+        run: |
+          if [ -f "public/404.html" ]; then
+            cp public/404.html dist/
+          fi
         
       - name: Make sure favicon is in dist root
         run: |
@@ -43,83 +92,8 @@ jobs:
           ls -la dist/
           echo "Favicon copied and verified"
           
-      - name: Create and copy domain-test.txt to dist
-        run: |
-          echo "Domain test file - Created on $(date)" > dist/domain-test.txt
-          echo "If you can see this file, static assets are being served correctly from GitHub Pages." >> dist/domain-test.txt
-          echo "Esta é uma verificação de domínio - Criado em $(date)" >> dist/domain-test.txt
-          echo "Se você consegue ver este arquivo, os recursos estáticos estão sendo servidos corretamente pelo GitHub Pages." >> dist/domain-test.txt
-      
-      - name: Copy Service Worker files
-        run: |
-          # Create sw directory in dist if not exists
-          mkdir -p dist/sw
-          
-          # Copy service worker file
-          cp public/sw.js dist/
-          
-          # Copy service worker modules
-          cp public/sw/config.js dist/sw/
-          cp public/sw/cacheManager.js dist/sw/
-          cp public/sw/strategies.js dist/sw/
-          
-          echo "Service worker files copied"
-      
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
-      
-      - name: Create content-type configuration file
-        run: |
-          # Create a _headers file for proper MIME types
-          cat > dist/_headers << EOF
-          # Headers for all files
-          /*
-            X-Frame-Options: SAMEORIGIN
-            X-XSS-Protection: 1; mode=block
-            X-Content-Type-Options: nosniff
-            Referrer-Policy: strict-origin-when-cross-origin
-
-          # JavaScript files - ensure proper MIME type
-          /*.js
-            Content-Type: application/javascript
-
-          # JSON files  
-          /*.json
-            Content-Type: application/json
-
-          # CSS files
-          /*.css
-            Content-Type: text/css
-
-          # JavaScript modules specifically
-          /*.mjs
-            Content-Type: application/javascript
-
-          # TypeScript files (for development)
-          /*.ts
-            Content-Type: application/javascript
-
-          /*.tsx
-            Content-Type: application/javascript
-
-          # Service worker
-          /sw.js
-            Content-Type: application/javascript
-          /sw/*
-            Content-Type: application/javascript
-          EOF
-          
-          # Create redirects file for SPA
-          cat > dist/_redirects << EOF
-          # Redirect all requests to index.html for SPA routing
-          /*    /index.html   200
-
-          # Set content type headers explicitly
-          /*.js    Content-Type: application/javascript
-          /*.css   Content-Type: text/css
-          /*.json  Content-Type: application/json
-          /*.ico   Content-Type: image/x-icon
-          EOF
       
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
