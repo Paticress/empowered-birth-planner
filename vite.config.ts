@@ -47,7 +47,10 @@ export default defineConfig(({ mode }) => ({
     historyApiFallback: true,
   },
   plugins: [
-    react(),
+    react({
+      // Ensure compatibility with non-module code
+      jsxRuntime: 'classic'
+    }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
@@ -100,7 +103,7 @@ export default defineConfig(({ mode }) => ({
       '@tanstack/react-query'
     ],
     esbuildOptions: {
-      target: 'es2020' // More compatible target
+      target: 'es2015' // More compatible target
     }
   },
   cacheDir: '.vite-cache',

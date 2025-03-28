@@ -13,7 +13,7 @@ window.__MAIN_EXECUTED = window.__MAIN_EXECUTED || false;
 window.onerror = function(message, source, lineno, colno, error) {
   console.error('Global error caught:', { message, source, lineno, colno, error });
   
-  // Type guard to ensure message is a string before calling includes
+  // Safely check if message contains certain strings
   if (typeof message === 'string') {
     if (message.includes('import.meta') || message.includes('module')) {
       console.warn('Module error detected, falling back to non-module version');

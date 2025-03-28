@@ -5,24 +5,31 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-console.log('Using module main.jsx entry point');
-
-// Check if we're in a modern browser environment
-const isModernBrowser = typeof window !== 'undefined' && 'noModule' in HTMLScriptElement.prototype;
-
-if (isModernBrowser) {
-  console.log('Modern browser detected, using ES modules');
-  
-  const rootElement = document.getElementById('root');
-  if (rootElement) {
-    ReactDOM.createRoot(rootElement).render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>
-    );
-  } else {
-    console.error('Root element not found!');
-  }
+// Prevent double initialization
+if (window.__MAIN_EXECUTED) {
+  console.log("Main.jsx - Application already initialized");
 } else {
-  console.warn('Legacy browser detected - will use fallback script');
+  window.__MAIN_EXECUTED = true;
+  console.log('Main.jsx - Using module entry point');
+
+  // Initialize the application
+  function initializeApp() {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      ReactDOM.createRoot(rootElement).render(
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
+      );
+    } else {
+      console.error('Root element not found!');
+    }
+  }
+
+  // Execute initialization
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+  } else {
+    initializeApp();
+  }
 }
