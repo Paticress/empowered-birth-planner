@@ -9,7 +9,8 @@ const config = {
   cacheName: 'energia-materna-cache-v1',
   precacheItems: [
     '/',
-    '/index.html'
+    '/index.html',
+    '/favicon.ico'  // Added favicon to precache list
   ]
 };
 
