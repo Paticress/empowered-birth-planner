@@ -36,15 +36,10 @@ jobs:
       - name: Copy 404.html to dist root
         run: cp public/404.html dist/
         
-      - name: Copy domain-test.txt to dist root
+      - name: Create and copy domain-test.txt to dist
         run: |
-          if [ -f "public/domain-test.txt" ]; then
-            cp public/domain-test.txt dist/
-            echo "Domain test file copied successfully"
-          else
-            echo "Creating domain-test.txt in dist directory"
-            echo "Domain test file - $(date)" > dist/domain-test.txt
-          fi
+          echo "Domain test file - Created on $(date)" > dist/domain-test.txt
+          echo "If you can see this file, static assets are being served correctly from GitHub Pages." >> dist/domain-test.txt
       
       - name: Copy Service Worker files
         run: |

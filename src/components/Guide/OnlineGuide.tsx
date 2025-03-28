@@ -31,20 +31,42 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
     if (embedded) {
       const sendResizeMessage = () => {
         const height = document.body.scrollHeight;
-        window.parent.postMessage({ type: 'resize', height }, '*');
-        console.log("OnlineGuide - Sending resize message, height:", height);
+        try {
+          // Use a more robust cross-origin communication approach
+          window.parent.postMessage({ type: 'resize', height, source: 'energia-materna-guide' }, '*');
+          console.log("OnlineGuide - Sending resize message, height:", height);
+        } catch (error) {
+          console.error("OnlineGuide - Error sending postMessage:", error);
+        }
       };
       
+      // Add a small delay for initial rendering
+      setTimeout(sendResizeMessage, 100);
+      
       // Send initial message and setup listeners
-      sendResizeMessage();
       window.addEventListener('resize', sendResizeMessage);
       
-      // Check for content changes periodically
+      // Observe DOM changes to detect content changes
+      const observer = new MutationObserver(() => {
+        console.log("OnlineGuide - DOM mutation detected, sending resize");
+        sendResizeMessage();
+      });
+      
+      // Start observing the document with the configured parameters
+      observer.observe(document.body, { 
+        childList: true, 
+        subtree: true, 
+        attributes: true,
+        characterData: true 
+      });
+      
+      // Check for content changes periodically as fallback
       const resizeInterval = setInterval(sendResizeMessage, 500);
       
       return () => {
         window.removeEventListener('resize', sendResizeMessage);
         clearInterval(resizeInterval);
+        observer.disconnect();
       };
     }
   }, [embedded, activeTab]);
@@ -52,6 +74,18 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
   const handleTabChange = (tab: string) => {
     console.log('Tab changed to:', tab);
     setActiveTab(tab);
+    
+    // When tab changes in embedded mode, ensure parent window is notified
+    if (embedded) {
+      setTimeout(() => {
+        const height = document.body.scrollHeight;
+        try {
+          window.parent.postMessage({ type: 'resize', height, source: 'energia-materna-guide' }, '*');
+        } catch (error) {
+          console.error("Error sending postMessage on tab change:", error);
+        }
+      }, 100);
+    }
   };
 
   console.log("OnlineGuide - Rendering with activeTab:", activeTab);

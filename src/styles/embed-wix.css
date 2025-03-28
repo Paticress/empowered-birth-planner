@@ -33,7 +33,7 @@ INSTRUÇÕES DE USO NO WIX:
 ----- INÍCIO DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
 
 <div id="birth-plan-container" class="responsive-iframe-container">
-  <iframe id="birth-plan-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-plano" scrolling="no"></iframe>
+  <iframe id="birth-plan-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-plano" allow="cross-origin-isolated" scrolling="no"></iframe>
 </div>
 
 <style>
@@ -62,6 +62,8 @@ INSTRUÇÕES DE USO NO WIX:
     
     // Listener para mensagens do iframe
     window.addEventListener('message', function(event) {
+      console.log("Mensagem recebida do iframe:", event.data);
+      
       // Verificar se a mensagem é do tipo resize
       if (event.data && event.data.type === 'resize') {
         // Ajustar altura do iframe
@@ -73,6 +75,23 @@ INSTRUÇÕES DE USO NO WIX:
         container.style.paddingBottom = '0';
       }
     });
+    
+    // Função para verificar se o iframe está carregado
+    function checkIframeLoaded() {
+      try {
+        // Tenta acessar o conteúdo do iframe para verificar se está carregado
+        console.log("Verificando se o iframe foi carregado...");
+        
+        // Envia mensagem para o iframe
+        iframe.contentWindow.postMessage({ type: 'wix-check' }, '*');
+        console.log("Mensagem enviada para o iframe");
+      } catch (e) {
+        console.log("Erro ao verificar iframe:", e);
+      }
+    }
+    
+    // Verifica o carregamento após um delay
+    setTimeout(checkIframeLoaded, 2000);
   }
   
   // Iniciar o ajuste de altura quando a página carregar
@@ -87,7 +106,7 @@ Para incorporar o Guia Online, use o mesmo formato, mas altere o URL para:
 https://planodeparto.energiamaterna.com.br/#/embedded-guia
 
 <div id="guide-container" class="responsive-iframe-container">
-  <iframe id="guide-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-guia" scrolling="no"></iframe>
+  <iframe id="guide-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-guia" allow="cross-origin-isolated" scrolling="no"></iframe>
 </div>
 
 <style>
@@ -116,6 +135,8 @@ https://planodeparto.energiamaterna.com.br/#/embedded-guia
     
     // Listener para mensagens do iframe
     window.addEventListener('message', function(event) {
+      console.log("Mensagem recebida do iframe:", event.data);
+      
       // Verificar se a mensagem é do tipo resize
       if (event.data && event.data.type === 'resize') {
         // Ajustar altura do iframe
@@ -127,6 +148,23 @@ https://planodeparto.energiamaterna.com.br/#/embedded-guia
         container.style.paddingBottom = '0';
       }
     });
+    
+    // Função para verificar se o iframe está carregado
+    function checkIframeLoaded() {
+      try {
+        // Tenta acessar o conteúdo do iframe para verificar se está carregado
+        console.log("Verificando se o iframe foi carregado...");
+        
+        // Envia mensagem para o iframe
+        iframe.contentWindow.postMessage({ type: 'wix-check' }, '*');
+        console.log("Mensagem enviada para o iframe");
+      } catch (e) {
+        console.log("Erro ao verificar iframe:", e);
+      }
+    }
+    
+    // Verifica o carregamento após um delay
+    setTimeout(checkIframeLoaded, 2000);
   }
   
   // Iniciar o ajuste de altura quando a página carregar
@@ -137,4 +175,6 @@ IMPORTANTE:
 - O URL "https://planodeparto.energiamaterna.com.br/#/embedded-plano" já está pronto para uso.
 - Se você estiver usando outro domínio, substitua apenas o domínio (mantenha o "/#/embedded-plano" ao final).
 - O símbolo "#" é necessário porque estamos usando HashRouter para a navegação.
+- Adicione o iframe em uma página restrita apenas para usuários pagantes do Wix.
+- Se o iframe não estiver se ajustando corretamente, verifique se o código acima está completo e sem modificações.
 */
