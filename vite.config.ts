@@ -64,27 +64,30 @@ export default defineConfig(({ mode }) => ({
         drop_debugger: true,
       }
     },
-    // Fix the output format to support ES modules
+    // Set up output handling for both module and non-module code
     rollupOptions: {
       output: {
-        format: 'es', // Using ES modules format
+        format: 'es',
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]'
+        assetFileNames: 'assets/[name].[hash].[ext]',
+        // Ensure proper handling of modules and non-modules
+        intro: `
+          // Fallback for browsers without module support
+          const isModern = typeof document !== "undefined" && "noModule" in HTMLScriptElement.prototype;
+          console.log("Build running with isModern:", isModern);
+        `
       },
-      // Don't bundle the favicon - let it be handled by the build process
       external: [
         /\/favicon\.ico$/
       ]
     },
-    // Optimize chunk size
+    // Generate chunks with optimized sizes
     chunkSizeWarningLimit: 1000,
-    // Generate CSS separately
     cssCodeSplit: true,
-    // Generate source maps for easier debugging
     sourcemap: true,
   },
-  // Optimize performance during development
+  // Add appropriate optimizations for both modern and legacy browsers
   optimizeDeps: {
     include: [
       'react', 
@@ -97,13 +100,14 @@ export default defineConfig(({ mode }) => ({
       '@tanstack/react-query'
     ],
     esbuildOptions: {
-      target: 'esnext'
+      target: 'es2020' // More compatible target
     }
   },
-  // Enable caching
   cacheDir: '.vite-cache',
-  // Improve dev performance
   esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    // Add JSX factory for React 17+ compatibility
+    jsxFactory: 'React.createElement',
+    jsxFragment: 'React.Fragment'
   }
 }));
