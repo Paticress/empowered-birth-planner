@@ -13,6 +13,7 @@
     'esm.sh',
     'cdnjs.cloudflare.com',
     'cdn.gpteng.co',
+    'gpteng.co',
     'react-router-dom'
   ];
   
@@ -128,102 +129,171 @@
     if (isTrustedDomain(src)) {
       const script = document.createElement('script');
       script.src = src;
-      script.type = 'text/javascript';
+      script.type = attributes.type || 'text/javascript';
       Object.keys(attributes).forEach(key => {
-        script.setAttribute(key, attributes[key]);
+        if (key !== 'type') { // We've already set type
+          script.setAttribute(key, attributes[key]);
+        }
       });
-      script.onload = callback;
+      script.onload = function() {
+        console.log("[CORS Proxy] Script loaded successfully:", src);
+        if (callback) callback();
+      };
+      script.onerror = function(error) {
+        console.error("[CORS Proxy] Script loading failed:", src);
+        if (callback) callback(error);
+      };
       document.head.appendChild(script);
       return script;
     }
     
     const needsProxy = problematicDomains.some(domain => src.includes(domain));
     
-    const script = document.createElement('script');
-    
-    // For problematic scripts, let's try to use an inline script approach
+    // For problematic scripts, we'll try different approaches
     if (needsProxy) {
-      try {
-        // First try direct loading
-        script.src = src;
-        script.type = 'text/javascript';
-        
-        // Special case for GPT Engineer script
-        if (src.includes('cdn.gpteng.co')) {
-          script.setAttribute('crossorigin', 'anonymous');
-          // Remove type="module" which can cause CSP issues
-          if (attributes.type === 'module') {
-            delete attributes.type;
-          }
+      console.log("[CORS Proxy] Loading problematic script:", src);
+      
+      // First try direct loading
+      const script = document.createElement('script');
+      script.src = src;
+      script.type = attributes.type || 'text/javascript';
+      
+      // Special case for GPT Engineer script
+      if (src.includes('gpteng.co')) {
+        console.log("[CORS Proxy] Special handling for GPT Engineer script");
+        script.setAttribute('crossorigin', 'anonymous');
+        // Remove type="module" which can cause CSP issues
+        if (attributes.type === 'module') {
+          script.type = 'text/javascript';
         }
-        
-        Object.keys(attributes).forEach(key => {
-          script.setAttribute(key, attributes[key]);
-        });
-        script.onload = callback;
-        script.onerror = function(error) {
-          console.warn("[CORS Proxy] Direct script loading failed, trying fetch approach:", error);
-          
-          // If direct loading fails, try the fetch approach
-          fetch(src)
-            .then(response => response.text())
-            .then(content => {
-              // Create an inline script
-              const inlineScript = document.createElement('script');
-              inlineScript.textContent = content;
-              inlineScript.type = 'text/javascript';
-              Object.keys(attributes).forEach(key => {
-                if (key !== 'src' && key !== 'type') { // Don't copy src and type
-                  inlineScript.setAttribute(key, attributes[key]);
-                }
-              });
-              inlineScript.onload = callback;
-              document.head.appendChild(inlineScript);
-            })
-            .catch(error => {
-              console.error("[CORS Proxy] Failed to load script content:", error);
-              // Try with local fallback
-              loadLocalFallback();
-            });
-        };
-        document.head.appendChild(script);
-      } catch (error) {
-        console.error("[CORS Proxy] Error during script loading:", error);
-        loadLocalFallback();
       }
+      
+      // Apply attributes
+      Object.keys(attributes).forEach(key => {
+        if (key !== 'type') { // We've already set type
+          script.setAttribute(key, attributes[key]);
+        }
+      });
+      
+      script.onload = function() {
+        console.log("[CORS Proxy] Script loaded successfully:", src);
+        if (callback) callback();
+      };
+      
+      script.onerror = function(error) {
+        console.warn("[CORS Proxy] Direct script loading failed, trying fetch approach:", error);
+        
+        // If direct loading fails, try the fetch approach
+        originalFetch(src)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to fetch script: ${response.status}`);
+            }
+            return response.text();
+          })
+          .then(content => {
+            // Create an inline script with the content
+            const inlineScript = document.createElement('script');
+            inlineScript.textContent = content;
+            inlineScript.type = attributes.type || 'text/javascript';
+            
+            // Apply attributes except src and type
+            Object.keys(attributes).forEach(key => {
+              if (key !== 'src' && key !== 'type') {
+                inlineScript.setAttribute(key, attributes[key]);
+              }
+            });
+            
+            inlineScript.onload = function() {
+              console.log("[CORS Proxy] Inline script loaded successfully");
+              if (callback) callback();
+            };
+            
+            inlineScript.onerror = function(inlineError) {
+              console.error("[CORS Proxy] Inline script failed:", inlineError);
+              loadLocalFallback();
+            };
+            
+            document.head.appendChild(inlineScript);
+          })
+          .catch(fetchError => {
+            console.error("[CORS Proxy] Failed to fetch script content:", fetchError);
+            loadLocalFallback();
+          });
+      };
+      
+      document.head.appendChild(script);
+      return script;
     } else {
       // For non-problematic domains, load normally
+      const script = document.createElement('script');
       script.src = src;
-      script.type = 'text/javascript';
+      script.type = attributes.type || 'text/javascript';
+      
       Object.keys(attributes).forEach(key => {
-        script.setAttribute(key, attributes[key]);
+        if (key !== 'type') { // We've already set type
+          script.setAttribute(key, attributes[key]);
+        }
       });
-      script.onload = callback;
+      
+      script.onload = function() {
+        console.log("[CORS Proxy] Script loaded successfully:", src);
+        if (callback) callback();
+      };
+      
+      script.onerror = function(error) {
+        console.error("[CORS Proxy] Script loading failed:", src);
+        if (callback) callback(error);
+      };
+      
       document.head.appendChild(script);
+      return script;
     }
     
     // Helper function to load local fallbacks
     function loadLocalFallback() {
       console.log("[CORS Proxy] Trying local fallback for:", src);
-      if (src.includes('react-router-dom') || src.includes('unpkg.com') || src.includes('cdn.jsdelivr.net')) {
+      
+      if (src.includes('react') || src.includes('unpkg.com/react') || src.includes('cdn.jsdelivr.net/npm/react')) {
         const fallbackScript = document.createElement('script');
         fallbackScript.src = '/assets/react-cdn-fallback.js';
-        fallbackScript.onload = callback;
+        fallbackScript.onload = function() {
+          console.log("[CORS Proxy] React fallback loaded successfully");
+          if (callback) callback();
+        };
+        fallbackScript.onerror = function(fallbackError) {
+          console.error("[CORS Proxy] React fallback failed:", fallbackError);
+          if (callback) callback(fallbackError);
+        };
         document.head.appendChild(fallbackScript);
-      } else if (src.includes('cdn.gpteng.co')) {
+      } 
+      else if (src.includes('gpteng.co')) {
         console.log("[CORS Proxy] Using local fallback for GPT Engineer");
-        // We don't have a direct fallback, but we can at least provide basic functionality
+        // Create a minimal implementation
         window.gptengineer = window.gptengineer || {
           createSelect: function() {
-            console.log("GPT Engineer Select functionality unavailable due to CSP restrictions");
+            console.log("GPT Engineer Select functionality unavailable");
             return null;
           }
         };
         if (callback) callback();
       }
+      else {
+        // Generic fallback approach
+        const fileName = src.split('/').pop();
+        const fallbackScript = document.createElement('script');
+        fallbackScript.src = `/assets/${fileName}`;
+        fallbackScript.onload = function() {
+          console.log("[CORS Proxy] Local fallback loaded successfully:", fileName);
+          if (callback) callback();
+        };
+        fallbackScript.onerror = function(fallbackError) {
+          console.error("[CORS Proxy] Local fallback failed:", fallbackError);
+          if (callback) callback(fallbackError);
+        };
+        document.head.appendChild(fallbackScript);
+      }
     }
-    
-    return script;
   };
   
   // Inject basic GPT Engineer API if not available

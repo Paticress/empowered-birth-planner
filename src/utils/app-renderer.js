@@ -83,11 +83,49 @@ function loadFullAppBundle() {
   console.log("Loading full app bundle");
   
   return new Promise((resolve, reject) => {
-    loadScript('/src/App.js', function() {
-      console.log("Full app bundle loaded");
-      resolve();
-    }, { type: 'text/javascript' });
+    // First try the ESM approach
+    if (supportsESM()) {
+      console.log("Browser supports modules, loading App as module");
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = '/src/App.js';
+      script.onload = () => {
+        console.log("Full app module loaded");
+        resolve();
+      };
+      script.onerror = () => {
+        console.warn("Module loading failed, trying regular script approach");
+        loadAsRegularScript(resolve, reject);
+      };
+      document.body.appendChild(script);
+    } else {
+      console.log("Browser doesn't support modules, loading App as regular script");
+      loadAsRegularScript(resolve, reject);
+    }
   });
+}
+
+// Helper to load app as a regular script when module loading fails
+function loadAsRegularScript(resolve, reject) {
+  loadScript('/src/App.js', function(error) {
+    if (error) {
+      console.error("Failed to load full app bundle:", error);
+      reject(error);
+    } else {
+      console.log("Full app bundle loaded as regular script");
+      resolve();
+    }
+  }, { type: 'text/javascript' });
+}
+
+// Check if browser supports ES modules
+function supportsESM() {
+  try {
+    new Function('import("")');
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
 
 export { createSimpleLoadingApp, renderSimpleApp, loadFullAppBundle };
