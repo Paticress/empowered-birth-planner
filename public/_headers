@@ -4,7 +4,7 @@
   Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
   X-Frame-Options: ALLOW-FROM https://energiamaterna.com.br
-  Content-Security-Policy: frame-ancestors 'self' https://*.energiamaterna.com.br https://*.wixsite.com https://*.wix.com;
+  Content-Security-Policy: default-src 'self' https://*.energiamaterna.com.br https://*.wix.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://corsproxy.io https://cors-anywhere.herokuapp.com https://cors.bridged.cc; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.energiamaterna.com.br; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.energiamaterna.com.br https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://corsproxy.io https://cors-anywhere.herokuapp.com https://cors.bridged.cc; frame-ancestors 'self' https://*.energiamaterna.com.br https://*.wix.com;
   Access-Control-Allow-Origin: *
   Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
   Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Allow-Origin

@@ -8,6 +8,7 @@
     react: false,
     reactDom: false,
     reactRouter: false,
+    gptEngineer: false,
     app: false,
     errorCount: 0
   };
@@ -224,6 +225,32 @@
     
     loadRouter();
   }
+
+  // Function to ensure GPT Engineer script is loaded
+  function ensureGPTEngineer(callback) {
+    if (window.__SCRIPT_LOAD_STATE.gptEngineer) {
+      callback();
+      return;
+    }
+
+    // Check if script exists
+    if (typeof window.__gptEngineer !== 'undefined') {
+      console.log("GPT Engineer already loaded");
+      window.__SCRIPT_LOAD_STATE.gptEngineer = true;
+      callback();
+      return;
+    }
+
+    // Add fallback script
+    const fallbackScript = document.createElement('script');
+    fallbackScript.src = "/assets/gpteng-fallback.js";
+    fallbackScript.onload = function() {
+      console.log("GPT Engineer fallback loaded");
+      window.__SCRIPT_LOAD_STATE.gptEngineer = true;
+      callback();
+    };
+    document.head.appendChild(fallbackScript);
+  }
   
   // Function to initialize the app after dependencies are loaded
   function loadFullAppBundle() {
@@ -253,12 +280,14 @@
     }
   }
   
-  // Load React, then ReactDOM, then React Router, then the app
+  // Load React, then ReactDOM, then React Router, then ensure GPT Engineer, then the app
   function loadDependencies() {
     loadReact(function() {
       loadReactDOM(function() {
         loadReactRouter(function() {
-          loadFullAppBundle();
+          ensureGPTEngineer(function() {
+            loadFullAppBundle();
+          });
         });
       });
     });
