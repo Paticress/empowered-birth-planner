@@ -1,25 +1,33 @@
 
 // Non-module entry point for maximum browser compatibility
 (function() {
-  console.log('Using main.js entry point (non-module version)');
+  console.log('Main.js - Using non-module entry point');
 
   // Flag to prevent double initialization
-  if (window.__MAIN_EXECUTED) {
-    console.log("Main.js - Application already initialized");
+  if (window.__MAIN_JS_EXECUTED) {
+    console.log("Main.js - Application already initialized by non-module entry point");
     return;
   }
   
-  window.__MAIN_EXECUTED = true;
+  window.__MAIN_JS_EXECUTED = true;
   console.log("Main.js - Initializing application using standard script");
   
   // Utility to load scripts
-  function loadScript(src, callback) {
+  function loadScript(src, callback, attributes) {
     var script = document.createElement('script');
     script.src = src;
     script.onload = callback;
+    
+    // Apply additional attributes if provided
+    if (attributes) {
+      for (var key in attributes) {
+        script.setAttribute(key, attributes[key]);
+      }
+    }
+    
     script.onerror = function(error) {
       console.error('Failed to load script:', src, error);
-      showError('Erro ao carregar recursos necessários');
+      showError('Erro ao carregar recursos necessários: ' + src);
     };
     document.body.appendChild(script);
   }
@@ -29,18 +37,18 @@
     var rootElement = document.getElementById('root');
     if (rootElement) {
       rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h1>Erro ao carregar</h1><p>' + 
-        message + '</p><p><a href="/" style="color: #0066ff; text-decoration: none;">Tentar novamente</a></p></div>';
+        message + '</p><p><a href="/" style="color: #0066ff; text-decoration: none;" onclick="window.location.reload(); return false;">Tentar novamente</a></p></div>';
     }
   }
 
   // Make sure React and ReactDOM are available globally
   if (!window.React || !window.ReactDOM) {
-    console.error("Main.js - React or ReactDOM not available globally");
+    console.warn("Main.js - React or ReactDOM not available globally, loading from CDN");
     loadScript('https://unpkg.com/react@18/umd/react.production.min.js', function() {
       loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js', function() {
         loadReactDependencies();
-      });
-    });
+      }, { crossorigin: "anonymous" });
+    }, { crossorigin: "anonymous" });
   } else {
     loadReactDependencies();
   }
@@ -52,7 +60,7 @@
     } else {
       loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
         renderApp();
-      });
+      }, { crossorigin: "anonymous" });
     }
   }
   
@@ -113,7 +121,7 @@
       loadFullAppBundle();
     } catch (err) {
       console.error("Main.js - Error rendering application:", err);
-      showError('Erro ao inicializar a aplicação. Tente recarregar a página.');
+      showError('Erro ao inicializar a aplicação. Tente recarregar a página. Detalhes: ' + err.message);
     }
   }
   

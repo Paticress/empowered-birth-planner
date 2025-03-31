@@ -71,7 +71,7 @@ export default defineConfig(({ mode }) => {
           drop_debugger: true,
         }
       },
-      // Set up legacy output format for maximum compatibility
+      // Set up output format for maximum compatibility
       target: 'es2015',
       rollupOptions: {
         output: {
@@ -79,15 +79,17 @@ export default defineConfig(({ mode }) => {
           entryFileNames: 'assets/[name].[hash].js',
           chunkFileNames: 'assets/[name].[hash].js',
           assetFileNames: 'assets/[name].[hash].[ext]',
-          // Completely remove any conflicting options
-          // Do not use manualChunks and inlineDynamicImports together
+          // Removed conflicting manualChunks option
           globals: {
             react: 'React',
-            'react-dom': 'ReactDOM'
-          }
+            'react-dom': 'ReactDOM',
+            'react-router-dom': 'ReactRouterDOM'
+          },
         },
         external: [
-          /\/favicon\.ico$/
+          'react',
+          'react-dom',
+          'react-router-dom'
         ]
       },
       // Generate chunks with optimized sizes
