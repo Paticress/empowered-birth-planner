@@ -53,6 +53,11 @@
         margin-top: 1rem;
       }
     </style>
+
+    <!-- CORS Preflight Headers -->
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta http-equiv="Access-Control-Allow-Methods" content="GET, POST, OPTIONS">
+    <meta http-equiv="Access-Control-Allow-Headers" content="Origin, Content-Type, Accept">
   </head>
 
   <body>
@@ -73,13 +78,24 @@
     <!-- Load React Router with crossorigin attribute -->
     <script crossorigin src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js"></script>
     
-    <!-- Simple loader script to handle module loading issues -->
+    <!-- Global window error handler for better error catchment -->
     <script>
-      // Global error handler
+      window.__APP_ERRORS = [];
       window.addEventListener('error', function(event) {
         console.error('Global error caught:', event);
-        if (event.message && (event.message.includes('module') || event.message.includes('MIME'))) {
-          console.warn('Module/MIME error detected, loading compatibility mode');
+        window.__APP_ERRORS.push({
+          message: event.message,
+          source: event.filename,
+          timestamp: new Date().toISOString()
+        });
+        
+        if (event.message && (
+            event.message.includes('module') || 
+            event.message.includes('MIME') || 
+            event.message.includes('CORS') ||
+            event.message.includes('script error')
+          )) {
+          console.warn('Script/Module error detected, activating compatibility mode');
           loadCompatibilityScript();
         }
       });
@@ -89,6 +105,7 @@
         if (window.__COMPAT_LOADED) return;
         window.__COMPAT_LOADED = true;
         
+        console.log("Loading compatibility script for maximum browser support");
         const script = document.createElement('script');
         script.src = '/src/compat-entry.js';
         script.onerror = function() {
@@ -97,22 +114,31 @@
         document.body.appendChild(script);
       }
       
-      // First try to load the module version
+      // Try standard module, then fallback to compatibility script
       const moduleSupport = 'noModule' in document.createElement('script');
+      
       if (moduleSupport) {
         try {
-          // Try to load the module version
+          // Load the main module script
           const moduleScript = document.createElement('script');
           moduleScript.type = 'module';
-          moduleScript.src = '/src/main.jsx';
-          moduleScript.onerror = loadCompatibilityScript;
+          moduleScript.src = '/src/main.js';
+          moduleScript.onerror = function(error) {
+            console.warn('Module script error, trying main.jsx fallback', error);
+            const fallbackModule = document.createElement('script');
+            fallbackModule.type = 'module';
+            fallbackModule.src = '/src/main.jsx';
+            fallbackModule.onerror = loadCompatibilityScript;
+            document.body.appendChild(fallbackModule);
+          };
           document.body.appendChild(moduleScript);
         } catch (e) {
-          console.warn('Module syntax error, falling back to compatibility mode');
+          console.warn('Module syntax error, falling back to compatibility mode:', e);
           loadCompatibilityScript();
         }
       } else {
         // Browser doesn't support modules, load compatibility version
+        console.warn('This browser does not support ES modules, loading compatibility script');
         loadCompatibilityScript();
       }
     </script>

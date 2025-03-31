@@ -1,7 +1,7 @@
 
 /* 
- * Energia Materna - CSS para incorporação no Wix
- * Este arquivo contém CSS e JavaScript para facilitar a incorporação do Plano de Parto
+ * Energia Materna - CSS e instruções para incorporação no Wix
+ * Versão robusta com suporte a CORS e comunicação bidirecional
  */
 
 /* ESTILOS CSS */
@@ -33,7 +33,7 @@ INSTRUÇÕES DE USO NO WIX:
 ----- INÍCIO DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
 
 <div id="birth-plan-container" class="responsive-iframe-container">
-  <iframe id="birth-plan-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-plano" allow="cross-origin-isolated" scrolling="no"></iframe>
+  <iframe id="birth-plan-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-plano" allow="cross-origin-isolated; fullscreen" scrolling="no" referrerpolicy="origin"></iframe>
 </div>
 
 <style>
@@ -59,18 +59,21 @@ INSTRUÇÕES DE USO NO WIX:
   // Função para ajustar altura do iframe automaticamente
   function setupIframeResizing() {
     const iframe = document.getElementById('birth-plan-iframe');
+    const container = document.getElementById('birth-plan-container');
     
     // Listener para mensagens do iframe
     window.addEventListener('message', function(event) {
       console.log("Mensagem recebida do iframe:", event.data);
+      
+      // Verificar origem da mensagem para segurança (opcional)
+      // if (event.origin !== "https://planodeparto.energiamaterna.com.br") return;
       
       // Verificar se a mensagem é do tipo resize
       if (event.data && event.data.type === 'resize') {
         // Ajustar altura do iframe
         iframe.style.height = event.data.height + 'px';
         
-        // Ajustar o container se necessário
-        const container = document.getElementById('birth-plan-container');
+        // Ajustar o container
         container.style.height = event.data.height + 'px';
         container.style.paddingBottom = '0';
       }
@@ -79,9 +82,6 @@ INSTRUÇÕES DE USO NO WIX:
     // Função para verificar se o iframe está carregado
     function checkIframeLoaded() {
       try {
-        // Tenta acessar o conteúdo do iframe para verificar se está carregado
-        console.log("Verificando se o iframe foi carregado...");
-        
         // Envia mensagem para o iframe
         iframe.contentWindow.postMessage({ type: 'wix-check' }, '*');
         console.log("Mensagem enviada para o iframe");
@@ -90,12 +90,24 @@ INSTRUÇÕES DE USO NO WIX:
       }
     }
     
-    // Verifica o carregamento após um delay
-    setTimeout(checkIframeLoaded, 2000);
+    // Verifica periódicamente o carregamento
+    const checkInterval = setInterval(checkIframeLoaded, 2000);
+    
+    // Limpa o intervalo após 30 segundos (15 tentativas)
+    setTimeout(() => {
+      clearInterval(checkInterval);
+    }, 30000);
+    
+    // Inicia verificação após delay inicial
+    setTimeout(checkIframeLoaded, 1000);
   }
   
   // Iniciar o ajuste de altura quando a página carregar
-  window.addEventListener('load', setupIframeResizing);
+  if (document.readyState === 'complete') {
+    setupIframeResizing();
+  } else {
+    window.addEventListener('load', setupIframeResizing);
+  }
 </script>
 
 ----- FIM DO CÓDIGO PARA COPIAR (NÃO INCLUA ESTA LINHA) -----
@@ -106,7 +118,7 @@ Para incorporar o Guia Online, use o mesmo formato, mas altere o URL para:
 https://planodeparto.energiamaterna.com.br/#/embedded-guia
 
 <div id="guide-container" class="responsive-iframe-container">
-  <iframe id="guide-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-guia" allow="cross-origin-isolated" scrolling="no"></iframe>
+  <iframe id="guide-iframe" src="https://planodeparto.energiamaterna.com.br/#/embedded-guia" allow="cross-origin-isolated; fullscreen" scrolling="no" referrerpolicy="origin"></iframe>
 </div>
 
 <style>
@@ -132,6 +144,7 @@ https://planodeparto.energiamaterna.com.br/#/embedded-guia
   // Função para ajustar altura do iframe automaticamente
   function setupIframeResizing() {
     const iframe = document.getElementById('guide-iframe');
+    const container = document.getElementById('guide-container');
     
     // Listener para mensagens do iframe
     window.addEventListener('message', function(event) {
@@ -142,8 +155,7 @@ https://planodeparto.energiamaterna.com.br/#/embedded-guia
         // Ajustar altura do iframe
         iframe.style.height = event.data.height + 'px';
         
-        // Ajustar o container se necessário
-        const container = document.getElementById('guide-container');
+        // Ajustar o container
         container.style.height = event.data.height + 'px';
         container.style.paddingBottom = '0';
       }
@@ -152,9 +164,6 @@ https://planodeparto.energiamaterna.com.br/#/embedded-guia
     // Função para verificar se o iframe está carregado
     function checkIframeLoaded() {
       try {
-        // Tenta acessar o conteúdo do iframe para verificar se está carregado
-        console.log("Verificando se o iframe foi carregado...");
-        
         // Envia mensagem para o iframe
         iframe.contentWindow.postMessage({ type: 'wix-check' }, '*');
         console.log("Mensagem enviada para o iframe");
@@ -163,20 +172,45 @@ https://planodeparto.energiamaterna.com.br/#/embedded-guia
       }
     }
     
-    // Verifica o carregamento após um delay
-    setTimeout(checkIframeLoaded, 2000);
+    // Verifica periódicamente o carregamento
+    const checkInterval = setInterval(checkIframeLoaded, 2000);
+    
+    // Limpa o intervalo após 30 segundos (15 tentativas)
+    setTimeout(() => {
+      clearInterval(checkInterval);
+    }, 30000);
+    
+    // Inicia verificação após delay inicial
+    setTimeout(checkIframeLoaded, 1000);
   }
   
   // Iniciar o ajuste de altura quando a página carregar
-  window.addEventListener('load', setupIframeResizing);
+  if (document.readyState === 'complete') {
+    setupIframeResizing();
+  } else {
+    window.addEventListener('load', setupIframeResizing);
+  }
 </script>
 
+SOLUÇÃO DE PROBLEMAS:
+
+Se o iframe não estiver se ajustando corretamente:
+
+1. Verifique se as permissões do iframe incluem "allow="cross-origin-isolated; fullscreen"
+2. No Wix, certifique-se de que nas configurações avançadas do elemento HTML, a opção "Permitir scripts externos" está habilitada
+3. Adicione o atributo "referrerpolicy="origin"" ao iframe
+4. Se estiver usando HTTPS no seu site, certifique-se de que o URL do iframe também é HTTPS
+5. Teste em uma janela anônima do navegador para evitar problemas de cache
+6. Verifique o console do navegador (F12) para possíveis erros
+
+Se o conteúdo não estiver sendo exibido:
+1. Verifique se a URL do iframe está correta e acessível
+2. Confirme que seu navegador não está bloqueando conteúdo de terceiros
+3. Desative bloqueadores de anúncios temporariamente para teste
+4. Adicione explicitamente permissões de domínio nas configurações de HTML do Wix
+
 IMPORTANTE: 
-- O URL "https://planodeparto.energiamaterna.com.br/#/embedded-plano" já está pronto para uso.
-- Verifique se nas configurações avançadas do elemento HTML no Wix, a opção "Permitir scripts externos" está habilitada.
-- Se você estiver usando outro domínio, substitua apenas o domínio (mantenha o "/#/embedded-plano" ao final).
-- O símbolo "#" é necessário porque estamos usando HashRouter para a navegação.
+- Os URLs "https://planodeparto.energiamaterna.com.br/#/embedded-plano" e "https://planodeparto.energiamaterna.com.br/#/embedded-guia" já estão prontos para uso.
 - Adicione o iframe em uma página restrita apenas para usuários pagantes do Wix.
-- Se o iframe não estiver se ajustando corretamente, verifique se o código acima está completo e sem modificações.
-- Se o iframe não aparecer, verifique o console do navegador (F12) para possíveis erros de CORS ou outras restrições.
+- O símbolo "#" é necessário porque estamos usando HashRouter para a navegação.
 */

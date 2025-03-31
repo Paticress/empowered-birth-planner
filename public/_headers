@@ -3,44 +3,64 @@
   Content-Type: text/html; charset=utf-8
   Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
+  X-Frame-Options: ALLOW-FROM https://energiamaterna.com.br
+  Content-Security-Policy: frame-ancestors 'self' https://*.energiamaterna.com.br https://*.wixsite.com https://*.wix.com;
   Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+  Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization
+  Access-Control-Allow-Credentials: true
 
 /*.js
   Content-Type: application/javascript; charset=utf-8
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 
 /*.mjs
   Content-Type: application/javascript; charset=utf-8
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 
 /*.jsx
   Content-Type: application/javascript; charset=utf-8
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 
 /*.tsx
   Content-Type: application/javascript; charset=utf-8
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
+
+/*.ts
+  Content-Type: application/javascript; charset=utf-8
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 
 /*.css
   Content-Type: text/css; charset=utf-8
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 
 /*.json
   Content-Type: application/json; charset=utf-8
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 
 /*.svg
   Content-Type: image/svg+xml; charset=utf-8
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 
 /*.png
   Content-Type: image/png
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 
 /*.jpg
   Content-Type: image/jpeg
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 
 /*.ico
   Content-Type: image/x-icon
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400

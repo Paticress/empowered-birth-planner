@@ -29,9 +29,7 @@ if (window.__MAIN_JSX_EXECUTED) {
         // Create root and render
         const root = ReactDOM.createRoot(rootElement);
         root.render(
-          <React.StrictMode>
-            <App />
-          </React.StrictMode>
+          <App />
         );
         console.log("Main.jsx - Application rendered successfully");
       } else {

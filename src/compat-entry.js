@@ -16,11 +16,30 @@ console.log("Compat-entry.js - Loading compatibility mode");
     console.log("Compat-entry.js - Loading script:", src);
     const script = document.createElement('script');
     script.src = src;
+    script.crossOrigin = "anonymous"; // Add crossorigin for better error reporting
     script.onload = callback;
     script.onerror = function(error) {
       console.error("Compat-entry.js - Failed to load script:", src, error);
+      tryAlternativeSource(src, callback);
     };
     document.body.appendChild(script);
+  }
+  
+  // Try alternative CDN if primary fails
+  function tryAlternativeSource(src, callback) {
+    if (src.includes('unpkg.com')) {
+      // Try jsdelivr as alternative
+      const altSrc = src.replace('unpkg.com', 'cdn.jsdelivr.net/npm');
+      console.log("Compat-entry.js - Trying alternative source:", altSrc);
+      const script = document.createElement('script');
+      script.src = altSrc;
+      script.crossOrigin = "anonymous";
+      script.onload = callback;
+      script.onerror = function() {
+        console.error("Compat-entry.js - Alternative source also failed");
+      };
+      document.body.appendChild(script);
+    }
   }
   
   // Show error message
@@ -86,6 +105,22 @@ console.log("Compat-entry.js - Loading compatibility mode");
               )
             }),
             React.createElement(ReactRouterDOM.Route, { 
+              path: "/embedded-guia", 
+              element: React.createElement('div', { className: "text-center p-8" },
+                React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Guia de Plano de Parto (Versão Incorporada)"),
+                React.createElement('p', null, "Carregando versão incorporada..."),
+                React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
+              )
+            }),
+            React.createElement(ReactRouterDOM.Route, { 
+              path: "/embedded-plano", 
+              element: React.createElement('div', { className: "text-center p-8" },
+                React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Construtor de Plano de Parto (Versão Incorporada)"),
+                React.createElement('p', null, "Carregando versão incorporada..."),
+                React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
+              )
+            }),
+            React.createElement(ReactRouterDOM.Route, { 
               path: "*", 
               element: React.createElement('div', { className: "text-center p-8" },
                 React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Página não encontrada"),
@@ -105,10 +140,27 @@ console.log("Compat-entry.js - Loading compatibility mode");
       
       console.log("Compat-entry.js - Basic application rendered");
       
-      // Try to load the full app script
-      loadScript('/src/App.js', function() {
-        console.log("Compat-entry.js - App.js loaded successfully");
-      });
+      // Try to load the full app script with retries
+      let retries = 0;
+      function loadAppWithRetry() {
+        const script = document.createElement('script');
+        script.src = '/src/App.js';
+        script.onload = function() {
+          console.log("Compat-entry.js - App.js loaded successfully");
+        };
+        script.onerror = function() {
+          retries++;
+          if (retries < 3) {
+            console.log(`Compat-entry.js - Retry ${retries} loading App.js`);
+            setTimeout(loadAppWithRetry, 1000); // Wait 1 second before retry
+          } else {
+            console.error("Compat-entry.js - Failed to load App.js after multiple attempts");
+          }
+        };
+        document.body.appendChild(script);
+      }
+      
+      loadAppWithRetry();
     } catch (error) {
       console.error("Compat-entry.js - Critical error:", error);
       showError("Ocorreu um erro crítico ao carregar a aplicação. Por favor, tente novamente mais tarde.");

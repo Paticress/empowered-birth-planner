@@ -2,41 +2,80 @@
 import { useEffect } from 'react';
 
 /**
- * Hook to log domain-related debugging information
- * Helps diagnose routing and domain configuration issues
+ * Hook para auxiliar no diagnóstico de problemas de domínio e incorporação
+ * Adiciona informações úteis para debug de problemas de CORS e iframe
  */
-export const useDomainDebug = () => {
+export function useDomainDebug() {
   useEffect(() => {
-    // Only run in development or when a debug flag is set
-    if (process.env.NODE_ENV === 'development' || localStorage.getItem('debug') === 'true') {
-      console.group('Domain Debug Information');
-      console.log('Current URL:', window.location.href);
-      console.log('Hostname:', window.location.hostname);
-      console.log('Origin:', window.location.origin);
-      console.log('Pathname:', window.location.pathname);
-      console.log('Hash:', window.location.hash);
-      console.log('Search:', window.location.search);
-      console.log('Browser User Agent:', navigator.userAgent);
+    // Log environment information
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isDev = process.env.NODE_ENV === 'development';
+    const isInIframe = window !== window.parent;
+    const protocol = window.location.protocol;
+
+    // Check for common issues
+    const hasHashRouter = window.location.hash !== '';
+    const hasReactRouter = !!(window as any).ReactRouterDOM;
+    const hasReact = !!(window as any).React;
+    const hasReactDOM = !!(window as any).ReactDOM;
+    
+    // Collect error information if available
+    const appErrors = (window as any).__APP_ERRORS || [];
+    
+    // Create debug report
+    const debugReport = {
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+      path: window.location.pathname,
+      hash: window.location.hash,
+      hostname: window.location.hostname,
+      protocol,
+      isLocalhost,
+      isDev,
+      isInIframe,
+      userAgent: navigator.userAgent,
+      hasHashRouter,
+      hasReactRouter,
+      hasReact,
+      hasReactDOM,
+      screenSize: {
+        width: window.innerWidth,
+        height: window.innerHeight
+      },
+      appErrors
+    };
+    
+    // Log the debug information
+    console.log('Domain Debug Information:', debugReport);
+    
+    // Check specific issues
+    if (isInIframe) {
+      console.log('Running inside an iframe - checking CORS policies');
       
-      // Check for cross-origin issues
+      // Test postMessage to parent
       try {
-        const domainTest = document.createElement('script');
-        domainTest.src = '/domain-test.txt';
-        domainTest.onload = () => console.log('Domain test file loaded successfully');
-        domainTest.onerror = (e) => console.warn('Domain test file failed to load, possible CORS issue:', e);
-        document.body.appendChild(domainTest);
-        
-        // Clean up
-        setTimeout(() => {
-          document.body.removeChild(domainTest);
-        }, 1000);
-      } catch (e) {
-        console.error('Error during domain test:', e);
+        window.parent.postMessage({ 
+          type: 'debug', 
+          source: 'energia-materna-app',
+          message: 'Testing parent communication'
+        }, '*');
+        console.log('Test message sent to parent window');
+      } catch (error) {
+        console.error('Error communicating with parent window:', error);
       }
-      
-      console.groupEnd();
     }
+    
+    if (protocol !== 'https:' && !isLocalhost) {
+      console.warn('Running on non-HTTPS protocol, this may cause issues with secure features and iframe embedding');
+    }
+    
+    // Return cleanup function
+    return () => {
+      console.log('Domain debug hook unmounted');
+    };
   }, []);
-};
+  
+  return null;
+}
 
 export default useDomainDebug;
