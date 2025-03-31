@@ -1,18 +1,11 @@
 
-// Simple Service Worker
-// Ensures basic offline functionality and proper MIME type handling
-
-// Cache name with version
-const CACHE_NAME = 'energia-materna-cache-v3';
-
-// Assets to cache on install
+// Service Worker with improved MIME type handling
+const CACHE_NAME = 'energia-materna-cache-v4';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/favicon.ico',
-  '/src/main.js',
-  '/src/main.jsx',
-  '/src/main.tsx'
+  '/src/main.js'
 ];
 
 // Install event - cache critical assets
@@ -59,77 +52,58 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event - network first with cache fallback
+// Fetch event with proper MIME type handling
 self.addEventListener('fetch', event => {
   // Skip cross-origin requests
   if (!event.request.url.startsWith(self.location.origin)) {
     return;
   }
   
-  // Special handling for favicon.ico
-  if (event.request.url.includes('favicon.ico')) {
-    event.respondWith(
-      caches.match('/favicon.ico')
-        .then(response => {
-          if (response) {
-            console.log('[Service Worker] Serving cached favicon');
-            return response;
-          }
-          return fetch('/favicon.ico')
-            .then(networkResponse => {
-              if (networkResponse && networkResponse.ok) {
-                const clonedResponse = networkResponse.clone();
-                caches.open(CACHE_NAME).then(cache => {
-                  cache.put('/favicon.ico', clonedResponse);
-                });
-                return networkResponse;
-              }
-              return new Response('', {
-                status: 200,
-                headers: new Headers({ 'Content-Type': 'image/x-icon' })
-              });
-            })
-            .catch(() => {
-              return new Response('', {
-                status: 200,
-                headers: new Headers({ 'Content-Type': 'image/x-icon' })
-              });
-            });
-        })
-    );
-    return;
-  }
-  
-  // Special handling for JavaScript files to ensure proper MIME types
-  if (event.request.url.endsWith('.js') || event.request.url.endsWith('.jsx') || event.request.url.endsWith('.tsx')) {
+  // Handle JavaScript files specially
+  if (event.request.url.endsWith('.js') || 
+      event.request.url.endsWith('.jsx') || 
+      event.request.url.endsWith('.tsx') || 
+      event.request.url.endsWith('.mjs')) {
+    
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          // Clone the response and set the correct MIME type
+          // Clone the response and ensure proper MIME type
           const clonedResponse = response.clone();
           const headers = new Headers(clonedResponse.headers);
           headers.set('Content-Type', 'application/javascript; charset=utf-8');
           
-          return new Response(clonedResponse.body, {
+          // Cache the corrected response
+          const correctedResponse = new Response(clonedResponse.body, {
             status: clonedResponse.status,
             statusText: clonedResponse.statusText,
             headers: headers
           });
+          
+          // Cache for future use
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, correctedResponse.clone());
+          });
+          
+          return correctedResponse;
         })
         .catch(() => {
+          // Fallback to cached version
           return caches.match(event.request);
         })
     );
     return;
   }
   
-  // For HTML requests, use network first strategy
+  // For HTML requests (navigation)
   if (event.request.mode === 'navigate' || 
       (event.request.method === 'GET' && 
-       event.request.headers.get('accept').includes('text/html'))) {
+       event.request.headers.get('accept')?.includes('text/html'))) {
+       
     event.respondWith(
       fetch(event.request)
         .then(response => {
+          // Cache successful responses
           if (response.ok) {
             const clonedResponse = response.clone();
             caches.open(CACHE_NAME).then(cache => {
@@ -140,6 +114,7 @@ self.addEventListener('fetch', event => {
           throw new Error('Network response was not ok');
         })
         .catch(() => {
+          // Fallback to cache or index.html
           return caches.match(event.request)
             .then(cachedResponse => {
               if (cachedResponse) {
@@ -152,13 +127,14 @@ self.addEventListener('fetch', event => {
     return;
   }
   
-  // For other requests, try cache first then network
+  // Standard cache-first strategy for other requests
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
         if (cachedResponse) {
           return cachedResponse;
         }
+        
         return fetch(event.request)
           .then(response => {
             if (response && response.ok) {
@@ -173,7 +149,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Message event handler
+// Message handling for updates
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();

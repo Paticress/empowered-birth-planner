@@ -40,9 +40,9 @@ jobs:
             cp public/favicon.ico dist/
           fi
           
-          echo "Ensuring correct MIME types"
+          echo "Creating _headers file for Netlify/GitHub Pages"
           cat > dist/_headers << EOF
-          # Headers for all files
+          # Set proper MIME types for all files
           /*
             X-Frame-Options: SAMEORIGIN
             X-XSS-Protection: 1; mode=block
@@ -50,8 +50,14 @@ jobs:
             Referrer-Policy: strict-origin-when-cross-origin
             Access-Control-Allow-Origin: *
 
-          # JavaScript files - ensure proper MIME type
+          # JavaScript files - critical for module loading
           /*.js
+            Content-Type: application/javascript; charset=utf-8
+
+          # JSX/TSX files
+          /*.jsx
+            Content-Type: application/javascript; charset=utf-8
+          /*.tsx
             Content-Type: application/javascript; charset=utf-8
 
           # JSON files  
@@ -65,13 +71,74 @@ jobs:
           # Favicon specific rule
           /favicon.ico
             Cache-Control: public, max-age=604800
-            Access-Control-Allow-Origin: *
             Content-Type: image/x-icon
           EOF
           
-          echo "Creating fallback entry points"
-          cp src/main.js dist/main.js
-          cp src/main.jsx dist/main.jsx
+          echo "Creating .htaccess for Apache servers"
+          cat > dist/.htaccess << EOF
+          # Serve JavaScript files with the correct MIME type
+          AddType application/javascript .js .mjs .jsx .tsx
+          
+          # Enable CORS for all assets
+          Header set Access-Control-Allow-Origin "*"
+          
+          # Rewrite rules for SPA routing
+          RewriteEngine On
+          RewriteBase /
+          RewriteRule ^index\.html$ - [L]
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteCond %{REQUEST_FILENAME} !-d
+          RewriteRule . /index.html [L]
+          EOF
+          
+          echo "Creating a web.config file for IIS servers"
+          cat > dist/web.config << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <configuration>
+            <system.webServer>
+              <staticContent>
+                <remove fileExtension=".js" />
+                <mimeMap fileExtension=".js" mimeType="application/javascript" />
+                <remove fileExtension=".jsx" />
+                <mimeMap fileExtension=".jsx" mimeType="application/javascript" />
+                <remove fileExtension=".tsx" />
+                <mimeMap fileExtension=".tsx" mimeType="application/javascript" />
+                <remove fileExtension=".json" />
+                <mimeMap fileExtension=".json" mimeType="application/json" />
+                <remove fileExtension=".ico" />
+                <mimeMap fileExtension=".ico" mimeType="image/x-icon" />
+              </staticContent>
+              <rewrite>
+                <rules>
+                  <rule name="SPA Routes" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="/" />
+                  </rule>
+                </rules>
+              </rewrite>
+            </system.webServer>
+          </configuration>
+          EOF
+          
+          echo "Copying fallback entry points to dist"
+          cp src/main.js dist/
+          
+          echo "Creating simple compatibility script in dist root"
+          cat > dist/compat.js << EOF
+          // Compatibility script for older browsers
+          (function() {
+            console.log('Loading compatibility script');
+            document.getElementById('root').innerHTML = '<div style="text-align:center;padding:20px"><h1>Carregando...</h1></div>';
+            var script = document.createElement('script');
+            script.src = '/main.js';
+            script.type = 'text/javascript';
+            document.body.appendChild(script);
+          })();
+          EOF
 
       - name: Copy CNAME to dist
         run: |
@@ -102,3 +169,8 @@ jobs:
           branch: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
           clean: true
+          
+      - name: Test URLs after deployment
+        run: |
+          echo "Deployment complete. The site should be live at https://planodeparto.energiamaterna.com.br"
+          echo "Remember to verify that MIME types are being set correctly in the GitHub Pages environment"

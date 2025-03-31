@@ -45,11 +45,14 @@ export default defineConfig(({ mode }) => ({
     open: true,
     // Add historyApiFallback for SPA routing during development
     historyApiFallback: true,
+    headers: {
+      // Set correct MIME types during development
+      'Content-Type': 'application/javascript'
+    }
   },
   plugins: [
     react({
-      // Use standard configuration options without the jsxRuntime or fastRefresh
-      // which are causing type errors
+      // Use standard configuration without custom options that cause errors
     }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
@@ -67,19 +70,28 @@ export default defineConfig(({ mode }) => ({
         drop_debugger: true,
       }
     },
-    // Set up output handling for both module and non-module code
+    // Set up legacy output format for maximum compatibility
+    target: 'es2015',
     rollupOptions: {
       output: {
-        format: 'es',
+        format: 'iife', // Use IIFE format for better browser compatibility
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]',
-        // Ensure proper handling of modules and non-modules
-        intro: `
-          // Fallback for browsers without module support
-          const isModern = typeof document !== "undefined" && "noModule" in HTMLScriptElement.prototype;
-          console.log("Build running with isModern:", isModern);
-        `
+        // Generate legacy entry points
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-tabs',
+            'lucide-react'
+          ]
+        },
+        // Ensure correct global variable access
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM'
+        }
       },
       external: [
         /\/favicon\.ico$/
@@ -112,5 +124,13 @@ export default defineConfig(({ mode }) => ({
     // Add JSX factory for React 17+ compatibility
     jsxFactory: 'React.createElement',
     jsxFragment: 'React.Fragment'
+  },
+  // Set proper MIME types for all JavaScript files in the build
+  preview: {
+    headers: {
+      '*.js': {
+        'Content-Type': 'application/javascript'
+      }
+    }
   }
 }));

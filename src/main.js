@@ -1,16 +1,19 @@
 
-// Fallback entry point for browsers that don't support ES modules
-console.log('Using fallback main.js entry point (non-module version)');
+// Non-module entry point for maximum browser compatibility
+(function() {
+  console.log('Using main.js entry point (non-module version)');
 
-// Flag to prevent double initialization
-window.__MAIN_EXECUTED = window.__MAIN_EXECUTED || false;
+  // Flag to prevent double initialization
+  window.__MAIN_EXECUTED = window.__MAIN_EXECUTED || false;
 
-// Skip if already executed
-if (window.__MAIN_EXECUTED) {
-  console.log("Main.js - Application already initialized");
-} else {
+  // Skip if already executed
+  if (window.__MAIN_EXECUTED) {
+    console.log("Main.js - Application already initialized");
+    return;
+  }
+  
   window.__MAIN_EXECUTED = true;
-  console.log("Main.js - Initializing application using fallback script");
+  console.log("Main.js - Initializing application using standard script");
   
   // Make sure React and ReactDOM are available globally
   if (!window.React || !window.ReactDOM) {
@@ -22,16 +25,16 @@ if (window.__MAIN_EXECUTED) {
     reactScript.onload = function() {
       var reactDOMScript = document.createElement('script');
       reactDOMScript.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
-      reactDOMScript.onload = renderFallbackApp;
+      reactDOMScript.onload = renderApp;
       document.body.appendChild(reactDOMScript);
     };
     document.body.appendChild(reactScript);
   } else {
     // React is available, render the app
-    renderFallbackApp();
+    renderApp();
   }
   
-  function renderFallbackApp() {
+  function renderApp() {
     var rootElement = document.getElementById('root');
     
     if (!rootElement) {
@@ -45,40 +48,51 @@ if (window.__MAIN_EXECUTED) {
     }
     
     try {
-      // Simple fallback app using global React
-      var React = window.React;
-      var ReactDOM = window.ReactDOM;
-      
-      // Simple component just to show loading
-      var App = function() {
-        return React.createElement('div', {
-            style: {
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              maxWidth: '600px',
-              margin: '0 auto',
-              padding: '2rem',
-              textAlign: 'center'
-            }
-          },
-          React.createElement('h1', null, 'Carregando Guia de Plano de Parto'),
-          React.createElement('p', null, 'Por favor, aguarde enquanto carregamos o conteúdo.'),
-          React.createElement('p', null, 
-            React.createElement('a', { href: '/' }, 'Recarregar página')
-          )
-        );
-      };
-      
-      // Render using ReactDOM
-      var root = ReactDOM.createRoot(rootElement);
-      root.render(React.createElement(App, null));
-      
-      console.log("Main.js - Fallback app rendered successfully");
-      
-      // Try to redirect to a more compatible version after a short delay
-      setTimeout(function() {
-        window.location.href = '/?legacy=true';
-      }, 5000);
-      
+      // Load React Router and other dependencies
+      loadReactRouter(function() {
+        // Main App component rendered with React 18 createRoot
+        var root = ReactDOM.createRoot(rootElement);
+        
+        // Simple App component
+        function App() {
+          // Get HashRouter, Routes and Route from React Router DOM
+          var HashRouter = ReactRouterDOM.HashRouter;
+          var Routes = ReactRouterDOM.Routes;
+          var Route = ReactRouterDOM.Route;
+          var Navigate = ReactRouterDOM.Navigate;
+          
+          return React.createElement(HashRouter, null,
+            React.createElement(Routes, null,
+              React.createElement(Route, { path: "/", element: React.createElement(Navigate, { to: "/guia-online", replace: true }) }),
+              React.createElement(Route, { path: "*", element: 
+                React.createElement('div', { style: { padding: '2rem', textAlign: 'center' } },
+                  React.createElement('h1', null, 'Carregando conteúdo...'),
+                  React.createElement('p', null, 'Por favor aguarde enquanto carregamos o conteúdo.'),
+                  React.createElement('p', null, 
+                    React.createElement('a', { href: '/' }, 'Recarregar página')
+                  )
+                )
+              })
+            )
+          );
+        }
+        
+        // Render the App
+        root.render(React.createElement(App));
+        console.log("Main.js - Initial app rendered successfully");
+        
+        // Now load the full app bundle
+        var mainScript = document.createElement('script');
+        mainScript.src = '/assets/index.js';
+        mainScript.type = 'text/javascript';
+        mainScript.onload = function() {
+          console.log("Main.js - Full application bundle loaded");
+        };
+        mainScript.onerror = function(err) {
+          console.error("Main.js - Error loading full app bundle:", err);
+        };
+        document.body.appendChild(mainScript);
+      });
     } catch (err) {
       console.error("Main.js - Error rendering application:", err);
       if (rootElement) {
@@ -86,4 +100,24 @@ if (window.__MAIN_EXECUTED) {
       }
     }
   }
-}
+  
+  // Helper to load React Router
+  function loadReactRouter(callback) {
+    if (window.ReactRouterDOM) {
+      callback();
+      return;
+    }
+    
+    var routerScript = document.createElement('script');
+    routerScript.src = 'https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js';
+    routerScript.onload = callback;
+    routerScript.onerror = function() {
+      console.error("Failed to load React Router");
+      var rootElement = document.getElementById('root');
+      if (rootElement) {
+        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h1>Erro ao carregar</h1><p>Não foi possível carregar as dependências necessárias.</p><p><a href="/">Tentar novamente</a></p></div>';
+      }
+    };
+    document.body.appendChild(routerScript);
+  }
+})();
