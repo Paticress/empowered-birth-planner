@@ -52,19 +52,62 @@ console.log("Compat-entry.js - Loading compatibility mode");
   function loadReactRouter() {
     if (!window.ReactRouterDOM) {
       loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
-        loadMainScript();
+        loadAppContent();
       });
     } else {
-      loadMainScript();
+      loadAppContent();
     }
   }
   
-  // Load the main script
-  function loadMainScript() {
+  // Load the application content
+  function loadAppContent() {
     try {
-      // Load a non-module version of the main app
-      loadScript('/src/main.js', function() {
-        console.log("Compat-entry.js - Successfully loaded main.js");
+      // Create a basic app with React Router
+      const rootElement = document.getElementById('root');
+      if (!rootElement) {
+        console.error("Root element not found");
+        return;
+      }
+      
+      // Create a simple fallback app
+      const SimpleApp = function() {
+        return React.createElement(ReactRouterDOM.HashRouter, null,
+          React.createElement(ReactRouterDOM.Routes, null,
+            React.createElement(ReactRouterDOM.Route, { 
+              path: "/", 
+              element: React.createElement(ReactRouterDOM.Navigate, { to: "/guia-online", replace: true }) 
+            }),
+            React.createElement(ReactRouterDOM.Route, { 
+              path: "/guia-online", 
+              element: React.createElement('div', { className: "text-center p-8" },
+                React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Guia de Plano de Parto"),
+                React.createElement('p', null, "Carregando conteúdo..."),
+                React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
+              )
+            }),
+            React.createElement(ReactRouterDOM.Route, { 
+              path: "*", 
+              element: React.createElement('div', { className: "text-center p-8" },
+                React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Página não encontrada"),
+                React.createElement('a', { href: "/", className: "text-blue-500" }, "Ir para página inicial")
+              )
+            })
+          )
+        );
+      };
+      
+      // Render the simple app
+      if (ReactDOM.createRoot) {
+        ReactDOM.createRoot(rootElement).render(React.createElement(SimpleApp));
+      } else {
+        ReactDOM.render(React.createElement(SimpleApp), rootElement);
+      }
+      
+      console.log("Compat-entry.js - Basic application rendered");
+      
+      // Try to load the full app script
+      loadScript('/src/App.js', function() {
+        console.log("Compat-entry.js - App.js loaded successfully");
       });
     } catch (error) {
       console.error("Compat-entry.js - Critical error:", error);

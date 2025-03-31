@@ -1,3 +1,4 @@
+
 // App.js - Non-module bridge file
 (function() {
   try {
