@@ -71,76 +71,126 @@
     <!-- GPT Engineer Script -->
     <script src="https://cdn.gpteng.co/gptengineer.js"></script>
     
-    <!-- Load React and ReactDOM from CDN with crossorigin attribute and integrity hashes -->
-    <script crossorigin integrity="sha384-SqvWu5XoWgG+BUgKqzjXbA18ZYPBOEAOPsFnqHWv9rJ5j+D8fnv/fEivGNKMYCBX" src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin integrity="sha384-FghQNVzrAOeJpFva69GLDNbDnNgEFOJCzL3oGdxV0OuToBeDeBsjAYvZI2CR7QJdG" src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Preload key dependencies with integrity checks and crossorigin -->
+    <link rel="preload" href="https://unpkg.com/react@18/umd/react.production.min.js" as="script" crossorigin>
+    <link rel="preload" href="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" as="script" crossorigin>
+    <link rel="preload" href="https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js" as="script" crossorigin>
     
-    <!-- Load React Router with crossorigin attribute -->
-    <script crossorigin src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js"></script>
-    
-    <!-- Global window error handler for better error catchment -->
+    <!-- Load React and ReactDOM locally with fallbacks to CDN -->
     <script>
-      window.__APP_ERRORS = [];
-      window.addEventListener('error', function(event) {
-        console.error('Global error caught:', event);
-        window.__APP_ERRORS.push({
-          message: event.message,
-          source: event.filename,
-          timestamp: new Date().toISOString()
-        });
-        
-        if (event.message && (
-            event.message.includes('module') || 
-            event.message.includes('MIME') || 
-            event.message.includes('CORS') ||
-            event.message.includes('script error')
-          )) {
-          console.warn('Script/Module error detected, activating compatibility mode');
-          loadCompatibilityScript();
-        }
-      });
-      
-      // Load the compatibility script
-      function loadCompatibilityScript() {
-        if (window.__COMPAT_LOADED) return;
-        window.__COMPAT_LOADED = true;
-        
-        console.log("Loading compatibility script for maximum browser support");
+      // Create a function to load script with fallback
+      function loadScriptWithFallback(primarySrc, fallbackSrc, id, callback) {
         const script = document.createElement('script');
-        script.src = '/src/compat-entry.js';
+        script.src = primarySrc;
+        script.id = id;
+        script.crossOrigin = "anonymous";
+        script.onload = callback;
         script.onerror = function() {
-          document.getElementById('root').innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Erro ao carregar</h2><p>Não foi possível carregar recursos necessários.</p><a href="/" style="color: blue;">Tentar novamente</a></div>';
+          console.warn(`Failed to load ${primarySrc}, trying fallback`);
+          const fallback = document.createElement('script');
+          fallback.src = fallbackSrc;
+          fallback.id = id + "-fallback";
+          fallback.crossOrigin = "anonymous";
+          fallback.onload = callback;
+          fallback.onerror = function() {
+            console.error(`Failed to load both ${primarySrc} and ${fallbackSrc}`);
+          };
+          document.body.appendChild(fallback);
         };
         document.body.appendChild(script);
+        return script;
       }
       
-      // Try standard module, then fallback to compatibility script
-      const moduleSupport = 'noModule' in document.createElement('script');
+      // Track loaded dependencies
+      window.__DEPS_LOADED = {
+        react: false,
+        reactDom: false,
+        reactRouter: false
+      };
       
-      if (moduleSupport) {
-        try {
-          // Load the main module script
-          const moduleScript = document.createElement('script');
-          moduleScript.type = 'module';
-          moduleScript.src = '/src/main.js';
-          moduleScript.onerror = function(error) {
-            console.warn('Module script error, trying main.jsx fallback', error);
-            const fallbackModule = document.createElement('script');
-            fallbackModule.type = 'module';
-            fallbackModule.src = '/src/main.jsx';
-            fallbackModule.onerror = loadCompatibilityScript;
-            document.body.appendChild(fallbackModule);
+      // Check if all dependencies are loaded and init the app
+      function checkDepsAndInit() {
+        if (window.__DEPS_LOADED.react && window.__DEPS_LOADED.reactDom && window.__DEPS_LOADED.reactRouter) {
+          // All dependencies loaded, load main app
+          console.log("All dependencies loaded, initializing app");
+          const mainScript = document.createElement('script');
+          mainScript.type = "module";
+          mainScript.src = "/src/main.js";
+          mainScript.onerror = function() {
+            console.warn("Module script failed, trying non-module version");
+            const nonModule = document.createElement('script');
+            nonModule.src = "/src/compat-entry.js";
+            document.body.appendChild(nonModule);
           };
-          document.body.appendChild(moduleScript);
-        } catch (e) {
-          console.warn('Module syntax error, falling back to compatibility mode:', e);
-          loadCompatibilityScript();
+          document.body.appendChild(mainScript);
         }
-      } else {
-        // Browser doesn't support modules, load compatibility version
-        console.warn('This browser does not support ES modules, loading compatibility script');
-        loadCompatibilityScript();
       }
+      
+      // Load React
+      loadScriptWithFallback(
+        "https://unpkg.com/react@18/umd/react.production.min.js",
+        "https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js",
+        "react-script",
+        function() {
+          window.__DEPS_LOADED.react = true;
+          checkDepsAndInit();
+        }
+      );
+      
+      // Load ReactDOM
+      loadScriptWithFallback(
+        "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
+        "https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js",
+        "react-dom-script",
+        function() {
+          window.__DEPS_LOADED.reactDom = true;
+          checkDepsAndInit();
+        }
+      );
+      
+      // Load React Router (the problematic one from the error)
+      loadScriptWithFallback(
+        "https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js",
+        "https://cdn.jsdelivr.net/npm/react-router-dom@6/umd/react-router-dom.production.min.js",
+        "react-router-script",
+        function() {
+          window.__DEPS_LOADED.reactRouter = true;
+          checkDepsAndInit();
+        }
+      );
+      
+      // Fallback if scripts fail to load or take too long
+      setTimeout(function() {
+        if (!window.__DEPS_LOADED.react || !window.__DEPS_LOADED.reactDom || !window.__DEPS_LOADED.reactRouter) {
+          console.warn("Dependencies taking too long to load, using compatibility mode");
+          const compat = document.createElement('script');
+          compat.src = "/src/compat-entry.js";
+          document.body.appendChild(compat);
+        }
+      }, 5000);
+    </script>
+    
+    <!-- Global error handler -->
+    <script>
+      window.addEventListener('error', function(event) {
+        console.error('Global error caught:', event.message);
+        
+        // Look for specific CORS and module errors
+        if (event.message && (
+            event.message.includes('CORS') || 
+            event.message.includes('module') || 
+            event.message.includes('import')
+          )) {
+          console.warn('CORS or module error detected, loading compatibility version');
+          
+          // Only load compat if not already loaded
+          if (!window.__COMPAT_ENTRY_LOADED) {
+            const compat = document.createElement('script');
+            compat.src = '/src/compat-entry.js';
+            document.body.appendChild(compat);
+          }
+        }
+      });
     </script>
   </body>
 </html>

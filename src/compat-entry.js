@@ -11,7 +11,7 @@ console.log("Compat-entry.js - Loading compatibility mode");
   
   window.__COMPAT_ENTRY_LOADED = true;
   
-  // Helper function to load scripts sequentially
+  // Helper function to load scripts sequentially with fallbacks
   function loadScript(src, callback) {
     console.log("Compat-entry.js - Loading script:", src);
     const script = document.createElement('script');
@@ -27,8 +27,8 @@ console.log("Compat-entry.js - Loading compatibility mode");
   
   // Try alternative CDN if primary fails
   function tryAlternativeSource(src, callback) {
+    // First try jsdelivr as alternative
     if (src.includes('unpkg.com')) {
-      // Try jsdelivr as alternative
       const altSrc = src.replace('unpkg.com', 'cdn.jsdelivr.net/npm');
       console.log("Compat-entry.js - Trying alternative source:", altSrc);
       const script = document.createElement('script');
@@ -36,7 +36,21 @@ console.log("Compat-entry.js - Loading compatibility mode");
       script.crossOrigin = "anonymous";
       script.onload = callback;
       script.onerror = function() {
-        console.error("Compat-entry.js - Alternative source also failed");
+        console.error("Compat-entry.js - Alternative CDN also failed");
+        
+        // As last resort, try loading from local /assets directory if available
+        if (src.includes('react@18') || src.includes('react-dom@18') || src.includes('react-router-dom@6')) {
+          const filename = src.split('/').pop();
+          const localSrc = `/assets/${filename}`;
+          console.log("Compat-entry.js - Trying local source:", localSrc);
+          const localScript = document.createElement('script');
+          localScript.src = localSrc;
+          localScript.onload = callback;
+          localScript.onerror = function() {
+            console.error("Compat-entry.js - All sources failed for:", src);
+          };
+          document.body.appendChild(localScript);
+        }
       };
       document.body.appendChild(script);
     }
@@ -56,12 +70,25 @@ console.log("Compat-entry.js - Loading compatibility mode");
     }
   }
   
+  // Function to check if a script is already loaded
+  function isScriptLoaded(globalVar) {
+    return typeof window[globalVar] !== 'undefined';
+  }
+  
   // First, ensure React and ReactDOM are available
-  if (!window.React || !window.ReactDOM) {
+  if (!isScriptLoaded('React')) {
     loadScript('https://unpkg.com/react@18/umd/react.production.min.js', function() {
-      loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js', function() {
+      if (!isScriptLoaded('ReactDOM')) {
+        loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js', function() {
+          loadReactRouter();
+        });
+      } else {
         loadReactRouter();
-      });
+      }
+    });
+  } else if (!isScriptLoaded('ReactDOM')) {
+    loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js', function() {
+      loadReactRouter();
     });
   } else {
     loadReactRouter();
@@ -69,7 +96,7 @@ console.log("Compat-entry.js - Loading compatibility mode");
   
   // Load React Router
   function loadReactRouter() {
-    if (!window.ReactRouterDOM) {
+    if (!isScriptLoaded('ReactRouterDOM')) {
       loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
         loadAppContent();
       });
@@ -109,6 +136,14 @@ console.log("Compat-entry.js - Loading compatibility mode");
               element: React.createElement('div', { className: "text-center p-8" },
                 React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Guia de Plano de Parto (Versão Incorporada)"),
                 React.createElement('p', null, "Carregando versão incorporada..."),
+                React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
+              )
+            }),
+            React.createElement(ReactRouterDOM.Route, { 
+              path: "/criar-plano", 
+              element: React.createElement('div', { className: "text-center p-8" },
+                React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Construtor de Plano de Parto"),
+                React.createElement('p', null, "Carregando construtor..."),
                 React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
               )
             }),
