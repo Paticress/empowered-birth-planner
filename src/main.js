@@ -19,22 +19,45 @@
   if (!window.React || !window.ReactDOM) {
     console.error("Main.js - React or ReactDOM not available globally");
     
-    // Try to load them dynamically
-    var reactScript = document.createElement('script');
-    reactScript.src = 'https://unpkg.com/react@18/umd/react.production.min.js';
-    reactScript.onload = function() {
-      var reactDOMScript = document.createElement('script');
-      reactDOMScript.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
-      reactDOMScript.onload = renderApp;
-      document.body.appendChild(reactDOMScript);
-    };
-    document.body.appendChild(reactScript);
+    // Load React and ReactDOM from CDN
+    loadScript('https://unpkg.com/react@18/umd/react.production.min.js', function() {
+      loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js', function() {
+        loadReactDependencies();
+      });
+    });
   } else {
-    // React is available, render the app
-    renderApp();
+    loadReactDependencies();
+  }
+  
+  // Load React dependencies (Router, etc.)
+  function loadReactDependencies() {
+    if (window.ReactRouterDOM) {
+      renderApp();
+    } else {
+      loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
+        renderApp();
+      });
+    }
+  }
+  
+  // Utility to load scripts
+  function loadScript(src, callback) {
+    var script = document.createElement('script');
+    script.src = src;
+    script.onload = callback;
+    script.onerror = function(error) {
+      console.error('Failed to load script:', src, error);
+      // Show error message to user
+      var rootElement = document.getElementById('root');
+      if (rootElement) {
+        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h1>Erro ao carregar</h1><p>Não foi possível carregar recursos necessários.</p><p><a href="/">Tentar novamente</a></p></div>';
+      }
+    };
+    document.body.appendChild(script);
   }
   
   function renderApp() {
+    console.log("Main.js - All dependencies loaded, rendering app");
     var rootElement = document.getElementById('root');
     
     if (!rootElement) {
@@ -48,51 +71,52 @@
     }
     
     try {
-      // Load React Router and other dependencies
-      loadReactRouter(function() {
-        // Main App component rendered with React 18 createRoot
-        var root = ReactDOM.createRoot(rootElement);
+      // Simple App component
+      function App() {
+        // Get HashRouter, Routes and Route from React Router DOM
+        var HashRouter = ReactRouterDOM.HashRouter;
+        var Routes = ReactRouterDOM.Routes;
+        var Route = ReactRouterDOM.Route;
+        var Navigate = ReactRouterDOM.Navigate;
         
-        // Simple App component
-        function App() {
-          // Get HashRouter, Routes and Route from React Router DOM
-          var HashRouter = ReactRouterDOM.HashRouter;
-          var Routes = ReactRouterDOM.Routes;
-          var Route = ReactRouterDOM.Route;
-          var Navigate = ReactRouterDOM.Navigate;
-          
-          return React.createElement(HashRouter, null,
-            React.createElement(Routes, null,
-              React.createElement(Route, { path: "/", element: React.createElement(Navigate, { to: "/guia-online", replace: true }) }),
-              React.createElement(Route, { path: "*", element: 
-                React.createElement('div', { style: { padding: '2rem', textAlign: 'center' } },
-                  React.createElement('h1', null, 'Carregando conteúdo...'),
-                  React.createElement('p', null, 'Por favor aguarde enquanto carregamos o conteúdo.'),
-                  React.createElement('p', null, 
-                    React.createElement('a', { href: '/' }, 'Recarregar página')
-                  )
+        return React.createElement(HashRouter, null,
+          React.createElement(Routes, null,
+            React.createElement(Route, { path: "/", element: React.createElement(Navigate, { to: "/guia-online", replace: true }) }),
+            React.createElement(Route, { path: "/guia-online", element: 
+              React.createElement('div', { className: "text-center py-8 px-4" },
+                React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Guia de Plano de Parto"),
+                React.createElement('p', { className: "mb-4" }, "Carregando conteúdo..."),
+                React.createElement('div', { className: "w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin mx-auto" })
+              )
+            }),
+            React.createElement(Route, { path: "*", element: 
+              React.createElement('div', { style: { padding: '2rem', textAlign: 'center' } },
+                React.createElement('h1', null, 'Página não encontrada'),
+                React.createElement('p', null, 'A página que você está procurando não existe.'),
+                React.createElement('p', null, 
+                  React.createElement('a', { href: '/', style: { color: '#0066ff', textDecoration: 'none' } }, 'Voltar para a página inicial')
                 )
-              })
-            )
-          );
-        }
-        
-        // Render the App
+              )
+            })
+          )
+        );
+      }
+      
+      // Use React 18's createRoot API if available, fallback to older render method
+      if (ReactDOM.createRoot) {
+        var root = ReactDOM.createRoot(rootElement);
         root.render(React.createElement(App));
-        console.log("Main.js - Initial app rendered successfully");
-        
-        // Now load the full app bundle
-        var mainScript = document.createElement('script');
-        mainScript.src = '/assets/index.js';
-        mainScript.type = 'text/javascript';
-        mainScript.onload = function() {
-          console.log("Main.js - Full application bundle loaded");
-        };
-        mainScript.onerror = function(err) {
-          console.error("Main.js - Error loading full app bundle:", err);
-        };
-        document.body.appendChild(mainScript);
-      });
+      } else {
+        // Fallback for older browsers
+        ReactDOM.render(React.createElement(App), rootElement);
+      }
+      
+      console.log("Main.js - Initial app rendered successfully");
+      
+      // Now try to load the full app bundle
+      setTimeout(function() {
+        loadFullAppBundle();
+      }, 500);
     } catch (err) {
       console.error("Main.js - Error rendering application:", err);
       if (rootElement) {
@@ -101,23 +125,27 @@
     }
   }
   
-  // Helper to load React Router
-  function loadReactRouter(callback) {
-    if (window.ReactRouterDOM) {
-      callback();
-      return;
+  // Load the full application bundle
+  function loadFullAppBundle() {
+    try {
+      // First try to load as module
+      var moduleScript = document.createElement('script');
+      moduleScript.src = '/src/main.jsx';
+      moduleScript.type = 'module';
+      moduleScript.onerror = function() {
+        console.log("Main.js - Failed to load as module, trying non-module version");
+        // Fallback to non-module version
+        var script = document.createElement('script');
+        script.src = '/assets/index.js';
+        script.type = 'text/javascript';
+        script.onerror = function() {
+          console.error("Main.js - Failed to load full app bundle");
+        };
+        document.body.appendChild(script);
+      };
+      document.body.appendChild(moduleScript);
+    } catch (error) {
+      console.error("Main.js - Error loading full app bundle:", error);
     }
-    
-    var routerScript = document.createElement('script');
-    routerScript.src = 'https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js';
-    routerScript.onload = callback;
-    routerScript.onerror = function() {
-      console.error("Failed to load React Router");
-      var rootElement = document.getElementById('root');
-      if (rootElement) {
-        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h1>Erro ao carregar</h1><p>Não foi possível carregar as dependências necessárias.</p><p><a href="/">Tentar novamente</a></p></div>';
-      }
-    };
-    document.body.appendChild(routerScript);
   }
 })();

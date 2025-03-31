@@ -31,9 +31,6 @@
       }(window.location))
     </script>
     
-    <!-- Preload critical scripts to improve loading performance -->
-    <link rel="preload" href="/src/main.js" as="script" />
-    
     <!-- Critical CSS inline for faster render -->
     <style>
       /* Minimal styling for initial render */
@@ -69,32 +66,26 @@
     <!-- GPT Engineer Script -->
     <script src="https://cdn.gpteng.co/gptengineer.js"></script>
     
+    <!-- Compatibility Script - Load this first to handle any module errors -->
+    <script src="/src/compat-entry.js"></script>
+    
     <!-- React and ReactDOM for non-module fallback -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js" crossorigin></script>
     
-    <!-- Primary script loader with feature detection -->
-    <script>
-      // Flag to prevent double initialization
-      window.__INITIALIZATION_STARTED = false;
-      
-      function loadApp() {
-        if (window.__INITIALIZATION_STARTED) return;
-        window.__INITIALIZATION_STARTED = true;
-        
-        // For browsers without module support, load traditional scripts
-        var script = document.createElement('script');
-        script.src = '/src/main.js';
-        script.type = 'text/javascript';
-        script.onerror = function(error) {
-          console.error('Error loading main script:', error);
-          document.getElementById('root').innerHTML = '<div class="loading"><p>Erro ao carregar. <a href="/">Tente novamente</a></p></div>';
-        };
-        document.body.appendChild(script);
+    <!-- Modern browsers - try to use the module version -->
+    <script type="module">
+      try {
+        import('./src/main.jsx')
+          .catch(error => {
+            console.error('Error importing module:', error);
+            // Already handled by compat-entry.js
+          });
+      } catch (e) {
+        console.error('Module syntax error:', e);
+        // Already handled by compat-entry.js
       }
-      
-      // Execute immediately
-      loadApp();
     </script>
   </body>
 </html>

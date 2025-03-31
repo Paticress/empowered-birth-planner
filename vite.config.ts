@@ -123,7 +123,7 @@ export default defineConfig(({ mode }) => ({
     jsxFactory: 'React.createElement',
     jsxFragment: 'React.Fragment'
   },
-  // Fix the preview headers to use the correct type format
+  // Fix the preview headers
   preview: {
     headers: {
       'Content-Type': 'application/javascript'

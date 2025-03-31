@@ -12,42 +12,45 @@ if (typeof window !== 'undefined') {
   window.__MAIN_EXECUTED = window.__MAIN_EXECUTED || false;
 }
 
-// Enhanced error handling
-if (typeof window !== 'undefined') {
-  window.onerror = function(message, source, lineno, colno, error) {
-    console.error('Global error caught:', { message, source, lineno, colno, error });
+// Improved error handling function
+function handleGlobalError(message, source, lineno, colno, error) {
+  console.error('Global error caught:', { message, source, lineno, colno, error });
+  
+  // Check if we're getting module-related errors
+  if (typeof message === 'string' && 
+      (message.includes('import.meta') || 
+       message.includes('module') || 
+       message.includes('MIME'))) {
     
-    // Check if we're getting module-related errors
-    if (typeof message === 'string' && 
-        (message.includes('import.meta') || 
-         message.includes('module') || 
-         message.includes('MIME'))) {
-      
-      console.warn('Module/MIME error detected, falling back to compatibility mode');
-      
-      // Create a message in the root element
-      const rootEl = document.getElementById('root');
-      if (rootEl) {
-        rootEl.innerHTML = `
-          <div style="text-align: center; padding: 20px;">
-            <h2>Carregando em modo alternativo...</h2>
-            <p>Aguarde um momento enquanto carregamos a aplicação.</p>
-          </div>
-        `;
-      }
-      
-      // Load the compatibility script
-      const script = document.createElement('script');
-      script.src = '/src/main.js';
-      script.type = 'text/javascript';
-      document.body.appendChild(script);
-      
-      // Prevent further execution of this script
-      return true;
+    console.warn('Module/MIME error detected, falling back to compatibility mode');
+    
+    // Create a message in the root element
+    const rootEl = document.getElementById('root');
+    if (rootEl) {
+      rootEl.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+          <h2>Carregando em modo alternativo...</h2>
+          <p>Aguarde um momento enquanto carregamos a aplicação.</p>
+        </div>
+      `;
     }
     
-    return false;
-  };
+    // Load the compatibility script
+    const script = document.createElement('script');
+    script.src = '/src/compat-entry.js';
+    script.type = 'text/javascript';
+    document.body.appendChild(script);
+    
+    // Prevent further execution of this script
+    return true;
+  }
+  
+  return false;
+}
+
+// Set up global error handler
+if (typeof window !== 'undefined') {
+  window.onerror = handleGlobalError;
 }
 
 // Main app initialization
@@ -93,7 +96,7 @@ if (typeof window !== 'undefined' && !window.__MAIN_EXECUTED) {
       
       // Load the fallback script
       const fallbackScript = document.createElement('script');
-      fallbackScript.src = '/src/main.js';
+      fallbackScript.src = '/src/compat-entry.js';
       fallbackScript.type = 'text/javascript';
       document.body.appendChild(fallbackScript);
     }
