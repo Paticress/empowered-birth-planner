@@ -1,3 +1,4 @@
+
 // Enhanced CORS proxy script that intercepts problematic requests
 (function() {
   console.log("[CORS Proxy] Enhanced proxy helper loaded");
@@ -10,7 +11,8 @@
     'unpkg.com',
     'cdn.jsdelivr.net',
     'esm.sh',
-    'cdnjs.cloudflare.com'
+    'cdnjs.cloudflare.com',
+    'react-router-dom'
   ];
   
   // List of CORS proxy URLs to try in sequence
@@ -27,10 +29,21 @@
   const fetchWithProxy = async (url, init, proxyIndex = 0) => {
     if (proxyIndex >= corsProxies.length) {
       console.error("[CORS Proxy] All proxies failed for URL:", url);
-      return originalFetch(url, init).catch(error => {
-        console.error("[CORS Proxy] Original fetch also failed:", error);
+      
+      // Last resort: try without proxy but with modified headers
+      try {
+        const modifiedInit = { ...init };
+        if (!modifiedInit.headers) modifiedInit.headers = {};
+        modifiedInit.headers['X-Requested-With'] = 'XMLHttpRequest';
+        modifiedInit.mode = 'cors';
+        modifiedInit.credentials = 'omit';
+        
+        console.log("[CORS Proxy] Trying direct request with modified headers");
+        return originalFetch(url, modifiedInit);
+      } catch (error) {
+        console.error("[CORS Proxy] Modified direct request also failed:", error);
         throw error;
-      });
+      }
     }
     
     const proxyUrl = corsProxies[proxyIndex] + encodeURIComponent(url);
@@ -137,6 +150,31 @@
     
     return script;
   };
+  
+  // Directly inject React Router DOM if needed
+  if (typeof window.ReactRouterDOM === 'undefined') {
+    console.log("[CORS Proxy] ReactRouterDOM not found, attempting to inject it");
+    
+    // Create a simple version that will prevent errors until the real one loads
+    window.ReactRouterDOM = {
+      HashRouter: function(props) { return props.children || null; },
+      Routes: function(props) { return props.children || null; },
+      Route: function() { return null; },
+      Navigate: function() { return null; },
+      Link: function(props) { return props.children || null; },
+      useNavigate: function() { return function() {}; },
+      useParams: function() { return {}; },
+      useLocation: function() { return { pathname: '/' }; }
+    };
+    
+    // Try to load the real one
+    setTimeout(() => {
+      const script = document.createElement('script');
+      script.src = '/assets/react-cdn-fallback.js';
+      script.onload = () => console.log("[CORS Proxy] Loaded React Router fallback");
+      document.head.appendChild(script);
+    }, 100);
+  }
   
   console.log("[CORS Proxy] Fetch and XHR have been patched to handle CORS issues");
 })();
