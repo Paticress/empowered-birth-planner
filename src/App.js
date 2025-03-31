@@ -1,4 +1,3 @@
-
 // App.js - Non-module bridge file
 (function() {
   try {
@@ -34,50 +33,28 @@
     }
     
     function loadAppContent() {
-      // The dynamic import needs to be modified to avoid build issues
+      // Load the main.jsx using type="module"
       console.log("App.js - Loading application content");
-      
-      // Load the App.tsx using a regular script approach instead of dynamic import
       var appScript = document.createElement('script');
       appScript.type = 'module';
       appScript.src = './src/main.jsx';
       
       appScript.onload = function() {
         console.log("App.js - Successfully loaded main.jsx");
-        
-        // Replace the simple app with the full app
-        const rootElement = document.getElementById('root');
-        if (rootElement && window.React && window.ReactDOM && window.App) {
-          console.log("App.js - Rendering full application");
-          try {
-            window.ReactDOM.createRoot(rootElement).render(window.React.createElement(window.App));
-            console.log("App.js - Full application rendered successfully");
-          } catch (renderError) {
-            console.error("App.js - Error rendering full application:", renderError);
-            fallbackToAppJs();
-          }
-        } else {
-          console.error("App.js - React, ReactDOM, App, or root element not available for full app render");
-          fallbackToAppJs();
-        }
       };
       
       appScript.onerror = function(error) {
         console.error("App.js - Failed to load main.jsx:", error);
-        fallbackToAppJs();
+        fallbackToCompatMode();
       };
       
       document.body.appendChild(appScript);
     }
     
-    function fallbackToAppJs() {
-      // Fall back to script tag
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = '/src/main.jsx';
-      script.onerror = function(error) {
-        console.error("App.js - Failed to load main.jsx:", error);
-      };
+    function fallbackToCompatMode() {
+      console.log("App.js - Falling back to compatibility mode");
+      var script = document.createElement('script');
+      script.src = '/src/compat-entry.js';
       document.body.appendChild(script);
     }
   } catch (outerError) {

@@ -73,20 +73,26 @@
     <!-- Load React Router with crossorigin attribute -->
     <script crossorigin src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js"></script>
     
-    <!-- Load application scripts -->
-    <script src="/src/main.js" type="text/javascript"></script>
+    <!-- Compatibility script for older browsers or environments with MIME issues -->
+    <script nomodule src="/src/compat-entry.js"></script>
     
-    <!-- Module version as enhancement with proper error handling -->
+    <!-- Module version with proper error handling -->
     <script type="module">
       try {
         import('./src/main.jsx')
           .catch(error => {
             console.warn('Error loading module version:', error);
-            // main.js fallback will handle rendering
+            // Fallback to compatibility script
+            const script = document.createElement('script');
+            script.src = '/src/compat-entry.js';
+            document.body.appendChild(script);
           });
       } catch (e) {
         console.warn('Module syntax error (expected in some browsers):', e);
-        // main.js fallback will handle rendering
+        // Load the compatibility version
+        const script = document.createElement('script');
+        script.src = '/src/compat-entry.js';
+        document.body.appendChild(script);
       }
     </script>
   </body>
