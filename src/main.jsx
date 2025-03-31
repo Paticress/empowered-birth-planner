@@ -2,7 +2,7 @@
 // This file serves as a module entry point for modern browsers
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import App from './App.tsx';  // Import from App.tsx instead of App.js
 import './index.css';
 
 // Make App available on the window for non-module loading

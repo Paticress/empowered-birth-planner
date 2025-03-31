@@ -84,3 +84,12 @@
     console.error("App.js - Critical error:", outerError);
   }
 })();
+
+// Create a placeholder App component for module imports
+const App = () => {
+  // This is a placeholder component that will be replaced by the real App.tsx
+  return null;
+};
+
+// Export the App component for ESM imports
+export default App;
