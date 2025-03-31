@@ -7,65 +7,79 @@
   Content-Security-Policy: frame-ancestors 'self' https://*.energiamaterna.com.br https://*.wixsite.com https://*.wix.com;
   Access-Control-Allow-Origin: *
   Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
-  Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization
+  Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Allow-Origin
   Access-Control-Allow-Credentials: true
+  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.js
   Content-Type: application/javascript; charset=utf-8
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
   Access-Control-Expose-Headers: Content-Type
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.mjs
   Content-Type: application/javascript; charset=utf-8
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
   Access-Control-Expose-Headers: Content-Type
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.jsx
   Content-Type: application/javascript; charset=utf-8
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
   Access-Control-Expose-Headers: Content-Type
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.tsx
   Content-Type: application/javascript; charset=utf-8
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
   Access-Control-Expose-Headers: Content-Type
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.ts
   Content-Type: application/javascript; charset=utf-8
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
   Access-Control-Expose-Headers: Content-Type
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.css
   Content-Type: text/css; charset=utf-8
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.json
   Content-Type: application/json; charset=utf-8
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.svg
   Content-Type: image/svg+xml; charset=utf-8
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.png
   Content-Type: image/png
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.jpg
   Content-Type: image/jpeg
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
+  Cross-Origin-Resource-Policy: cross-origin
 
 /*.ico
   Content-Type: image/x-icon
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
+  Cross-Origin-Resource-Policy: cross-origin
