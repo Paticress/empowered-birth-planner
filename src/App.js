@@ -34,43 +34,40 @@
     }
     
     function loadAppContent() {
-      // Use dynamic import if supported
-      if (typeof import === 'function') {
-        console.log("App.js - Using dynamic import");
+      // The dynamic import needs to be modified to avoid build issues
+      console.log("App.js - Loading application content");
+      
+      // Load the App.tsx using a regular script approach instead of dynamic import
+      var appScript = document.createElement('script');
+      appScript.type = 'module';
+      appScript.src = './src/main.jsx';
+      
+      appScript.onload = function() {
+        console.log("App.js - Successfully loaded main.jsx");
         
-        try {
-          import('./App.tsx')
-            .then(module => {
-              console.log("App.js - Successfully imported App.tsx");
-              const App = module.default;
-              
-              // Replace the simple app with the full app
-              const rootElement = document.getElementById('root');
-              if (rootElement && window.React && window.ReactDOM) {
-                console.log("App.js - Rendering full application");
-                try {
-                  window.ReactDOM.createRoot(rootElement).render(window.React.createElement(App));
-                  console.log("App.js - Full application rendered successfully");
-                } catch (renderError) {
-                  console.error("App.js - Error rendering full application:", renderError);
-                }
-              } else {
-                console.error("App.js - React, ReactDOM, or root element not available for full app render");
-              }
-            })
-            .catch(error => {
-              console.error("App.js - Failed to import App.tsx:", error);
-            });
-        } catch (importError) {
-          console.error("App.js - Error with dynamic import:", importError);
-          
-          // Fallback to script tag loading
+        // Replace the simple app with the full app
+        const rootElement = document.getElementById('root');
+        if (rootElement && window.React && window.ReactDOM && window.App) {
+          console.log("App.js - Rendering full application");
+          try {
+            window.ReactDOM.createRoot(rootElement).render(window.React.createElement(window.App));
+            console.log("App.js - Full application rendered successfully");
+          } catch (renderError) {
+            console.error("App.js - Error rendering full application:", renderError);
+            fallbackToAppJs();
+          }
+        } else {
+          console.error("App.js - React, ReactDOM, App, or root element not available for full app render");
           fallbackToAppJs();
         }
-      } else {
-        console.log("App.js - Dynamic import not supported, loading script directly");
+      };
+      
+      appScript.onerror = function(error) {
+        console.error("App.js - Failed to load main.jsx:", error);
         fallbackToAppJs();
-      }
+      };
+      
+      document.body.appendChild(appScript);
     }
     
     function fallbackToAppJs() {

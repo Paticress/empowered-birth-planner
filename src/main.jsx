@@ -5,6 +5,11 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
+// Make App available on the window for non-module loading
+if (typeof window !== 'undefined') {
+  window.App = App;
+}
+
 // Prevent double initialization
 if (window.__MAIN_JSX_EXECUTED) {
   console.log("Main.jsx - Application already initialized by module entry point");
