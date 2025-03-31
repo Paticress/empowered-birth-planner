@@ -53,7 +53,7 @@
         margin-top: 1rem;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index.C7RLQ_qm.js"></script>
+    <script async type="module" crossorigin src="/assets/index.l0sNRNKZ.js"></script>
   </head>
 
   <body>
@@ -67,16 +67,55 @@
     <!-- GPT Engineer Script -->
     <script src="https://cdn.gpteng.co/gptengineer.js"></script>
     
-    <!-- Load React and ReactDOM from CDN with crossorigin attribute -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Load React and ReactDOM from CDN with crossorigin attribute and integrity hashes -->
+    <script crossorigin integrity="sha384-SqvWu5XoWgG+BUgKqzjXbA18ZYPBOEAOPsFnqHWv9rJ5j+D8fnv/fEivGNKMYCBX" src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin integrity="sha384-FghQNVzrAOeJpFva69GLDNbDnNgEFOJCzL3oGdxV0OuToBeDeBsjAYvZI2CR7QJdG" src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
     <!-- Load React Router with crossorigin attribute -->
     <script crossorigin src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js"></script>
     
-    <!-- Compatibility script for older browsers or environments with MIME issues -->
-    <script nomodule src="/src/compat-entry.js"></script>
-    
-    <!-- Module version with proper error handling -->
+    <!-- Simple loader script to handle module loading issues -->
+    <script>
+      // Global error handler
+      window.addEventListener('error', function(event) {
+        console.error('Global error caught:', event);
+        if (event.message && (event.message.includes('module') || event.message.includes('MIME'))) {
+          console.warn('Module/MIME error detected, loading compatibility mode');
+          loadCompatibilityScript();
+        }
+      });
+      
+      // Load the compatibility script
+      function loadCompatibilityScript() {
+        if (window.__COMPAT_LOADED) return;
+        window.__COMPAT_LOADED = true;
+        
+        const script = document.createElement('script');
+        script.src = '/src/compat-entry.js';
+        script.onerror = function() {
+          document.getElementById('root').innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Erro ao carregar</h2><p>Não foi possível carregar recursos necessários.</p><a href="/" style="color: blue;">Tentar novamente</a></div>';
+        };
+        document.body.appendChild(script);
+      }
+      
+      // First try to load the module version
+      const moduleSupport = 'noModule' in document.createElement('script');
+      if (moduleSupport) {
+        try {
+          // Try to load the module version
+          const moduleScript = document.createElement('script');
+          moduleScript.type = 'module';
+          moduleScript.src = '/src/main.jsx';
+          moduleScript.onerror = loadCompatibilityScript;
+          document.body.appendChild(moduleScript);
+        } catch (e) {
+          console.warn('Module syntax error, falling back to compatibility mode');
+          loadCompatibilityScript();
+        }
+      } else {
+        // Browser doesn't support modules, load compatibility version
+        loadCompatibilityScript();
+      }
+    </script>
   </body>
 </html>

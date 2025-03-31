@@ -7,3 +7,8 @@
 /*.css   Content-Type: text/css
 /*.json  Content-Type: application/json
 /*.ico   Content-Type: image/x-icon
+
+# CORS headers for all routes
+/*     Access-Control-Allow-Origin: *
+/*     Access-Control-Allow-Methods: GET, POST, OPTIONS
+/*     Access-Control-Allow-Headers: Origin, Content-Type, Accept
