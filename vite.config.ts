@@ -79,10 +79,8 @@ export default defineConfig(({ mode }) => {
           entryFileNames: 'assets/[name].[hash].js',
           chunkFileNames: 'assets/[name].[hash].js',
           assetFileNames: 'assets/[name].[hash].[ext]',
-          // Remove manualChunks - it conflicts with inlineDynamicImports
-          // which may be implicitly enabled in some build configurations
-          // inlineDynamicImports: true,
-          // Ensure correct global variable access
+          // Completely remove any conflicting options
+          // Do not use manualChunks and inlineDynamicImports together
           globals: {
             react: 'React',
             'react-dom': 'ReactDOM'
