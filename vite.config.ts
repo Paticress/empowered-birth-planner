@@ -79,17 +79,9 @@ export default defineConfig(({ mode }) => {
           entryFileNames: 'assets/[name].[hash].js',
           chunkFileNames: 'assets/[name].[hash].js',
           assetFileNames: 'assets/[name].[hash].[ext]',
-          // Remove manualChunks if using inlineDynamicImports
-          // inlineDynamicImports: true is an implicit default in some builds
-          // so we need to fix the conflict by removing manualChunks
-          // manualChunks: {
-          //   vendor: ['react', 'react-dom', 'react-router-dom'],
-          //   ui: [
-          //     '@radix-ui/react-dialog',
-          //     '@radix-ui/react-tabs',
-          //     'lucide-react'
-          //   ]
-          // },
+          // Remove manualChunks - it conflicts with inlineDynamicImports
+          // which may be implicitly enabled in some build configurations
+          // inlineDynamicImports: true,
           // Ensure correct global variable access
           globals: {
             react: 'React',

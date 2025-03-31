@@ -14,15 +14,26 @@ if (window.__MAIN_EXECUTED) {
 
   // Initialize the application
   function initializeApp() {
-    const rootElement = document.getElementById('root');
-    if (rootElement) {
-      ReactDOM.createRoot(rootElement).render(
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
-      );
-    } else {
-      console.error('Root element not found!');
+    try {
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        console.log("Rendering application to DOM");
+        ReactDOM.createRoot(rootElement).render(
+          <React.StrictMode>
+            <App />
+          </React.StrictMode>
+        );
+        console.log("Application rendered successfully");
+      } else {
+        console.error('Root element not found!');
+      }
+    } catch (error) {
+      console.error("Error initializing application:", error);
+      // Display error message to user
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h1>Erro ao carregar</h1><p>Ocorreu um erro ao inicializar a aplicação</p></div>';
+      }
     }
   }
 
