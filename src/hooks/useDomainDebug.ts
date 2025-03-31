@@ -2,37 +2,41 @@
 import { useEffect } from 'react';
 
 /**
- * A hook to help debug domain/hosting issues
- * Logs useful information about the current environment
+ * Hook to log domain-related debugging information
+ * Helps diagnose routing and domain configuration issues
  */
 export const useDomainDebug = () => {
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      return; // Only run in production
-    }
-    
-    console.log('Domain Debug Information:');
-    console.log('URL:', window.location.href);
-    console.log('Protocol:', window.location.protocol);
-    console.log('Hostname:', window.location.hostname);
-    console.log('Pathname:', window.location.pathname);
-    console.log('Hash:', window.location.hash);
-    console.log('User Agent:', navigator.userAgent);
-    
-    // Check if we're on the custom domain
-    const isCustomDomain = window.location.hostname === 'planodeparto.energiamaterna.com.br';
-    console.log('Is Custom Domain:', isCustomDomain);
-    
-    // Check if service worker is supported
-    console.log('Service Worker Supported:', 'serviceWorker' in navigator);
-    
-    try {
-      // Test CORS with a simple fetch to own domain
-      fetch('/')
-        .then(() => console.log('Self-domain fetch succeeded'))
-        .catch(err => console.error('Self-domain fetch failed:', err));
-    } catch (error) {
-      console.error('Error in domain debug:', error);
+    // Only run in development or when a debug flag is set
+    if (process.env.NODE_ENV === 'development' || localStorage.getItem('debug') === 'true') {
+      console.group('Domain Debug Information');
+      console.log('Current URL:', window.location.href);
+      console.log('Hostname:', window.location.hostname);
+      console.log('Origin:', window.location.origin);
+      console.log('Pathname:', window.location.pathname);
+      console.log('Hash:', window.location.hash);
+      console.log('Search:', window.location.search);
+      console.log('Browser User Agent:', navigator.userAgent);
+      
+      // Check for cross-origin issues
+      try {
+        const domainTest = document.createElement('script');
+        domainTest.src = '/domain-test.txt';
+        domainTest.onload = () => console.log('Domain test file loaded successfully');
+        domainTest.onerror = (e) => console.warn('Domain test file failed to load, possible CORS issue:', e);
+        document.body.appendChild(domainTest);
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(domainTest);
+        }, 1000);
+      } catch (e) {
+        console.error('Error during domain test:', e);
+      }
+      
+      console.groupEnd();
     }
   }, []);
 };
+
+export default useDomainDebug;

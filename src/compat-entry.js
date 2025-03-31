@@ -1,98 +1,74 @@
 
-// Compatibility entry point
-// This file is deliberately not a module to ensure maximum compatibility
+// Compatibility entry point for browsers that don't support ES modules
+console.log("Compat-entry.js - Loading compatibility mode");
+
 (function() {
-  console.log('Loading compatibility entry point');
+  // Check if we've already loaded this file to prevent double execution
+  if (window.__COMPAT_ENTRY_LOADED) {
+    console.log("Compat-entry.js - Already loaded, skipping initialization");
+    return;
+  }
   
-  // Helper function to create a basic loading UI
-  function showLoadingUI() {
-    var rootEl = document.getElementById('root');
-    if (rootEl) {
-      rootEl.innerHTML = `
-        <div style="font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 2rem;">
-          <h1>Guia de Plano de Parto</h1>
-          <p>Carregando a aplicação...</p>
-          <div style="margin: 2rem auto; width: 50%; height: 6px; background: #eee; border-radius: 3px; overflow: hidden;">
-            <div style="width: 50%; height: 100%; background: #0066ff; animation: progress 2s infinite linear;"></div>
-          </div>
-          <style>
-            @keyframes progress {
-              0% { transform: translateX(-100%); }
-              100% { transform: translateX(100%); }
-            }
-          </style>
+  window.__COMPAT_ENTRY_LOADED = true;
+  
+  // Helper function to load scripts sequentially
+  function loadScript(src, callback) {
+    console.log("Compat-entry.js - Loading script:", src);
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = callback;
+    script.onerror = function(error) {
+      console.error("Compat-entry.js - Failed to load script:", src, error);
+    };
+    document.body.appendChild(script);
+  }
+  
+  // Show error message
+  function showError(message) {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+          <h1>Erro ao carregar</h1>
+          <p>${message}</p>
+          <p><a href="/" onclick="window.location.reload(); return false;">Tentar novamente</a></p>
         </div>
       `;
     }
   }
   
-  // Show loading UI immediately
-  showLoadingUI();
-  
-  // Try to load React and ReactDOM
-  function loadDependencies() {
-    // Load React
-    var reactScript = document.createElement('script');
-    reactScript.src = 'https://unpkg.com/react@18/umd/react.production.min.js';
-    reactScript.onload = function() {
-      // Load ReactDOM
-      var reactDOMScript = document.createElement('script');
-      reactDOMScript.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
-      reactDOMScript.onload = function() {
-        // Load React Router
-        var routerScript = document.createElement('script');
-        routerScript.src = 'https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js';
-        routerScript.onload = function() {
-          // Now load the main script
-          loadMainScript();
-        };
-        routerScript.onerror = function() {
-          console.error('Failed to load React Router');
-          // Fall back to main.js
-          loadMainScript();
-        };
-        document.body.appendChild(routerScript);
-      };
-      reactDOMScript.onerror = function() {
-        console.error('Failed to load ReactDOM');
-        loadMainScript();
-      };
-      document.body.appendChild(reactDOMScript);
-    };
-    reactScript.onerror = function() {
-      console.error('Failed to load React');
-      loadMainScript();
-    };
-    document.body.appendChild(reactScript);
-  }
-  
-  // Try to load dependencies if needed
-  if (window.React && window.ReactDOM && window.ReactRouterDOM) {
-    console.log('Dependencies already loaded, proceeding to main script');
-    loadMainScript();
+  // First, ensure React and ReactDOM are available
+  if (!window.React || !window.ReactDOM) {
+    loadScript('https://unpkg.com/react@18/umd/react.production.min.js', function() {
+      loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js', function() {
+        loadReactRouter();
+      });
+    });
   } else {
-    console.log('Loading dependencies...');
-    loadDependencies();
+    loadReactRouter();
   }
   
-  // Load the main application code
+  // Load React Router
+  function loadReactRouter() {
+    if (!window.ReactRouterDOM) {
+      loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
+        loadMainScript();
+      });
+    } else {
+      loadMainScript();
+    }
+  }
+  
+  // Load the main script
   function loadMainScript() {
-    var script = document.createElement('script');
-    script.src = '/src/main.js';
-    script.type = 'text/javascript';
-    script.onerror = function() {
-      console.error('Failed to load main script');
-      var rootEl = document.getElementById('root');
-      if (rootEl) {
-        rootEl.innerHTML = `
-          <div style="font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 2rem;">
-            <h1>Erro ao Carregar</h1>
-            <p>Não foi possível carregar a aplicação.</p>
-            <p><a href="/" style="color: #0066ff; text-decoration: none;">Tentar Novamente</a></p>
-          </div>
-        `;
-      }
-    };
-    document.body.appendChild(script);
+    try {
+      // Load a non-module version of the main app
+      loadScript('/src/main.js', function() {
+        console.log("Compat-entry.js - Successfully loaded main.js");
+      });
+    } catch (error) {
+      console.error("Compat-entry.js - Critical error:", error);
+      showError("Ocorreu um erro crítico ao carregar a aplicação. Por favor, tente novamente mais tarde.");
+    }
   }
 })();
