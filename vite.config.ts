@@ -37,96 +37,102 @@ const indexPath: string | null = findIndexHtml(__dirname);
 const root: string = indexPath ? path.dirname(indexPath) : __dirname;
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  base: "/", // Base path must be "/" for correct absolute paths
-  root: root, // Set the root to the directory containing index.html
-  server: {
-    port: 8080,
-    open: true,
-    // Add historyApiFallback for SPA routing during development
-    historyApiFallback: true,
-    headers: {
-      // Set correct MIME types during development
-      'Content-Type': 'application/javascript'
-    }
-  },
-  plugins: [
-    react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  build: {
-    outDir: path.resolve(__dirname, "dist"),
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: true,
+export default defineConfig(({ mode }) => {
+  const isProd = mode === 'production';
+  
+  return {
+    base: "/", // Base path must be "/" for correct absolute paths
+    root: root, // Set the root to the directory containing index.html
+    server: {
+      port: 8080,
+      open: true,
+      // Add historyApiFallback for SPA routing during development
+      historyApiFallback: true,
+      headers: {
+        // Set correct MIME types during development
+        'Content-Type': 'application/javascript'
       }
     },
-    // Set up legacy output format for maximum compatibility
-    target: 'es2015',
-    rollupOptions: {
-      output: {
-        format: 'iife', // Use IIFE format for better browser compatibility
-        entryFileNames: 'assets/[name].[hash].js',
-        chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]',
-        // Generate legacy entry points
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-tabs',
-            'lucide-react'
-          ]
-        },
-        // Ensure correct global variable access
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM'
+    plugins: [
+      react(),
+      mode === 'development' && componentTagger(),
+    ].filter(Boolean),
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
+    build: {
+      outDir: path.resolve(__dirname, "dist"),
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: isProd,
+          drop_debugger: true,
         }
       },
-      external: [
-        /\/favicon\.ico$/
-      ]
+      // Set up legacy output format for maximum compatibility
+      target: 'es2015',
+      rollupOptions: {
+        output: {
+          format: 'iife', // Use IIFE format for better browser compatibility
+          entryFileNames: 'assets/[name].[hash].js',
+          chunkFileNames: 'assets/[name].[hash].js',
+          assetFileNames: 'assets/[name].[hash].[ext]',
+          // Remove manualChunks if using inlineDynamicImports
+          // inlineDynamicImports: true is an implicit default in some builds
+          // so we need to fix the conflict by removing manualChunks
+          // manualChunks: {
+          //   vendor: ['react', 'react-dom', 'react-router-dom'],
+          //   ui: [
+          //     '@radix-ui/react-dialog',
+          //     '@radix-ui/react-tabs',
+          //     'lucide-react'
+          //   ]
+          // },
+          // Ensure correct global variable access
+          globals: {
+            react: 'React',
+            'react-dom': 'ReactDOM'
+          }
+        },
+        external: [
+          /\/favicon\.ico$/
+        ]
+      },
+      // Generate chunks with optimized sizes
+      chunkSizeWarningLimit: 1000,
+      cssCodeSplit: true,
+      sourcemap: true,
     },
-    // Generate chunks with optimized sizes
-    chunkSizeWarningLimit: 1000,
-    cssCodeSplit: true,
-    sourcemap: true,
-  },
-  // Add appropriate optimizations for both modern and legacy browsers
-  optimizeDeps: {
-    include: [
-      'react', 
-      'react-dom', 
-      'react-router-dom',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-tabs',
-      'lucide-react',
-      'date-fns',
-      '@tanstack/react-query'
-    ],
-    esbuildOptions: {
-      target: 'es2015' // More compatible target
+    // Add appropriate optimizations for both modern and legacy browsers
+    optimizeDeps: {
+      include: [
+        'react', 
+        'react-dom', 
+        'react-router-dom',
+        '@radix-ui/react-dialog',
+        '@radix-ui/react-tabs',
+        'lucide-react',
+        'date-fns',
+        '@tanstack/react-query'
+      ],
+      esbuildOptions: {
+        target: 'es2015' // More compatible target
+      }
+    },
+    cacheDir: '.vite-cache',
+    esbuild: {
+      logOverride: { 'this-is-undefined-in-esm': 'silent' },
+      // Add JSX factory for React 17+ compatibility
+      jsxFactory: 'React.createElement',
+      jsxFragment: 'React.Fragment'
+    },
+    // Fix the preview headers with correct format
+    preview: {
+      headers: {
+        'Content-Type': 'application/javascript'
+      }
     }
-  },
-  cacheDir: '.vite-cache',
-  esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' },
-    // Add JSX factory for React 17+ compatibility
-    jsxFactory: 'React.createElement',
-    jsxFragment: 'React.Fragment'
-  },
-  // Fix the preview headers
-  preview: {
-    headers: {
-      'Content-Type': 'application/javascript'
-    }
-  }
-}));
+  };
+});
