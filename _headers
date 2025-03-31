@@ -1,4 +1,4 @@
-# Headers for all files
+# Set proper MIME types for all files
 /*
   X-Frame-Options: SAMEORIGIN
   X-XSS-Protection: 1; mode=block
@@ -6,8 +6,14 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Access-Control-Allow-Origin: *
 
-# JavaScript files - ensure proper MIME type
+# JavaScript files - critical for module loading
 /*.js
+  Content-Type: application/javascript; charset=utf-8
+
+# JSX/TSX files
+/*.jsx
+  Content-Type: application/javascript; charset=utf-8
+/*.tsx
   Content-Type: application/javascript; charset=utf-8
 
 # JSON files  
@@ -21,5 +27,4 @@
 # Favicon specific rule
 /favicon.ico
   Cache-Control: public, max-age=604800
-  Access-Control-Allow-Origin: *
   Content-Type: image/x-icon

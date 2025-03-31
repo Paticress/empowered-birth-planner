@@ -1,0 +1,13 @@
+# Serve JavaScript files with the correct MIME type
+AddType application/javascript .js .mjs .jsx .tsx
+
+# Enable CORS for all assets
+Header set Access-Control-Allow-Origin "*"
+
+# Rewrite rules for SPA routing
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
