@@ -51,9 +51,7 @@ export default defineConfig(({ mode }) => ({
     }
   },
   plugins: [
-    react({
-      // Use standard configuration without custom options that cause errors
-    }),
+    react(),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
@@ -125,12 +123,10 @@ export default defineConfig(({ mode }) => ({
     jsxFactory: 'React.createElement',
     jsxFragment: 'React.Fragment'
   },
-  // Set proper MIME types for all JavaScript files in the build
+  // Fix the preview headers to use the correct type format
   preview: {
     headers: {
-      '*.js': {
-        'Content-Type': 'application/javascript'
-      }
+      'Content-Type': 'application/javascript'
     }
   }
 }));
