@@ -1,3 +1,4 @@
+
 // Enhanced CORS proxy script that intercepts problematic requests
 (function() {
   console.log("[CORS Proxy] Enhanced proxy helper loaded");
@@ -13,6 +14,13 @@
     'cdnjs.cloudflare.com',
     'cdn.gpteng.co',
     'react-router-dom'
+  ];
+  
+  // Trusted domains that should not be proxied
+  const trustedDomains = [
+    'energiamaterna.com.br',
+    'planodeparto.energiamaterna.com.br',
+    'localhost'
   ];
   
   // List of CORS proxy URLs to try in sequence
@@ -62,10 +70,21 @@
     }
   };
   
+  // Check if a URL is from a trusted domain that doesn't need proxying
+  const isTrustedDomain = (url) => {
+    if (typeof url !== 'string') return false;
+    return trustedDomains.some(domain => url.includes(domain));
+  };
+  
   // Override fetch
   window.fetch = function(resource, init) {
     // Skip if resource is not a string URL
     if (typeof resource !== 'string') {
+      return originalFetch(resource, init);
+    }
+    
+    // Skip for trusted domains
+    if (isTrustedDomain(resource)) {
       return originalFetch(resource, init);
     }
     
@@ -85,6 +104,11 @@
   const originalXHROpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(method, url, ...rest) {
     if (typeof url === 'string') {
+      // Skip for trusted domains
+      if (isTrustedDomain(url)) {
+        return originalXHROpen.call(this, method, url, ...rest);
+      }
+      
       const needsProxy = problematicDomains.some(domain => url.includes(domain));
       
       if (needsProxy) {
@@ -99,6 +123,20 @@
   // Create direct script loading helper
   window.__loadScriptWithCORS = function(src, callback, attributes = {}) {
     console.log("[CORS Proxy] Loading script with CORS support:", src);
+    
+    // Skip for trusted domains
+    if (isTrustedDomain(src)) {
+      const script = document.createElement('script');
+      script.src = src;
+      script.type = 'text/javascript';
+      Object.keys(attributes).forEach(key => {
+        script.setAttribute(key, attributes[key]);
+      });
+      script.onload = callback;
+      document.head.appendChild(script);
+      return script;
+    }
+    
     const needsProxy = problematicDomains.some(domain => src.includes(domain));
     
     const script = document.createElement('script');
@@ -109,6 +147,16 @@
         // First try direct loading
         script.src = src;
         script.type = 'text/javascript';
+        
+        // Special case for GPT Engineer script
+        if (src.includes('cdn.gpteng.co')) {
+          script.setAttribute('crossorigin', 'anonymous');
+          // Remove type="module" which can cause CSP issues
+          if (attributes.type === 'module') {
+            delete attributes.type;
+          }
+        }
+        
         Object.keys(attributes).forEach(key => {
           script.setAttribute(key, attributes[key]);
         });
@@ -123,8 +171,11 @@
               // Create an inline script
               const inlineScript = document.createElement('script');
               inlineScript.textContent = content;
+              inlineScript.type = 'text/javascript';
               Object.keys(attributes).forEach(key => {
-                inlineScript.setAttribute(key, attributes[key]);
+                if (key !== 'src' && key !== 'type') { // Don't copy src and type
+                  inlineScript.setAttribute(key, attributes[key]);
+                }
               });
               inlineScript.onload = callback;
               document.head.appendChild(inlineScript);
@@ -159,11 +210,32 @@
         fallbackScript.src = '/assets/react-cdn-fallback.js';
         fallbackScript.onload = callback;
         document.head.appendChild(fallbackScript);
+      } else if (src.includes('cdn.gpteng.co')) {
+        console.log("[CORS Proxy] Using local fallback for GPT Engineer");
+        // We don't have a direct fallback, but we can at least provide basic functionality
+        window.gptengineer = window.gptengineer || {
+          createSelect: function() {
+            console.log("GPT Engineer Select functionality unavailable due to CSP restrictions");
+            return null;
+          }
+        };
+        if (callback) callback();
       }
     }
     
     return script;
   };
+  
+  // Inject basic GPT Engineer API if not available
+  if (typeof window.gptengineer === 'undefined') {
+    console.log("[CORS Proxy] Creating basic gptengineer API");
+    window.gptengineer = {
+      createSelect: function() {
+        console.log("Basic GPT Engineer Select API called - real implementation will load later");
+        return null;
+      }
+    };
+  }
   
   // Direct injection of minimal ReactRouterDOM to prevent errors
   if (typeof window.ReactRouterDOM === 'undefined') {
