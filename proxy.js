@@ -1,4 +1,3 @@
-
 // Enhanced CORS proxy script that intercepts problematic requests
 (function() {
   console.log("[CORS Proxy] Enhanced proxy helper loaded");
@@ -12,6 +11,7 @@
     'cdn.jsdelivr.net',
     'esm.sh',
     'cdnjs.cloudflare.com',
+    'cdn.gpteng.co',
     'react-router-dom'
   ];
   
@@ -102,45 +102,48 @@
     const needsProxy = problematicDomains.some(domain => src.includes(domain));
     
     const script = document.createElement('script');
+    
+    // For problematic scripts, let's try to use an inline script approach
     if (needsProxy) {
-      // For script tags, we need to fetch the content and create an inline script
-      console.log("[CORS Proxy] Fetching script content for:", src);
-      fetch(src) // This will use our proxied fetch
-        .then(response => response.text())
-        .then(content => {
-          script.textContent = content;
-          // Apply attributes
-          Object.keys(attributes).forEach(key => {
-            script.setAttribute(key, attributes[key]);
-          });
-          script.onload = callback;
-          document.head.appendChild(script);
-        })
-        .catch(error => {
-          console.error("[CORS Proxy] Failed to load script:", src, error);
-          // Try using a script tag directly with the proxy URL as a fallback
-          const fallbackScript = document.createElement('script');
-          fallbackScript.src = corsProxies[currentProxyIndex] + encodeURIComponent(src);
-          Object.keys(attributes).forEach(key => {
-            fallbackScript.setAttribute(key, attributes[key]);
-          });
-          fallbackScript.onload = callback;
-          fallbackScript.onerror = error => {
-            console.error("[CORS Proxy] Fallback script load failed:", error);
-            // Try loading from local fallback
-            if (src.includes('react-router-dom')) {
-              console.log("[CORS Proxy] Trying local fallback for React Router");
-              const localScript = document.createElement('script');
-              localScript.src = '/assets/react-cdn-fallback.js';
-              localScript.onload = callback;
-              document.head.appendChild(localScript);
-            }
-          };
-          document.head.appendChild(fallbackScript);
+      try {
+        // First try direct loading
+        script.src = src;
+        script.type = 'text/javascript';
+        Object.keys(attributes).forEach(key => {
+          script.setAttribute(key, attributes[key]);
         });
+        script.onload = callback;
+        script.onerror = function(error) {
+          console.warn("[CORS Proxy] Direct script loading failed, trying fetch approach:", error);
+          
+          // If direct loading fails, try the fetch approach
+          fetch(src)
+            .then(response => response.text())
+            .then(content => {
+              // Create an inline script
+              const inlineScript = document.createElement('script');
+              inlineScript.textContent = content;
+              Object.keys(attributes).forEach(key => {
+                inlineScript.setAttribute(key, attributes[key]);
+              });
+              inlineScript.onload = callback;
+              document.head.appendChild(inlineScript);
+            })
+            .catch(error => {
+              console.error("[CORS Proxy] Failed to load script content:", error);
+              // Try with local fallback
+              loadLocalFallback();
+            });
+        };
+        document.head.appendChild(script);
+      } catch (error) {
+        console.error("[CORS Proxy] Error during script loading:", error);
+        loadLocalFallback();
+      }
     } else {
       // For non-problematic domains, load normally
       script.src = src;
+      script.type = 'text/javascript';
       Object.keys(attributes).forEach(key => {
         script.setAttribute(key, attributes[key]);
       });
@@ -148,12 +151,23 @@
       document.head.appendChild(script);
     }
     
+    // Helper function to load local fallbacks
+    function loadLocalFallback() {
+      console.log("[CORS Proxy] Trying local fallback for:", src);
+      if (src.includes('react-router-dom') || src.includes('unpkg.com') || src.includes('cdn.jsdelivr.net')) {
+        const fallbackScript = document.createElement('script');
+        fallbackScript.src = '/assets/react-cdn-fallback.js';
+        fallbackScript.onload = callback;
+        document.head.appendChild(fallbackScript);
+      }
+    }
+    
     return script;
   };
   
-  // Directly inject React Router DOM if needed
+  // Direct injection of minimal ReactRouterDOM to prevent errors
   if (typeof window.ReactRouterDOM === 'undefined') {
-    console.log("[CORS Proxy] ReactRouterDOM not found, attempting to inject it");
+    console.log("[CORS Proxy] ReactRouterDOM not found, creating minimal placeholder");
     
     // Create a simple version that will prevent errors until the real one loads
     window.ReactRouterDOM = {
@@ -172,6 +186,7 @@
       const script = document.createElement('script');
       script.src = '/assets/react-cdn-fallback.js';
       script.onload = () => console.log("[CORS Proxy] Loaded React Router fallback");
+      script.onerror = () => console.error("[CORS Proxy] Failed to load React Router fallback");
       document.head.appendChild(script);
     }, 100);
   }
