@@ -3,16 +3,42 @@
 (function() {
   console.log("GPT Engineer fallback script initializing");
   
+  // Create fallback right away, will be replaced if real one loads
+  window.gptengineer = window.gptengineer || {
+    initialized: true,
+    version: 'fallback-1.0',
+    
+    init: function() {
+      console.log("GPT Engineer fallback init called");
+      return true;
+    },
+    
+    createSelect: function(element, options) {
+      console.log("GPT Engineer fallback createSelect called", element, options);
+      // Return null to indicate the function was called but no real functionality is available
+      return null;
+    },
+    
+    isAvailable: function() {
+      return false;
+    },
+    
+    // Additional functions that might be needed
+    onError: function(e) {
+      console.error("GPT Engineer fallback error handler:", e);
+    }
+  };
+  
   // Wait a moment to check if the main script loaded properly
   setTimeout(function() {
-    // If gptengineer object is not properly initialized, create our fallback
+    // If gptengineer object is properly initialized but without createSelect, it may be partially loaded
     if (!window.gptengineer || typeof window.gptengineer.createSelect !== 'function') {
       console.log("GPT Engineer main script failed to load properly, using fallback");
       
-      // Create a comprehensive fallback implementation
+      // Make sure our fallback is fully assigned
       window.gptengineer = {
         initialized: true,
-        version: 'fallback-1.0',
+        version: 'fallback-1.1',
         
         init: function() {
           console.log("GPT Engineer fallback init called");
@@ -21,7 +47,6 @@
         
         createSelect: function(element, options) {
           console.log("GPT Engineer fallback createSelect called", element, options);
-          // Return null to indicate the function was called but no real functionality is available
           return null;
         },
         
@@ -29,7 +54,6 @@
           return false;
         },
         
-        // Additional functions that might be needed
         onError: function(e) {
           console.error("GPT Engineer fallback error handler:", e);
         }
