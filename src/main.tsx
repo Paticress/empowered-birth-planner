@@ -1,4 +1,16 @@
 
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+// Declare the global variable for TypeScript
+declare global {
+  interface Window {
+    __MAIN_EXECUTED?: boolean;
+    ReactRouterDOM?: any;
+  }
+}
+
 // This is intentionally a non-module file for maximum compatibility
 // It will be properly processed by Vite during build
 (function() {
@@ -17,7 +29,7 @@
   }
 
   // Improved error handling function
-  function handleGlobalError(message, source, lineno, colno, error) {
+  function handleGlobalError(message: string | Event, source?: string, lineno?: number, colno?: number, error?: Error) {
     console.error('Global error caught:', { message, source, lineno, colno, error });
     
     // Check if we're getting module-related errors
@@ -71,12 +83,14 @@
     };
     
     // Extract HashRouter and other components if available
-    const { HashRouter, Routes, Route, Navigate } = window.ReactRouterDOM || {
-      HashRouter: function(props) { return props.children; },
-      Routes: function(props) { return props.children; },
+    const RouterComponents = window.ReactRouterDOM || {
+      HashRouter: function(props: any) { return props.children; },
+      Routes: function(props: any) { return props.children; },
       Route: function() { return null; },
       Navigate: function() { return null; }
     };
+    
+    const { HashRouter, Routes, Route, Navigate } = RouterComponents;
     
     // Create a router-based app
     const RouterApp = function() {
@@ -105,6 +119,7 @@
         if (ReactDOM.createRoot) {
           ReactDOM.createRoot(rootElement).render(React.createElement(RouterApp));
         } else {
+          // @ts-ignore - Fallback for older versions
           ReactDOM.render(React.createElement(RouterApp), rootElement);
         }
         console.log("Main.tsx - Simple app rendered successfully");
