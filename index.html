@@ -72,7 +72,7 @@
         margin: 20px auto;
       }
     </style>
-    <script async type="module" crossorigin src="/assets/index.l0sNRNKZ.js"></script>
+    <script type="module" crossorigin src="/assets/index.l0sNRNKZ.js"></script>
   </head>
 
   <body>
@@ -93,31 +93,8 @@
     <!-- CORS Proxy loader -->
     <script src="/public/proxy.js"></script>
     
-    <!-- GPT Engineer script with proper error handling -->
-    <script>
-      // Create a GPT Engineer fallback immediately to avoid errors
-      window.gptengineer = window.gptengineer || {
-        initialized: true,
-        version: 'fallback-1.0',
-        createSelect: function() { return null; },
-        isAvailable: function() { return false; }
-      };
-      
-      // Try to load the actual script with proper error handling
-      (function() {
-        var script = document.createElement('script');
-        script.src = "https://cdn.jsdelivr.net/npm/@gptengineer/core@latest/dist/gptengineer.min.js";
-        script.type = "text/javascript"; // Important: DO NOT use "module" type here
-        script.crossOrigin = "anonymous";
-        script.onerror = function() {
-          console.warn("Could not load GPT Engineer from CDN, using fallback");
-        };
-        document.body.appendChild(script);
-      })();
-    </script>
-    
-    <!-- Improved GPT Engineer fallback -->
-    <script src="/public/assets/gpteng-fallback.js"></script>
+    <!-- GPT Engineer script with proper type -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     
     <!-- Modular script loader -->
     <script src="/public/js/script-loader.js"></script>
