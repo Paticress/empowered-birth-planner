@@ -26,6 +26,12 @@
         createSelect: function() {
           console.log("Basic GPT Engineer Select API called - real implementation or fallback will load later");
           return null;
+        },
+        isAvailable: function() {
+          return false;
+        },
+        onError: function(e) {
+          console.error("Basic GPT Engineer error handler:", e);
         }
       };
     }
