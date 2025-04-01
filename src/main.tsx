@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import * as ReactDOM from 'react-dom/client';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Declare the global variable for TypeScript
@@ -12,11 +12,7 @@ declare global {
     App?: React.ComponentType<any>;
     __appLoader?: () => void;
     React?: typeof React;
-    ReactDOM?: typeof ReactDOM & {
-      createRoot?: (container: Element) => {
-        render: (element: React.ReactNode) => void;
-      };
-    };
+    ReactDOM?: any; // Use 'any' for the global ReactDOM for maximum flexibility
   }
 }
 
@@ -93,7 +89,7 @@ declare global {
           return;
         }
         
-        // Render the app
+        // Render the app using the correct ReactDOM client API
         const root = ReactDOM.createRoot(rootElement);
         root.render(
           <React.StrictMode>
@@ -147,13 +143,15 @@ declare global {
       const rootElement = document.getElementById('root');
       if (rootElement) {
         try {
-          if (ReactDOM.createRoot) {
+          // Check if we can use modern ReactDOM API
+          if (typeof ReactDOM.createRoot === 'function') {
             const root = ReactDOM.createRoot(rootElement);
             root.render(React.createElement(SimpleApp));
           } else {
-            // Fallback for older versions
+            // Fallback for older versions or when using the legacy ReactDOM global
             console.warn("Main.tsx - ReactDOM.createRoot not available, using render fallback");
-            ReactDOM.render(React.createElement(SimpleApp), rootElement);
+            // Use any cast to ensure TypeScript doesn't complain about legacy render method
+            (ReactDOM as any).render(React.createElement(SimpleApp), rootElement);
           }
         } catch (renderError) {
           console.error("Main.tsx - Error rendering fallback:", renderError);
@@ -162,4 +160,3 @@ declare global {
     }
   });
 })();
-
