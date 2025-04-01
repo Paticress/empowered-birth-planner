@@ -46,7 +46,13 @@
     }
     
     function loadAppContent() {
-      // First try to load App.tsx as a script
+      // Load the actual App component using DOM manipulation
+      if (typeof window.App === 'function') {
+        console.log("App.js - App component already available, rendering it");
+        renderAppComponent();
+        return;
+      }
+      
       console.log("App.js - Loading App.tsx content");
       
       // Use a script that doesn't have module imports
@@ -56,6 +62,11 @@
       
       appScript.onload = function() {
         console.log("App.js - Successfully loaded main.js");
+        
+        // Check if we need to render the app component
+        if (typeof window.App === 'function') {
+          renderAppComponent();
+        }
       };
       
       appScript.onerror = function(error) {
@@ -64,6 +75,27 @@
       };
       
       document.body.appendChild(appScript);
+    }
+    
+    function renderAppComponent() {
+      try {
+        console.log("App.js - Rendering full App component");
+        var rootElement = document.getElementById('root');
+        
+        if (rootElement) {
+          // Use React 18's createRoot API if available
+          if (ReactDOM.createRoot) {
+            var root = ReactDOM.createRoot(rootElement);
+            root.render(React.createElement(window.App));
+          } else {
+            // Fallback for older React versions
+            ReactDOM.render(React.createElement(window.App), rootElement);
+          }
+        }
+      } catch (err) {
+        console.error("App.js - Error rendering App component:", err);
+        fallbackToCompatMode();
+      }
     }
     
     function fallbackToCompatMode() {
@@ -82,7 +114,6 @@
 if (typeof window !== 'undefined' && typeof window.App === 'undefined') {
   // Create a placeholder App component for module imports
   window.App = function() {
-    // This is a placeholder component that will be replaced by the real App.tsx
     return null;
   };
 }

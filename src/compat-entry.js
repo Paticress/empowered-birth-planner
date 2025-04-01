@@ -21,6 +21,7 @@ console.log("Compat-entry.js - Loading compatibility mode");
     var script = document.createElement('script');
     script.src = src;
     script.type = 'text/javascript';
+    script.crossOrigin = "anonymous";
     script.onload = callback || function() {};
     script.onerror = function(error) {
       console.error("Failed to load compat script:", src, error);
@@ -79,14 +80,55 @@ console.log("Compat-entry.js - Loading compatibility mode");
     return React.createElement('div', null, "Carregando...");
   };
   
+  // Helper function to directly initialize the app from our App.tsx component
+  function initApp() {
+    try {
+      // Try to load our real App component
+      const script = document.createElement('script');
+      script.type = "text/javascript";
+      script.src = "/src/App.tsx.js"; // Using the compiled version if available
+      script.onerror = function() {
+        console.error("Could not load App.tsx.js, falling back to router only");
+        initSimpleRouter();
+      };
+      script.onload = function() {
+        console.log("Successfully loaded App component in compatibility mode");
+        
+        // Render the App component if it's available
+        if (typeof window.App === 'function') {
+          const rootElement = document.getElementById('root');
+          if (rootElement) {
+            try {
+              if (ReactDOM.createRoot) {
+                ReactDOM.createRoot(rootElement).render(React.createElement(window.App));
+              } else {
+                ReactDOM.render(React.createElement(window.App), rootElement);
+              }
+            } catch (err) {
+              console.error("Failed to render App component:", err);
+              initSimpleRouter();
+            }
+          }
+        } else {
+          console.error("App component not available");
+          initSimpleRouter();
+        }
+      };
+      document.body.appendChild(script);
+    } catch (error) {
+      console.error("Error initializing App:", error);
+      initSimpleRouter();
+    }
+  }
+  
   // Load React Router DOM if not already loaded
   if (!window.ReactRouterDOM) {
     loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
       console.log("ReactRouterDOM loaded in compat mode");
-      initSimpleRouter();
+      initApp();
     });
   } else {
-    initSimpleRouter();
+    initApp();
   }
   
   function initSimpleRouter() {
