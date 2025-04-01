@@ -39,21 +39,17 @@
   }
 })();
 
-// These exports will be used by the build system, but ignored in browser
-// Usage of try/catch ensures it doesn't break in the browser
-try {
-  if (typeof module !== 'undefined') {
-    import React from 'react';
-    import ReactDOM from 'react-dom/client';
-    import App from './App';
-    import './index.css';
-    import { registerServiceWorker } from './registerSW';
-    
-    export const MODULE_LOAD_SUCCESS = true;
-    
-    // Normal module exports for the build system
-    export { React, ReactDOM, App, registerServiceWorker };
+// This section will be used by the build system but ignored in the browser
+if (typeof module !== 'undefined') {
+  try {
+    // For the build system
+    module.exports = {
+      React: null,
+      ReactDOM: null, 
+      App: null,
+      registerServiceWorker: null
+    };
+  } catch (e) {
+    console.log("Main.jsx - Module exports skipped in browser environment");
   }
-} catch (e) {
-  console.log("Main.jsx - Module exports skipped in browser environment");
 }

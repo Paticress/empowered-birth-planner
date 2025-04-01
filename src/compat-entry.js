@@ -20,6 +20,7 @@ console.log("Compat-entry.js - Loading compatibility mode");
   function loadScript(src, callback) {
     var script = document.createElement('script');
     script.src = src;
+    script.type = 'text/javascript';
     script.onload = callback || function() {};
     script.onerror = function(error) {
       console.error("Failed to load compat script:", src, error);
@@ -73,6 +74,53 @@ console.log("Compat-entry.js - Loading compatibility mode");
   // Create a simple loading UI
   createSimpleApp();
   
-  // Load the non-module version of the app
-  loadScript('/src/App.js');
+  // Define a simpler version of the App
+  window.App = window.App || function() {
+    return React.createElement('div', null, "Carregando...");
+  };
+  
+  // Load React Router DOM if not already loaded
+  if (!window.ReactRouterDOM) {
+    loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
+      console.log("ReactRouterDOM loaded in compat mode");
+      initSimpleRouter();
+    });
+  } else {
+    initSimpleRouter();
+  }
+  
+  function initSimpleRouter() {
+    // Create a simple router
+    const { HashRouter, Routes, Route } = window.ReactRouterDOM;
+    
+    const RouterApp = function() {
+      return React.createElement(HashRouter, null,
+        React.createElement(Routes, null,
+          React.createElement(Route, { 
+            path: '/*', 
+            element: React.createElement('div', {
+              style: { textAlign: 'center', padding: '40px' }
+            }, 
+              React.createElement('h1', null, 'Guia de Plano de Parto'),
+              React.createElement('p', null, 'Estamos carregando o conteúdo em modo de compatibilidade.'),
+              React.createElement('p', null, 'Por favor, aguarde ou tente recarregar a página.')
+            )
+          })
+        )
+      );
+    };
+    
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      try {
+        if (ReactDOM.createRoot) {
+          ReactDOM.createRoot(rootElement).render(React.createElement(RouterApp));
+        } else {
+          ReactDOM.render(React.createElement(RouterApp), rootElement);
+        }
+      } catch (error) {
+        console.error("Failed to render router app:", error);
+      }
+    }
+  }
 })();

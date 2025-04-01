@@ -49,7 +49,7 @@
       // First try to load App.tsx as a script
       console.log("App.js - Loading App.tsx content");
       
-      // Create a script to load App.tsx after React is loaded
+      // Use a script that doesn't have module imports
       var appScript = document.createElement('script');
       appScript.type = 'text/javascript'; // Not using module to avoid import issues
       appScript.src = './src/main.js'; // Use the JS version which has better compatibility
@@ -78,19 +78,11 @@
   }
 })();
 
-// We now expose App component only if it hasn't been defined yet
-if (typeof window.App === 'undefined') {
+// We need to make sure this doesn't conflict with any existing App definition
+if (typeof window !== 'undefined' && typeof window.App === 'undefined') {
   // Create a placeholder App component for module imports
-  var App = function() {
+  window.App = function() {
     // This is a placeholder component that will be replaced by the real App.tsx
     return null;
   };
-
-  // Export the App component for ESM imports
-  if (typeof module !== 'undefined') {
-    module.exports = { default: App };
-  }
-  
-  // Also expose globally
-  window.App = App;
 }
