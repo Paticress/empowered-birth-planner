@@ -82,27 +82,39 @@
       // Explicitly import App.tsx to get the real App component
       console.log("App.js - Attempting to import App.tsx directly");
       try {
+        // This loads the App component directly - first try to load from a bundled location
         var appModule = document.createElement('script');
-        appModule.src = './dist/assets/index.js'; // Try bundled version first
+        appModule.src = './src/App.tsx.js'; // Try a processed version first
         appModule.type = 'text/javascript'; // Use text/javascript for maximum compatibility
         appModule.onload = function() {
-          console.log("App.js - Successfully loaded bundled App component");
+          console.log("App.js - Successfully loaded App.tsx.js");
           setTimeout(renderAppComponent, 300);
         };
         appModule.onerror = function() {
-          console.log("App.js - Bundled App not found, trying main.js");
-          var mainScript = document.createElement('script');
-          mainScript.src = './src/main.js';
-          mainScript.type = 'text/javascript';
-          mainScript.onload = function() {
-            console.log("App.js - Successfully loaded main.js");
+          console.log("App.js - App.tsx.js not found, trying bundled version");
+          var bundledScript = document.createElement('script');
+          bundledScript.src = './dist/assets/index.js'; 
+          bundledScript.type = 'text/javascript'; 
+          bundledScript.onload = function() {
+            console.log("App.js - Successfully loaded bundled App component");
             setTimeout(renderAppComponent, 300);
           };
-          mainScript.onerror = function() {
-            console.error("App.js - Failed to load main.js, falling back to basic content");
-            renderBasicContent();
+          bundledScript.onerror = function() {
+            console.log("App.js - Bundled App not found, trying main.js");
+            var mainScript = document.createElement('script');
+            mainScript.src = './src/main.js';
+            mainScript.type = 'text/javascript';
+            mainScript.onload = function() {
+              console.log("App.js - Successfully loaded main.js");
+              setTimeout(renderAppComponent, 300);
+            };
+            mainScript.onerror = function() {
+              console.error("App.js - Failed to load main.js, falling back to basic content");
+              renderBasicContent();
+            };
+            document.body.appendChild(mainScript);
           };
-          document.body.appendChild(mainScript);
+          document.body.appendChild(bundledScript);
         };
         document.body.appendChild(appModule);
       } catch (err) {

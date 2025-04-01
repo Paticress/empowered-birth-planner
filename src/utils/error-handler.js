@@ -55,11 +55,17 @@ function setupGlobalErrorHandler() {
     if (typeof message === 'string' && message.includes('gpteng')) {
       console.warn('GPT Engineer script error detected, providing fallback');
       
-      // Create a minimal implementation
+      // Create a minimal implementation if it doesn't exist
       window.gptengineer = window.gptengineer || {
         createSelect: function() {
           console.log("GPT Engineer Select functionality unavailable due to script error");
           return null;
+        },
+        isAvailable: function() {
+          return false;
+        },
+        onError: function(e) {
+          console.error("GPT Engineer error handler (fallback):", e);
         }
       };
       
