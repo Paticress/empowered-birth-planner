@@ -19,6 +19,31 @@ function createFallbackContent(container) {
   
   console.log("FallbackContent - Rendering fallback content to", container);
   
+  // Try to load the full version if we haven't already
+  if (typeof window.__FULL_APP_LOADED === 'undefined' || !window.__FULL_APP_LOADED) {
+    window.__FULL_APP_LOADED = true;
+    console.log("FallbackContent - Attempting to load full application");
+    tryLoadFullApp();
+  }
+  
+  // Function to attempt loading the full app
+  function tryLoadFullApp() {
+    // Create a script tag to load the full version
+    const script = document.createElement('script');
+    script.src = '/src/App.tsx'; // Try to load the TypeScript version
+    script.type = 'module';
+    script.onerror = function() {
+      console.log("Could not load full TypeScript app, trying JS version");
+      const fallbackScript = document.createElement('script');
+      fallbackScript.src = '/src/App.js';
+      fallbackScript.onerror = function() {
+        console.log("Failed to load full app version, using compiled version");
+      };
+      document.body.appendChild(fallbackScript);
+    };
+    document.body.appendChild(script);
+  }
+  
   // Determine which content to show based on current route
   var currentRoute = window.location.hash.replace('#', '') || '/';
   console.log("FallbackContent - Current route:", currentRoute);
@@ -50,6 +75,22 @@ function createFallbackContent(container) {
       .fem-text-center { text-align: center; }
       .fem-text-sm { font-size: 0.875rem; }
       .fem-text-gray { color: #64748b; }
+      .fem-full-version-btn { 
+        display: inline-block; 
+        background-color: #3b82f6; 
+        color: white; 
+        font-weight: 600;
+        padding: 0.75rem 1.5rem; 
+        border-radius: 0.375rem; 
+        text-decoration: none;
+        margin: 1.5rem auto;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      .fem-full-version-btn:hover {
+        background-color: #2563eb;
+      }
     </style>
   `;
   
@@ -110,11 +151,17 @@ function createFallbackContent(container) {
               <h3 class="fem-card-title">Pós-Parto</h3>
               <p class="fem-text">Amamentação, cuidados com o recém-nascido e recuperação materna.</p>
             </div>
+            
+            <div class="fem-text-center fem-mt-8">
+              <button class="fem-full-version-btn" id="loadFullVersionBtn">
+                Carregar Versão Completa
+              </button>
+            </div>
           </div>
           
           <div class="fem-flex fem-justify-center fem-mt-8">
             <button class="fem-button" onclick="window.location.reload()">
-              Tentar Carregar Versão Completa
+              Tentar Recarregar Página
             </button>
           </div>
         </main>
@@ -171,11 +218,17 @@ function createFallbackContent(container) {
               <h3 class="fem-card-title">Comunicação com a equipe médica</h3>
               <p class="fem-text">Dicas para comunicar de forma eficaz suas preferências e necessidades à equipe que irá acompanhar seu parto.</p>
             </div>
+            
+            <div class="fem-text-center fem-mt-8">
+              <button class="fem-full-version-btn" id="loadFullVersionBtn">
+                Carregar Versão Completa
+              </button>
+            </div>
           </div>
           
           <div class="fem-flex fem-justify-center fem-mt-8">
             <button class="fem-button" onclick="window.location.reload()">
-              Tentar Carregar Versão Completa
+              Tentar Recarregar Página
             </button>
           </div>
         </main>
@@ -199,6 +252,16 @@ function createFallbackContent(container) {
   
   container.innerHTML = content;
   console.log("FallbackContent - Content rendered successfully");
+  
+  // Add event listener for load full version button
+  const loadFullVersionBtn = container.querySelector('#loadFullVersionBtn');
+  if (loadFullVersionBtn) {
+    loadFullVersionBtn.addEventListener('click', function() {
+      console.log("FallbackContent - Load full version button clicked");
+      tryLoadFullApp();
+      alert('Carregando a versão completa. Se não carregar automaticamente, por favor recarregue a página.');
+    });
+  }
   
   // Ensure Reload button works properly
   var reloadButton = container.querySelector('button[onclick="window.location.reload()"]');
@@ -252,7 +315,7 @@ function createFallbackContent(container) {
             mainContent.innerHTML = '';
             createFallbackContent(mainContent);
           } else {
-            console.log("FallbackContent - Content area already has proper content, no fallback needed");
+            console.log("FallbackContent - Content area already has content, no fallback needed");
           }
         } else {
           console.log("FallbackContent - Main content element not found");

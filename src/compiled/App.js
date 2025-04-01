@@ -11,6 +11,38 @@ function logRoute() {
 // Call immediately to check initial route
 logRoute();
 
+// Add flag to track if we've attempted to load the full app
+window.__FULL_APP_LOADED = window.__FULL_APP_LOADED || false;
+
+// Function to check if we need to load the full app
+function shouldTryLoadFullApp() {
+  if (window.__FULL_APP_LOADED) return false;
+  
+  // Only try once per session
+  window.__FULL_APP_LOADED = true;
+  return true;
+}
+
+// Function to attempt loading the full app
+function tryLoadFullApp() {
+  console.log("Attempting to load the full application version");
+  
+  // Create a script tag to load the full version
+  const script = document.createElement('script');
+  script.src = '/src/App.tsx'; // Try to load the TypeScript version
+  script.type = 'module';
+  script.onerror = function() {
+    console.log("Could not load full TypeScript app, trying JS version");
+    const fallbackScript = document.createElement('script');
+    fallbackScript.src = '/src/App.js';
+    fallbackScript.onerror = function() {
+      console.log("Failed to load full app version, using compiled version");
+    };
+    document.body.appendChild(fallbackScript);
+  };
+  document.body.appendChild(script);
+}
+
 // Define a simple BirthPlanBuilder component that actually renders content
 function SimpleBirthPlanBuilder() {
   console.log("SimpleBirthPlanBuilder component rendering");
@@ -118,16 +150,24 @@ function SimpleBirthPlanBuilder() {
       React.createElement('button', {
         style: styles.button,
         onClick: function() { 
-          alert('Esta é uma versão simplificada do plano de parto. Recarregue a página para tentar novamente com a versão completa.'); 
+          if (shouldTryLoadFullApp()) {
+            tryLoadFullApp();
+          }
+          alert('Carregando a versão completa do construtor de plano de parto. Se não carregar automaticamente, por favor recarregue a página.'); 
         }
-      }, "Continuar")
+      }, "Carregar Versão Completa")
     ),
     
     React.createElement('div', { style: { textAlign: 'center', marginTop: '1rem', fontSize: '0.875rem', color: '#64748b' } }, 
       "Se o conteúdo não estiver carregando completamente, tente recarregar a página. ",
       React.createElement('button', {
         style: { color: '#3b82f6', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' },
-        onClick: function() { window.location.reload(); }
+        onClick: function() { 
+          if (shouldTryLoadFullApp()) {
+            tryLoadFullApp();
+          }
+          window.location.reload(); 
+        }
       }, "Recarregar")
     )
   );
@@ -194,6 +234,19 @@ function SimpleGuide() {
       cursor: 'pointer',
       textDecoration: 'none',
       display: 'inline-block'
+    },
+    fullVersionButton: {
+      backgroundColor: '#3b82f6',
+      color: 'white',
+      border: 'none',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '0.375rem',
+      fontWeight: '600',
+      cursor: 'pointer',
+      textDecoration: 'none',
+      display: 'inline-block',
+      margin: '1.5rem auto',
+      fontSize: '1rem'
     }
   };
   
@@ -230,12 +283,88 @@ function SimpleGuide() {
         )
       ),
       
-      React.createElement('div', { style: { textAlign: 'center', marginTop: '2rem', fontSize: '0.875rem', color: '#64748b' } }, 
+      React.createElement('div', { style: styles.card },
+        React.createElement('h3', { style: styles.cardTitle }, "Direitos no parto"),
+        React.createElement('p', null, "Conheça seus direitos durante o trabalho de parto e nascimento, garantindo uma experiência mais segura e respeitosa.")
+      ),
+      
+      React.createElement('div', { style: styles.card },
+        React.createElement('h3', { style: styles.cardTitle }, "Comunicação com a equipe médica"),
+        React.createElement('p', null, "Dicas para comunicar de forma eficaz suas preferências e necessidades à equipe que irá acompanhar seu parto.")
+      ),
+      
+      React.createElement('div', { style: { textAlign: 'center' } },
+        React.createElement('button', {
+          style: styles.fullVersionButton,
+          onClick: function() {
+            if (shouldTryLoadFullApp()) {
+              tryLoadFullApp();
+            }
+            alert('Carregando a versão completa do guia. Se não carregar automaticamente, por favor recarregue a página.');
+          }
+        }, "Tentar Carregar Versão Completa")
+      ),
+      
+      React.createElement('div', { style: { textAlign: 'center', marginTop: '1rem', fontSize: '0.875rem', color: '#64748b' } }, 
         "Se o conteúdo não estiver carregando completamente, tente recarregar a página. ",
         React.createElement('button', {
           style: { color: '#3b82f6', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' },
-          onClick: function() { window.location.reload(); }
+          onClick: function() { 
+            if (shouldTryLoadFullApp()) {
+              tryLoadFullApp();
+            }
+            window.location.reload(); 
+          }
         }, "Recarregar")
+      )
+    )
+  );
+}
+
+// Header component for navigation
+function SimpleHeader() {
+  console.log("SimpleHeader component rendering");
+  
+  const styles = {
+    header: {
+      backgroundColor: 'white',
+      borderBottom: '1px solid #e2e8f0',
+      padding: '1rem 0',
+      position: 'sticky',
+      top: 0,
+      zIndex: 10
+    },
+    container: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '0 1rem',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    },
+    logo: {
+      color: '#3b82f6',
+      fontWeight: 'bold',
+      fontSize: '1.25rem',
+      textDecoration: 'none'
+    },
+    nav: {
+      display: 'flex',
+      gap: '1.5rem'
+    },
+    navLink: {
+      color: '#475569',
+      textDecoration: 'none',
+      fontWeight: '500'
+    }
+  };
+  
+  return React.createElement('header', { style: styles.header },
+    React.createElement('div', { style: styles.container },
+      React.createElement('a', { href: "#/", style: styles.logo }, "Energia Materna"),
+      React.createElement('nav', { style: styles.nav },
+        React.createElement('a', { href: "#/guia-online", style: styles.navLink }, "Guia"),
+        React.createElement('a', { href: "#/criar-plano", style: styles.navLink }, "Criar Plano")
       )
     )
   );
@@ -278,6 +407,11 @@ function NotFound() {
 window.App = function() {
   console.log("App component rendering", "Current hash:", window.location.hash);
   
+  // Try to load the full version if we haven't already
+  if (shouldTryLoadFullApp()) {
+    setTimeout(tryLoadFullApp, 500);
+  }
+  
   // Get current route from hash
   var hash = window.location.hash.replace('#', '') || '/';
   
@@ -287,9 +421,15 @@ window.App = function() {
   if (hash === '/' || hash === '') {
     content = React.createElement(ReactRouterDOM.Navigate, { to: '/guia-online', replace: true });
   } else if (hash === '/guia-online' || hash.startsWith('/guia-online')) {
-    content = React.createElement(SimpleGuide);
+    content = React.createElement('div', null,
+      React.createElement(SimpleHeader),
+      React.createElement(SimpleGuide)
+    );
   } else if (hash === '/criar-plano' || hash.startsWith('/criar-plano')) {
-    content = React.createElement(SimpleBirthPlanBuilder);
+    content = React.createElement('div', null,
+      React.createElement(SimpleHeader),
+      React.createElement(SimpleBirthPlanBuilder)
+    );
   } else if (hash === '/embedded-guia' || hash.startsWith('/embedded-guia')) {
     content = React.createElement('div', null, 
       React.createElement('h1', { className: "text-2xl font-bold m-4" }, "Guia do Parto Respeitoso (Versão Incorporada)"),
@@ -378,5 +518,20 @@ function ensureContentInIframe() {
 
 // Run iframe check after a delay
 setTimeout(ensureContentInIframe, 1000);
+
+// Initial rendering
+try {
+  const rootElement = document.getElementById('root');
+  if (rootElement && window.React && window.ReactDOM) {
+    console.log("Performing initial render of compiled App");
+    if (window.ReactDOM.createRoot) {
+      window.ReactDOM.createRoot(rootElement).render(window.React.createElement(window.App));
+    } else {
+      window.ReactDOM.render(window.React.createElement(window.App), rootElement);
+    }
+  }
+} catch (error) {
+  console.error("Error during initial render:", error);
+}
 
 console.log("Compiled App.js - App component created successfully");
