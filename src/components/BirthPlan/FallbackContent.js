@@ -28,17 +28,17 @@ function createFallbackContent(container) {
       window.__FULL_APP_LOADED = true;
       console.log("FallbackContent - Initializing full application load");
       
-      // First attempt - try to load bootstrapApp directly
-      const bootstrapScript = document.createElement('script');
-      bootstrapScript.src = '/src/bootstrapApp.ts';
-      bootstrapScript.type = 'module'; // Use module type for TS files
+      // First attempt - try to load main.js (non-module version)
+      const mainScript = document.createElement('script');
+      mainScript.src = '/src/main.js';
+      mainScript.type = 'text/javascript'; // Use standard script type
       
-      bootstrapScript.onerror = function() {
-        console.log("FallbackContent - bootstrapApp.ts load failed, trying App.js");
+      mainScript.onerror = function() {
+        console.log("FallbackContent - main.js load failed, trying App.js");
         loadAppJs();
       };
       
-      document.body.appendChild(bootstrapScript);
+      document.body.appendChild(mainScript);
       
       // Second attempt - look for a global bootstrap function
       if (typeof window.bootstrapApplication === 'function') {
@@ -76,6 +76,17 @@ function createFallbackContent(container) {
       // Force a reload after a short delay to apply changes
       setTimeout(function() {
         console.log("FallbackContent - Reloading page to initialize App.js");
+        // Clear any cached states before reloading
+        try {
+          sessionStorage.removeItem('app_last_route');
+          localStorage.removeItem('app_initialized');
+          
+          // Clear any window flags we've set
+          window.__FULL_APP_LOADED = false;
+          window.__MAIN_EXECUTED = false;
+        } catch (e) {
+          console.error("Error clearing cache:", e);
+        }
         window.location.reload();
       }, 500);
     };
@@ -401,49 +412,88 @@ function createFallbackContent(container) {
       loadFullVersionBtn.disabled = true;
       loadFullVersionBtn.style.opacity = '0.7';
       
-      // Try every possible way to load the full app
-      
-      // 1. First try the direct App import from App.tsx
+      // Clear any cached states before trying to load
       try {
-        const importScript = document.createElement('script');
-        importScript.textContent = `
-          import('./src/App.tsx')
-            .then(module => {
-              console.log("Successfully imported App.tsx");
-              window.App = module.default;
-              document.getElementById('root').innerHTML = '';
-              import('./src/bootstrapApp.ts')
-                .then(bootstrap => {
-                  bootstrap.bootstrapApplication();
-                })
-                .catch(err => console.error("Error importing bootstrap:", err));
-            })
-            .catch(error => { console.error("Failed to import App.tsx:", error); });
-        `;
-        importScript.type = 'module';
-        document.body.appendChild(importScript);
+        sessionStorage.removeItem('app_last_route');
+        localStorage.removeItem('app_initialized');
+        
+        // Clear any window flags we've set
+        window.__FULL_APP_LOADED = false;
+        window.__MAIN_EXECUTED = false;
+        window.__COMPAT_ENTRY_LOADED = false;
       } catch (e) {
-        console.log("Import script approach failed:", e);
+        console.error("Error clearing cache:", e);
       }
       
-      // 2. Try loading the non-module version with App.js
-      setTimeout(() => {
-        if (!window.App) {
-          console.log("FallbackContent - App not imported yet, trying App.js");
-          loadAppJs();
-        }
-      }, 1000);
+      // Try multiple loading strategies
       
-      // 3. Add a fail-safe reload after a timeout
-      setTimeout(() => {
+      // 1. Try loading the main.jsx file which is compatible with more browsers
+      const mainJsxScript = document.createElement('script');
+      mainJsxScript.src = '/src/main.jsx';
+      mainJsxScript.type = 'text/javascript'; // Avoid module type
+      
+      mainJsxScript.onload = function() {
+        console.log("FallbackContent - main.jsx loaded successfully");
+        setTimeout(function() {
+          window.location.reload();
+        }, 500);
+      };
+      
+      mainJsxScript.onerror = function() {
+        console.log("FallbackContent - main.jsx failed to load, trying App.js");
+        
+        // 2. Try loading App.js directly
+        const appScript = document.createElement('script');
+        appScript.src = '/src/App.js';
+        appScript.type = 'text/javascript'; // Ensure non-module for compatibility
+        
+        appScript.onload = function() {
+          console.log("FallbackContent - App.js loaded successfully");
+          setTimeout(function() {
+            window.location.reload();
+          }, 500);
+        };
+        
+        appScript.onerror = function() {
+          console.log("FallbackContent - App.js load failed, trying compiled version");
+          
+          // 3. Try loading the compiled App.js
+          const compiledScript = document.createElement('script');
+          compiledScript.src = '/src/compiled/App.js';
+          compiledScript.type = 'text/javascript';
+          
+          compiledScript.onload = function() {
+            console.log("FallbackContent - Compiled App.js loaded successfully");
+            setTimeout(function() {
+              window.location.reload();
+            }, 500);
+          };
+          
+          compiledScript.onerror = function() {
+            console.log("FallbackContent - All load attempts failed");
+            
+            // 4. Last resort - try to load index.html directly
+            window.location.href = '/index.html' + window.location.hash;
+          };
+          
+          document.body.appendChild(compiledScript);
+        };
+        
+        document.body.appendChild(appScript);
+      };
+      
+      document.body.appendChild(mainJsxScript);
+      
+      // Set a fallback timeout to reload the page if no scripts load successfully
+      setTimeout(function() {
         if (loadingIndicator) {
           loadingIndicator.style.display = 'none';
+          loadFullVersionBtn.disabled = false;
+          loadFullVersionBtn.style.opacity = '1';
         }
-        if (!window.App) {
-          console.log("FallbackContent - No App detected after timeout, forcing reload");
-          window.location.reload();
-        }
-      }, 3000);
+        alert('Não foi possível carregar a versão completa. A página será recarregada.');
+        window.location.reload();
+      }, 5000);
     });
   }
   
