@@ -6,10 +6,10 @@
   // Load modules in the correct order
   function loadModules() {
     const modules = [
-      "/js/proxy/config.js",
-      "/js/proxy/fetch-override.js", 
-      "/js/proxy/script-loader.js",
-      "/js/proxy/fallbacks.js"
+      "/public/js/proxy/config.js",
+      "/public/js/proxy/fetch-override.js", 
+      "/public/js/proxy/script-loader.js",
+      "/public/js/proxy/fallbacks.js"
     ];
     
     let moduleIndex = 0;

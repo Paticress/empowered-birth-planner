@@ -6,7 +6,7 @@
   
   // Load the main proxy module
   const script = document.createElement('script');
-  script.src = "/js/proxy/index.js";
+  script.src = "/public/js/proxy/index.js";
   script.onerror = function() {
     console.error("[CORS Proxy] Failed to load modular proxy system, using inline fallback");
     

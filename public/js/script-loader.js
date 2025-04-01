@@ -6,7 +6,7 @@
   // Load core script loader first
   function loadDependencyModules() {
     const coreScript = document.createElement('script');
-    coreScript.src = "/js/loaders/core-loader.js";
+    coreScript.src = "/public/js/loaders/core-loader.js";
     coreScript.onload = function() {
       loadModules();
     };
@@ -20,10 +20,10 @@
   // Load all the modules in sequence
   function loadModules() {
     const modules = [
-      "/js/loaders/react-loader.js",
-      "/js/loaders/router-loader.js",
-      "/js/loaders/gpteng-loader.js",
-      "/js/loaders/app-initializer.js"
+      "/public/js/loaders/react-loader.js",
+      "/public/js/loaders/router-loader.js",
+      "/public/js/loaders/gpteng-loader.js",
+      "/public/js/loaders/app-initializer.js"
     ];
     
     let moduleIndex = 0;

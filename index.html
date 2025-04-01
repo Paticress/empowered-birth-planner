@@ -69,19 +69,19 @@
       </div>
     </div>
     
-    <!-- CORS Proxy loader - must be loaded early -->
-    <script src="/proxy.js"></script>
+    <!-- Error handler script - Make sure these files exist -->
+    <script src="/public/js/error-handler.js"></script>
     
     <!-- ReactJS Fallback - Ensures React is available -->
-    <script src="/assets/react-cdn-fallback.js"></script>
+    <script src="/public/assets/react-cdn-fallback.js"></script>
+    
+    <!-- CORS Proxy loader - must be loaded early -->
+    <script src="/public/proxy.js"></script>
     
     <!-- GPT Engineer Script - Changed from module to regular script to avoid CSP issues -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="text/javascript" crossorigin="anonymous"></script>
-    
-    <!-- Error handler for improved debugging -->
-    <script src="/js/error-handler.js"></script>
+    <script src="https://cdn.gpteng.co/gptengineer.js" crossorigin="anonymous"></script>
     
     <!-- Modular script loader -->
-    <script src="/js/script-loader.js"></script>
+    <script src="/public/js/script-loader.js"></script>
   </body>
 </html>
