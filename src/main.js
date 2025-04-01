@@ -59,11 +59,23 @@
     appScript.onerror = function() {
       console.error("Main.js - Failed to load App.js, showing fallback");
       
-      // Try to use fallback app if available
-      if (window.__fallbackApp && window.__fallbackApp.createBasicContent) {
-        window.__fallbackApp.createBasicContent(document.getElementById('root'));
+      // Try Module import of App.tsx as a last resort
+      if (typeof import === 'function') {
+        console.log("Main.js - Module import of App.tsx failed, trying App.js bridge");
+        
+        // Try to load the fallback app if available
+        if (window.__fallbackApp && window.__fallbackApp.createBasicContent) {
+          window.__fallbackApp.createBasicContent(document.getElementById('root'));
+        } else {
+          // Show error message
+          const rootEl = document.getElementById('root');
+          if (rootEl) {
+            rootEl.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p></div>';
+          }
+        }
       } else {
-        // Show error message
+        // Show error message directly
+        console.error("Main.js - Module import not supported, showing error");
         const rootEl = document.getElementById('root');
         if (rootEl) {
           rootEl.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p></div>';

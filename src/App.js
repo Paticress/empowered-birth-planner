@@ -39,57 +39,106 @@
         return;
       }
       
-      // Try loading the App.tsx as a normal script first (not as module)
-      const script = document.createElement('script');
-      script.src = './src/App.tsx';
-      script.type = 'text/javascript'; // Force non-module for broader compatibility
+      // First try loading a pre-compiled version if available
+      console.log("App.js - Trying to load pre-compiled version");
+      const compiledScript = document.createElement('script');
+      compiledScript.src = './src/compiled/App.js';
+      compiledScript.type = 'text/javascript'; // Force non-module
       
-      script.onload = function() {
-        console.log("App.js - Loaded App.tsx successfully as regular script");
+      compiledScript.onload = function() {
+        console.log("App.js - Loaded compiled App.js successfully");
         renderApp();
       };
       
-      script.onerror = function() {
-        console.log("App.js - Failed to load App.tsx as script, trying direct import");
+      compiledScript.onerror = function() {
+        console.log("App.js - Failed to load compiled App.js, trying App.tsx as module");
         
-        // Create a simple minimal implementation as a last resort
-        window.App = window.App || function SimpleApp() {
-          return window.React.createElement(window.ReactRouterDOM.HashRouter, null,
-            window.React.createElement(window.ReactRouterDOM.Routes, null,
-              window.React.createElement(window.ReactRouterDOM.Route, { 
-                path: '/', 
-                element: window.React.createElement(window.ReactRouterDOM.Navigate, { to: '/guia-online', replace: true })
-              }),
-              window.React.createElement(window.ReactRouterDOM.Route, { 
-                path: '/guia-online', 
-                element: window.React.createElement('div', { style: { textAlign: 'center', padding: '40px' } },
-                  window.React.createElement('h1', null, 'Guia de Plano de Parto'),
-                  window.React.createElement('p', null, 'Bem-vinda ao Guia de Plano de Parto!')
-                )
-              }),
-              window.React.createElement(window.ReactRouterDOM.Route, {
-                path: '/criar-plano', 
-                element: window.React.createElement('div', { style: { textAlign: 'center', padding: '40px' } },
-                  window.React.createElement('h1', null, 'Construtor de Plano de Parto'),
-                  window.React.createElement('p', null, 'Estamos preparando seu construtor de plano de parto.')
-                )
-              }),
-              window.React.createElement(window.ReactRouterDOM.Route, {
-                path: '*',
-                element: window.React.createElement('div', { style: { textAlign: 'center', padding: '40px' } },
-                  window.React.createElement('h1', null, 'Página não encontrada'),
-                  window.React.createElement('p', null, 'A página que você está procurando não existe.'),
-                  window.React.createElement('a', { href: '#/guia-online' }, 'Voltar para o Guia')
-                )
-              })
-            )
-          );
-        };
-        
-        renderApp();
+        // First try to import as a module (proper way)
+        try {
+          // This won't work if modules aren't supported
+          import('./src/App.tsx')
+            .then(module => {
+              console.log("App.js - Successfully imported App.tsx as a module");
+              window.App = module.default;
+              renderApp();
+            })
+            .catch(error => {
+              console.log("App.js - Error importing App.tsx:", error);
+              
+              // Try loading as a regular script tag
+              console.log("App.js - Trying to load App.tsx as a regular script");
+              const tsxScript = document.createElement('script');
+              tsxScript.src = './src/App.tsx';
+              tsxScript.type = 'text/javascript'; // Force non-module for compatibility
+              
+              tsxScript.onload = function() {
+                console.log("App.js - Loaded App.tsx successfully as regular script");
+                renderApp();
+              };
+              
+              tsxScript.onerror = function() {
+                console.log("App.js - Failed to load App.tsx via script tag");
+                
+                // Retry with a different path as a last resort
+                const altScript = document.createElement('script');
+                altScript.src = '/App.tsx';
+                altScript.type = 'text/javascript';
+                
+                altScript.onload = function() {
+                  console.log("App.js - Loaded App.tsx from root path");
+                  renderApp();
+                };
+                
+                altScript.onerror = function() {
+                  console.log("App.js - All attempts to load App.tsx failed");
+                  
+                  // Create simple App component manually as a fallback
+                  console.log("App.js - Creating manual App component");
+                  window.App = function() {
+                    return window.React.createElement(window.ReactRouterDOM.HashRouter, null,
+                      window.React.createElement(window.ReactRouterDOM.Routes, null,
+                        window.React.createElement(window.ReactRouterDOM.Route, { 
+                          path: '/', 
+                          element: window.React.createElement(window.ReactRouterDOM.Navigate, { to: '/guia-online', replace: true })
+                        }),
+                        window.React.createElement(window.ReactRouterDOM.Route, { 
+                          path: '/guia-online', 
+                          element: window.React.createElement('div', { className: "container mx-auto px-4 py-8" },
+                            window.React.createElement('h1', { className: "text-2xl font-bold mb-4" }, 'Guia de Plano de Parto'),
+                            window.React.createElement('p', null, 'Bem-vinda ao Guia de Plano de Parto!')
+                          )
+                        }),
+                        window.React.createElement(window.ReactRouterDOM.Route, {
+                          path: '*',
+                          element: window.React.createElement('div', { className: "container mx-auto px-4 py-8" },
+                            window.React.createElement('h1', { className: "text-2xl font-bold mb-4" }, 'Página não encontrada'),
+                            window.React.createElement('a', { href: '#/guia-online' }, 'Voltar para o Guia')
+                          )
+                        })
+                      )
+                    );
+                  };
+                  renderApp();
+                };
+                
+                document.body.appendChild(altScript);
+              };
+              
+              document.body.appendChild(tsxScript);
+            });
+        } catch (importError) {
+          console.log("App.js - Module import not supported, trying direct script approach for App.tsx");
+          
+          // Try as a direct script tag since import() failed
+          const directScript = document.createElement('script');
+          directScript.src = './src/App.tsx';
+          directScript.onload = renderApp;
+          directScript.onerror = showFallbackContent;
+          document.body.appendChild(directScript);
+        }
       };
       
-      document.body.appendChild(script);
+      document.body.appendChild(compiledScript);
     }
     
     // Function to render the App component

@@ -1,8 +1,5 @@
 
 // App rendering utilities
-import { loadScript } from './scriptLoader.js';
-import { createBasicAppContent } from './fallbackApp.js';
-
 console.log('AppRenderer - Initializing app renderer');
 
 /**
@@ -62,7 +59,20 @@ function renderBasicContent() {
   var rootElement = document.getElementById('root');
   if (!rootElement) return;
   
-  createBasicAppContent(rootElement);
+  // Try to use the fallback app if available
+  if (window.__fallbackApp && window.__fallbackApp.createBasicContent) {
+    window.__fallbackApp.createBasicContent(rootElement);
+  } else {
+    // Create a simple loader message
+    rootElement.innerHTML = `
+      <div style="text-align: center; padding: 40px;">
+        <h1>Guia de Plano de Parto</h1>
+        <p>Carregando conteúdo...</p>
+        <div style="width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; margin: 20px auto; animation: spin 1s linear infinite;"></div>
+        <style>@keyframes spin {0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }}</style>
+      </div>
+    `;
+  }
 }
 
 // Expose to window for non-module environments
@@ -73,4 +83,17 @@ if (typeof window !== 'undefined') {
   };
 }
 
-export { renderAppComponent, renderBasicContent };
+// Try exporting for module environments, but wrapped in try/catch to avoid errors in non-module contexts
+try {
+  if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports = {
+      renderAppComponent,
+      renderBasicContent
+    };
+  } else if (typeof exports !== 'undefined') {
+    exports.renderAppComponent = renderAppComponent;
+    exports.renderBasicContent = renderBasicContent;
+  }
+} catch (e) {
+  console.warn("AppRenderer - Exports not supported in this context");
+}
