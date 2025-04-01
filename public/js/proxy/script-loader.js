@@ -16,31 +16,58 @@
     if (typeof url !== 'string') return false;
     return config.trustedDomains.some(domain => url.includes(domain));
   };
+
+  // Helper function to check if a resource exists before trying to load it
+  const checkResourceExists = async (url) => {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.warn(`[Script Loader] Resource check failed for ${url}:`, error);
+      return false;
+    }
+  };
   
   // Create script loading helper
   window.__loadScriptWithCORS = function(src, callback, attributes = {}) {
     console.log("[Script Loader] Loading script with CORS support:", src);
     
+    // For empty or null src, log error and call callback with error
+    if (!src) {
+      console.error("[Script Loader] Empty or null script source provided");
+      if (callback) callback(new Error("Empty script source"));
+      return null;
+    }
+    
     // Skip for trusted domains
     if (isTrustedDomain(src)) {
-      const script = document.createElement('script');
-      script.src = src;
-      script.type = attributes.type || 'text/javascript';
-      Object.keys(attributes).forEach(key => {
-        if (key !== 'type') { // We've already set type
-          script.setAttribute(key, attributes[key]);
+      // Check if resource exists first for trusted domains
+      checkResourceExists(src).then(exists => {
+        if (!exists) {
+          console.warn(`[Script Loader] Resource not found at ${src}, trying fallback`);
+          loadLocalFallback();
+          return;
         }
+        
+        const script = document.createElement('script');
+        script.src = src;
+        script.type = attributes.type || 'text/javascript';
+        Object.keys(attributes).forEach(key => {
+          if (key !== 'type') { // We've already set type
+            script.setAttribute(key, attributes[key]);
+          }
+        });
+        script.onload = function() {
+          console.log("[Script Loader] Script loaded successfully:", src);
+          if (callback) callback();
+        };
+        script.onerror = function(error) {
+          console.error("[Script Loader] Script loading failed:", src);
+          loadLocalFallback();
+        };
+        document.head.appendChild(script);
       });
-      script.onload = function() {
-        console.log("[Script Loader] Script loaded successfully:", src);
-        if (callback) callback();
-      };
-      script.onerror = function(error) {
-        console.error("[Script Loader] Script loading failed:", src);
-        if (callback) callback(error);
-      };
-      document.head.appendChild(script);
-      return script;
+      return null;
     }
     
     const needsProxy = config.problematicDomains.some(domain => src.includes(domain));
@@ -121,29 +148,38 @@
       document.head.appendChild(script);
       return script;
     } else {
-      // For non-problematic domains, load normally
-      const script = document.createElement('script');
-      script.src = src;
-      script.type = attributes.type || 'text/javascript';
-      
-      Object.keys(attributes).forEach(key => {
-        if (key !== 'type') { // We've already set type
-          script.setAttribute(key, attributes[key]);
+      // For non-problematic domains, check resource exists first
+      checkResourceExists(src).then(exists => {
+        if (!exists) {
+          console.warn(`[Script Loader] Resource not found at ${src}, trying fallback`);
+          loadLocalFallback();
+          return;
         }
+        
+        // Load normally
+        const script = document.createElement('script');
+        script.src = src;
+        script.type = attributes.type || 'text/javascript';
+        
+        Object.keys(attributes).forEach(key => {
+          if (key !== 'type') { // We've already set type
+            script.setAttribute(key, attributes[key]);
+          }
+        });
+        
+        script.onload = function() {
+          console.log("[Script Loader] Script loaded successfully:", src);
+          if (callback) callback();
+        };
+        
+        script.onerror = function(error) {
+          console.error("[Script Loader] Script loading failed:", src);
+          loadLocalFallback();
+        };
+        
+        document.head.appendChild(script);
       });
-      
-      script.onload = function() {
-        console.log("[Script Loader] Script loaded successfully:", src);
-        if (callback) callback();
-      };
-      
-      script.onerror = function(error) {
-        console.error("[Script Loader] Script loading failed:", src);
-        if (callback) callback(error);
-      };
-      
-      document.head.appendChild(script);
-      return script;
+      return null;
     }
     
     // Helper function to load local fallbacks
@@ -175,22 +211,32 @@
         if (callback) callback();
       }
       else {
-        // Generic fallback approach
+        // Generic fallback approach - check if file exists first in assets folder
         const fileName = src.split('/').pop();
-        const fallbackScript = document.createElement('script');
-        fallbackScript.src = `/assets/${fileName}`;
-        fallbackScript.onload = function() {
-          console.log("[Script Loader] Local fallback loaded successfully:", fileName);
-          if (callback) callback();
-        };
-        fallbackScript.onerror = function(fallbackError) {
-          console.error("[Script Loader] Local fallback failed:", fallbackError);
-          if (callback) callback(fallbackError);
-        };
-        document.head.appendChild(fallbackScript);
+        const fallbackPath = `/assets/${fileName}`;
+        
+        checkResourceExists(fallbackPath).then(exists => {
+          if (exists) {
+            const fallbackScript = document.createElement('script');
+            fallbackScript.src = fallbackPath;
+            fallbackScript.onload = function() {
+              console.log("[Script Loader] Local fallback loaded successfully:", fileName);
+              if (callback) callback();
+            };
+            fallbackScript.onerror = function(fallbackError) {
+              console.error("[Script Loader] Local fallback failed:", fallbackError);
+              if (callback) callback(fallbackError);
+            };
+            document.head.appendChild(fallbackScript);
+          } else {
+            console.error(`[Script Loader] No fallback available for ${src}`);
+            if (callback) callback(new Error(`No fallback available for ${src}`));
+          }
+        });
       }
     }
   };
   
   console.log("[Script Loader] Script loader with CORS support initialized");
 })();
+

@@ -14,13 +14,12 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     
-    <!-- CORS and security headers with updated CSP - more permissive for scripts -->
+    <!-- CORS headers - CSP moved to _headers file -->
     <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <meta http-equiv="Access-Control-Allow-Methods" content="GET, POST, OPTIONS">
     <meta http-equiv="Access-Control-Allow-Headers" content="Origin, Content-Type, Accept">
     <meta http-equiv="Cross-Origin-Embedder-Policy" content="credentialless">
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.energiamaterna.com.br https://*.wix.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://corsproxy.io https://cors-anywhere.herokuapp.com https://cors.bridged.cc; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co https://*.gpteng.co https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://corsproxy.io https://cors-anywhere.herokuapp.com https://cors.bridged.cc; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.energiamaterna.com.br; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.energiamaterna.com.br https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://corsproxy.io https://cors-anywhere.herokuapp.com https://cors.bridged.cc https://cdn.gpteng.co https://*.gpteng.co; frame-ancestors 'self' https://*.energiamaterna.com.br https://*.wix.com;">
     
     <!-- GitHub Pages SPA support -->
     <script type="text/javascript">
@@ -78,6 +77,9 @@
     
     <!-- GPT Engineer Script - Changed from module to regular script to avoid CSP issues -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="text/javascript" crossorigin="anonymous"></script>
+    
+    <!-- Error handler for improved debugging -->
+    <script src="/js/error-handler.js"></script>
     
     <!-- Modular script loader -->
     <script src="/js/script-loader.js"></script>
