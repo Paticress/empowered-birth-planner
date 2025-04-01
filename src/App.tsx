@@ -92,8 +92,9 @@ export default App;
 // Manually expose App to window with proper type casting for legacy code paths
 if (typeof window !== 'undefined') {
   try {
-    (window as any).App = App;
-    console.log("App component exported to window.App");
+    // Make sure we expose App to window for non-module code paths
+    window.App = App;
+    console.log("App component exported to window.App successfully");
   } catch (error) {
     console.error("Error assigning App to window:", error);
   }
