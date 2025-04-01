@@ -79,19 +79,13 @@ if (typeof window !== 'undefined') {
   };
 }
 
-// Support both CommonJS and ES modules without causing syntax errors
+// Support for older browsers without breaking code
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-  module.exports = {
-    createBasicAppContent: createBasicAppContent
-  };
-}
-
-// Support for import statement in ES modules context
-// This is wrapped in a try/catch to avoid errors in non-module contexts
-try {
-  if (typeof exports !== 'undefined') {
-    exports.createBasicAppContent = createBasicAppContent;
+  try {
+    module.exports = {
+      createBasicAppContent: createBasicAppContent
+    };
+  } catch (e) {
+    console.warn("FallbackApp - Exports not supported in this context");
   }
-} catch (e) {
-  console.warn("FallbackApp - Exports not supported in this context");
 }

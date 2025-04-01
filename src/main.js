@@ -13,13 +13,13 @@
   console.log("Main.js - Initializing application using standard script");
   
   // Create a simple loading indicator in the root element
-  const rootElement = document.getElementById('root');
+  var rootElement = document.getElementById('root');
   if (rootElement && !rootElement.hasChildNodes()) {
     rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Carregando...</p><div style="width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; margin: 20px auto; animation: spin 1s linear infinite;"></div></div><style>@keyframes spin {0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }}</style>';
   }
   
   function loadScripts(scripts, onComplete) {
-    let loadedCount = 0;
+    var loadedCount = 0;
     
     function loadNextScript() {
       if (loadedCount >= scripts.length) {
@@ -27,7 +27,7 @@
         return;
       }
       
-      const script = document.createElement('script');
+      var script = document.createElement('script');
       script.src = scripts[loadedCount];
       script.onload = function() {
         loadedCount++;
@@ -45,13 +45,13 @@
   }
   
   // Check if React is already loaded
-  const reactLoaded = typeof window.React !== 'undefined';
-  const reactDOMLoaded = typeof window.ReactDOM !== 'undefined';
-  const reactRouterLoaded = typeof window.ReactRouterDOM !== 'undefined';
+  var reactLoaded = typeof window.React !== 'undefined';
+  var reactDOMLoaded = typeof window.ReactDOM !== 'undefined';
+  var reactRouterLoaded = typeof window.ReactRouterDOM !== 'undefined';
   
   function initApp() {
     // Try to load App directly
-    const appScript = document.createElement('script');
+    var appScript = document.createElement('script');
     appScript.src = '/src/App.js';
     appScript.onload = function() {
       console.log("Main.js - App.js loaded successfully");
@@ -60,7 +60,7 @@
       console.error("Main.js - Failed to load App.js, showing fallback");
       
       // Try Module import of App.tsx as a last resort
-      if (typeof import === 'function') {
+      if (typeof window.importModule === 'function') {
         console.log("Main.js - Module import of App.tsx failed, trying App.js bridge");
         
         // Try to load the fallback app if available
@@ -68,7 +68,7 @@
           window.__fallbackApp.createBasicContent(document.getElementById('root'));
         } else {
           // Show error message
-          const rootEl = document.getElementById('root');
+          var rootEl = document.getElementById('root');
           if (rootEl) {
             rootEl.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p></div>';
           }
@@ -76,7 +76,7 @@
       } else {
         // Show error message directly
         console.error("Main.js - Module import not supported, showing error");
-        const rootEl = document.getElementById('root');
+        var rootEl = document.getElementById('root');
         if (rootEl) {
           rootEl.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p></div>';
         }
@@ -87,7 +87,7 @@
   
   // Load dependencies in sequence if needed
   if (!reactLoaded || !reactDOMLoaded || !reactRouterLoaded) {
-    const dependencies = [];
+    var dependencies = [];
     
     if (!reactLoaded) {
       dependencies.push('https://unpkg.com/react@18/umd/react.production.min.js');
