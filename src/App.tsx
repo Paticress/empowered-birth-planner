@@ -86,13 +86,13 @@ const App = () => {
   );
 };
 
-// Make sure App is exported as default
+// Export App as default for module imports
 export default App;
 
-// Manually expose App to window to ensure it's accessible for legacy code paths
+// Manually expose App to window with proper type casting for legacy code paths
 if (typeof window !== 'undefined') {
   try {
-    window.App = App;
+    (window as any).App = App;
     console.log("App component exported to window.App");
   } catch (error) {
     console.error("Error assigning App to window:", error);

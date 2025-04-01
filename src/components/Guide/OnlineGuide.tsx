@@ -150,10 +150,13 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
   );
 }
 
+// Modified global export to use the correct TypeScript approach
 // Ensure component is also available globally for non-module contexts
 if (typeof window !== 'undefined') {
   try {
-    window.OnlineGuide = OnlineGuide;
+    // Use type assertion to add OnlineGuide to the Window interface
+    (window as any).OnlineGuide = OnlineGuide;
+    console.log("OnlineGuide component exported to window");
   } catch (error) {
     console.error("Error exporting OnlineGuide to window:", error);
   }
