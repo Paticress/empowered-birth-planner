@@ -38,6 +38,27 @@
       };
     }
     
+    // Attempt to load the GPT Engineer script directly if not already tried
+    if (!window.__GPT_ENGINEER_LOAD_ATTEMPTED) {
+      window.__GPT_ENGINEER_LOAD_ATTEMPTED = true;
+      
+      // Ensure script tag exists with proper type
+      const existingScript = document.querySelector('script[src*="gptengineer.js"]');
+      if (!existingScript) {
+        try {
+          const script = document.createElement('script');
+          script.src = "https://cdn.gpteng.co/gptengineer.js";
+          script.type = "module"; // Important: This must be a module!
+          script.onerror = function() {
+            console.warn("Failed to load GPT Engineer from CDN");
+          };
+          document.body.appendChild(script);
+        } catch (error) {
+          console.error("Error adding GPT Engineer script:", error);
+        }
+      }
+    }
+    
     // Add any missing methods to ensure API completeness
     if (typeof window.gptengineer.createSelect !== 'function') {
       window.gptengineer.createSelect = function() {
