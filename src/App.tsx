@@ -86,18 +86,14 @@ const App = () => {
   );
 };
 
-// Immediately export the App component
+// Make sure App is exported as default
 export default App;
 
-// Mark that the main App component has loaded (after App declaration)
+// Manually expose App to window to ensure it's accessible for legacy code paths
 if (typeof window !== 'undefined') {
-  // Ensure we're not in a module context to avoid import.meta errors
   try {
     window.App = App;
-    console.log(`App component exported to window.App`);
-    console.log(`Current URL: ${window.location.href}`);
-    console.log(`Current path: ${window.location.pathname}`);
-    console.log(`Current hash: ${window.location.hash}`);
+    console.log("App component exported to window.App");
   } catch (error) {
     console.error("Error assigning App to window:", error);
   }

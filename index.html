@@ -92,8 +92,28 @@
     <!-- CORS Proxy loader -->
     <script src="/public/proxy.js"></script>
     
-    <!-- GPT Engineer Script - Set as non-module explicitly -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="text/javascript" crossorigin="anonymous"></script>
+    <!-- Add a local fallback for GPT Engineer instead of directly loading from CDN -->
+    <script>
+      // Create a GPT Engineer fallback immediately to avoid errors
+      window.gptengineer = window.gptengineer || {
+        initialized: true,
+        version: 'fallback-1.0',
+        createSelect: function() { return null; },
+        isAvailable: function() { return false; }
+      };
+      
+      // Try to load the actual script with proper error handling
+      (function() {
+        var script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/@gptengineer/core@latest/dist/gptengineer.min.js";
+        script.type = "text/javascript";
+        script.crossOrigin = "anonymous";
+        script.onerror = function() {
+          console.warn("Could not load GPT Engineer from CDN, using fallback");
+        };
+        document.body.appendChild(script);
+      })();
+    </script>
     
     <!-- Improved GPT Engineer fallback -->
     <script src="/public/assets/gpteng-fallback.js"></script>

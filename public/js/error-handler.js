@@ -1,21 +1,15 @@
 
+// Global error handling utilities
 (function() {
   console.log("[Error Handler] Initializing enhanced error handling");
   
-  // Store original error handlers
-  const originalOnError = window.onerror;
-  const originalUnhandledRejection = window.onunhandledrejection;
-  
-  // Track errors for debugging
-  window.__APP_ERRORS = window.__APP_ERRORS || [];
-  
-  // Enhanced error handler
+  // Setup global error handler
   window.onerror = function(message, source, lineno, colno, error) {
-    console.error('[Error Handler] Global error caught:', { message, source, lineno, colno, error });
+    console.error("[Error Handler] Global error caught:", { message, source, lineno, colno, error });
     
-    // Log error details for debugging
+    // Track errors for debugging
+    window.__APP_ERRORS = window.__APP_ERRORS || [];
     window.__APP_ERRORS.push({
-      type: 'error',
       message: message,
       source: source,
       lineno: lineno,
@@ -24,59 +18,58 @@
       time: new Date().toISOString()
     });
     
-    // Handle specific errors
-    if (typeof message === 'string') {
-      // 404 Not Found errors
-      if (message.includes('404') || message.includes('not found')) {
-        console.warn('[Error Handler] Resource not found error detected');
+    // Check if it's a module error (for fallback handling)
+    if (typeof message === 'string' && 
+        (message.includes('import.meta') || message.includes('module') || message.includes('MIME'))) {
+      console.warn("[Error Handler] Module/MIME error detected, may require compatibility mode");
+      
+      // For GPT Engineer specifically, create a fallback
+      if (source && source.includes('gptengineer.js')) {
+        console.log("[Error Handler] Providing fallback for GPT Engineer");
+        window.gptengineer = window.gptengineer || {
+          createSelect: function() { return null; },
+          isAvailable: function() { return false; }
+        };
       }
       
-      // CSP errors
-      if (message.includes('Content Security Policy')) {
-        console.warn('[Error Handler] CSP violation detected:', message);
-      }
-      
-      // Module errors
-      if (message.includes('import.meta') || message.includes('module') || message.includes('MIME')) {
-        console.warn('[Error Handler] Module/MIME error detected, may require compatibility mode');
-      }
+      return true; // Prevent the error from showing in console
     }
     
-    // Call original handler if it exists
-    if (typeof originalOnError === 'function') {
-      return originalOnError(message, source, lineno, colno, error);
-    }
-    
-    // Let error propagate by default
-    return false;
+    return false; // Let other error handlers run
   };
   
-  // Enhanced unhandled promise rejection handler
-  window.onunhandledrejection = function(event) {
+  // Add unhandledrejection handler for promises
+  window.addEventListener('unhandledrejection', function(event) {
     console.error('[Error Handler] Unhandled promise rejection:', event.reason);
     
-    // Log promise error details
+    // Track errors for debugging
+    window.__APP_ERRORS = window.__APP_ERRORS || [];
     window.__APP_ERRORS.push({
       type: 'unhandledrejection',
       message: event.reason ? (event.reason.message || String(event.reason)) : 'Unknown promise rejection',
       stack: event.reason && event.reason.stack,
       time: new Date().toISOString()
     });
-    
-    // Call original handler if it exists
-    if (typeof originalUnhandledRejection === 'function') {
-      originalUnhandledRejection(event);
-    }
-  };
+  });
   
-  // Add global error reporting function
-  window.__getErrorReport = function() {
-    return {
-      errors: window.__APP_ERRORS || [],
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      timestamp: new Date().toISOString()
-    };
+  // Function to show error message in the UI
+  function showErrorMessage(message) {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+          <h1>Erro ao carregar</h1>
+          <p>${message}</p>
+          <p><a href="/" style="color: #0066ff; text-decoration: none;" onclick="window.location.reload(); return false;">Tentar novamente</a></p>
+        </div>
+      `;
+    }
+  }
+  
+  // Expose the error handler functionality
+  window.__errorHandler = {
+    showError: showErrorMessage,
+    getErrors: function() { return window.__APP_ERRORS || []; }
   };
   
   console.log("[Error Handler] Enhanced error handling initialized");

@@ -1,5 +1,5 @@
 
-// App.js - Non-module bridge file
+// App.js - Non-module bridge file for maximum compatibility
 (function() {
   try {
     console.log("App.js - Attempting to hydrate the full application");
@@ -12,143 +12,120 @@
     
     window.__FULL_APP_LOADED = true;
     
-    // Track render attempts to prevent infinite loops
-    window.__RENDER_ATTEMPTS = window.__RENDER_ATTEMPTS || 0;
-    if (window.__RENDER_ATTEMPTS > 3) {
-      console.error("App.js - Too many render attempts, may indicate a critical issue");
-      return;
-    }
-    window.__RENDER_ATTEMPTS++;
-    
-    // Ensure we export our App component to the window
-    window.App = window.App || function() {
-      console.log("App.js - Using placeholder App component until real one loads");
-      return React.createElement('div', null, "Carregando aplicação...");
+    // All dependencies needed for the app to run
+    const requiredDependencies = {
+      React: typeof window.React !== 'undefined',
+      ReactDOM: typeof window.ReactDOM !== 'undefined',
+      ReactRouterDOM: typeof window.ReactRouterDOM !== 'undefined'
     };
     
-    // Add error handling for React Router issues
-    if (!window.ReactRouterDOM) {
-      console.error("App.js - ReactRouterDOM not available, trying to load it");
-      var routerScript = document.createElement('script');
-      routerScript.src = 'https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js';
-      routerScript.crossOrigin = 'anonymous';
-      
-      routerScript.onload = function() {
-        console.log("App.js - ReactRouterDOM loaded successfully, proceeding");
-        loadAppContent();
-      };
-      
-      routerScript.onerror = function(error) {
-        console.error("App.js - Failed to load ReactRouterDOM:", error);
-        // Try alternative CDN
-        var altScript = document.createElement('script');
-        altScript.src = 'https://cdn.jsdelivr.net/npm/react-router-dom@6/umd/react-router-dom.production.min.js';
-        altScript.crossOrigin = 'anonymous';
-        altScript.onload = function() {
-          console.log("App.js - ReactRouterDOM loaded from alternative CDN, proceeding");
-          loadAppContent();
-        };
-        altScript.onerror = function() {
-          console.error("App.js - Failed to load ReactRouterDOM from alternative CDN");
-          fallbackToCompatMode();
-        };
-        document.body.appendChild(altScript);
-      };
-      
-      document.body.appendChild(routerScript);
-    } else {
-      loadAppContent();
-    }
+    // Check if all dependencies are loaded
+    const allDependenciesLoaded = Object.values(requiredDependencies).every(Boolean);
     
-    function loadAppContent() {
-      // Check if React is available
-      if (!window.React) {
-        console.error("App.js - React not available");
-        loadReactDependencies(function() {
-          loadAppContent();
-        });
-        return;
-      }
-      
-      // Check if ReactDOM is available
-      if (!window.ReactDOM) {
-        console.error("App.js - ReactDOM not available");
-        loadReactDependencies(function() {
-          loadAppContent();
-        });
-        return;
-      }
-      
-      console.log("App.js - All dependencies loaded, rendering app");
-      
-      // Use the window.App directly if it's already properly defined
-      if (typeof window.App === 'function') {
-        console.log("App.js - App component already available in window.App");
+    if (!allDependenciesLoaded) {
+      console.error("App.js - Some dependencies are missing:", requiredDependencies);
+      loadReactDependencies(function() {
         renderAppComponent();
-        return;
-      }
-      
-      // If we get here, we need to try to load the App component from various sources
-      console.log("App.js - Attempting to import App.tsx directly");
-      try {
-        // Try loading main.js first as that's most likely to be available
-        var mainScript = document.createElement('script');
-        mainScript.src = './src/main.js';
-        mainScript.type = 'text/javascript';
-        mainScript.onload = function() {
-          console.log("App.js - Successfully loaded main.js");
-          setTimeout(renderAppComponent, 300);
-        };
-        mainScript.onerror = function() {
-          console.error("App.js - Failed to load main.js, falling back to basic content");
-          renderBasicContent();
-        };
-        document.body.appendChild(mainScript);
-      } catch (err) {
-        console.error("App.js - Error importing App:", err);
-        renderBasicContent();
-      }
+      });
+      return;
     }
     
+    console.log("App.js - All dependencies loaded, rendering app");
+    
+    // Check if App component is already available
+    if (typeof window.App === 'function') {
+      console.log("App.js - App component already available in window.App");
+      renderAppComponent();
+      return;
+    }
+    
+    // Try to load the App component from source
+    try {
+      // Try main.js first as it's most likely to be available
+      var mainScript = document.createElement('script');
+      mainScript.src = './src/main.js';
+      mainScript.type = 'text/javascript';
+      mainScript.onload = function() {
+        console.log("App.js - Successfully loaded main.js");
+        setTimeout(renderAppComponent, 300);
+      };
+      mainScript.onerror = function() {
+        console.error("App.js - Failed to load main.js, using basic routing");
+        renderBasicContent();
+      };
+      document.body.appendChild(mainScript);
+    } catch (err) {
+      console.error("App.js - Error loading App:", err);
+      renderBasicContent();
+    }
+    
+    // Load React dependencies if needed
     function loadReactDependencies(callback) {
       console.log("App.js - Loading React dependencies");
       
       // Load React
-      var reactScript = document.createElement('script');
-      reactScript.src = 'https://unpkg.com/react@18/umd/react.production.min.js';
-      reactScript.crossOrigin = 'anonymous';
-      
-      reactScript.onload = function() {
-        console.log("App.js - React loaded successfully");
+      if (!requiredDependencies.React) {
+        var reactScript = document.createElement('script');
+        reactScript.src = 'https://unpkg.com/react@18/umd/react.production.min.js';
+        reactScript.crossOrigin = 'anonymous';
         
-        // Load ReactDOM
-        var reactDOMScript = document.createElement('script');
-        reactDOMScript.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
-        reactDOMScript.crossOrigin = 'anonymous';
-        
-        reactDOMScript.onload = function() {
-          console.log("App.js - ReactDOM loaded successfully");
+        reactScript.onload = function() {
+          console.log("App.js - React loaded successfully");
           
-          // Call the callback
-          callback();
+          // Load ReactDOM
+          if (!requiredDependencies.ReactDOM) {
+            var reactDOMScript = document.createElement('script');
+            reactDOMScript.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
+            reactDOMScript.crossOrigin = 'anonymous';
+            
+            reactDOMScript.onload = function() {
+              console.log("App.js - ReactDOM loaded successfully");
+              
+              // Load React Router
+              if (!requiredDependencies.ReactRouterDOM) {
+                var routerScript = document.createElement('script');
+                routerScript.src = 'https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js';
+                routerScript.crossOrigin = 'anonymous';
+                
+                routerScript.onload = function() {
+                  console.log("App.js - React Router loaded successfully");
+                  callback();
+                };
+                
+                routerScript.onerror = function() {
+                  console.error("App.js - Failed to load React Router");
+                  callback(); // Continue anyway
+                };
+                
+                document.body.appendChild(routerScript);
+              } else {
+                callback();
+              }
+            };
+            
+            reactDOMScript.onerror = function() {
+              console.error("App.js - Failed to load ReactDOM");
+              callback(); // Continue anyway
+            };
+            
+            document.body.appendChild(reactDOMScript);
+          } else {
+            callback();
+          }
         };
         
-        reactDOMScript.onerror = function(error) {
-          console.error("App.js - Failed to load ReactDOM:", error);
-          fallbackToCompatMode();
+        reactScript.onerror = function() {
+          console.error("App.js - Failed to load React");
+          callback(); // Continue anyway
         };
         
-        document.body.appendChild(reactDOMScript);
-      };
-      
-      reactScript.onerror = function(error) {
-        console.error("App.js - Failed to load React:", error);
-        fallbackToCompatMode();
-      };
-      
-      document.body.appendChild(reactScript);
+        document.body.appendChild(reactScript);
+      } else {
+        callback();
+      }
     }
     
+    // Render the App component
     function renderAppComponent() {
       try {
         console.log("App.js - Rendering full App component");
@@ -157,7 +134,7 @@
         if (rootElement) {
           // Check if App is properly loaded
           if (typeof window.App !== 'function') {
-            console.error("App.js - App component not properly loaded");
+            console.error("App.js - App component not properly loaded, using basic content");
             renderBasicContent();
             return;
           }
@@ -195,6 +172,7 @@
       }
     }
     
+    // Render basic content as fallback
     function renderBasicContent() {
       console.log("App.js - Rendering basic content as fallback");
       var rootElement = document.getElementById('root');
@@ -203,6 +181,7 @@
       createBasicAppContent(rootElement);
     }
     
+    // Create a simple router-based app as fallback
     function createBasicAppContent(rootElement) {
       // Create a simple router-based app
       var SimpleApp = function() {
@@ -251,14 +230,6 @@
         console.error("App.js - Error rendering basic content:", error);
         rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Estamos com dificuldades para carregar o conteúdo. Por favor, tente recarregar a página.</p></div>';
       }
-    }
-    
-    function fallbackToCompatMode() {
-      console.log("App.js - Falling back to compatibility mode");
-      var script = document.createElement('script');
-      script.src = '/src/compat-entry.js';
-      script.type = 'text/javascript';
-      document.body.appendChild(script);
     }
   } catch (outerError) {
     console.error("App.js - Critical error:", outerError);

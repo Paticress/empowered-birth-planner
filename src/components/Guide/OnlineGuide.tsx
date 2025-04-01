@@ -12,7 +12,6 @@ interface OnlineGuideProps {
 export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
   const [activeTab, setActiveTab] = useState('introduction');
   const location = useLocation();
-  const [iframeLoaded, setIframeLoaded] = useState(false);
   
   // Debug logs for component rendering
   console.log("OnlineGuide - Component rendering, embedded:", embedded);
@@ -33,7 +32,6 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
       console.log("OnlineGuide - Received message:", event.data);
       if (event.data && event.data.type === 'wix-check') {
         console.log("OnlineGuide - Received check from parent, sending response");
-        setIframeLoaded(true);
         try {
           window.parent.postMessage({ 
             type: 'loaded', 
@@ -150,4 +148,13 @@ export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
       </main>
     </div>
   );
+}
+
+// Ensure component is also available globally for non-module contexts
+if (typeof window !== 'undefined') {
+  try {
+    window.OnlineGuide = OnlineGuide;
+  } catch (error) {
+    console.error("Error exporting OnlineGuide to window:", error);
+  }
 }
