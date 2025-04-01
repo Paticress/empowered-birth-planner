@@ -57,36 +57,26 @@
     // Load React dependencies
     if (window.__reactLoader && window.__reactLoader.loadReactDependencies) {
       window.__reactLoader.loadReactDependencies(function() {
-        // Render a simple app while loading the full bundle
-        if (window.__appLoader && window.__appLoader.createSimpleApp) {
-          const success = window.__appLoader.createSimpleApp();
-          
-          if (success) {
-            // Load the full app bundle
-            if (window.__appLoader.loadFullAppBundle) {
-              window.__appLoader.loadFullAppBundle().catch(function(err) {
-                console.error("Failed to load full app bundle:", err);
-                
-                // Attempt to load compatibility mode
-                if (window.__errorHandler && window.__errorHandler.loadCompatibilityMode) {
-                  window.__errorHandler.loadCompatibilityMode();
-                }
-              });
-            }
-          } else {
-            console.error("Failed to create simple app");
-            
-            // Attempt to load compatibility mode
-            if (window.__errorHandler && window.__errorHandler.loadCompatibilityMode) {
-              window.__errorHandler.loadCompatibilityMode();
-            }
-          }
-        } else {
-          console.error("App loader utilities not available");
-        }
+        // Try to load App.tsx directly first as a module
+        const appModule = document.createElement('script');
+        appModule.type = 'module';
+        appModule.src = '/src/App.tsx';
+        appModule.onerror = function() {
+          console.log("Main.js - Module import of App.tsx failed, trying App.js bridge");
+          // Fall back to App.js bridge for non-module environments
+          const appScript = document.createElement('script');
+          appScript.src = '/src/App.js';
+          document.body.appendChild(appScript);
+        };
+        document.body.appendChild(appModule);
       });
     } else {
       console.error("React loader utilities not available");
+      
+      // Try to load App.js directly as fallback
+      const appScript = document.createElement('script');
+      appScript.src = '/src/App.js';
+      document.body.appendChild(appScript);
     }
   });
 })();
