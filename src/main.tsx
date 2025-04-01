@@ -90,12 +90,39 @@ declare global {
         }
         
         // Render the app using the correct ReactDOM client API
-        const root = ReactDOM.createRoot(rootElement);
-        root.render(
-          <React.StrictMode>
-            <App />
-          </React.StrictMode>
-        );
+        try {
+          const root = ReactDOM.createRoot(rootElement);
+          root.render(
+            <React.StrictMode>
+              <App />
+            </React.StrictMode>
+          );
+          console.log("Main.tsx - App successfully rendered with modern API");
+        } catch (modernError) {
+          console.error("Main.tsx - Error using modern ReactDOM API:", modernError);
+          
+          // Fallback to legacy ReactDOM.render if available
+          if (typeof (ReactDOM as any).render === 'function') {
+            console.log("Main.tsx - Falling back to legacy ReactDOM.render");
+            (ReactDOM as any).render(
+              <React.StrictMode>
+                <App />
+              </React.StrictMode>,
+              rootElement
+            );
+          } else if (window.ReactDOM && typeof window.ReactDOM.render === 'function') {
+            // Use global ReactDOM as last resort
+            console.log("Main.tsx - Falling back to global ReactDOM.render");
+            window.ReactDOM.render(
+              <React.StrictMode>
+                <App />
+              </React.StrictMode>,
+              rootElement
+            );
+          } else {
+            throw new Error("No compatible ReactDOM render method available");
+          }
+        }
         
         console.log("Main.tsx - App successfully rendered");
       } catch (error) {
@@ -147,11 +174,22 @@ declare global {
           if (typeof ReactDOM.createRoot === 'function') {
             const root = ReactDOM.createRoot(rootElement);
             root.render(React.createElement(SimpleApp));
-          } else {
-            // Fallback for older versions or when using the legacy ReactDOM global
-            console.warn("Main.tsx - ReactDOM.createRoot not available, using render fallback");
-            // Use any cast to ensure TypeScript doesn't complain about legacy render method
+          } else if (typeof (ReactDOM as any).render === 'function') {
+            // Fallback for older versions or when using the legacy ReactDOM import
+            console.warn("Main.tsx - ReactDOM.createRoot not available, using direct render fallback");
             (ReactDOM as any).render(React.createElement(SimpleApp), rootElement);
+          } else if (window.ReactDOM && typeof window.ReactDOM.render === 'function') {
+            // Fallback to global ReactDOM
+            console.warn("Main.tsx - Using global ReactDOM.render fallback");
+            window.ReactDOM.render(React.createElement(SimpleApp), rootElement);
+          } else {
+            console.error("Main.tsx - No React rendering method available");
+            rootElement.innerHTML = `
+              <div style="text-align: center; padding: 20px;">
+                <h2>Erro ao carregar</h2>
+                <p>Não foi possível inicializar o React. Por favor, tente novamente mais tarde.</p>
+              </div>
+            `;
           }
         } catch (renderError) {
           console.error("Main.tsx - Error rendering fallback:", renderError);

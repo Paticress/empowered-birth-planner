@@ -12,6 +12,14 @@
     
     window.__FULL_APP_LOADED = true;
     
+    // Track render attempts to prevent infinite loops
+    window.__RENDER_ATTEMPTS = window.__RENDER_ATTEMPTS || 0;
+    if (window.__RENDER_ATTEMPTS > 3) {
+      console.error("App.js - Too many render attempts, may indicate a critical issue");
+      return;
+    }
+    window.__RENDER_ATTEMPTS++;
+    
     // Add error handling for React Router issues
     if (!window.ReactRouterDOM) {
       console.error("App.js - ReactRouterDOM not available, trying to load it");
@@ -47,6 +55,24 @@
     }
     
     function loadAppContent() {
+      // Check if React is available
+      if (!window.React) {
+        console.error("App.js - React not available");
+        loadReactDependencies(function() {
+          loadAppContent();
+        });
+        return;
+      }
+      
+      // Check if ReactDOM is available
+      if (!window.ReactDOM) {
+        console.error("App.js - ReactDOM not available");
+        loadReactDependencies(function() {
+          loadAppContent();
+        });
+        return;
+      }
+      
       // Check if App component is already available
       if (typeof window.App === 'function') {
         console.log("App.js - App component already available, rendering it");
@@ -66,7 +92,7 @@
         // Force render after a short delay to ensure everything is loaded
         setTimeout(function() {
           renderAppComponent();
-        }, 100);
+        }, 300);
       };
       
       appScript.onerror = function(error) {
@@ -75,6 +101,45 @@
       };
       
       document.body.appendChild(appScript);
+    }
+    
+    function loadReactDependencies(callback) {
+      console.log("App.js - Loading React dependencies");
+      
+      // Load React
+      var reactScript = document.createElement('script');
+      reactScript.src = 'https://unpkg.com/react@18/umd/react.production.min.js';
+      reactScript.crossOrigin = 'anonymous';
+      
+      reactScript.onload = function() {
+        console.log("App.js - React loaded successfully");
+        
+        // Load ReactDOM
+        var reactDOMScript = document.createElement('script');
+        reactDOMScript.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
+        reactDOMScript.crossOrigin = 'anonymous';
+        
+        reactDOMScript.onload = function() {
+          console.log("App.js - ReactDOM loaded successfully");
+          
+          // Call the callback
+          callback();
+        };
+        
+        reactDOMScript.onerror = function(error) {
+          console.error("App.js - Failed to load ReactDOM:", error);
+          fallbackToCompatMode();
+        };
+        
+        document.body.appendChild(reactDOMScript);
+      };
+      
+      reactScript.onerror = function(error) {
+        console.error("App.js - Failed to load React:", error);
+        fallbackToCompatMode();
+      };
+      
+      document.body.appendChild(reactScript);
     }
     
     function renderAppComponent() {
@@ -95,14 +160,28 @@
           
           // Use React 18's createRoot API if available
           if (window.ReactDOM && window.ReactDOM.createRoot) {
-            var root = window.ReactDOM.createRoot(rootElement);
-            root.render(window.React.createElement(window.App));
+            console.log("App.js - Using React 18 createRoot API");
+            try {
+              var root = window.ReactDOM.createRoot(rootElement);
+              root.render(window.React.createElement(window.App));
+              console.log("App.js - App component successfully rendered with createRoot");
+            } catch (err) {
+              console.error("App.js - Error with createRoot API:", err);
+              // Try fallback to older render method
+              if (window.ReactDOM.render) {
+                console.log("App.js - Falling back to legacy render API");
+                window.ReactDOM.render(window.React.createElement(window.App), rootElement);
+                console.log("App.js - App component successfully rendered with legacy API");
+              } else {
+                throw err; // Re-throw if no fallback
+              }
+            }
           } else {
             // Fallback for older React versions
+            console.log("App.js - Using legacy React render API");
             window.ReactDOM.render(window.React.createElement(window.App), rootElement);
+            console.log("App.js - App component successfully rendered with legacy API");
           }
-          
-          console.log("App.js - App component successfully rendered");
         } else {
           console.error("App.js - Root element not found in DOM");
         }
@@ -130,6 +209,14 @@
               )
             }),
             window.React.createElement(window.ReactRouterDOM.Route, {
+              path: '/criar-plano', 
+              element: window.React.createElement('div', { style: { textAlign: 'center', padding: '40px' } },
+                window.React.createElement('h1', null, 'Construtor de Plano de Parto'),
+                window.React.createElement('p', null, 'Estamos preparando seu construtor de plano de parto.'),
+                window.React.createElement('p', null, 'Por favor, aguarde um momento...')
+              )
+            }),
+            window.React.createElement(window.ReactRouterDOM.Route, {
               path: '*',
               element: window.React.createElement('div', { style: { textAlign: 'center', padding: '40px' } },
                 window.React.createElement('h1', null, 'Página não encontrada'),
@@ -147,6 +234,7 @@
         } else {
           window.ReactDOM.render(window.React.createElement(SimpleApp), rootElement);
         }
+        console.log("App.js - Basic routing app rendered successfully");
       } catch (error) {
         console.error("App.js - Error rendering basic content:", error);
         rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Estamos com dificuldades para carregar o conteúdo. Por favor, tente recarregar a página.</p></div>';
@@ -157,9 +245,16 @@
       console.log("App.js - Falling back to compatibility mode");
       var script = document.createElement('script');
       script.src = '/src/compat-entry.js';
+      script.type = 'text/javascript';
       document.body.appendChild(script);
     }
   } catch (outerError) {
     console.error("App.js - Critical error:", outerError);
+    
+    // Try to render basic UI when everything else fails
+    var rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p></div>';
+    }
   }
 })();

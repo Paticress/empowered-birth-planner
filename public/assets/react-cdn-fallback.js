@@ -26,7 +26,9 @@ if (typeof window.React === 'undefined') {
     memo: function(component) { return component; },
     useMemo: function(factory) { return factory(); },
     useCallback: function(callback) { return callback; },
-    useRef: function(initialValue) { return { current: initialValue }; }
+    useRef: function(initialValue) { return { current: initialValue }; },
+    StrictMode: function(props) { return props.children; },
+    version: '18.0.0-fallback'
   };
 }
 
@@ -37,12 +39,23 @@ if (typeof window.ReactDOM === 'undefined') {
     render: function(element, container) {
       console.log("ReactDOM.render fallback called");
       container.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando Guia de Plano de Parto...</h2><p>Por favor, aguarde enquanto carregamos a aplicação.</p></div>';
+      
+      // Try to load the real app after a short delay
+      setTimeout(function() {
+        if (typeof window.__appLoader === 'function') {
+          window.__appLoader();
+        }
+      }, 500);
     },
     createRoot: function(container) {
       console.log("ReactDOM.createRoot fallback called");
       return {
         render: function(element) {
+          console.log("ReactDOM.createRoot().render fallback called");
           container.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando Guia de Plano de Parto...</h2><p>Por favor, aguarde enquanto carregamos a aplicação.</p></div>';
+          
+          // Store the container for potential re-renders
+          container.__reactContainer = true;
           
           // Try to load the real app after a short delay
           setTimeout(function() {
@@ -50,11 +63,22 @@ if (typeof window.ReactDOM === 'undefined') {
               window.__appLoader();
             }
           }, 500);
+        },
+        unmount: function() {
+          console.log("ReactDOM.createRoot().unmount fallback called");
+          if (container) {
+            container.innerHTML = '';
+          }
         }
       };
     },
-    unmountComponentAtNode: function() {},
-    findDOMNode: function() { return null; }
+    unmountComponentAtNode: function(container) {
+      if (container) {
+        container.innerHTML = '';
+      }
+    },
+    findDOMNode: function() { return null; },
+    version: '18.0.0-fallback'
   };
 }
 
@@ -148,7 +172,9 @@ if (typeof window.ReactRouterDOM === 'undefined') {
         },
         ...props
       }, props.children);
-    }
+    },
+    
+    version: '6.0.0-fallback'
   };
   
   // Setup a basic hash change listener to trigger UI updates
@@ -156,6 +182,7 @@ if (typeof window.ReactRouterDOM === 'undefined') {
     // Find the root element and force a re-render
     const root = document.getElementById('root');
     if (root && root.__reactContainer) {
+      console.log("Hash changed, forcing re-render");
       const appElement = root.innerHTML;
       root.innerHTML = '';
       setTimeout(() => {
@@ -169,6 +196,15 @@ if (typeof window.ReactRouterDOM === 'undefined') {
 window.__appLoader = function() {
   console.log("Attempting to load the real application");
   
+  // Track loading attempts to prevent loops
+  window.__APP_LOAD_ATTEMPTS = window.__APP_LOAD_ATTEMPTS || 0;
+  window.__APP_LOAD_ATTEMPTS++;
+  
+  if (window.__APP_LOAD_ATTEMPTS > 3) {
+    console.error("Too many app loading attempts, stopping to prevent infinite loop");
+    return;
+  }
+  
   // Try to load the main app script
   const script = document.createElement('script');
   script.src = '/src/App.js';
@@ -178,6 +214,13 @@ window.__appLoader = function() {
     const mainScript = document.createElement('script');
     mainScript.src = '/src/main.js';
     mainScript.type = 'text/javascript';
+    mainScript.onerror = function() {
+      console.error("Failed to load main.js, trying compat-entry.js");
+      const compatScript = document.createElement('script');
+      compatScript.src = '/src/compat-entry.js';
+      compatScript.type = 'text/javascript';
+      document.body.appendChild(compatScript);
+    };
     document.body.appendChild(mainScript);
   };
   document.body.appendChild(script);
@@ -190,9 +233,9 @@ window.__checkReactLibs = function() {
     hasReactDOM: typeof window.ReactDOM !== 'undefined',
     hasReactRouterDOM: typeof window.ReactRouterDOM !== 'undefined',
     usingFallbacks: {
-      React: typeof window.React !== 'undefined' && !window.React.version,
-      ReactDOM: typeof window.ReactDOM !== 'undefined' && !window.ReactDOM.version,
-      ReactRouterDOM: typeof window.ReactRouterDOM !== 'undefined' && !window.ReactRouterDOM.version
+      React: typeof window.React !== 'undefined' && (window.React.version || '').includes('fallback'),
+      ReactDOM: typeof window.ReactDOM !== 'undefined' && (window.ReactDOM.version || '').includes('fallback'),
+      ReactRouterDOM: typeof window.ReactDOM !== 'undefined' && (window.ReactRouterDOM.version || '').includes('fallback')
     }
   };
 };

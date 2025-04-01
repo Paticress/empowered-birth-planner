@@ -68,17 +68,17 @@ console.log("Compat-entry.js - Loading compatibility mode");
       
       // Render the basic app
       try {
-        if (ReactDOM.createRoot) {
-          ReactDOM.createRoot(rootElement).render(React.createElement(LoadingApp));
+        if (window.ReactDOM.createRoot) {
+          window.ReactDOM.createRoot(rootElement).render(React.createElement(LoadingApp));
         } else {
-          ReactDOM.render(React.createElement(LoadingApp), rootElement);
+          window.ReactDOM.render(React.createElement(LoadingApp), rootElement);
         }
       } catch (error) {
         console.error("Failed to render simple app:", error);
-        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando...</h2></div>';
+        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando...</h2><div class="spinner"></div></div>';
       }
     } else {
-      rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando...</h2></div>';
+      rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando...</h2><div class="spinner"></div></div>';
     }
   }
   
@@ -111,44 +111,22 @@ console.log("Compat-entry.js - Loading compatibility mode");
   // Helper function to directly initialize the app from our App.tsx component
   function initApp() {
     try {
-      // Try to load our real App component
+      // Try to load our real App component through App.js bridge
       const script = document.createElement('script');
       script.type = "text/javascript";
-      script.src = "/src/App.tsx.js"; // Using the compiled version if available
+      script.src = "/src/App.js";
       script.onerror = function() {
-        console.error("Could not load App.tsx.js, trying App.js");
+        console.error("Could not load App.js, trying alternative approach");
         
-        const appScript = document.createElement('script');
-        appScript.type = "text/javascript";
-        appScript.src = "/src/App.js";
-        appScript.onerror = function() {
-          console.error("Could not load App.js, falling back to router only");
+        // Try to load through main.js
+        const mainScript = document.createElement('script');
+        mainScript.type = "text/javascript";
+        mainScript.src = "/src/main.js";
+        mainScript.onerror = function() {
+          console.error("Could not load main.js, falling back to router only");
           initSimpleRouter();
         };
-        document.body.appendChild(appScript);
-      };
-      script.onload = function() {
-        console.log("Successfully loaded App component in compatibility mode");
-        
-        // Render the App component if it's available
-        if (typeof window.App === 'function') {
-          const rootElement = document.getElementById('root');
-          if (rootElement) {
-            try {
-              if (ReactDOM.createRoot) {
-                ReactDOM.createRoot(rootElement).render(React.createElement(window.App));
-              } else {
-                ReactDOM.render(React.createElement(window.App), rootElement);
-              }
-            } catch (err) {
-              console.error("Failed to render App component:", err);
-              initSimpleRouter();
-            }
-          }
-        } else {
-          console.error("App component not available");
-          initSimpleRouter();
-        }
+        document.body.appendChild(mainScript);
       };
       document.body.appendChild(script);
     } catch (error) {
@@ -171,6 +149,7 @@ console.log("Compat-entry.js - Loading compatibility mode");
   });
   
   function initSimpleRouter() {
+    console.log("Compat - Initializing simple router");
     ensureReactLoaded(function() {
       // Load React Router if needed
       if (!window.ReactRouterDOM) {
@@ -184,6 +163,8 @@ console.log("Compat-entry.js - Loading compatibility mode");
   }
   
   function createSimpleRouter() {
+    console.log("Compat - Creating simple router app");
+    
     // Try to get the correct object
     const RouterObj = window.ReactRouterDOM || {};
     const HashRouter = RouterObj.HashRouter;
@@ -228,6 +209,16 @@ console.log("Compat-entry.js - Loading compatibility mode");
             )
           }),
           React.createElement(Route, { 
+            path: '/criar-plano', 
+            element: React.createElement('div', {
+              style: { textAlign: 'center', padding: '40px' }
+            }, 
+              React.createElement('h1', null, 'Construtor de Plano de Parto'),
+              React.createElement('p', null, 'Estamos preparando seu construtor de plano de parto.'),
+              React.createElement('p', null, 'Por favor, aguarde um momento...')
+            )
+          }),
+          React.createElement(Route, { 
             path: '*', 
             element: React.createElement('div', {
               style: { textAlign: 'center', padding: '40px' }
@@ -244,11 +235,12 @@ console.log("Compat-entry.js - Loading compatibility mode");
     const rootElement = document.getElementById('root');
     if (rootElement) {
       try {
-        if (ReactDOM.createRoot) {
-          ReactDOM.createRoot(rootElement).render(React.createElement(RouterApp));
+        if (window.ReactDOM.createRoot) {
+          window.ReactDOM.createRoot(rootElement).render(React.createElement(RouterApp));
         } else {
-          ReactDOM.render(React.createElement(RouterApp), rootElement);
+          window.ReactDOM.render(React.createElement(RouterApp), rootElement);
         }
+        console.log("Compat - Simple router app rendered successfully");
       } catch (error) {
         console.error("Failed to render router app:", error);
         rootElement.innerHTML = `
