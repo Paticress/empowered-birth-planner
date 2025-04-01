@@ -23,12 +23,20 @@
         (message.includes('import.meta') || message.includes('module') || message.includes('MIME'))) {
       console.warn("[Error Handler] Module/MIME error detected, may require compatibility mode");
       
-      // For GPT Engineer specifically, create a fallback
-      if (source && source.includes('gptengineer.js')) {
+      // For GPT Engineer specifically, create a more comprehensive fallback
+      if (source && (source.includes('gptengineer.js') || source.includes('gpteng.co'))) {
         console.log("[Error Handler] Providing fallback for GPT Engineer");
         window.gptengineer = window.gptengineer || {
-          createSelect: function() { return null; },
-          isAvailable: function() { return false; }
+          initialized: true,
+          version: 'fallback-2.0',
+          createSelect: function() { 
+            console.log("GPT Engineer Select API called (fallback provided by error handler)");
+            return null; 
+          },
+          isAvailable: function() { return false; },
+          onError: function(e) {
+            console.error("GPT Engineer error handler (fallback):", e);
+          }
         };
       }
       

@@ -38,6 +38,20 @@
       };
     }
     
+    // Add any missing methods to ensure API completeness
+    if (typeof window.gptengineer.createSelect !== 'function') {
+      window.gptengineer.createSelect = function() {
+        console.log("Enhanced GPT Engineer Select API called - using fallback implementation");
+        return null;
+      };
+    }
+    
+    if (typeof window.gptengineer.isAvailable !== 'function') {
+      window.gptengineer.isAvailable = function() {
+        return false;
+      };
+    }
+    
     // Set load state so other modules know the fallback is ready
     if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
     

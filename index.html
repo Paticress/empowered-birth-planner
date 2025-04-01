@@ -93,7 +93,7 @@
     <!-- CORS Proxy loader -->
     <script src="/public/proxy.js"></script>
     
-    <!-- Add a local fallback for GPT Engineer instead of directly loading from CDN -->
+    <!-- GPT Engineer script with proper error handling -->
     <script>
       // Create a GPT Engineer fallback immediately to avoid errors
       window.gptengineer = window.gptengineer || {
@@ -107,7 +107,7 @@
       (function() {
         var script = document.createElement('script');
         script.src = "https://cdn.jsdelivr.net/npm/@gptengineer/core@latest/dist/gptengineer.min.js";
-        script.type = "text/javascript";
+        script.type = "text/javascript"; // Important: DO NOT use "module" type here
         script.crossOrigin = "anonymous";
         script.onerror = function() {
           console.warn("Could not load GPT Engineer from CDN, using fallback");
