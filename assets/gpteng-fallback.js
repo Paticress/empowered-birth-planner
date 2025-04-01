@@ -15,7 +15,48 @@
     
     createSelect: function(element, options) {
       console.log("GPT Engineer fallback createSelect called", element, options);
-      // Return null to indicate the function was called but no real functionality is available
+      // If we're in a fallback situation, just create a basic select element
+      if (element && typeof document !== 'undefined') {
+        try {
+          // Create a simple select element as fallback
+          const selectEl = document.createElement('select');
+          selectEl.className = 'fallback-select';
+          
+          // Add a default option
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.text = 'Selecione uma opção';
+          defaultOption.disabled = true;
+          defaultOption.selected = true;
+          selectEl.appendChild(defaultOption);
+          
+          // Add options if provided
+          if (options && Array.isArray(options)) {
+            options.forEach(function(opt) {
+              const optionEl = document.createElement('option');
+              optionEl.value = opt.value || opt.text;
+              optionEl.text = opt.text || opt.value;
+              selectEl.appendChild(optionEl);
+            });
+          }
+          
+          // Replace the target element with our select
+          if (typeof element === 'string') {
+            const targetEl = document.querySelector(element);
+            if (targetEl) {
+              targetEl.innerHTML = '';
+              targetEl.appendChild(selectEl);
+            }
+          } else if (element instanceof Element) {
+            element.innerHTML = '';
+            element.appendChild(selectEl);
+          }
+          
+          return selectEl;
+        } catch (e) {
+          console.error("Error creating fallback select:", e);
+        }
+      }
       return null;
     },
     
@@ -23,7 +64,6 @@
       return false;
     },
     
-    // Additional functions that might be needed
     onError: function(e) {
       console.error("GPT Engineer fallback error handler:", e);
     }
@@ -36,28 +76,27 @@
       console.log("GPT Engineer main script failed to load properly, using fallback");
       
       // Make sure our fallback is fully assigned
-      window.gptengineer = {
-        initialized: true,
-        version: 'fallback-1.1',
-        
-        init: function() {
-          console.log("GPT Engineer fallback init called");
-          return true;
-        },
-        
-        createSelect: function(element, options) {
+      window.gptengineer = window.gptengineer || {};
+      
+      // Add properties only if they don't exist
+      if (!window.gptengineer.createSelect) {
+        window.gptengineer.createSelect = function(element, options) {
           console.log("GPT Engineer fallback createSelect called", element, options);
           return null;
-        },
-        
-        isAvailable: function() {
+        };
+      }
+      
+      if (!window.gptengineer.isAvailable) {
+        window.gptengineer.isAvailable = function() {
           return false;
-        },
-        
-        onError: function(e) {
+        };
+      }
+      
+      if (!window.gptengineer.onError) {
+        window.gptengineer.onError = function(e) {
           console.error("GPT Engineer fallback error handler:", e);
-        }
-      };
+        };
+      }
       
       // Let the application know that the fallback is ready
       if (window.__scriptLoader && window.__scriptLoader.state) {

@@ -20,7 +20,7 @@
     
     console.log("GPT Engineer not properly loaded, ensuring fallback is available");
     
-    // Make sure our fallback is loaded
+    // Create basic fallback implementation
     if (!window.gptengineer) {
       window.gptengineer = {
         createSelect: function() {
@@ -36,9 +36,29 @@
       };
     }
     
-    // Let the callback proceed, but the fallback script will enhance the implementation soon
-    if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
-    callback();
+    // Try to load a non-module version explicitly
+    try {
+      const script = document.createElement('script');
+      script.src = "https://cdn.jsdelivr.net/npm/@gptengineer/core@latest/dist/gptengineer.min.js";
+      script.type = "text/javascript";
+      script.crossOrigin = "anonymous";
+      script.onload = function() {
+        console.log("GPT Engineer loaded from alternative CDN");
+        if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
+        callback();
+      };
+      script.onerror = function() {
+        console.warn("Alternative GPT Engineer CDN also failed, using fallback implementation");
+        // Let the callback proceed with the fallback implementation
+        if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
+        callback();
+      };
+      document.body.appendChild(script);
+    } catch (error) {
+      console.error("Error loading GPT Engineer:", error);
+      if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
+      callback();
+    }
   }
   
   // Expose the GPT Engineer loader
