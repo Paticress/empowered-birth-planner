@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -78,8 +77,8 @@
     <!-- CORS Proxy loader - must be loaded early -->
     <script src="/public/proxy.js"></script>
     
-    <!-- GPT Engineer Script - Changed from module to regular script to avoid CSP issues -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" crossorigin="anonymous"></script>
+    <!-- GPT Engineer Script - Note: Must use type="module" for import.meta to work -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module" crossorigin="anonymous"></script>
     
     <!-- Modular script loader -->
     <script src="/public/js/script-loader.js"></script>
