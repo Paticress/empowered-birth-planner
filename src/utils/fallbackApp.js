@@ -56,4 +56,11 @@ function createBasicAppContent(rootElement) {
   }
 }
 
+// Expose to window for non-module contexts
+if (typeof window !== 'undefined') {
+  window.__fallbackApp = {
+    createBasicContent: createBasicAppContent
+  };
+}
+
 export { createBasicAppContent };

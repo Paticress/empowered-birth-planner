@@ -65,4 +65,12 @@ function renderBasicContent() {
   createBasicAppContent(rootElement);
 }
 
+// Expose to window for non-module environments
+if (typeof window !== 'undefined') {
+  window.__appRenderer = {
+    renderAppComponent,
+    renderBasicContent
+  };
+}
+
 export { renderAppComponent, renderBasicContent };
