@@ -20,11 +20,13 @@
     
     console.log("GPT Engineer not properly loaded, ensuring fallback is available");
     
-    // Create basic fallback implementation
+    // Create basic fallback implementation if not already there
     if (!window.gptengineer) {
       window.gptengineer = {
+        initialized: true,
+        version: 'fallback-1.0',
         createSelect: function() {
-          console.log("Basic GPT Engineer Select API called - real implementation or fallback will load later");
+          console.log("Basic GPT Engineer Select API called - using fallback implementation");
           return null;
         },
         isAvailable: function() {
@@ -36,6 +38,9 @@
       };
     }
     
+    // Set load state so other modules know the fallback is ready
+    if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
+    
     // Try to load a non-module version explicitly
     try {
       const script = document.createElement('script');
@@ -44,19 +49,16 @@
       script.crossOrigin = "anonymous";
       script.onload = function() {
         console.log("GPT Engineer loaded from alternative CDN");
-        if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
         callback();
       };
       script.onerror = function() {
         console.warn("Alternative GPT Engineer CDN also failed, using fallback implementation");
         // Let the callback proceed with the fallback implementation
-        if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
         callback();
       };
       document.body.appendChild(script);
     } catch (error) {
       console.error("Error loading GPT Engineer:", error);
-      if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
       callback();
     }
   }
