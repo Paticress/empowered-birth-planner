@@ -30,17 +30,24 @@ function createFallbackContent(container) {
   function tryLoadFullApp() {
     // Create a script tag to load the full version
     const script = document.createElement('script');
-    script.src = '/src/App.tsx'; // Try to load the TypeScript version
-    script.type = 'module';
-    script.onerror = function() {
-      console.log("Could not load full TypeScript app, trying JS version");
+    
+    // Important! Change from module type to regular script to avoid MIME type issues
+    script.src = '/src/App.js'; 
+    script.type = 'text/javascript'; // Use regular script instead of module
+    
+    script.onerror = function(error) {
+      console.log("Could not load full app, trying alternative version", error);
       const fallbackScript = document.createElement('script');
-      fallbackScript.src = '/src/App.js';
-      fallbackScript.onerror = function() {
-        console.log("Failed to load full app version, using compiled version");
+      fallbackScript.src = '/src/compiled/App.js';
+      fallbackScript.type = 'text/javascript'; // Ensure we use regular script
+      
+      fallbackScript.onerror = function(error) {
+        console.log("Failed to load alternative app version, staying with fallback content", error);
       };
+      
       document.body.appendChild(fallbackScript);
     };
+    
     document.body.appendChild(script);
   }
   
@@ -91,11 +98,32 @@ function createFallbackContent(container) {
       .fem-full-version-btn:hover {
         background-color: #2563eb;
       }
+      .embedded-warning {
+        background-color: #fef2f2;
+        border: 1px solid #fee2e2;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #b91c1c;
+      }
     </style>
   `;
   
   // Different content based on route
   var content = baseStyles;
+  
+  // Check if we're in an iframe
+  var isInIframe = (window !== window.parent);
+  var iframeWarning = '';
+  
+  if (isInIframe) {
+    iframeWarning = `
+      <div class="embedded-warning">
+        <p><strong>Atenção:</strong> Este conteúdo está sendo exibido em uma versão simplificada dentro de um iframe.</p>
+        <p>Para a experiência completa, <a href="${window.location.href}" target="_blank" style="color: #2563eb; text-decoration: underline;">abra esta página em uma nova aba</a>.</p>
+      </div>
+    `;
+  }
   
   if (currentRoute.includes('criar-plano')) {
     content += `
@@ -110,6 +138,7 @@ function createFallbackContent(container) {
           </div>
         </header>
         <main class="fem-main">
+          ${iframeWarning}
           <h1 class="fem-heading">Construtor de Plano de Parto</h1>
           <p class="fem-text">Seu assistente para criar um plano de parto personalizado</p>
           
@@ -180,6 +209,7 @@ function createFallbackContent(container) {
           </div>
         </header>
         <main class="fem-main">
+          ${iframeWarning}
           <h1 class="fem-heading">Guia do Parto Respeitoso</h1>
           <p class="fem-text">Seu guia completo para um plano de parto eficaz</p>
           
@@ -258,8 +288,45 @@ function createFallbackContent(container) {
   if (loadFullVersionBtn) {
     loadFullVersionBtn.addEventListener('click', function() {
       console.log("FallbackContent - Load full version button clicked");
-      tryLoadFullApp();
-      alert('Carregando a versão completa. Se não carregar automaticamente, por favor recarregue a página.');
+      
+      // Clear any cached content to force a fresh load
+      container.innerHTML = '<div style="text-align:center; padding:2rem;"><p>Carregando versão completa...</p></div>';
+      
+      // Try loading the non-module version
+      const appScript = document.createElement('script');
+      appScript.src = '/src/App.js';
+      appScript.type = 'text/javascript'; // Regular script, not module
+      
+      appScript.onload = function() {
+        console.log("App.js loaded successfully, reloading page to apply changes");
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      };
+      
+      appScript.onerror = function() {
+        console.log("Could not load App.js, trying compiled version");
+        const compiledScript = document.createElement('script');
+        compiledScript.src = '/src/compiled/App.js';
+        compiledScript.type = 'text/javascript';
+        
+        compiledScript.onload = function() {
+          console.log("Compiled App.js loaded successfully, reloading page");
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        };
+        
+        compiledScript.onerror = function() {
+          console.log("Failed to load any version of App.js");
+          container.innerHTML = content; // Restore original content
+          alert('Não foi possível carregar a versão completa. Por favor, tente novamente mais tarde.');
+        };
+        
+        document.body.appendChild(compiledScript);
+      };
+      
+      document.body.appendChild(appScript);
     });
   }
   
