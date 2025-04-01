@@ -86,8 +86,10 @@ const App = () => {
   );
 };
 
-// Mark that the main App component has loaded 
-// (moved after App declaration to fix the order)
+// Immediately export the App component
+export default App;
+
+// Mark that the main App component has loaded (after App declaration)
 if (typeof window !== 'undefined') {
   // Ensure we're not in a module context to avoid import.meta errors
   try {
@@ -100,6 +102,3 @@ if (typeof window !== 'undefined') {
     console.error("Error assigning App to window:", error);
   }
 }
-
-// Ensure the App is exported correctly
-export default App;

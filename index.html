@@ -92,7 +92,7 @@
     <!-- CORS Proxy loader -->
     <script src="/public/proxy.js"></script>
     
-    <!-- GPT Engineer Script - Properly set as non-module -->
+    <!-- GPT Engineer Script - Set as non-module explicitly -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="text/javascript" crossorigin="anonymous"></script>
     
     <!-- Improved GPT Engineer fallback -->
@@ -100,5 +100,12 @@
     
     <!-- Modular script loader -->
     <script src="/public/js/script-loader.js"></script>
+    
+    <!-- Global Error Logger -->
+    <script type="text/javascript">
+      window.addEventListener('error', function(event) {
+        console.error('Global error caught:', event.message, event.filename, event.lineno);
+      });
+    </script>
   </body>
 </html>
