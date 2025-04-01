@@ -8,6 +8,9 @@ declare global {
   interface Window {
     __MAIN_EXECUTED?: boolean;
     ReactRouterDOM?: any;
+    __FULL_APP_LOADED?: boolean;
+    App?: React.ComponentType<any>;
+    __appLoader?: () => void;
   }
 }
 
@@ -18,8 +21,6 @@ declare global {
   
   // Flag to track if main.tsx script has already executed
   if (typeof window !== 'undefined') {
-    window.__MAIN_EXECUTED = window.__MAIN_EXECUTED || false;
-    
     if (window.__MAIN_EXECUTED) {
       console.log("Main.tsx - Already executed, skipping initialization");
       return;
@@ -69,68 +70,85 @@ declare global {
     window.onerror = window.onerror || handleGlobalError;
   }
 
-  // Create a simple app structure without module imports
-  if (typeof window !== 'undefined' && typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
-    console.log("Main.tsx - Rendering simple application to DOM");
+  // Import App dynamically to prevent module errors
+  import('./App').then(module => {
+    window.App = module.default;
     
-    // Create a simple app structure
-    const SimpleApp = function() {
-      return React.createElement('div', { className: "text-center py-8" },
-        React.createElement('h1', { className: "text-2xl font-bold" }, "Guia de Plano de Parto"),
-        React.createElement('p', { className: "mt-4" }, "Carregando conteúdo..."),
-        React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
-      );
-    };
-    
-    // Extract HashRouter and other components if available
-    const RouterComponents = window.ReactRouterDOM || {
-      HashRouter: function(props: any) { return props.children; },
-      Routes: function(props: any) { return props.children; },
-      Route: function() { return null; },
-      Navigate: function() { return null; }
-    };
-    
-    const { HashRouter, Routes, Route, Navigate } = RouterComponents;
-    
-    // Create a router-based app
-    const RouterApp = function() {
-      return React.createElement(HashRouter, null,
-        React.createElement(Routes, null,
-          React.createElement(Route, { 
-            path: '/', 
-            element: React.createElement(Navigate, { to: '/guia-online', replace: true }) 
-          }),
-          React.createElement(Route, { 
-            path: '/guia-online', 
-            element: React.createElement(SimpleApp)
-          }),
-          React.createElement(Route, { 
-            path: '*', 
-            element: React.createElement(SimpleApp)
-          })
-        )
-      );
-    };
-    
-    // Render the app
-    const rootElement = document.getElementById('root');
-    if (rootElement) {
+    if (typeof window !== 'undefined' && typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+      console.log("Main.tsx - Rendering app from module import");
+      
+      // Use direct reference to imported App component
+      const App = module.default;
+      
       try {
-        if (ReactDOM.createRoot) {
-          ReactDOM.createRoot(rootElement).render(React.createElement(RouterApp));
-        } else {
-          // @ts-ignore - Fallback for older versions
-          ReactDOM.render(React.createElement(RouterApp), rootElement);
+        const rootElement = document.getElementById('root');
+        if (!rootElement) {
+          console.error("Main.tsx - Root element not found");
+          return;
         }
-        console.log("Main.tsx - Simple app rendered successfully");
+        
+        // Render the app
+        ReactDOM.createRoot(rootElement).render(
+          <React.StrictMode>
+            <App />
+          </React.StrictMode>
+        );
+        
+        console.log("Main.tsx - App successfully rendered");
       } catch (error) {
         console.error("Main.tsx - Error rendering application:", error);
-        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Erro ao carregar aplicação</h2><p>Tente recarregar a página</p></div>';
       }
     } else {
-      console.error("Main.tsx - Root element not found in DOM!");
+      console.log("Main.tsx - React or ReactDOM not available, deferring rendering");
     }
-  } else {
-    console.log("Main.tsx - React or ReactDOM not available, deferring rendering");
-  }
+  }).catch(error => {
+    console.error("Main.tsx - Error importing App:", error);
+    
+    // Create a simple app fallback
+    const SimpleApp = () => {
+      const routerAvailable = typeof window !== 'undefined' && window.ReactRouterDOM;
+      
+      if (routerAvailable) {
+        // Use global react objects for compatibility
+        return window.React.createElement(window.ReactRouterDOM.HashRouter, null,
+          window.React.createElement(window.ReactRouterDOM.Routes, null,
+            window.React.createElement(window.ReactRouterDOM.Route, { 
+              path: '/', 
+              element: window.React.createElement(window.ReactRouterDOM.Navigate, { to: '/guia-online', replace: true }) 
+            }),
+            window.React.createElement(window.ReactRouterDOM.Route, { 
+              path: '/guia-online', 
+              element: window.React.createElement('div', { className: "text-center py-8" },
+                window.React.createElement('h1', { className: "text-2xl font-bold" }, "Guia de Plano de Parto"),
+                window.React.createElement('p', { className: "mt-4" }, "Carregando conteúdo..."),
+                window.React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
+              )
+            })
+          )
+        );
+      } else {
+        return window.React.createElement('div', { className: "text-center py-8" },
+          window.React.createElement('h1', { className: "text-2xl font-bold" }, "Guia de Plano de Parto"),
+          window.React.createElement('p', { className: "mt-4" }, "Carregando conteúdo..."),
+          window.React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
+        );
+      }
+    };
+    
+    // Try to render basic fallback
+    if (typeof window !== 'undefined' && typeof window.React !== 'undefined' && typeof window.ReactDOM !== 'undefined') {
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        try {
+          if (window.ReactDOM.createRoot) {
+            window.ReactDOM.createRoot(rootElement).render(window.React.createElement(SimpleApp));
+          } else {
+            window.ReactDOM.render(window.React.createElement(SimpleApp), rootElement);
+          }
+        } catch (renderError) {
+          console.error("Main.tsx - Error rendering fallback:", renderError);
+        }
+      }
+    }
+  });
 })();

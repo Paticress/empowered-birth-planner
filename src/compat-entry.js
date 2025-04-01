@@ -25,6 +25,16 @@ console.log("Compat-entry.js - Loading compatibility mode");
     script.onload = callback || function() {};
     script.onerror = function(error) {
       console.error("Failed to load compat script:", src, error);
+      
+      // Try alternative source if it's a CDN
+      if (src.includes('unpkg.com')) {
+        var altSrc = src.replace('unpkg.com', 'cdn.jsdelivr.net/npm');
+        console.log("Trying alternative CDN:", altSrc);
+        loadScript(altSrc, callback);
+      } else {
+        // If not a CDN, show error but still call callback to continue
+        if (callback) callback();
+      }
     };
     document.body.appendChild(script);
   }
@@ -80,6 +90,24 @@ console.log("Compat-entry.js - Loading compatibility mode");
     return React.createElement('div', null, "Carregando...");
   };
   
+  // Ensure React is loaded before proceeding
+  function ensureReactLoaded(callback) {
+    if (window.React && window.ReactDOM) {
+      callback();
+      return;
+    }
+    
+    console.log("Compat - Loading React dependencies");
+    
+    // Load React first
+    loadScript('https://unpkg.com/react@18/umd/react.production.min.js', function() {
+      // Then load ReactDOM
+      loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js', function() {
+        callback();
+      });
+    });
+  }
+  
   // Helper function to directly initialize the app from our App.tsx component
   function initApp() {
     try {
@@ -88,8 +116,16 @@ console.log("Compat-entry.js - Loading compatibility mode");
       script.type = "text/javascript";
       script.src = "/src/App.tsx.js"; // Using the compiled version if available
       script.onerror = function() {
-        console.error("Could not load App.tsx.js, falling back to router only");
-        initSimpleRouter();
+        console.error("Could not load App.tsx.js, trying App.js");
+        
+        const appScript = document.createElement('script');
+        appScript.type = "text/javascript";
+        appScript.src = "/src/App.js";
+        appScript.onerror = function() {
+          console.error("Could not load App.js, falling back to router only");
+          initSimpleRouter();
+        };
+        document.body.appendChild(appScript);
       };
       script.onload = function() {
         console.log("Successfully loaded App component in compatibility mode");
@@ -121,31 +157,84 @@ console.log("Compat-entry.js - Loading compatibility mode");
     }
   }
   
-  // Load React Router DOM if not already loaded
-  if (!window.ReactRouterDOM) {
-    loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
-      console.log("ReactRouterDOM loaded in compat mode");
+  // Load React Router DOM and initialize app
+  ensureReactLoaded(function() {
+    // Ensure React Router is loaded
+    if (!window.ReactRouterDOM) {
+      loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
+        console.log("ReactRouterDOM loaded in compat mode");
+        initApp();
+      });
+    } else {
       initApp();
-    });
-  } else {
-    initApp();
-  }
+    }
+  });
   
   function initSimpleRouter() {
-    // Create a simple router
-    const { HashRouter, Routes, Route } = window.ReactRouterDOM;
+    ensureReactLoaded(function() {
+      // Load React Router if needed
+      if (!window.ReactRouterDOM) {
+        loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
+          createSimpleRouter();
+        });
+      } else {
+        createSimpleRouter();
+      }
+    });
+  }
+  
+  function createSimpleRouter() {
+    // Try to get the correct object
+    const RouterObj = window.ReactRouterDOM || {};
+    const HashRouter = RouterObj.HashRouter;
+    const Routes = RouterObj.Routes;
+    const Route = RouterObj.Route;
+    const Navigate = RouterObj.Navigate;
     
+    // If any of the objects is missing, build a simple fallback
+    if (!HashRouter || !Routes || !Route) {
+      console.error("Router components not available, showing simple page");
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        rootElement.innerHTML = `
+          <div style="text-align: center; padding: 40px;">
+            <h1>Guia de Plano de Parto</h1>
+            <p>Bem-vinda ao Guia de Plano de Parto!</p>
+            <p>Estamos carregando o conteúdo em modo de compatibilidade.</p>
+            <p>Por favor, aguarde ou tente recarregar a página.</p>
+          </div>
+        `;
+      }
+      return;
+    }
+    
+    // Create a simple router
     const RouterApp = function() {
       return React.createElement(HashRouter, null,
         React.createElement(Routes, null,
           React.createElement(Route, { 
-            path: '/*', 
+            path: '/', 
+            element: React.createElement(Navigate, { to: '/guia-online', replace: true })
+          }),
+          React.createElement(Route, { 
+            path: '/guia-online', 
             element: React.createElement('div', {
               style: { textAlign: 'center', padding: '40px' }
             }, 
               React.createElement('h1', null, 'Guia de Plano de Parto'),
+              React.createElement('p', null, 'Bem-vinda ao Guia de Plano de Parto!'),
               React.createElement('p', null, 'Estamos carregando o conteúdo em modo de compatibilidade.'),
               React.createElement('p', null, 'Por favor, aguarde ou tente recarregar a página.')
+            )
+          }),
+          React.createElement(Route, { 
+            path: '*', 
+            element: React.createElement('div', {
+              style: { textAlign: 'center', padding: '40px' }
+            },
+              React.createElement('h1', null, 'Página não encontrada'),
+              React.createElement('p', null, 'A página que você está procurando não existe.'),
+              React.createElement('a', { href: '#/guia-online' }, 'Voltar para o Guia')
             )
           })
         )
@@ -162,6 +251,13 @@ console.log("Compat-entry.js - Loading compatibility mode");
         }
       } catch (error) {
         console.error("Failed to render router app:", error);
+        rootElement.innerHTML = `
+          <div style="text-align: center; padding: 40px;">
+            <h1>Guia de Plano de Parto</h1>
+            <p>Ocorreu um erro ao carregar a aplicação.</p>
+            <p>Por favor, tente recarregar a página.</p>
+          </div>
+        `;
       }
     }
   }
