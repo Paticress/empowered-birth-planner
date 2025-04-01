@@ -19,36 +19,110 @@ function createFallbackContent(container) {
   
   console.log("FallbackContent - Rendering fallback content to", container);
   
-  // Try to load the full version if we haven't already
-  if (typeof window.__FULL_APP_LOADED === 'undefined' || !window.__FULL_APP_LOADED) {
-    window.__FULL_APP_LOADED = true;
-    console.log("FallbackContent - Attempting to load full application");
-    tryLoadFullApp();
-  }
+  // Try to initialize full app load immediately
+  initializeFullAppLoad();
   
   // Function to attempt loading the full app
-  function tryLoadFullApp() {
-    // Create a script tag to load the full version
-    const script = document.createElement('script');
-    
-    // Important! Change from module type to regular script to avoid MIME type issues
-    script.src = '/src/App.js'; 
-    script.type = 'text/javascript'; // Use regular script instead of module
-    
-    script.onerror = function(error) {
-      console.log("Could not load full app, trying alternative version", error);
-      const fallbackScript = document.createElement('script');
-      fallbackScript.src = '/src/compiled/App.js';
-      fallbackScript.type = 'text/javascript'; // Ensure we use regular script
+  function initializeFullAppLoad() {
+    if (typeof window.__FULL_APP_LOADED === 'undefined' || !window.__FULL_APP_LOADED) {
+      window.__FULL_APP_LOADED = true;
+      console.log("FallbackContent - Initializing full application load");
       
-      fallbackScript.onerror = function(error) {
-        console.log("Failed to load alternative app version, staying with fallback content", error);
+      // First attempt - try to load bootstrapApp directly
+      const bootstrapScript = document.createElement('script');
+      bootstrapScript.src = '/src/bootstrapApp.ts';
+      bootstrapScript.type = 'module'; // Use module type for TS files
+      
+      bootstrapScript.onerror = function() {
+        console.log("FallbackContent - bootstrapApp.ts load failed, trying App.js");
+        loadAppJs();
       };
       
-      document.body.appendChild(fallbackScript);
+      document.body.appendChild(bootstrapScript);
+      
+      // Second attempt - look for a global bootstrap function
+      if (typeof window.bootstrapApplication === 'function') {
+        try {
+          console.log("FallbackContent - Found global bootstrapApplication, calling it");
+          window.bootstrapApplication();
+          return;
+        } catch (e) {
+          console.error("FallbackContent - Error calling bootstrapApplication:", e);
+        }
+      }
+      
+      // Continue with App.js if needed
+      setTimeout(function() {
+        if (!window.App) {
+          console.log("FallbackContent - App not found after bootstrap attempt, trying App.js");
+          loadAppJs();
+        }
+      }, 500);
+    }
+  }
+  
+  // Function to load App.js
+  function loadAppJs() {
+    console.log("FallbackContent - Attempting to load App.js");
+    
+    // Important - use regular script type for better compatibility
+    const appScript = document.createElement('script');
+    appScript.src = '/src/App.js';
+    appScript.type = 'text/javascript'; // Use regular script instead of module
+    
+    appScript.onload = function() {
+      console.log("FallbackContent - App.js loaded successfully");
+      
+      // Force a reload after a short delay to apply changes
+      setTimeout(function() {
+        console.log("FallbackContent - Reloading page to initialize App.js");
+        window.location.reload();
+      }, 500);
     };
     
-    document.body.appendChild(script);
+    appScript.onerror = function(error) {
+      console.log("FallbackContent - Could not load App.js, trying compiled version", error);
+      
+      const compiledScript = document.createElement('script');
+      compiledScript.src = '/src/compiled/App.js';
+      compiledScript.type = 'text/javascript'; // Ensure we use regular script
+      
+      compiledScript.onload = function() {
+        console.log("FallbackContent - Compiled App.js loaded successfully");
+        
+        // Force a reload to apply changes
+        setTimeout(function() {
+          window.location.reload();
+        }, 500);
+      };
+      
+      compiledScript.onerror = function(error) {
+        console.log("FallbackContent - Failed to load alternative app versions", error);
+        
+        // Try to load from main.js as last resort
+        const mainScript = document.createElement('script');
+        mainScript.src = '/src/main.js';
+        mainScript.type = 'text/javascript';
+        
+        mainScript.onload = function() {
+          console.log("FallbackContent - main.js loaded successfully");
+          setTimeout(function() {
+            window.location.reload();
+          }, 500);
+        };
+        
+        mainScript.onerror = function() {
+          console.log("FallbackContent - All load attempts failed, staying with fallback content");
+          alert('Não foi possível carregar a versão completa. Por favor, tente novamente mais tarde ou contate o suporte.');
+        };
+        
+        document.body.appendChild(mainScript);
+      };
+      
+      document.body.appendChild(compiledScript);
+    };
+    
+    document.body.appendChild(appScript);
   }
   
   // Determine which content to show based on current route
@@ -105,6 +179,25 @@ function createFallbackContent(container) {
         padding: 1rem;
         margin-bottom: 1.5rem;
         color: #b91c1c;
+      }
+      .loading-indicator {
+        display: none;
+        text-align: center;
+        padding: 1rem;
+        margin-top: 1rem;
+      }
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem auto;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
     </style>
   `;
@@ -185,11 +278,15 @@ function createFallbackContent(container) {
               <button class="fem-full-version-btn" id="loadFullVersionBtn">
                 Carregar Versão Completa
               </button>
+              <div id="loadingIndicator" class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <p>Carregando versão completa...</p>
+              </div>
             </div>
           </div>
           
           <div class="fem-flex fem-justify-center fem-mt-8">
-            <button class="fem-button" onclick="window.location.reload()">
+            <button class="fem-button" id="reloadPageBtn">
               Tentar Recarregar Página
             </button>
           </div>
@@ -253,11 +350,15 @@ function createFallbackContent(container) {
               <button class="fem-full-version-btn" id="loadFullVersionBtn">
                 Carregar Versão Completa
               </button>
+              <div id="loadingIndicator" class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <p>Carregando versão completa...</p>
+              </div>
             </div>
           </div>
           
           <div class="fem-flex fem-justify-center fem-mt-8">
-            <button class="fem-button" onclick="window.location.reload()">
+            <button class="fem-button" id="reloadPageBtn">
               Tentar Recarregar Página
             </button>
           </div>
@@ -285,56 +386,89 @@ function createFallbackContent(container) {
   
   // Add event listener for load full version button
   const loadFullVersionBtn = container.querySelector('#loadFullVersionBtn');
+  const loadingIndicator = container.querySelector('#loadingIndicator');
+  
   if (loadFullVersionBtn) {
     loadFullVersionBtn.addEventListener('click', function() {
       console.log("FallbackContent - Load full version button clicked");
       
-      // Clear any cached content to force a fresh load
-      container.innerHTML = '<div style="text-align:center; padding:2rem;"><p>Carregando versão completa...</p></div>';
+      // Show loading indicator
+      if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+      }
       
-      // Try loading the non-module version
-      const appScript = document.createElement('script');
-      appScript.src = '/src/App.js';
-      appScript.type = 'text/javascript'; // Regular script, not module
+      // Disable the button to prevent multiple clicks
+      loadFullVersionBtn.disabled = true;
+      loadFullVersionBtn.style.opacity = '0.7';
       
-      appScript.onload = function() {
-        console.log("App.js loaded successfully, reloading page to apply changes");
-        setTimeout(() => {
+      // Try every possible way to load the full app
+      
+      // 1. First try the direct App import from App.tsx
+      try {
+        const importScript = document.createElement('script');
+        importScript.textContent = `
+          import('./src/App.tsx')
+            .then(module => {
+              console.log("Successfully imported App.tsx");
+              window.App = module.default;
+              document.getElementById('root').innerHTML = '';
+              import('./src/bootstrapApp.ts')
+                .then(bootstrap => {
+                  bootstrap.bootstrapApplication();
+                })
+                .catch(err => console.error("Error importing bootstrap:", err));
+            })
+            .catch(error => { console.error("Failed to import App.tsx:", error); });
+        `;
+        importScript.type = 'module';
+        document.body.appendChild(importScript);
+      } catch (e) {
+        console.log("Import script approach failed:", e);
+      }
+      
+      // 2. Try loading the non-module version with App.js
+      setTimeout(() => {
+        if (!window.App) {
+          console.log("FallbackContent - App not imported yet, trying App.js");
+          loadAppJs();
+        }
+      }, 1000);
+      
+      // 3. Add a fail-safe reload after a timeout
+      setTimeout(() => {
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'none';
+        }
+        if (!window.App) {
+          console.log("FallbackContent - No App detected after timeout, forcing reload");
           window.location.reload();
-        }, 500);
-      };
-      
-      appScript.onerror = function() {
-        console.log("Could not load App.js, trying compiled version");
-        const compiledScript = document.createElement('script');
-        compiledScript.src = '/src/compiled/App.js';
-        compiledScript.type = 'text/javascript';
-        
-        compiledScript.onload = function() {
-          console.log("Compiled App.js loaded successfully, reloading page");
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
-        };
-        
-        compiledScript.onerror = function() {
-          console.log("Failed to load any version of App.js");
-          container.innerHTML = content; // Restore original content
-          alert('Não foi possível carregar a versão completa. Por favor, tente novamente mais tarde.');
-        };
-        
-        document.body.appendChild(compiledScript);
-      };
-      
-      document.body.appendChild(appScript);
+        }
+      }, 3000);
     });
   }
   
-  // Ensure Reload button works properly
-  var reloadButton = container.querySelector('button[onclick="window.location.reload()"]');
-  if (reloadButton) {
-    reloadButton.addEventListener('click', function() {
-      window.location.reload();
+  // Add event listener for reload button
+  const reloadPageBtn = container.querySelector('#reloadPageBtn');
+  if (reloadPageBtn) {
+    reloadPageBtn.addEventListener('click', function() {
+      console.log("FallbackContent - Reload page button clicked");
+      
+      // Clear any cached data before reload
+      try {
+        // Clear sessionStorage and localStorage items related to app state
+        sessionStorage.removeItem('app_last_route');
+        localStorage.removeItem('app_initialized');
+        
+        // Clear any window flags we've set
+        window.__FULL_APP_LOADED = false;
+        window.__MAIN_EXECUTED = false;
+        window.__COMPAT_ENTRY_LOADED = false;
+      } catch (e) {
+        console.error("Error clearing cache:", e);
+      }
+      
+      // Force reload from server, not from cache
+      window.location.reload(true);
     });
   }
 }
@@ -351,6 +485,10 @@ function createFallbackContent(container) {
       var isBirthPlanRoute = currentHash.includes('criar-plano');
       
       console.log("FallbackContent - Current hash:", currentHash, "Is guide route:", isGuiaRoute, "Is birth plan route:", isBirthPlanRoute);
+      
+      // Check if App component exists
+      var hasAppComponent = typeof window.App !== 'undefined';
+      console.log("FallbackContent - App component exists:", hasAppComponent);
       
       // Only run when we're on a route that should show content
       if (isGuiaRoute || isBirthPlanRoute) {
@@ -376,7 +514,10 @@ function createFallbackContent(container) {
                                    !mainContent.querySelector('.maternal-900');
           }
           
-          if (isEmpty || hasOnlySimpleElements) {
+          // Check if App component exists but hasn't rendered correctly
+          var needsFallback = isEmpty || hasOnlySimpleElements || !hasAppComponent;
+          
+          if (needsFallback) {
             console.log("FallbackContent - Content area needs proper rendering, showing enhanced fallback");
             // Clear any partial content first
             mainContent.innerHTML = '';
