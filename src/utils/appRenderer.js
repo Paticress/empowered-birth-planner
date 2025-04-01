@@ -1,5 +1,8 @@
 
 // App rendering utilities
+import { loadScript } from './scriptLoader.js';
+import { createBasicAppContent } from './fallbackApp.js';  // Add this import
+
 console.log('AppRenderer - Initializing app renderer');
 
 /**

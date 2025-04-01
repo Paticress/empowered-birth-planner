@@ -46,6 +46,12 @@ function initApp() {
             if (rootElement) {
               module.createBasicAppContent(rootElement);
             }
+          }).catch(fallbackError => {
+            console.error("ScriptLoader - Error importing fallback app:", fallbackError);
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+              rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p></div>';
+            }
           });
         });
       }, 300);
