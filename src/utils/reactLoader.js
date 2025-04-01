@@ -54,7 +54,22 @@ function loadReactDependencies(callback) {
             
             routerScript.onerror = function() {
               console.error("ReactLoader - Failed to load React Router");
-              callback(); // Continue anyway
+              // Try to load from alternate CDN
+              var altScript = document.createElement('script');
+              altScript.src = 'https://cdn.jsdelivr.net/npm/react-router-dom@6/umd/react-router-dom.production.min.js';
+              altScript.crossOrigin = 'anonymous';
+              
+              altScript.onload = function() {
+                console.log("ReactLoader - React Router loaded from alternative CDN");
+                callback();
+              };
+              
+              altScript.onerror = function() {
+                console.error("ReactLoader - Failed to load React Router from alternative source");
+                callback(); // Continue anyway
+              };
+              
+              document.body.appendChild(altScript);
             };
             
             document.body.appendChild(routerScript);
@@ -65,7 +80,22 @@ function loadReactDependencies(callback) {
         
         reactDOMScript.onerror = function() {
           console.error("ReactLoader - Failed to load ReactDOM");
-          callback(); // Continue anyway
+          // Try to load from alternate CDN
+          var altScript = document.createElement('script');
+          altScript.src = 'https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js';
+          altScript.crossOrigin = 'anonymous';
+          
+          altScript.onload = function() {
+            console.log("ReactLoader - ReactDOM loaded from alternative CDN");
+            callback();
+          };
+          
+          altScript.onerror = function() {
+            console.error("ReactLoader - Failed to load ReactDOM from alternative source");
+            callback(); // Continue anyway
+          };
+          
+          document.body.appendChild(altScript);
         };
         
         document.body.appendChild(reactDOMScript);
@@ -76,7 +106,22 @@ function loadReactDependencies(callback) {
     
     reactScript.onerror = function() {
       console.error("ReactLoader - Failed to load React");
-      callback(); // Continue anyway
+      // Try to load from alternate CDN
+      var altScript = document.createElement('script');
+      altScript.src = 'https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js';
+      altScript.crossOrigin = 'anonymous';
+      
+      altScript.onload = function() {
+        console.log("ReactLoader - React loaded from alternative CDN");
+        callback();
+      };
+      
+      altScript.onerror = function() {
+        console.error("ReactLoader - Failed to load React from alternative source");
+        callback(); // Continue anyway
+      };
+      
+      document.body.appendChild(altScript);
     };
     
     document.body.appendChild(reactScript);

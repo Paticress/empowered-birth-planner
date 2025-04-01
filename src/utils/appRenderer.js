@@ -1,7 +1,7 @@
 
 // App rendering utilities
 import { loadScript } from './scriptLoader.js';
-import { createBasicAppContent } from './fallbackApp.js';  // Add this import
+import { createBasicAppContent } from './fallbackApp.js';
 
 console.log('AppRenderer - Initializing app renderer');
 
@@ -15,7 +15,7 @@ function renderAppComponent() {
     
     if (rootElement) {
       // Check if App is properly loaded
-      if (typeof window.App !== 'function') {
+      if (typeof window.App !== 'function' && typeof window.App !== 'object') {
         console.error("AppRenderer - App component not properly loaded, using basic content");
         renderBasicContent();
         return;

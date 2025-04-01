@@ -33,8 +33,8 @@ function loadScript(src, callback) {
 function initApp() {
   try {
     // Try to load the App component from source
-    loadScript('./src/main.js', function() {
-      console.log("ScriptLoader - Successfully loaded main.js");
+    loadScript('./src/App.js', function() {
+      console.log("ScriptLoader - Successfully loaded App.js");
       setTimeout(() => {
         // Import the app renderer
         import('./appRenderer.js').then(module => {
