@@ -32,6 +32,17 @@
     
     // Main initialization function
     function initializeApp() {
+      // Helper function to detect hash route
+      function getCurrentRoute() {
+        var hash = window.location.hash || '';
+        if (hash.startsWith('#/')) {
+          return hash.substring(2); // Remove the '#/' part
+        } else if (hash.startsWith('#')) {
+          return hash.substring(1); // Remove just the '#' part
+        }
+        return '';
+      }
+      
       // If App is already in window, render it directly
       if (window.App) {
         console.log("App.js - App already available in window, rendering");
@@ -212,11 +223,42 @@
       var isBirthPlanRoute = currentHash.includes('criar-plano');
       
       // Try to use the fallback app if available
-      if (isBirthPlanRoute && window.__birthPlanFallback && window.__birthPlanFallback.createFallbackContent) {
-        var rootElement = document.getElementById('root');
-        if (rootElement) {
-          window.__birthPlanFallback.createFallbackContent(rootElement);
-          return;
+      if (isBirthPlanRoute) {
+        console.log("App.js - On criar-plano route, using birth plan fallback");
+        
+        // Try loading the birth plan fallback scripts if not already loaded
+        if (!window.__birthPlanFallback || !window.__simpleBirthPlanBuilder) {
+          console.log("App.js - Loading birth plan fallbacks");
+          
+          // Load FallbackContent.js
+          var fallbackScript = document.createElement('script');
+          fallbackScript.src = './src/components/BirthPlan/FallbackContent.js';
+          document.body.appendChild(fallbackScript);
+          
+          // Load SimpleBirthPlanBuilder.js
+          var simpleBPScript = document.createElement('script');
+          simpleBPScript.src = './src/components/BirthPlan/SimpleBirthPlanBuilder.js';
+          document.body.appendChild(simpleBPScript);
+          
+          // Wait a short time and then try to render the content
+          setTimeout(function() {
+            if (window.__birthPlanFallback && window.__birthPlanFallback.createFallbackContent) {
+              var rootElement = document.getElementById('root');
+              if (rootElement) {
+                window.__birthPlanFallback.createFallbackContent(rootElement);
+                return;
+              }
+            }
+            
+            // If still not loaded, show basic HTML fallback
+            showBasicFallback(isBirthPlanRoute);
+          }, 500);
+        } else if (window.__birthPlanFallback && window.__birthPlanFallback.createFallbackContent) {
+          var rootElement = document.getElementById('root');
+          if (rootElement) {
+            window.__birthPlanFallback.createFallbackContent(rootElement);
+            return;
+          }
         }
       } else if (window.__fallbackApp && window.__fallbackApp.createBasicContent) {
         var rootElement = document.getElementById('root');
@@ -227,13 +269,18 @@
       }
       
       // Ultimate fallback
+      showBasicFallback(isBirthPlanRoute);
+    }
+    
+    // Show a very basic HTML fallback
+    function showBasicFallback(isBirthPlanRoute) {
       var rootElement = document.getElementById('root');
-      if (rootElement) {
-        if (isBirthPlanRoute) {
-          rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Construtor de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p><button onclick="window.location.reload()" style="margin-top: 20px; padding: 8px 16px; background-color: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer;">Recarregar Página</button></div>';
-        } else {
-          rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p><button onclick="window.location.reload()" style="margin-top: 20px; padding: 8px 16px; background-color: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer;">Recarregar Página</button></div>';
-        }
+      if (!rootElement) return;
+      
+      if (isBirthPlanRoute) {
+        rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Construtor de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p><button onclick="window.location.reload()" style="margin-top: 20px; padding: 8px 16px; background-color: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer;">Recarregar Página</button></div>';
+      } else {
+        rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p><button onclick="window.location.reload()" style="margin-top: 20px; padding: 8px 16px; background-color: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer;">Recarregar Página</button></div>';
       }
     }
   } catch (outerError) {

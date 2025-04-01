@@ -56,6 +56,49 @@ function SimpleBirthPlanBuilder() {
   );
 }
 
+// Auto-render the component if we detect we're on the criar-plano route and the page is empty
+(function() {
+  // Wait for DOM to be ready
+  function checkAndRender() {
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      // Check if we're on the criar-plano route
+      if (window.location.hash && window.location.hash.includes('criar-plano')) {
+        console.log("SimpleBirthPlanBuilder - detected criar-plano route, checking for content");
+        
+        // Check if the main content area is empty
+        var mainContent = document.querySelector('main') || document.getElementById('root');
+        
+        if (mainContent && (!mainContent.hasChildNodes() || mainContent.innerHTML.trim() === '' || mainContent.innerText.trim() === '')) {
+          console.log("SimpleBirthPlanBuilder - main content is empty, rendering fallback");
+          
+          if (window.React && window.ReactDOM) {
+            var container = document.createElement('div');
+            container.className = 'fallback-birth-plan-container';
+            mainContent.appendChild(container);
+            
+            if (window.ReactDOM.createRoot) {
+              window.ReactDOM.createRoot(container).render(window.React.createElement(SimpleBirthPlanBuilder));
+            } else {
+              window.ReactDOM.render(window.React.createElement(SimpleBirthPlanBuilder), container);
+            }
+            
+            console.log("SimpleBirthPlanBuilder - fallback rendered successfully");
+          } else {
+            console.log("SimpleBirthPlanBuilder - React or ReactDOM not available, using FallbackContent");
+            if (window.__birthPlanFallback && window.__birthPlanFallback.createFallbackContent) {
+              window.__birthPlanFallback.createFallbackContent(mainContent);
+            }
+          }
+        }
+      }
+    } else {
+      setTimeout(checkAndRender, 100);
+    }
+  }
+  
+  checkAndRender();
+})();
+
 // Export for non-module contexts
 if (typeof window !== 'undefined') {
   window.__simpleBirthPlanBuilder = SimpleBirthPlanBuilder;
