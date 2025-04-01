@@ -1,5 +1,6 @@
 
 // Error handling utilities for application initialization
+import React from "react";
 console.log("Loading error handling utilities");
 
 /**

@@ -16,241 +16,95 @@ console.log("Compat-entry.js - Loading compatibility mode");
     console.error('Compat - Global error caught:', event.message);
   });
   
-  // Create and load the compatibility scripts
-  function loadScript(src, callback) {
-    var script = document.createElement('script');
-    script.src = src;
-    script.type = 'text/javascript';
-    script.crossOrigin = "anonymous";
-    script.onload = callback || function() {};
-    script.onerror = function(error) {
-      console.error("Failed to load compat script:", src, error);
+  // Dynamically import our compat modules
+  import('./compat/scriptLoader.js')
+    .then(scriptLoader => {
+      const { loadScript, isScriptLoaded } = scriptLoader;
       
-      // Try alternative source if it's a CDN
-      if (src.includes('unpkg.com')) {
-        var altSrc = src.replace('unpkg.com', 'cdn.jsdelivr.net/npm');
-        console.log("Trying alternative CDN:", altSrc);
-        loadScript(altSrc, callback);
-      } else {
-        // If not a CDN, show error but still call callback to continue
-        if (callback) callback();
-      }
-    };
-    document.body.appendChild(script);
-  }
-  
-  // Load a simple React app with loading UI
-  function createSimpleApp() {
-    const rootElement = document.getElementById('root');
-    if (!rootElement) return;
-    
-    if (window.React && window.ReactDOM) {
-      const LoadingApp = function() {
-        return React.createElement('div', { style: { textAlign: 'center', padding: '20px' } },
-          React.createElement('h1', null, "Guia de Plano de Parto"),
-          React.createElement('p', null, "Carregando conteúdo..."),
-          React.createElement('div', { style: { 
-            width: '40px', 
-            height: '40px', 
-            margin: '20px auto',
-            border: '4px solid #f3f3f3',
-            borderTop: '4px solid #3498db',
-            borderRadius: '50%',
-            animation: 'spin 2s linear infinite'
-          } })
-        );
-      };
-      
-      // Add a style for the spinner
-      const style = document.createElement('style');
-      style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-      document.head.appendChild(style);
-      
-      // Render the basic app
-      try {
-        if (window.ReactDOM.createRoot) {
-          window.ReactDOM.createRoot(rootElement).render(React.createElement(LoadingApp));
-        } else {
-          window.ReactDOM.render(React.createElement(LoadingApp), rootElement);
-        }
-      } catch (error) {
-        console.error("Failed to render simple app:", error);
-        rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando...</h2><div class="spinner"></div></div>';
-      }
-    } else {
-      rootElement.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando...</h2><div class="spinner"></div></div>';
-    }
-  }
-  
-  // Create a simple loading UI
-  createSimpleApp();
-  
-  // Define a simpler version of the App
-  window.App = window.App || function() {
-    return React.createElement('div', null, "Carregando...");
-  };
-  
-  // Ensure React is loaded before proceeding
-  function ensureReactLoaded(callback) {
-    if (window.React && window.ReactDOM) {
-      callback();
-      return;
-    }
-    
-    console.log("Compat - Loading React dependencies");
-    
-    // Load React first
-    loadScript('https://unpkg.com/react@18/umd/react.production.min.js', function() {
-      // Then load ReactDOM
-      loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js', function() {
-        callback();
-      });
-    });
-  }
-  
-  // Helper function to directly initialize the app from our App.tsx component
-  function initApp() {
-    try {
-      // Try to load our real App component through App.js bridge
-      const script = document.createElement('script');
-      script.type = "text/javascript";
-      script.src = "/src/App.js";
-      script.onerror = function() {
-        console.error("Could not load App.js, trying alternative approach");
-        
-        // Try to load through main.js
-        const mainScript = document.createElement('script');
-        mainScript.type = "text/javascript";
-        mainScript.src = "/src/main.js";
-        mainScript.onerror = function() {
-          console.error("Could not load main.js, falling back to router only");
-          initSimpleRouter();
-        };
-        document.body.appendChild(mainScript);
-      };
-      document.body.appendChild(script);
-    } catch (error) {
-      console.error("Error initializing App:", error);
-      initSimpleRouter();
-    }
-  }
-  
-  // Load React Router DOM and initialize app
-  ensureReactLoaded(function() {
-    // Ensure React Router is loaded
-    if (!window.ReactRouterDOM) {
-      loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
-        console.log("ReactRouterDOM loaded in compat mode");
-        initApp();
-      });
-    } else {
-      initApp();
-    }
-  });
-  
-  function initSimpleRouter() {
-    console.log("Compat - Initializing simple router");
-    ensureReactLoaded(function() {
-      // Load React Router if needed
-      if (!window.ReactRouterDOM) {
-        loadScript('https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js', function() {
-          createSimpleRouter();
+      import('./compat/uiComponents.js')
+        .then(uiComponents => {
+          const { createLoadingUI } = uiComponents;
+          
+          // Create a simple loading UI first
+          createLoadingUI();
+          
+          // Define a simpler version of the App
+          window.App = window.App || function() {
+            return React.createElement('div', null, "Carregando...");
+          };
+          
+          import('./compat/reactLoader.js')
+            .then(reactLoader => {
+              const { ensureReactLoaded, loadReactRouter } = reactLoader;
+              
+              ensureReactLoaded(() => {
+                loadReactRouter(() => {
+                  import('./compat/appLoader.js')
+                    .then(appLoader => {
+                      const { initApp } = appLoader;
+                      initApp();
+                    })
+                    .catch(error => {
+                      console.error("Failed to load app loader module:", error);
+                      import('./compat/simpleRouter.js')
+                        .then(simpleRouter => {
+                          simpleRouter.initSimpleRouter();
+                        })
+                        .catch(routerError => {
+                          console.error("Failed to load simple router module:", routerError);
+                        });
+                    });
+                });
+              });
+            })
+            .catch(error => {
+              console.error("Failed to load React loader module:", error);
+              
+              // Fallback to direct script loading
+              window.__loadScriptWithCORS = window.__loadScriptWithCORS || function(src, callback) {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = callback;
+                document.body.appendChild(script);
+              };
+              
+              window.__loadScriptWithCORS(
+                'https://unpkg.com/react@18/umd/react.production.min.js',
+                function() {
+                  window.__loadScriptWithCORS(
+                    'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
+                    function() {
+                      window.__loadScriptWithCORS(
+                        'https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js',
+                        function() {
+                          // Try loading the app directly
+                          const script = document.createElement('script');
+                          script.src = '/src/App.js';
+                          document.body.appendChild(script);
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            });
+        })
+        .catch(error => {
+          console.error("Failed to load UI components module:", error);
+          
+          // Very basic fallback UI
+          const rootElement = document.getElementById('root');
+          if (rootElement) {
+            rootElement.innerHTML = `
+              <div style="text-align: center; padding: 20px;">
+                <h2>Guia de Plano de Parto</h2>
+                <p>Carregando em modo de compatibilidade básica...</p>
+              </div>
+            `;
+          }
         });
-      } else {
-        createSimpleRouter();
-      }
+    })
+    .catch(error => {
+      console.error("Failed to load script loader module:", error);
     });
-  }
-  
-  function createSimpleRouter() {
-    console.log("Compat - Creating simple router app");
-    
-    // Try to get the correct object
-    const RouterObj = window.ReactRouterDOM || {};
-    const HashRouter = RouterObj.HashRouter;
-    const Routes = RouterObj.Routes;
-    const Route = RouterObj.Route;
-    const Navigate = RouterObj.Navigate;
-    
-    // If any of the objects is missing, build a simple fallback
-    if (!HashRouter || !Routes || !Route) {
-      console.error("Router components not available, showing simple page");
-      const rootElement = document.getElementById('root');
-      if (rootElement) {
-        rootElement.innerHTML = `
-          <div style="text-align: center; padding: 40px;">
-            <h1>Guia de Plano de Parto</h1>
-            <p>Bem-vinda ao Guia de Plano de Parto!</p>
-            <p>Estamos carregando o conteúdo em modo de compatibilidade.</p>
-            <p>Por favor, aguarde ou tente recarregar a página.</p>
-          </div>
-        `;
-      }
-      return;
-    }
-    
-    // Create a simple router
-    const RouterApp = function() {
-      return React.createElement(HashRouter, null,
-        React.createElement(Routes, null,
-          React.createElement(Route, { 
-            path: '/', 
-            element: React.createElement(Navigate, { to: '/guia-online', replace: true })
-          }),
-          React.createElement(Route, { 
-            path: '/guia-online', 
-            element: React.createElement('div', {
-              style: { textAlign: 'center', padding: '40px' }
-            }, 
-              React.createElement('h1', null, 'Guia de Plano de Parto'),
-              React.createElement('p', null, 'Bem-vinda ao Guia de Plano de Parto!'),
-              React.createElement('p', null, 'Estamos carregando o conteúdo em modo de compatibilidade.'),
-              React.createElement('p', null, 'Por favor, aguarde ou tente recarregar a página.')
-            )
-          }),
-          React.createElement(Route, { 
-            path: '/criar-plano', 
-            element: React.createElement('div', {
-              style: { textAlign: 'center', padding: '40px' }
-            }, 
-              React.createElement('h1', null, 'Construtor de Plano de Parto'),
-              React.createElement('p', null, 'Estamos preparando seu construtor de plano de parto.'),
-              React.createElement('p', null, 'Por favor, aguarde um momento...')
-            )
-          }),
-          React.createElement(Route, { 
-            path: '*', 
-            element: React.createElement('div', {
-              style: { textAlign: 'center', padding: '40px' }
-            },
-              React.createElement('h1', null, 'Página não encontrada'),
-              React.createElement('p', null, 'A página que você está procurando não existe.'),
-              React.createElement('a', { href: '#/guia-online' }, 'Voltar para o Guia')
-            )
-          })
-        )
-      );
-    };
-    
-    const rootElement = document.getElementById('root');
-    if (rootElement) {
-      try {
-        if (window.ReactDOM.createRoot) {
-          window.ReactDOM.createRoot(rootElement).render(React.createElement(RouterApp));
-        } else {
-          window.ReactDOM.render(React.createElement(RouterApp), rootElement);
-        }
-        console.log("Compat - Simple router app rendered successfully");
-      } catch (error) {
-        console.error("Failed to render router app:", error);
-        rootElement.innerHTML = `
-          <div style="text-align: center; padding: 40px;">
-            <h1>Guia de Plano de Parto</h1>
-            <p>Ocorreu um erro ao carregar a aplicação.</p>
-            <p>Por favor, tente recarregar a página.</p>
-          </div>
-        `;
-      }
-    }
-  }
 })();
