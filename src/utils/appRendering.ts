@@ -22,9 +22,11 @@ export function renderApp(App: React.ComponentType): void {
     try {
       const root = ReactDOM.createRoot(rootElement);
       root.render(
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
+        React.createElement(
+          React.StrictMode,
+          null,
+          React.createElement(App)
+        )
       );
       console.log("App successfully rendered with modern API");
     } catch (modernError) {
@@ -34,18 +36,22 @@ export function renderApp(App: React.ComponentType): void {
       if (typeof (ReactDOM as any).render === 'function') {
         console.log("Falling back to legacy ReactDOM.render");
         (ReactDOM as any).render(
-          <React.StrictMode>
-            <App />
-          </React.StrictMode>,
+          React.createElement(
+            React.StrictMode,
+            null,
+            React.createElement(App)
+          ),
           rootElement
         );
       } else if (window.ReactDOM && typeof window.ReactDOM.render === 'function') {
         // Use global ReactDOM as last resort
         console.log("Falling back to global ReactDOM.render");
         window.ReactDOM.render(
-          <React.StrictMode>
-            <App />
-          </React.StrictMode>,
+          React.createElement(
+            React.StrictMode,
+            null,
+            React.createElement(App)
+          ),
           rootElement
         );
       } else {

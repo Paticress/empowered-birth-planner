@@ -51,12 +51,14 @@ export function handleGlobalError(
  */
 export function renderSimpleLoadingApp(): React.FC {
   return () => {
-    return (
-      <div className="text-center py-8">
-        <h1 className="text-2xl font-bold">Guia de Plano de Parto</h1>
-        <p className="mt-4">Carregando conteúdo...</p>
-        <div className="w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" />
-      </div>
+    return React.createElement(
+      'div',
+      { className: "text-center py-8" },
+      React.createElement('h1', { className: "text-2xl font-bold" }, "Guia de Plano de Parto"),
+      React.createElement('p', { className: "mt-4" }, "Carregando conteúdo..."),
+      React.createElement('div', { 
+        className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" 
+      })
     );
   };
 }
