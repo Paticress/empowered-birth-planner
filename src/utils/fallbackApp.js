@@ -7,6 +7,18 @@ console.log('FallbackApp - Initializing fallback app utilities');
  * @param {HTMLElement} rootElement - The root DOM element
  */
 function createBasicAppContent(rootElement) {
+  if (!rootElement) {
+    console.error("FallbackApp - Root element not provided");
+    return;
+  }
+  
+  // Make sure React and ReactRouterDOM are available
+  if (!window.React || !window.ReactRouterDOM) {
+    console.error("FallbackApp - React or ReactRouterDOM not available, showing static content");
+    rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Estamos carregando o conteúdo. Por favor, aguarde ou tente recarregar a página.</p></div>';
+    return;
+  }
+  
   // Create a simple router-based app
   var SimpleApp = function() {
     return window.React.createElement(window.ReactRouterDOM.HashRouter, null,
@@ -44,10 +56,14 @@ function createBasicAppContent(rootElement) {
   };
   
   try {
-    if (window.ReactDOM.createRoot) {
+    if (window.ReactDOM && window.ReactDOM.createRoot) {
+      console.log("FallbackApp - Using React 18 createRoot API");
       window.ReactDOM.createRoot(rootElement).render(window.React.createElement(SimpleApp));
-    } else {
+    } else if (window.ReactDOM && window.ReactDOM.render) {
+      console.log("FallbackApp - Using legacy ReactDOM.render API");
       window.ReactDOM.render(window.React.createElement(SimpleApp), rootElement);
+    } else {
+      throw new Error("No suitable ReactDOM renderer available");
     }
     console.log("FallbackApp - Basic routing app rendered successfully");
   } catch (error) {

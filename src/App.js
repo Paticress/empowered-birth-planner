@@ -17,38 +17,13 @@
     if (!window.React || !window.ReactDOM) {
       console.log("App.js - React not available yet, loading dependencies");
       
-      // Try to dynamically import the React loader
-      try {
-        import('./utils/reactLoader.js')
-          .then(reactLoader => {
-            reactLoader.loadReactDependencies(() => {
-              // Continue with app initialization after React is loaded
-              initializeApp();
-            });
-          })
-          .catch(error => {
-            console.error("App.js - Error importing React loader:", error);
-            
-            // Fallback to window-level reactLoader if available
-            if (window.__reactLoader && window.__reactLoader.loadReactDependencies) {
-              window.__reactLoader.loadReactDependencies(() => {
-                initializeApp();
-              });
-            } else {
-              showFallbackContent();
-            }
-          });
-      } catch (importError) {
-        console.error("App.js - Dynamic import not supported:", importError);
-        
-        // Try using global reactLoader
-        if (window.__reactLoader && window.__reactLoader.loadReactDependencies) {
-          window.__reactLoader.loadReactDependencies(() => {
-            initializeApp();
-          });
-        } else {
-          showFallbackContent();
-        }
+      // Try to load React dependencies first
+      if (window.__reactLoader && window.__reactLoader.loadReactDependencies) {
+        window.__reactLoader.loadReactDependencies(() => {
+          // Continue with app initialization after React is loaded
+          initializeApp();
+        });
+        return;
       }
     } else {
       console.log("App.js - React already available, proceeding with initialization");
@@ -57,57 +32,67 @@
     
     // Main initialization function
     function initializeApp() {
-      // Try to directly create the real App component first (not using dynamic import)
+      // If App is already in window, render it directly
       if (window.App) {
         console.log("App.js - App already available in window, rendering");
         renderApp();
         return;
       }
       
-      // Try loading the compiled App.js first instead of App.tsx (which may have MIME issues)
+      // Try loading the App.tsx as a normal script first (not as module)
       const script = document.createElement('script');
-      script.src = './src/compiled/App.js';
+      script.src = './src/App.tsx';
+      script.type = 'text/javascript'; // Force non-module for broader compatibility
+      
       script.onload = function() {
-        console.log("App.js - Loaded compiled App.js successfully");
+        console.log("App.js - Loaded App.tsx successfully as regular script");
         renderApp();
       };
+      
       script.onerror = function() {
-        console.log("App.js - Failed to load compiled App.js, trying App.tsx as module");
+        console.log("App.js - Failed to load App.tsx as script, trying direct import");
         
-        // Try importing App.tsx as a module
-        try {
-          import('./App.tsx')
-            .then(module => {
-              console.log("App.js - Successfully imported App.tsx module");
-              window.App = module.default;
-              renderApp();
-            })
-            .catch(error => {
-              console.error("App.js - Error importing App.tsx:", error);
-              
-              // Try a direct script load of App.tsx as fallback
-              const tsxScript = document.createElement('script');
-              tsxScript.type = 'module';
-              tsxScript.src = './App.tsx';
-              tsxScript.onload = function() {
-                console.log("App.js - Loaded App.tsx via script tag");
-                renderApp();
-              };
-              tsxScript.onerror = function() {
-                console.error("App.js - Failed to load App.tsx via script tag");
-                showFallbackContent();
-              };
-              document.body.appendChild(tsxScript);
-            });
-        } catch (importError) {
-          console.error("App.js - Dynamic import not supported:", importError);
-          showFallbackContent();
-        }
+        // Create a simple minimal implementation as a last resort
+        window.App = window.App || function SimpleApp() {
+          return window.React.createElement(window.ReactRouterDOM.HashRouter, null,
+            window.React.createElement(window.ReactRouterDOM.Routes, null,
+              window.React.createElement(window.ReactRouterDOM.Route, { 
+                path: '/', 
+                element: window.React.createElement(window.ReactRouterDOM.Navigate, { to: '/guia-online', replace: true })
+              }),
+              window.React.createElement(window.ReactRouterDOM.Route, { 
+                path: '/guia-online', 
+                element: window.React.createElement('div', { style: { textAlign: 'center', padding: '40px' } },
+                  window.React.createElement('h1', null, 'Guia de Plano de Parto'),
+                  window.React.createElement('p', null, 'Bem-vinda ao Guia de Plano de Parto!')
+                )
+              }),
+              window.React.createElement(window.ReactRouterDOM.Route, {
+                path: '/criar-plano', 
+                element: window.React.createElement('div', { style: { textAlign: 'center', padding: '40px' } },
+                  window.React.createElement('h1', null, 'Construtor de Plano de Parto'),
+                  window.React.createElement('p', null, 'Estamos preparando seu construtor de plano de parto.')
+                )
+              }),
+              window.React.createElement(window.ReactRouterDOM.Route, {
+                path: '*',
+                element: window.React.createElement('div', { style: { textAlign: 'center', padding: '40px' } },
+                  window.React.createElement('h1', null, 'Página não encontrada'),
+                  window.React.createElement('p', null, 'A página que você está procurando não existe.'),
+                  window.React.createElement('a', { href: '#/guia-online' }, 'Voltar para o Guia')
+                )
+              })
+            )
+          );
+        };
+        
+        renderApp();
       };
+      
       document.body.appendChild(script);
     }
     
-    // Function to render the real App component
+    // Function to render the App component
     function renderApp() {
       try {
         if (!window.App) {
@@ -116,20 +101,29 @@
           return;
         }
         
-        import('./utils/appRenderer.js')
-          .then(renderer => {
-            renderer.renderAppComponent();
-          })
-          .catch(error => {
-            console.error("App.js - Error importing app renderer:", error);
-            
-            // Try fallback renderer if available
-            if (window.__appRenderer && window.__appRenderer.renderAppComponent) {
-              window.__appRenderer.renderAppComponent();
+        // Try to use the app renderer if available
+        if (window.__appRenderer && window.__appRenderer.renderAppComponent) {
+          window.__appRenderer.renderAppComponent();
+        } else {
+          // Direct rendering as fallback
+          const rootElement = document.getElementById('root');
+          if (!rootElement) {
+            console.error("App.js - Root element not found");
+            return;
+          }
+          
+          try {
+            if (window.ReactDOM.createRoot) {
+              window.ReactDOM.createRoot(rootElement).render(window.React.createElement(window.App));
             } else {
-              showFallbackContent();
+              window.ReactDOM.render(window.React.createElement(window.App), rootElement);
             }
-          });
+            console.log("App.js - App rendered successfully with direct rendering");
+          } catch (renderError) {
+            console.error("App.js - Error rendering with ReactDOM:", renderError);
+            showFallbackContent();
+          }
+        }
       } catch (error) {
         console.error("App.js - Error rendering App:", error);
         showFallbackContent();
@@ -140,34 +134,13 @@
     function showFallbackContent() {
       console.error("App.js - Critical error, showing fallback content");
       
-      try {
-        import('./utils/fallbackApp.js')
-          .then(module => {
-            const rootElement = document.getElementById('root');
-            if (rootElement) {
-              module.createBasicAppContent(rootElement);
-            }
-          })
-          .catch(finalError => {
-            console.error("App.js - Failed to load even fallback content:", finalError);
-            
-            // Try global fallbackApp if available
-            if (window.__fallbackApp && window.__fallbackApp.createBasicContent) {
-              const rootElement = document.getElementById('root');
-              if (rootElement) {
-                window.__fallbackApp.createBasicContent(rootElement);
-              }
-            } else {
-              // Ultimate fallback
-              const rootElement = document.getElementById('root');
-              if (rootElement) {
-                rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p></div>';
-              }
-            }
-          });
-      } catch (outerError) {
-        console.error("App.js - Error loading fallback:", outerError);
-        
+      // Try to use the fallback app if available
+      if (window.__fallbackApp && window.__fallbackApp.createBasicContent) {
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+          window.__fallbackApp.createBasicContent(rootElement);
+        }
+      } else {
         // Ultimate fallback
         const rootElement = document.getElementById('root');
         if (rootElement) {
