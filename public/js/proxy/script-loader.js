@@ -39,6 +39,35 @@
       return null;
     }
     
+    // Special case for GPT Engineer script
+    if (src.includes('gpteng.co') || src.includes('gptengineer.js')) {
+      console.log("[Script Loader] Special handling for GPT Engineer script");
+      const script = document.createElement('script');
+      script.src = src;
+      script.type = 'text/javascript'; // Force text/javascript instead of module
+      script.crossOrigin = 'anonymous';
+      
+      script.onload = function() {
+        console.log("[Script Loader] GPT Engineer script loaded successfully");
+        if (callback) callback();
+      };
+      
+      script.onerror = function(error) {
+        console.error("[Script Loader] GPT Engineer script failed to load:", error);
+        // Create a minimal implementation as fallback
+        window.gptengineer = window.gptengineer || {
+          createSelect: function() {
+            console.log("GPT Engineer Select functionality unavailable");
+            return null;
+          }
+        };
+        if (callback) callback();
+      };
+      
+      document.head.appendChild(script);
+      return script;
+    }
+    
     // Skip for trusted domains
     if (isTrustedDomain(src)) {
       // Check if resource exists first for trusted domains
@@ -239,4 +268,3 @@
   
   console.log("[Script Loader] Script loader with CORS support initialized");
 })();
-

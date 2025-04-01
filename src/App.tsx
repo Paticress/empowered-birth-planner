@@ -25,8 +25,9 @@ const queryClient = new QueryClient({
 // Enhanced log for debugging
 console.log("APP COMPONENT INITIALIZING - SETTING UP ROUTES");
 
-// Check if the current environment supports window
+// Mark that the main App component has loaded
 if (typeof window !== 'undefined') {
+  window.App = App;
   console.log(`Current URL: ${window.location.href}`);
   console.log(`Current path: ${window.location.pathname}`);
   console.log(`Current hash: ${window.location.hash}`);
@@ -92,4 +93,5 @@ const App = () => {
   );
 };
 
+// Ensure the App is exported correctly
 export default App;
