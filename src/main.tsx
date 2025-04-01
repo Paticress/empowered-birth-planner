@@ -11,6 +11,12 @@ declare global {
     __FULL_APP_LOADED?: boolean;
     App?: React.ComponentType<any>;
     __appLoader?: () => void;
+    React?: typeof React;
+    ReactDOM?: typeof ReactDOM & {
+      createRoot?: (container: Element) => {
+        render: (element: React.ReactNode) => void;
+      };
+    };
   }
 }
 
@@ -74,7 +80,7 @@ declare global {
   import('./App').then(module => {
     window.App = module.default;
     
-    if (typeof window !== 'undefined' && typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+    if (typeof window !== 'undefined') {
       console.log("Main.tsx - Rendering app from module import");
       
       // Use direct reference to imported App component
@@ -88,7 +94,8 @@ declare global {
         }
         
         // Render the app
-        ReactDOM.createRoot(rootElement).render(
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(
           <React.StrictMode>
             <App />
           </React.StrictMode>
@@ -110,40 +117,43 @@ declare global {
       
       if (routerAvailable) {
         // Use global react objects for compatibility
-        return window.React.createElement(window.ReactRouterDOM.HashRouter, null,
-          window.React.createElement(window.ReactRouterDOM.Routes, null,
-            window.React.createElement(window.ReactRouterDOM.Route, { 
+        return React.createElement(window.ReactRouterDOM.HashRouter, null,
+          React.createElement(window.ReactRouterDOM.Routes, null,
+            React.createElement(window.ReactRouterDOM.Route, { 
               path: '/', 
-              element: window.React.createElement(window.ReactRouterDOM.Navigate, { to: '/guia-online', replace: true }) 
+              element: React.createElement(window.ReactRouterDOM.Navigate, { to: '/guia-online', replace: true }) 
             }),
-            window.React.createElement(window.ReactRouterDOM.Route, { 
+            React.createElement(window.ReactRouterDOM.Route, { 
               path: '/guia-online', 
-              element: window.React.createElement('div', { className: "text-center py-8" },
-                window.React.createElement('h1', { className: "text-2xl font-bold" }, "Guia de Plano de Parto"),
-                window.React.createElement('p', { className: "mt-4" }, "Carregando conteúdo..."),
-                window.React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
+              element: React.createElement('div', { className: "text-center py-8" },
+                React.createElement('h1', { className: "text-2xl font-bold" }, "Guia de Plano de Parto"),
+                React.createElement('p', { className: "mt-4" }, "Carregando conteúdo..."),
+                React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
               )
             })
           )
         );
       } else {
-        return window.React.createElement('div', { className: "text-center py-8" },
-          window.React.createElement('h1', { className: "text-2xl font-bold" }, "Guia de Plano de Parto"),
-          window.React.createElement('p', { className: "mt-4" }, "Carregando conteúdo..."),
-          window.React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
+        return React.createElement('div', { className: "text-center py-8" },
+          React.createElement('h1', { className: "text-2xl font-bold" }, "Guia de Plano de Parto"),
+          React.createElement('p', { className: "mt-4" }, "Carregando conteúdo..."),
+          React.createElement('div', { className: "w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin mx-auto mt-4" })
         );
       }
     };
     
     // Try to render basic fallback
-    if (typeof window !== 'undefined' && typeof window.React !== 'undefined' && typeof window.ReactDOM !== 'undefined') {
+    if (typeof window !== 'undefined') {
       const rootElement = document.getElementById('root');
       if (rootElement) {
         try {
-          if (window.ReactDOM.createRoot) {
-            window.ReactDOM.createRoot(rootElement).render(window.React.createElement(SimpleApp));
+          if (ReactDOM.createRoot) {
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(React.createElement(SimpleApp));
           } else {
-            window.ReactDOM.render(window.React.createElement(SimpleApp), rootElement);
+            // Fallback for older versions
+            console.warn("Main.tsx - ReactDOM.createRoot not available, using render fallback");
+            ReactDOM.render(React.createElement(SimpleApp), rootElement);
           }
         } catch (renderError) {
           console.error("Main.tsx - Error rendering fallback:", renderError);
@@ -152,3 +162,4 @@ declare global {
     }
   });
 })();
+
