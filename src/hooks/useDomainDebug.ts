@@ -2,151 +2,37 @@
 import { useEffect } from 'react';
 
 /**
- * Hook para auxiliar no diagnóstico de problemas de domínio e incorporação
- * Adiciona informações úteis para debug de problemas de CORS e iframe
+ * A hook to help debug domain/hosting issues
+ * Logs useful information about the current environment
  */
-export function useDomainDebug() {
+export const useDomainDebug = () => {
   useEffect(() => {
-    // Log environment information
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const isDev = process.env.NODE_ENV === 'development';
-    const isInIframe = window !== window.parent;
-    const protocol = window.location.protocol;
-
-    // Check for common issues
-    const hasHashRouter = window.location.hash !== '';
-    const hasReactRouter = !!(window as any).ReactRouterDOM;
-    const hasReact = !!(window as any).React;
-    const hasReactDOM = !!(window as any).ReactDOM;
-    
-    // Check for missing dependencies
-    const missingDependencies = [];
-    if (!hasReact) missingDependencies.push('React');
-    if (!hasReactDOM) missingDependencies.push('ReactDOM');
-    if (!hasReactRouter) missingDependencies.push('ReactRouterDOM');
-    
-    // Check for script load errors
-    const scriptErrorsExist = document.querySelectorAll('script[onerror]').length > 0;
-    
-    // Check for CORS issues
-    const corsErrors = (window as any).__APP_ERRORS?.filter(
-      (err: any) => err.message?.includes('CORS') || err.message?.includes('cross-origin')
-    ) || [];
-    
-    // Collect error information if available
-    const appErrors = (window as any).__APP_ERRORS || [];
-    
-    // Create debug report
-    const debugReport = {
-      timestamp: new Date().toISOString(),
-      url: window.location.href,
-      path: window.location.pathname,
-      hash: window.location.hash,
-      hostname: window.location.hostname,
-      protocol,
-      isLocalhost,
-      isDev,
-      isInIframe,
-      userAgent: navigator.userAgent,
-      hasHashRouter,
-      hasReactRouter,
-      hasReact,
-      hasReactDOM,
-      missingDependencies,
-      scriptErrorsExist,
-      corsErrors: corsErrors.length > 0,
-      appErrors: appErrors.length,
-      screenSize: {
-        width: window.innerWidth,
-        height: window.innerHeight
-      }
-    };
-    
-    // Log the debug information
-    console.log('Domain Debug Information:', debugReport);
-    
-    // Check for CORS issues and try to resolve them
-    if (corsErrors.length > 0) {
-      console.warn('CORS issues detected. Attempting to resolve...');
-      
-      // Load the proxy script if not already loaded
-      if (!(window as any).__PROXY_LOADED) {
-        try {
-          const proxyScript = document.createElement('script');
-          proxyScript.src = '/proxy.js';
-          proxyScript.onload = () => {
-            console.log('CORS proxy helper loaded successfully');
-            (window as any).__PROXY_LOADED = true;
-          };
-          document.head.appendChild(proxyScript);
-        } catch (err) {
-          console.error('Failed to load CORS proxy helper:', err);
-        }
-      }
+    if (process.env.NODE_ENV === 'development') {
+      return; // Only run in production
     }
     
-    // Check specific issues when running in iframe
-    if (isInIframe) {
-      console.log('Running inside an iframe - checking CORS policies');
-      
-      // Test postMessage to parent
-      try {
-        window.parent.postMessage({ 
-          type: 'debug', 
-          source: 'energia-materna-app',
-          message: 'Testing parent communication'
-        }, '*');
-        console.log('Test message sent to parent window');
-      } catch (error) {
-        console.error('Error communicating with parent window:', error);
-      }
-      
-      // Add specific iframe friendly classes
-      document.body.classList.add('in-iframe');
-      
-      // Send height updates to parent
-      const sendHeight = () => {
-        try {
-          const height = document.body.scrollHeight;
-          window.parent.postMessage({ 
-            type: 'resize', 
-            height, 
-            source: 'energia-materna-app'
-          }, '*');
-        } catch (e) {
-          console.error('Error sending height to parent:', e);
-        }
-      };
-      
-      // Send height on load and when window resizes
-      sendHeight();
-      window.addEventListener('resize', sendHeight);
-      
-      // Create a MutationObserver to detect DOM changes
-      const observer = new MutationObserver(sendHeight);
-      observer.observe(document.body, { 
-        childList: true, 
-        subtree: true, 
-        attributes: true 
-      });
-      
-      return () => {
-        window.removeEventListener('resize', sendHeight);
-        observer.disconnect();
-      };
-    }
+    console.log('Domain Debug Information:');
+    console.log('URL:', window.location.href);
+    console.log('Protocol:', window.location.protocol);
+    console.log('Hostname:', window.location.hostname);
+    console.log('Pathname:', window.location.pathname);
+    console.log('Hash:', window.location.hash);
+    console.log('User Agent:', navigator.userAgent);
     
-    if (protocol !== 'https:' && !isLocalhost) {
-      console.warn('Running on non-HTTPS protocol, this may cause issues with secure features and iframe embedding');
-    }
+    // Check if we're on the custom domain
+    const isCustomDomain = window.location.hostname === 'planodeparto.energiamaterna.com.br';
+    console.log('Is Custom Domain:', isCustomDomain);
     
-    // Return cleanup function
-    return () => {
-      console.log('Domain debug hook unmounted');
-    };
+    // Check if service worker is supported
+    console.log('Service Worker Supported:', 'serviceWorker' in navigator);
+    
+    try {
+      // Test CORS with a simple fetch to own domain
+      fetch('/')
+        .then(() => console.log('Self-domain fetch succeeded'))
+        .catch(err => console.error('Self-domain fetch failed:', err));
+    } catch (error) {
+      console.error('Error in domain debug:', error);
+    }
   }, []);
-  
-  return null;
-}
-
-export default useDomainDebug;
+};

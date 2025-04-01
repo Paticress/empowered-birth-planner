@@ -1,25 +1,11 @@
 
 import { Progress } from '@/components/ui/progress';
 
-// Define the tab order to calculate progress
-const TAB_ORDER = [
-  'introduction',
-  'rights',
-  'structure',
-  'communication',
-  'checklist',
-  'resources'
-];
-
 type GuideProgressBarProps = {
-  activeTab: string;
+  progress: number;
 };
 
-export function GuideProgressBar({ activeTab }: GuideProgressBarProps) {
-  // Calculate progress based on activeTab position in TAB_ORDER
-  const currentIndex = TAB_ORDER.indexOf(activeTab);
-  const progress = currentIndex >= 0 ? ((currentIndex + 1) / TAB_ORDER.length) * 100 : 0;
-
+export function GuideProgressBar({ progress }: GuideProgressBarProps) {
   return (
     <div className="mb-4 print:hidden" aria-label="Progresso no guia">
       <div className="flex justify-between items-center mb-2">

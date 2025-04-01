@@ -1,163 +1,174 @@
 
 import { useState, useEffect } from 'react';
-import { GuideTabs } from './GuideTabs';
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { GuideIntroduction } from './GuideIntroduction';
+import { GuideStructure } from './GuideStructure';
+import { GuideRights } from './GuideRights';
+import { GuideCommunication } from './GuideCommunication';
+import { GuideChecklist } from './GuideChecklist';
+import { GuideResources } from './GuideResources';
 import { GuideHeader } from './GuideHeader';
-import { useLocation } from 'react-router-dom';
-import '../../../src/styles/embed.css';
+import { GuideTabs } from './GuideTabs';
+import { GuideProgressBar } from './GuideProgressBar';
+import { BackToTopButton } from './BackToTopButton';
+import { MobileNavigation } from './MobileNavigation';
+import { Footer } from '@/components/Footer';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-interface OnlineGuideProps {
-  embedded?: boolean;
-}
-
-export function OnlineGuide({ embedded = false }: OnlineGuideProps) {
-  const [activeTab, setActiveTab] = useState('introduction');
-  const location = useLocation();
+export function OnlineGuide() {
+  const [activeTab, setActiveTab] = useState("introduction");
+  const [progress, setProgress] = useState(0);
+  const isMobile = useIsMobile();
   
-  // Debug logs for component rendering
-  console.log("OnlineGuide - Component rendering, embedded:", embedded);
+  const tabs = ["introduction", "structure", "rights", "communication", "checklist", "resources"];
+  const tabNames: Record<string, string> = {
+    introduction: "Introdução",
+    structure: "Estrutura",
+    rights: "Direitos",
+    communication: "Comunicação",
+    checklist: "Checklist",
+    resources: "Recursos"
+  };
   
-  // Handle navigation from other tabs
   useEffect(() => {
-    console.log("OnlineGuide - useEffect running with location:", location);
-    const hash = location.hash.replace('#', '');
-    if (hash && hash !== '/guia-online') {
-      console.log("OnlineGuide - Setting active tab from hash:", hash);
-      setActiveTab(hash);
+    const savedTab = localStorage.getItem('guide-current-tab');
+    if (savedTab && tabs.includes(savedTab)) {
+      setActiveTab(savedTab);
+      updateProgress(savedTab);
     }
-  }, [location]);
+  }, []);
   
-  // Listen for parent window messages
   useEffect(() => {
-    const handleParentMessages = (event: MessageEvent) => {
-      console.log("OnlineGuide - Received message:", event.data);
-      if (event.data && event.data.type === 'wix-check') {
-        console.log("OnlineGuide - Received check from parent, sending response");
-        try {
-          window.parent.postMessage({ 
-            type: 'loaded', 
-            source: 'energia-materna-guide',
-            height: document.body.scrollHeight
-          }, '*');
-        } catch (error) {
-          console.error("OnlineGuide - Error sending load confirmation:", error);
-        }
-      }
-    };
-    
-    window.addEventListener('message', handleParentMessages);
-    return () => window.removeEventListener('message', handleParentMessages);
-  }, [embedded]);
+    localStorage.setItem('guide-current-tab', activeTab);
+  }, [activeTab]);
 
-  // Send resize messages to parent window when in embedded mode
-  useEffect(() => {
-    if (embedded) {
-      const sendResizeMessage = () => {
-        const height = document.body.scrollHeight;
-        try {
-          // Use a more robust cross-origin communication approach
-          window.parent.postMessage({ 
-            type: 'resize', 
-            height, 
-            source: 'energia-materna-guide',
-            url: window.location.href
-          }, '*');
-          console.log("OnlineGuide - Sending resize message, height:", height);
-        } catch (error) {
-          console.error("OnlineGuide - Error sending postMessage:", error);
-        }
-      };
-      
-      // Add a small delay for initial rendering
-      setTimeout(sendResizeMessage, 100);
-      
-      // Send initial message and setup listeners
-      window.addEventListener('resize', sendResizeMessage);
-      
-      // Observe DOM changes to detect content changes
-      const observer = new MutationObserver(() => {
-        console.log("OnlineGuide - DOM mutation detected, sending resize");
-        sendResizeMessage();
-      });
-      
-      // Start observing the document with the configured parameters
-      observer.observe(document.body, { 
-        childList: true, 
-        subtree: true, 
-        attributes: true,
-        characterData: true 
-      });
-      
-      // Check for content changes periodically as fallback
-      const resizeInterval = setInterval(sendResizeMessage, 500);
-      
-      // Send an initial "ready" message
-      try {
-        setTimeout(() => {
-          window.parent.postMessage({ 
-            type: 'ready', 
-            source: 'energia-materna-guide',
-            height: document.body.scrollHeight
-          }, '*');
-          console.log("OnlineGuide - Sent ready message to parent");
-        }, 200);
-      } catch (error) {
-        console.error("OnlineGuide - Error sending ready message:", error);
-      }
-      
-      return () => {
-        window.removeEventListener('resize', sendResizeMessage);
-        clearInterval(resizeInterval);
-        observer.disconnect();
-      };
-    }
-  }, [embedded, activeTab]);
-
-  const handleTabChange = (tab: string) => {
-    console.log('Tab changed to:', tab);
-    setActiveTab(tab);
-    
-    // When tab changes in embedded mode, ensure parent window is notified
-    if (embedded) {
-      setTimeout(() => {
-        const height = document.body.scrollHeight;
-        try {
-          window.parent.postMessage({ 
-            type: 'resize', 
-            height, 
-            source: 'energia-materna-guide',
-            tab: tab
-          }, '*');
-        } catch (error) {
-          console.error("Error sending postMessage on tab change:", error);
-        }
-      }, 100);
-    }
+  const handleNextSection = (next: string) => {
+    setActiveTab(next);
+    updateProgress(next);
+    scrollToTop();
   };
 
-  console.log("OnlineGuide - Rendering with activeTab:", activeTab);
+  const updateProgress = (tab: string) => {
+    const currentIndex = tabs.indexOf(tab);
+    const progressPercentage = ((currentIndex + 1) / tabs.length) * 100;
+    setProgress(progressPercentage);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    updateProgress(value);
+    scrollToTop();
+  };
+
+  const currentIndex = tabs.indexOf(activeTab);
+  const isFirstTab = currentIndex === 0;
+  const isLastTab = currentIndex === tabs.length - 1;
+
   return (
-    <div className={`min-h-screen bg-white ${embedded ? 'embedded-mode' : ''}`}>
-      {!embedded && <GuideHeader onNavigate={handleTabChange} currentTab={activeTab} />}
-      
-      <main className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6">
-        <GuideTabs 
-          activeTab={activeTab} 
-          onTabChange={handleTabChange}
-          embedded={embedded}
+    <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Guia do Plano de Parto">
+      <div className="pt-4 md:pt-8">
+        <GuideHeader 
+          onNavigate={handleTabChange} 
+          currentTab={activeTab} 
         />
-      </main>
+
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-between items-center mb-4 md:hidden print:hidden">
+            <MobileNavigation 
+              activeTab={activeTab} 
+              onTabChange={handleTabChange} 
+              tabNames={tabNames} 
+            />
+          </div>
+          
+          <GuideProgressBar progress={progress} />
+          
+          <div className="mb-8 animate-fade-in print:block">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+              <div className="hidden md:flex justify-between items-center mb-4 print:hidden">
+                <GuideTabs activeTab={activeTab} onChange={handleTabChange} />
+              </div>
+              
+              <div className="flex justify-between items-center mb-4 print:hidden">
+                {!isFirstTab ? (
+                  <Button 
+                    variant="navigation" 
+                    className="flex items-center" 
+                    onClick={() => handleNextSection(tabs[currentIndex - 1])}
+                    aria-label={`Ir para seção anterior: ${tabNames[tabs[currentIndex - 1]]}`}
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Seção Anterior
+                  </Button>
+                ) : (
+                  <div></div>
+                )}
+                
+                {!isLastTab ? (
+                  <Button 
+                    className="flex items-center ml-auto" 
+                    variant="navigation"
+                    onClick={() => handleNextSection(tabs[currentIndex + 1])}
+                    aria-label={`Ir para próxima seção: ${tabNames[tabs[currentIndex + 1]]}`}
+                  >
+                    Próxima Seção <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <div></div>
+                )}
+              </div>
+              
+              <div className="bg-white shadow-md rounded-lg p-6 md:p-8">
+                <TabsContent value="introduction" className="mt-0" role="tabpanel" aria-labelledby="tab-introduction">
+                  <GuideIntroduction onNext={() => handleNextSection("structure")} />
+                </TabsContent>
+                
+                <TabsContent value="structure" className="mt-0" role="tabpanel" aria-labelledby="tab-structure">
+                  <GuideStructure 
+                    onPrevious={() => handleNextSection("introduction")} 
+                    onNext={() => handleNextSection("rights")} 
+                  />
+                </TabsContent>
+                
+                <TabsContent value="rights" className="mt-0" role="tabpanel" aria-labelledby="tab-rights">
+                  <GuideRights 
+                    onPrevious={() => handleNextSection("structure")} 
+                    onNext={() => handleNextSection("communication")} 
+                  />
+                </TabsContent>
+                
+                <TabsContent value="communication" className="mt-0" role="tabpanel" aria-labelledby="tab-communication">
+                  <GuideCommunication 
+                    onPrevious={() => handleNextSection("rights")} 
+                    onNext={() => handleNextSection("checklist")} 
+                  />
+                </TabsContent>
+                
+                <TabsContent value="checklist" className="mt-0" role="tabpanel" aria-labelledby="tab-checklist">
+                  <GuideChecklist
+                    onPrevious={() => handleNextSection("communication")}
+                    onNext={() => handleNextSection("resources")}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="resources" className="mt-0" role="tabpanel" aria-labelledby="tab-resources">
+                  <GuideResources
+                    onPrevious={() => handleNextSection("checklist")}
+                  />
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
+        </main>
+        
+        <BackToTopButton />
+        <Footer />
+      </div>
     </div>
   );
-}
-
-// Modified global export to use the correct TypeScript approach
-// Ensure component is also available globally for non-module contexts
-if (typeof window !== 'undefined') {
-  try {
-    // Use type assertion to add OnlineGuide to the Window interface
-    (window as any).OnlineGuide = OnlineGuide;
-    console.log("OnlineGuide component exported to window");
-  } catch (error) {
-    console.error("Error exporting OnlineGuide to window:", error);
-  }
 }

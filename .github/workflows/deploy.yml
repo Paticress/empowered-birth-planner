@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
@@ -30,147 +30,40 @@ jobs:
       - name: Build
         run: npm run build
       
-      - name: Verify build artifacts
-        run: |
-          echo "Checking build artifacts..."
-          ls -la dist/
-          echo "Verifying favicon exists"
-          if [ ! -f "dist/favicon.ico" ]; then
-            echo "Favicon missing, copying from public"
-            cp public/favicon.ico dist/
-          fi
-          
-          echo "Creating _headers file for Netlify/GitHub Pages"
-          cat > dist/_headers << EOF
-          # Set proper MIME types for all files
-          /*
-            X-Frame-Options: SAMEORIGIN
-            X-XSS-Protection: 1; mode=block
-            X-Content-Type-Options: nosniff
-            Referrer-Policy: strict-origin-when-cross-origin
-            Access-Control-Allow-Origin: *
-
-          # JavaScript files - critical for module loading
-          /*.js
-            Content-Type: application/javascript; charset=utf-8
-
-          # JSX/TSX files
-          /*.jsx
-            Content-Type: application/javascript; charset=utf-8
-          /*.tsx
-            Content-Type: application/javascript; charset=utf-8
-
-          # JSON files  
-          /*.json
-            Content-Type: application/json; charset=utf-8
-
-          # CSS files
-          /*.css
-            Content-Type: text/css; charset=utf-8
-
-          # Favicon specific rule
-          /favicon.ico
-            Cache-Control: public, max-age=604800
-            Content-Type: image/x-icon
-          EOF
-          
-          echo "Creating .htaccess for Apache servers"
-          cat > dist/.htaccess << EOF
-          # Serve JavaScript files with the correct MIME type
-          AddType application/javascript .js .mjs .jsx .tsx
-          
-          # Enable CORS for all assets
-          Header set Access-Control-Allow-Origin "*"
-          
-          # Rewrite rules for SPA routing
-          RewriteEngine On
-          RewriteBase /
-          RewriteRule ^index\.html$ - [L]
-          RewriteCond %{REQUEST_FILENAME} !-f
-          RewriteCond %{REQUEST_FILENAME} !-d
-          RewriteRule . /index.html [L]
-          EOF
-          
-          echo "Creating a web.config file for IIS servers"
-          cat > dist/web.config << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <configuration>
-            <system.webServer>
-              <staticContent>
-                <remove fileExtension=".js" />
-                <mimeMap fileExtension=".js" mimeType="application/javascript" />
-                <remove fileExtension=".jsx" />
-                <mimeMap fileExtension=".jsx" mimeType="application/javascript" />
-                <remove fileExtension=".tsx" />
-                <mimeMap fileExtension=".tsx" mimeType="application/javascript" />
-                <remove fileExtension=".json" />
-                <mimeMap fileExtension=".json" mimeType="application/json" />
-                <remove fileExtension=".ico" />
-                <mimeMap fileExtension=".ico" mimeType="image/x-icon" />
-              </staticContent>
-              <rewrite>
-                <rules>
-                  <rule name="SPA Routes" stopProcessing="true">
-                    <match url=".*" />
-                    <conditions logicalGrouping="MatchAll">
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-                    </conditions>
-                    <action type="Rewrite" url="/" />
-                  </rule>
-                </rules>
-              </rewrite>
-            </system.webServer>
-          </configuration>
-          EOF
-          
-          echo "Copying fallback entry points to dist"
-          cp src/main.js dist/
-          
-          echo "Creating simple compatibility script in dist root"
-          cat > dist/compat.js << EOF
-          // Compatibility script for older browsers
-          (function() {
-            console.log('Loading compatibility script');
-            document.getElementById('root').innerHTML = '<div style="text-align:center;padding:20px"><h1>Carregando...</h1></div>';
-            var script = document.createElement('script');
-            script.src = '/main.js';
-            script.type = 'text/javascript';
-            document.body.appendChild(script);
-          })();
-          EOF
-
       - name: Copy CNAME to dist
-        run: |
-          if [ -f "public/CNAME" ]; then
-            cp public/CNAME dist/
-          fi
+        run: cp public/CNAME dist/
 
       - name: Copy 404.html to dist root
-        run: |
-          if [ -f "public/404.html" ]; then
-            cp public/404.html dist/
-          fi
+        run: cp public/404.html dist/
         
-      - name: Make sure favicon is in dist root
+      - name: Copy domain-test.txt to dist root
         run: |
-          echo "Copying favicon.ico to dist root directory"
-          cp public/favicon.ico dist/
-          ls -la dist/
-          echo "Favicon copied and verified"
-          
+          if [ -f "public/domain-test.txt" ]; then
+            cp public/domain-test.txt dist/
+            echo "Domain test file copied successfully"
+          else
+            echo "Creating domain-test.txt in dist directory"
+            echo "Domain test file - $(date)" > dist/domain-test.txt
+          fi
+      
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
       
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          folder: dist
-          branch: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
-          clean: true
-          
-      - name: Test URLs after deployment
-        run: |
-          echo "Deployment complete. The site should be live at https://planodeparto.energiamaterna.com.br"
-          echo "Remember to verify that MIME types are being set correctly in the GitHub Pages environment"
+          path: './dist'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

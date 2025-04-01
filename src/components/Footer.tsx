@@ -1,6 +1,5 @@
 
 import { Link } from 'react-router-dom';
-import { BookOpen, Newspaper, Award } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -23,24 +22,24 @@ export function Footer() {
           <div className="flex justify-end">
             <div>
               <h3 className="text-maternal-900 font-semibold text-lg mb-4">Links Rápidos</h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2">
                 <li>
-                  <Link 
-                    to="/guia-online" 
-                    className="text-maternal-700 hover:text-maternal-600 transition-colors flex items-center"
+                  <a 
+                    href="https://www.energiamaterna.com.br/meu-plano-de-parto" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-maternal-700 hover:text-maternal-600 transition-colors"
                   >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Guia Online
-                  </Link>
+                    Modelo de Plano de Parto
+                  </a>
                 </li>
                 <li>
                   <a 
                     href="https://www.energiamaterna.com.br/especiais" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="text-maternal-700 hover:text-maternal-600 transition-colors flex items-center"
+                    className="text-maternal-700 hover:text-maternal-600 transition-colors"
                   >
-                    <Award className="h-4 w-4 mr-2" />
                     Especiais Energia Materna
                   </a>
                 </li>
@@ -49,9 +48,8 @@ export function Footer() {
                     href="https://www.energiamaterna.com.br/blog" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="text-maternal-700 hover:text-maternal-600 transition-colors flex items-center"
+                    className="text-maternal-700 hover:text-maternal-600 transition-colors"
                   >
-                    <Newspaper className="h-4 w-4 mr-2" />
                     Blog
                   </a>
                 </li>

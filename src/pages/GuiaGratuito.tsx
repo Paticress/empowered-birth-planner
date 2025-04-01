@@ -1,27 +1,18 @@
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { LeadForm } from '@/components/Lead/LeadForm';
 import { OnlineGuide } from '@/components/Guide/OnlineGuide';
 import { Testimonial } from '@/components/Testimonial';
 import { BookOpen, Shield, MessageCircle, CheckSquare } from 'lucide-react';
 import { FeatureCard } from '@/components/FeatureCard';
-import { OnlineGuideTerms } from '@/components/Terms/OnlineGuideTerms';
 
 const GuiaGratuito = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const formRef = useRef<HTMLDivElement>(null);
 
   const handleFormSuccess = () => {
     setFormSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  // Debug log to check rendering
-  console.log("Rendering GuiaGratuito, formSubmitted:", formSubmitted);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-maternal-50 via-purple-50 to-indigo-50 page-transition">
@@ -42,7 +33,7 @@ const GuiaGratuito = () => {
                 </p>
               </div>
               
-              <div className="form-section animate-fade-in" ref={formRef} id="form-section">
+              <div className="form-section animate-fade-in">
                 <h2 className="text-2xl font-bold text-maternal-900 mb-4 text-center">
                   Acesse seu guia gratuito
                 </h2>
@@ -53,11 +44,6 @@ const GuiaGratuito = () => {
                   onSuccess={handleFormSuccess} 
                   buttonText="Acessar Meu Guia" 
                 />
-                <div className="text-center mt-4">
-                  <p className="text-xs text-maternal-600">
-                    Ao acessar, você concorda com nossos <OnlineGuideTerms /> e política de privacidade.
-                  </p>
-                </div>
               </div>
             </div>
           </section>
@@ -97,9 +83,9 @@ const GuiaGratuito = () => {
               <p className="text-maternal-900 font-medium text-lg mb-4">
                 100% GRATUITO – Acesse agora e dê o primeiro passo para um parto consciente!
               </p>
-              <button onClick={scrollToForm} className="btn-primary inline-block">
+              <a href="#form-section" className="btn-primary inline-block">
                 Quero Meu Guia Agora
-              </button>
+              </a>
             </div>
           </section>
           
@@ -122,9 +108,9 @@ const GuiaGratuito = () => {
                 />
                 
                 <div className="mt-8 text-center">
-                  <button onClick={scrollToForm} className="btn-primary inline-block">
+                  <a href="#form-section" className="btn-primary inline-block" id="form-section">
                     Quero Acessar o Guia Agora
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>

@@ -1,37 +1,70 @@
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+import { registerServiceWorker, updateServiceWorker } from './registerSW.tsx';
 
-import React from 'react';
-import { bootstrapApplication } from './bootstrapApp';
-
-// This is intentionally a non-module file for maximum compatibility
-// It will be properly processed by Vite during build
-(function() {
-  console.log("Main.tsx - Application bootstrapping started");
-  
-  // Flag to track if main.tsx script has already executed
-  if (typeof window !== 'undefined') {
-    if (window.__MAIN_EXECUTED) {
-      console.log("Main.tsx - Already executed, skipping initialization");
-      return;
+// Performance monitoring
+const reportPerformance = () => {
+  if (window.performance && 'getEntriesByType' in window.performance) {
+    const metrics: Record<string, number> = {};
+    const navigationEntries = performance.getEntriesByType('navigation');
+    
+    if (navigationEntries && navigationEntries.length) {
+      // Cast to PerformanceNavigationTiming to access navigation-specific properties
+      const nav = navigationEntries[0] as PerformanceNavigationTiming;
+      metrics['loadTime'] = nav.loadEventEnd - nav.startTime;
+      metrics['domContentLoaded'] = nav.domContentLoadedEventEnd - nav.startTime;
+      
+      // Get first contentful paint if available
+      const paintEntries = performance.getEntriesByName('first-contentful-paint');
+      if (paintEntries.length > 0) {
+        metrics['firstContentfulPaint'] = paintEntries[0].startTime;
+      }
     }
     
-    window.__MAIN_EXECUTED = true;
+    console.log('Performance metrics:', metrics);
+  }
+};
+
+// Register service worker for offline capabilities
+registerServiceWorker();
+
+// Check for updates on schedule
+const checkForUpdates = () => {
+  updateServiceWorker();
+  
+  // Adaptive update interval - less frequent checks when app is stable
+  const nextInterval = localStorage.getItem('app-stable') ? 
+    120 * 60 * 1000 : // 2 hours if app is stable
+    30 * 60 * 1000;   // 30 minutes on new deployments
+  
+  setTimeout(checkForUpdates, nextInterval);
+};
+
+// Start update checking after initial load - wait for initial load to complete
+window.addEventListener('load', () => {
+  // Measure and report performance
+  setTimeout(reportPerformance, 3000);
+  
+  // Mark app as stable after first week of use
+  const firstUse = localStorage.getItem('first-use-date');
+  if (!firstUse) {
+    localStorage.setItem('first-use-date', Date.now().toString());
+  } else if (!localStorage.getItem('app-stable')) {
+    const oneWeek = 7 * 24 * 60 * 60 * 1000;
+    if (Date.now() - parseInt(firstUse) > oneWeek) {
+      localStorage.setItem('app-stable', 'true');
+    }
   }
   
-  // Start the application bootstrap process
-  bootstrapApplication();
-})();
+  // Start update checking
+  setTimeout(checkForUpdates, 5 * 60 * 1000);
+});
 
-// This section will be used by the build system but ignored in the browser
-if (typeof module !== 'undefined') {
-  try {
-    // For the build system
-    module.exports = {
-      React: null,
-      ReactDOM: null, 
-      App: null,
-      registerServiceWorker: null
-    };
-  } catch (e) {
-    console.log("Main.tsx - Module exports skipped in browser environment");
-  }
-}
+// Initialize React
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)

@@ -1,113 +1,108 @@
 
-import { useEffect, useRef } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GuideIntroduction } from './GuideIntroduction';
-import { GuideRights } from './GuideRights';
-import { GuideStructure } from './GuideStructure';
-import { GuideCommunication } from './GuideCommunication';
-import { GuideChecklist } from './GuideChecklist';
-import { GuideResources } from './GuideResources';
-import { BackToTopButton } from './BackToTopButton';
-import { MobileNavigation } from './MobileNavigation';
-import { GuideProgressBar } from './GuideProgressBar';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { BookOpen, FileText, MessageCircle, ClipboardList, CheckCircle } from 'lucide-react';
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface GuideTabsProps {
+type GuideTabsProps = {
   activeTab: string;
-  onTabChange: (value: string) => void;
-  embedded?: boolean;
-}
-
-// Define tab names for navigation
-const TAB_NAMES = {
-  'introduction': 'Introdução',
-  'rights': 'Seus Direitos',
-  'structure': 'Estrutura do Plano',
-  'communication': 'Comunicação com a Equipe',
-  'checklist': 'Checklist Essencial',
-  'resources': 'Recursos Adicionais'
+  onChange: (value: string) => void;
 };
 
-export function GuideTabs({ activeTab, onTabChange, embedded = false }: GuideTabsProps) {
-  const tabsRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
-  
-  useEffect(() => {
-    // Scroll to top when tab changes
-    if (tabsRef.current) {
-      tabsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+export function GuideTabs({ activeTab, onChange }: GuideTabsProps) {
+  const getTabLabel = (id: string): string => {
+    switch(id) {
+      case "introduction": return "Introdução";
+      case "structure": return "Estrutura";
+      case "rights": return "Direitos";
+      case "communication": return "Comunicação";
+      case "checklist": return "Checklist";
+      case "resources": return "Recursos";
+      default: return id;
     }
-  }, [activeTab]);
-  
-  const handleValueChange = (value: string) => {
-    onTabChange(value);
   };
 
   return (
-    <div ref={tabsRef} className="mb-16">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-maternal-900">
-          Guia do Parto Respeitoso
-        </h1>
-        <p className="text-lg text-maternal-700 mt-2">
-          Seu guia completo para um plano de parto eficaz
-        </p>
-      </div>
-      
-      <GuideProgressBar activeTab={activeTab} />
-      
-      {isMobile && (
-        <div className="mb-6">
-          <MobileNavigation 
-            activeTab={activeTab} 
-            onTabChange={onTabChange}
-            tabNames={TAB_NAMES}
-          />
-        </div>
-      )}
-      
-      <Tabs 
-        value={activeTab} 
-        onValueChange={handleValueChange}
-        className="w-full"
+    <TabsList 
+      className="grid grid-cols-2 md:grid-cols-6 w-full mb-8 bg-white shadow-sm print:hidden"
+      aria-label="Seções do Guia do Plano de Parto"
+    >
+      <TabsTrigger 
+        value="introduction" 
+        className="px-2 md:px-3 data-[state=active]:bg-maternal-100 data-[state=active]:text-maternal-900 text-maternal-900"
+        onClick={() => onChange("introduction")}
+        id="tab-introduction"
+        aria-selected={activeTab === "introduction"}
+        aria-controls="panel-introduction"
       >
-        {!isMobile && (
-          <TabsList className="w-full mb-8 overflow-x-auto flex-nowrap whitespace-nowrap">
-            <TabsTrigger value="introduction">Introdução</TabsTrigger>
-            <TabsTrigger value="rights">Seus Direitos</TabsTrigger>
-            <TabsTrigger value="structure">Estrutura do Plano</TabsTrigger>
-            <TabsTrigger value="communication">Comunicação com a Equipe</TabsTrigger>
-            <TabsTrigger value="checklist">Checklist Essencial</TabsTrigger>
-            <TabsTrigger value="resources">Recursos Adicionais</TabsTrigger>
-          </TabsList>
-        )}
-        
-        <TabsContent value="introduction">
-          <GuideIntroduction onNext={() => onTabChange('rights')} />
-        </TabsContent>
-        
-        <TabsContent value="rights">
-          <GuideRights onNext={() => onTabChange('structure')} onPrevious={() => onTabChange('introduction')} />
-        </TabsContent>
-        
-        <TabsContent value="structure">
-          <GuideStructure onNext={() => onTabChange('communication')} onPrevious={() => onTabChange('rights')} />
-        </TabsContent>
-        
-        <TabsContent value="communication">
-          <GuideCommunication onNext={() => onTabChange('checklist')} onPrevious={() => onTabChange('structure')} />
-        </TabsContent>
-        
-        <TabsContent value="checklist">
-          <GuideChecklist onNext={() => onTabChange('resources')} onPrevious={() => onTabChange('communication')} />
-        </TabsContent>
-        
-        <TabsContent value="resources">
-          <GuideResources onPrevious={() => onTabChange('checklist')} />
-        </TabsContent>
-      </Tabs>
-      
-      <BackToTopButton />
-    </div>
+        <span className="flex flex-col md:flex-row items-center">
+          <BookOpen className="h-5 w-5 md:mr-2" aria-hidden="true" />
+          <span className="text-xs md:text-sm">Introdução</span>
+        </span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="structure" 
+        className="px-2 md:px-3 data-[state=active]:bg-maternal-100 data-[state=active]:text-maternal-900 text-maternal-900"
+        onClick={() => onChange("structure")}
+        id="tab-structure"
+        aria-selected={activeTab === "structure"}
+        aria-controls="panel-structure"
+      >
+        <span className="flex flex-col md:flex-row items-center">
+          <FileText className="h-5 w-5 md:mr-2" aria-hidden="true" />
+          <span className="text-xs md:text-sm">Estrutura</span>
+        </span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="rights" 
+        className="px-2 md:px-3 data-[state=active]:bg-maternal-100 data-[state=active]:text-maternal-900 text-maternal-900"
+        onClick={() => onChange("rights")}
+        id="tab-rights"
+        aria-selected={activeTab === "rights"}
+        aria-controls="panel-rights"
+      >
+        <span className="flex flex-col md:flex-row items-center">
+          <CheckCircle className="h-5 w-5 md:mr-2" aria-hidden="true" />
+          <span className="text-xs md:text-sm">Direitos</span>
+        </span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="communication" 
+        className="px-2 md:px-3 data-[state=active]:bg-maternal-100 data-[state=active]:text-maternal-900 text-maternal-900"
+        onClick={() => onChange("communication")}
+        id="tab-communication"
+        aria-selected={activeTab === "communication"}
+        aria-controls="panel-communication"
+      >
+        <span className="flex flex-col md:flex-row items-center">
+          <MessageCircle className="h-5 w-5 md:mr-2" aria-hidden="true" />
+          <span className="text-xs md:text-sm">Comunicação</span>
+        </span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="checklist" 
+        className="px-2 md:px-3 data-[state=active]:bg-maternal-100 data-[state=active]:text-maternal-900 text-maternal-900"
+        onClick={() => onChange("checklist")}
+        id="tab-checklist"
+        aria-selected={activeTab === "checklist"}
+        aria-controls="panel-checklist"
+      >
+        <span className="flex flex-col md:flex-row items-center">
+          <ClipboardList className="h-5 w-5 md:mr-2" aria-hidden="true" />
+          <span className="text-xs md:text-sm">Checklist</span>
+        </span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="resources" 
+        className="px-2 md:px-3 data-[state=active]:bg-maternal-100 data-[state=active]:text-maternal-900 text-maternal-900"
+        onClick={() => onChange("resources")}
+        id="tab-resources"
+        aria-selected={activeTab === "resources"}
+        aria-controls="panel-resources"
+      >
+        <span className="flex flex-col md:flex-row items-center">
+          <BookOpen className="h-5 w-5 md:mr-2" aria-hidden="true" />
+          <span className="text-xs md:text-sm">Recursos</span>
+        </span>
+      </TabsTrigger>
+    </TabsList>
   );
 }

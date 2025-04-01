@@ -16,20 +16,9 @@
     // Handle custom domain redirects differently
     if (l.hostname === 'planodeparto.energiamaterna.com.br') {
       // For custom domain, redirect to hashtag-based routing
-      var pathname = l.pathname;
-      // Remove any trailing slash
-      if (pathname.endsWith('/') && pathname.length > 1) {
-        pathname = pathname.slice(0, -1);
-      }
-      
-      // Default to /guia-gratuito if path is root
-      if (pathname === '' || pathname === '/') {
-        pathname = '/guia-gratuito';
-      }
-      
       l.replace(
         l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        '/#' + pathname
+        '/#' + l.pathname
       );
     } else {
       // For GitHub Pages domain
