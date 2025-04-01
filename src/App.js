@@ -41,12 +41,24 @@
       
       // First try loading a pre-compiled version if available
       console.log("App.js - Trying to load pre-compiled version");
-      const compiledScript = document.createElement('script');
+      var compiledScript = document.createElement('script');
       compiledScript.src = './src/compiled/App.js';
       compiledScript.type = 'text/javascript'; // Force non-module
       
       compiledScript.onload = function() {
         console.log("App.js - Loaded compiled App.js successfully");
+        
+        // Load fallback content for BirthPlan
+        var birthPlanFallbackScript = document.createElement('script');
+        birthPlanFallbackScript.src = './src/components/BirthPlan/FallbackContent.js';
+        birthPlanFallbackScript.type = 'text/javascript';
+        document.body.appendChild(birthPlanFallbackScript);
+        
+        var simpleBPBuilder = document.createElement('script');
+        simpleBPBuilder.src = './src/components/BirthPlan/SimpleBirthPlanBuilder.js';
+        simpleBPBuilder.type = 'text/javascript';
+        document.body.appendChild(simpleBPBuilder);
+        
         renderApp();
       };
       
@@ -67,7 +79,7 @@
               
               // Try loading as a regular script tag
               console.log("App.js - Trying to load App.tsx as a regular script");
-              const tsxScript = document.createElement('script');
+              var tsxScript = document.createElement('script');
               tsxScript.src = './src/App.tsx';
               tsxScript.type = 'text/javascript'; // Force non-module for compatibility
               
@@ -80,7 +92,7 @@
                 console.log("App.js - Failed to load App.tsx via script tag");
                 
                 // Retry with a different path as a last resort
-                const altScript = document.createElement('script');
+                var altScript = document.createElement('script');
                 altScript.src = '/App.tsx';
                 altScript.type = 'text/javascript';
                 
@@ -108,6 +120,18 @@
                             window.React.createElement('p', null, 'Bem-vinda ao Guia de Plano de Parto!')
                           )
                         }),
+                        window.React.createElement(window.ReactRouterDOM.Route, { 
+                          path: '/criar-plano', 
+                          element: window.React.createElement('div', { className: "container mx-auto px-4 py-8" },
+                            window.React.createElement('h1', { className: "text-2xl font-bold mb-4" }, 'Construtor de Plano de Parto'),
+                            window.React.createElement('p', null, 'Estamos preparando o construtor de plano de parto para você.'),
+                            window.React.createElement('p', { className: "mt-4" }, 'Se a página continuar em branco, tente recarregá-la.'),
+                            window.React.createElement('button', {
+                              className: "mt-2 px-4 py-2 bg-blue-600 text-white rounded",
+                              onClick: function() { window.location.reload(); }
+                            }, "Recarregar")
+                          )
+                        }),
                         window.React.createElement(window.ReactRouterDOM.Route, {
                           path: '*',
                           element: window.React.createElement('div', { className: "container mx-auto px-4 py-8" },
@@ -130,7 +154,7 @@
           console.log("App.js - Module import not supported, trying direct script approach for App.tsx");
           
           // Try as a direct script tag since import() failed
-          const directScript = document.createElement('script');
+          var directScript = document.createElement('script');
           directScript.src = './src/App.tsx';
           directScript.onload = renderApp;
           directScript.onerror = showFallbackContent;
@@ -155,7 +179,7 @@
           window.__appRenderer.renderAppComponent();
         } else {
           // Direct rendering as fallback
-          const rootElement = document.getElementById('root');
+          var rootElement = document.getElementById('root');
           if (!rootElement) {
             console.error("App.js - Root element not found");
             return;
@@ -183,17 +207,32 @@
     function showFallbackContent() {
       console.error("App.js - Critical error, showing fallback content");
       
+      // Check current route to show appropriate fallback
+      var currentHash = window.location.hash || '#/';
+      var isBirthPlanRoute = currentHash.includes('criar-plano');
+      
       // Try to use the fallback app if available
-      if (window.__fallbackApp && window.__fallbackApp.createBasicContent) {
-        const rootElement = document.getElementById('root');
+      if (isBirthPlanRoute && window.__birthPlanFallback && window.__birthPlanFallback.createFallbackContent) {
+        var rootElement = document.getElementById('root');
+        if (rootElement) {
+          window.__birthPlanFallback.createFallbackContent(rootElement);
+          return;
+        }
+      } else if (window.__fallbackApp && window.__fallbackApp.createBasicContent) {
+        var rootElement = document.getElementById('root');
         if (rootElement) {
           window.__fallbackApp.createBasicContent(rootElement);
+          return;
         }
-      } else {
-        // Ultimate fallback
-        const rootElement = document.getElementById('root');
-        if (rootElement) {
-          rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p></div>';
+      }
+      
+      // Ultimate fallback
+      var rootElement = document.getElementById('root');
+      if (rootElement) {
+        if (isBirthPlanRoute) {
+          rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Construtor de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p><button onclick="window.location.reload()" style="margin-top: 20px; padding: 8px 16px; background-color: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer;">Recarregar Página</button></div>';
+        } else {
+          rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p><button onclick="window.location.reload()" style="margin-top: 20px; padding: 8px 16px; background-color: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer;">Recarregar Página</button></div>';
         }
       }
     }
@@ -201,9 +240,9 @@
     console.error("App.js - Critical error:", outerError);
     
     // Show simple error message as last resort
-    const rootElement = document.getElementById('root');
+    var rootElement = document.getElementById('root');
     if (rootElement) {
-      rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p></div>';
+      rootElement.innerHTML = '<div style="text-align: center; padding: 40px;"><h1>Guia de Plano de Parto</h1><p>Ocorreu um erro ao carregar a aplicação. Por favor, tente novamente mais tarde.</p><button onclick="window.location.reload()" style="margin-top: 20px; padding: 8px 16px; background-color: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer;">Recarregar Página</button></div>';
     }
   }
 })();

@@ -2,6 +2,31 @@
 // Compiled version of App.js for browsers that don't support ES modules
 console.log("Compiled App.js - Loading pre-compiled app");
 
+// Define a simple BirthPlanBuilder component
+function SimpleBirthPlanBuilder() {
+  return React.createElement('div', { className: "min-h-screen bg-white p-6" },
+    React.createElement('h1', { className: "text-3xl font-bold mb-4" }, "Construtor de Plano de Parto"),
+    React.createElement('p', { className: "mb-6" }, "Seu assistente para criar um plano de parto personalizado"),
+    
+    React.createElement('div', { className: "bg-blue-50 p-4 rounded-md mb-6" },
+      React.createElement('h2', { className: "text-xl font-semibold mb-2" }, "Bem-vinda ao Construtor de Plano de Parto"),
+      React.createElement('p', null, "Esta ferramenta ajudará você a criar um plano de parto que reflete suas preferências e necessidades.")
+    ),
+    
+    React.createElement('div', { className: "flex flex-col space-y-4" },
+      React.createElement('div', { className: "bg-white p-4 border rounded-md" },
+        React.createElement('h3', { className: "font-semibold mb-2" }, "Informações Pessoais"),
+        React.createElement('p', null, "Carregando formulário...")
+      ),
+      
+      React.createElement('div', { className: "bg-white p-4 border rounded-md" },
+        React.createElement('h3', { className: "font-semibold mb-2" }, "Preferências do Parto"),
+        React.createElement('p', null, "Carregando opções...")
+      )
+    )
+  );
+}
+
 // Define the App component as a global variable
 window.App = function() {
   return React.createElement(ReactRouterDOM.HashRouter, null,
@@ -26,9 +51,22 @@ window.App = function() {
         path: '/criar-plano', 
         element: React.createElement('div', { className: "min-h-screen bg-white" },
           React.createElement('main', { className: "max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6" },
-            React.createElement('h1', { className: "text-3xl font-bold mb-4" }, "Construtor de Plano de Parto"),
-            React.createElement('p', null, "Estamos carregando o construtor de plano de parto. Por favor, aguarde.")
+            React.createElement(SimpleBirthPlanBuilder)
           )
+        )
+      }),
+      React.createElement(ReactRouterDOM.Route, {
+        path: '/embedded-guia', 
+        element: React.createElement('div', { className: "min-h-screen bg-white p-4" },
+          React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Guia do Parto Respeitoso (Versão Incorporada)"),
+          React.createElement('p', null, "Carregando conteúdo incorporado...")
+        )
+      }),
+      React.createElement(ReactRouterDOM.Route, {
+        path: '/embedded-plano', 
+        element: React.createElement('div', { className: "min-h-screen bg-white p-4" },
+          React.createElement('h1', { className: "text-2xl font-bold mb-4" }, "Construtor de Plano de Parto (Versão Incorporada)"),
+          React.createElement('p', null, "Carregando construtor incorporado...")
         )
       }),
       React.createElement(ReactRouterDOM.Route, {
