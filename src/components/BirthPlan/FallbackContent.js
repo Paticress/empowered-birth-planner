@@ -1,4 +1,3 @@
-
 // Fallback content for the BirthPlan module when it fails to load
 console.log("FallbackContent for BirthPlan module loaded");
 
@@ -28,17 +27,32 @@ function createFallbackContent(container) {
       window.__FULL_APP_LOADED = true;
       console.log("FallbackContent - Initializing full application load");
       
-      // First attempt - try to load main.js (non-module version)
-      const mainScript = document.createElement('script');
-      mainScript.src = '/src/main.js';
-      mainScript.type = 'text/javascript'; // Use standard script type
+      // First attempt - create a simple DOM-based router and render directly
+      const simpleRouter = document.createElement('script');
+      simpleRouter.src = '/src/utils/fallbackApp.js';
+      simpleRouter.type = 'text/javascript'; // Use standard script type
       
-      mainScript.onerror = function() {
-        console.log("FallbackContent - main.js load failed, trying App.js");
-        loadAppJs();
+      simpleRouter.onload = function() {
+        console.log("FallbackContent - fallbackApp.js loaded, trying to initialize");
+        if (window.__fallbackApp && window.__fallbackApp.createBasicContent) {
+          const rootEl = document.getElementById('root');
+          if (rootEl) {
+            try {
+              window.__fallbackApp.createBasicContent(rootEl);
+              console.log("FallbackContent - Simple router app initialized");
+            } catch (e) {
+              console.error("FallbackContent - Error initializing simple router:", e);
+            }
+          }
+        }
       };
       
-      document.body.appendChild(mainScript);
+      simpleRouter.onerror = function() {
+        console.log("FallbackContent - fallbackApp.js load failed, trying main.js");
+        loadMainJs();
+      };
+      
+      document.body.appendChild(simpleRouter);
       
       // Second attempt - look for a global bootstrap function
       if (typeof window.bootstrapApplication === 'function') {
@@ -51,19 +65,119 @@ function createFallbackContent(container) {
         }
       }
       
-      // Continue with App.js if needed
+      // Continue with main.js if needed after a short delay
       setTimeout(function() {
         if (!window.App) {
-          console.log("FallbackContent - App not found after bootstrap attempt, trying App.js");
-          loadAppJs();
+          console.log("FallbackContent - App not found after bootstrap attempt, trying main.js");
+          loadMainJs();
         }
       }, 500);
     }
   }
   
+  // Function to load main.js directly
+  function loadMainJs() {
+    console.log("FallbackContent - Attempting to load main.js");
+    
+    const mainScript = document.createElement('script');
+    mainScript.src = '/src/main.js';
+    mainScript.type = 'text/javascript'; // Use standard script instead of module
+    
+    mainScript.onload = function() {
+      console.log("FallbackContent - main.js loaded successfully");
+      
+      // Check if we need to load React and ReactDOM
+      if (!window.React || !window.ReactDOM) {
+        loadReactDependencies(function() {
+          console.log("FallbackContent - React dependencies loaded, trying to initialize App");
+          loadAppJs();
+        });
+      } else {
+        loadAppJs();
+      }
+    };
+    
+    mainScript.onerror = function() {
+      console.log("FallbackContent - main.js load failed, trying App.js directly");
+      loadAppJs();
+    };
+    
+    document.body.appendChild(mainScript);
+  }
+  
+  // Function to load React dependencies if needed
+  function loadReactDependencies(callback) {
+    console.log("FallbackContent - Loading React dependencies");
+    
+    // Check if we already have React
+    if (window.React && window.ReactDOM) {
+      console.log("FallbackContent - React already available");
+      callback();
+      return;
+    }
+    
+    const reactScript = document.createElement('script');
+    reactScript.src = 'https://unpkg.com/react@18/umd/react.production.min.js';
+    reactScript.crossOrigin = 'anonymous';
+    
+    reactScript.onload = function() {
+      console.log("FallbackContent - React loaded");
+      
+      const reactDOMScript = document.createElement('script');
+      reactDOMScript.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
+      reactDOMScript.crossOrigin = 'anonymous';
+      
+      reactDOMScript.onload = function() {
+        console.log("FallbackContent - ReactDOM loaded");
+        
+        // Load React Router DOM
+        const routerScript = document.createElement('script');
+        routerScript.src = 'https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js';
+        routerScript.crossOrigin = 'anonymous';
+        
+        routerScript.onload = function() {
+          console.log("FallbackContent - ReactRouterDOM loaded");
+          callback();
+        };
+        
+        routerScript.onerror = function() {
+          console.error("FallbackContent - Failed to load ReactRouterDOM");
+          callback(); // Continue anyway
+        };
+        
+        document.body.appendChild(routerScript);
+      };
+      
+      reactDOMScript.onerror = function() {
+        console.error("FallbackContent - Failed to load ReactDOM");
+        callback(); // Continue anyway
+      };
+      
+      document.body.appendChild(reactDOMScript);
+    };
+    
+    reactScript.onerror = function() {
+      console.error("FallbackContent - Failed to load React");
+      callback(); // Continue anyway
+    };
+    
+    document.body.appendChild(reactScript);
+  }
+  
   // Function to load App.js
   function loadAppJs() {
     console.log("FallbackContent - Attempting to load App.js");
+    
+    // Try to clean any existing app flags
+    try {
+      Object.keys(window).forEach(key => {
+        if (key.includes('LOADED') || key.includes('EXECUTED') || key.includes('APP_')) {
+          delete window[key];
+        }
+      });
+    } catch (e) {
+      console.error("FallbackContent - Error cleaning window flags:", e);
+    }
     
     // Important - use regular script type for better compatibility
     const appScript = document.createElement('script');
@@ -73,6 +187,39 @@ function createFallbackContent(container) {
     appScript.onload = function() {
       console.log("FallbackContent - App.js loaded successfully");
       
+      // Check if the App component is available
+      if (window.App) {
+        console.log("FallbackContent - App component found, trying to render");
+        
+        // Try to render the App
+        try {
+          const rootEl = document.getElementById('root');
+          if (rootEl && window.React && window.ReactDOM) {
+            // Clear the container first
+            rootEl.innerHTML = '';
+            
+            // Render using available ReactDOM method
+            if (window.ReactDOM.createRoot) {
+              window.ReactDOM.createRoot(rootEl).render(
+                window.React.createElement(window.App)
+              );
+            } else if (window.ReactDOM.render) {
+              window.ReactDOM.render(
+                window.React.createElement(window.App),
+                rootEl
+              );
+            }
+            
+            console.log("FallbackContent - App component rendered successfully");
+            return;
+          }
+        } catch (e) {
+          console.error("FallbackContent - Error rendering App component:", e);
+        }
+      }
+      
+      // If App component is not available or rendering failed, reload the page
+      console.log("FallbackContent - Reloading page to initialize App.js");
       // Force a reload after a short delay to apply changes
       setTimeout(function() {
         console.log("FallbackContent - Reloading page to initialize App.js");
@@ -110,24 +257,24 @@ function createFallbackContent(container) {
       compiledScript.onerror = function(error) {
         console.log("FallbackContent - Failed to load alternative app versions", error);
         
-        // Try to load from main.js as last resort
-        const mainScript = document.createElement('script');
-        mainScript.src = '/src/main.js';
-        mainScript.type = 'text/javascript';
+        // Try to use compat-entry.js as last resort
+        const compatScript = document.createElement('script');
+        compatScript.src = '/src/compat-entry.js';
+        compatScript.type = 'text/javascript';
         
-        mainScript.onload = function() {
-          console.log("FallbackContent - main.js loaded successfully");
+        compatScript.onload = function() {
+          console.log("FallbackContent - compat-entry.js loaded successfully");
           setTimeout(function() {
             window.location.reload();
           }, 500);
         };
         
-        mainScript.onerror = function() {
+        compatScript.onerror = function() {
           console.log("FallbackContent - All load attempts failed, staying with fallback content");
           alert('Não foi possível carregar a versão completa. Por favor, tente novamente mais tarde ou contate o suporte.');
         };
         
-        document.body.appendChild(mainScript);
+        document.body.appendChild(compatScript);
       };
       
       document.body.appendChild(compiledScript);
@@ -139,6 +286,19 @@ function createFallbackContent(container) {
   // Determine which content to show based on current route
   var currentRoute = window.location.hash.replace('#', '') || '/';
   console.log("FallbackContent - Current route:", currentRoute);
+  
+  // Check if we're in an iframe
+  var isInIframe = (window !== window.parent);
+  var iframeWarning = '';
+  
+  if (isInIframe) {
+    iframeWarning = `
+      <div class="embedded-warning">
+        <p><strong>Atenção:</strong> Este conteúdo está sendo exibido em uma versão simplificada dentro de um iframe.</p>
+        <p>Para a experiência completa, <a href="${window.location.href}" target="_blank" style="color: #2563eb; text-decoration: underline;">abra esta página em uma nova aba</a>.</p>
+      </div>
+    `;
+  }
   
   // Add Tailwind-like styles directly to ensure proper styling
   var baseStyles = `
@@ -215,19 +375,6 @@ function createFallbackContent(container) {
   
   // Different content based on route
   var content = baseStyles;
-  
-  // Check if we're in an iframe
-  var isInIframe = (window !== window.parent);
-  var iframeWarning = '';
-  
-  if (isInIframe) {
-    iframeWarning = `
-      <div class="embedded-warning">
-        <p><strong>Atenção:</strong> Este conteúdo está sendo exibido em uma versão simplificada dentro de um iframe.</p>
-        <p>Para a experiência completa, <a href="${window.location.href}" target="_blank" style="color: #2563eb; text-decoration: underline;">abra esta página em uma nova aba</a>.</p>
-      </div>
-    `;
-  }
   
   if (currentRoute.includes('criar-plano')) {
     content += `
@@ -414,87 +561,93 @@ function createFallbackContent(container) {
       
       // Clear any cached states before trying to load
       try {
-        sessionStorage.removeItem('app_last_route');
-        localStorage.removeItem('app_initialized');
+        // Clear all local and session storage
+        localStorage.clear();
+        sessionStorage.clear();
         
         // Clear any window flags we've set
-        window.__FULL_APP_LOADED = false;
-        window.__MAIN_EXECUTED = false;
-        window.__COMPAT_ENTRY_LOADED = false;
+        Object.keys(window).forEach(key => {
+          if (key.startsWith('__') || key.includes('LOADED') || key.includes('EXECUTED')) {
+            window[key] = false;
+          }
+        });
       } catch (e) {
         console.error("Error clearing cache:", e);
       }
       
-      // Try multiple loading strategies
-      
-      // 1. Try loading the main.jsx file which is compatible with more browsers
-      const mainJsxScript = document.createElement('script');
-      mainJsxScript.src = '/src/main.jsx';
-      mainJsxScript.type = 'text/javascript'; // Avoid module type
-      
-      mainJsxScript.onload = function() {
-        console.log("FallbackContent - main.jsx loaded successfully");
-        setTimeout(function() {
-          window.location.reload();
-        }, 500);
-      };
-      
-      mainJsxScript.onerror = function() {
-        console.log("FallbackContent - main.jsx failed to load, trying App.js");
+      // Try to directly load OnlineGuide component for /guia-online route
+      if (currentRoute.includes('guia-online') || currentRoute === '/' || currentRoute === '') {
+        console.log("FallbackContent - Current route is guia-online, trying to directly load OnlineGuide component");
         
-        // 2. Try loading App.js directly
-        const appScript = document.createElement('script');
-        appScript.src = '/src/App.js';
-        appScript.type = 'text/javascript'; // Ensure non-module for compatibility
-        
-        appScript.onload = function() {
-          console.log("FallbackContent - App.js loaded successfully");
-          setTimeout(function() {
-            window.location.reload();
-          }, 500);
-        };
-        
-        appScript.onerror = function() {
-          console.log("FallbackContent - App.js load failed, trying compiled version");
+        // First load React dependencies
+        loadReactDependencies(function() {
+          console.log("FallbackContent - Dependencies loaded, trying to load OnlineGuide component");
           
-          // 3. Try loading the compiled App.js
-          const compiledScript = document.createElement('script');
-          compiledScript.src = '/src/compiled/App.js';
-          compiledScript.type = 'text/javascript';
+          // Now try to load the guide script directly
+          const guideScript = document.createElement('script');
+          guideScript.src = '/src/components/Guide/OnlineGuide.js';
+          guideScript.type = 'text/javascript';
           
-          compiledScript.onload = function() {
-            console.log("FallbackContent - Compiled App.js loaded successfully");
-            setTimeout(function() {
-              window.location.reload();
-            }, 500);
-          };
-          
-          compiledScript.onerror = function() {
-            console.log("FallbackContent - All load attempts failed");
+          guideScript.onload = function() {
+            console.log("FallbackContent - OnlineGuide.js loaded, trying to render component");
             
-            // 4. Last resort - try to load index.html directly
-            window.location.href = '/index.html' + window.location.hash;
+            // Try to render OnlineGuide component directly if it's available
+            if (window.OnlineGuide && window.React && window.ReactDOM) {
+              console.log("FallbackContent - OnlineGuide component found, rendering directly");
+              
+              try {
+                const rootEl = document.getElementById('root');
+                if (rootEl) {
+                  // Clean up the container
+                  rootEl.innerHTML = '';
+                  
+                  // Render the OnlineGuide component
+                  if (window.ReactDOM.createRoot) {
+                    window.ReactDOM.createRoot(rootEl).render(
+                      window.React.createElement(window.OnlineGuide)
+                    );
+                  } else if (window.ReactDOM.render) {
+                    window.ReactDOM.render(
+                      window.React.createElement(window.OnlineGuide),
+                      rootEl
+                    );
+                  }
+                }
+              } catch (e) {
+                console.error("FallbackContent - Error rendering OnlineGuide component:", e);
+                loadFullAppBundle(); // Fall back to loading the full app
+              }
+            } else {
+              console.log("FallbackContent - OnlineGuide component not found, loading full app");
+              loadFullAppBundle();
+            }
           };
           
-          document.body.appendChild(compiledScript);
-        };
-        
-        document.body.appendChild(appScript);
-      };
-      
-      document.body.appendChild(mainJsxScript);
-      
-      // Set a fallback timeout to reload the page if no scripts load successfully
-      setTimeout(function() {
-        if (loadingIndicator) {
-          loadingIndicator.style.display = 'none';
-          loadFullVersionBtn.disabled = false;
-          loadFullVersionBtn.style.opacity = '1';
-        }
-        alert('Não foi possível carregar a versão completa. A página será recarregada.');
-        window.location.reload();
-      }, 5000);
+          guideScript.onerror = function() {
+            console.log("FallbackContent - Failed to load OnlineGuide.js, falling back to App.js");
+            loadFullAppBundle();
+          };
+          
+          document.body.appendChild(guideScript);
+        });
+      } else {
+        loadFullAppBundle();
+      }
     });
+  }
+  
+  // Function to load the full app bundle
+  function loadFullAppBundle() {
+    console.log("FallbackContent - Loading full app bundle");
+    
+    // Try loading React etc. first if needed
+    if (!window.React || !window.ReactDOM) {
+      loadReactDependencies(function() {
+        loadAppJs();
+      });
+    } else {
+      loadAppJs();
+    }
   }
   
   // Add event listener for reload button
@@ -505,20 +658,16 @@ function createFallbackContent(container) {
       
       // Clear any cached data before reload
       try {
-        // Clear sessionStorage and localStorage items related to app state
-        sessionStorage.removeItem('app_last_route');
-        localStorage.removeItem('app_initialized');
+        // Clear all local and session storage
+        localStorage.clear();
+        sessionStorage.clear();
         
-        // Clear any window flags we've set
-        window.__FULL_APP_LOADED = false;
-        window.__MAIN_EXECUTED = false;
-        window.__COMPAT_ENTRY_LOADED = false;
+        // Force reload of page excluding cache
+        window.location.reload(true);
       } catch (e) {
-        console.error("Error clearing cache:", e);
+        console.error("Error during page reload:", e);
+        window.location.reload(); // Simple reload if clearing fails
       }
-      
-      // Force reload from server, not from cache
-      window.location.reload(true);
     });
   }
 }
@@ -538,7 +687,11 @@ function createFallbackContent(container) {
       
       // Check if App component exists
       var hasAppComponent = typeof window.App !== 'undefined';
-      console.log("FallbackContent - App component exists:", hasAppComponent);
+      
+      // Check if OnlineGuide component exists for guia-online route
+      var hasOnlineGuideComponent = typeof window.OnlineGuide !== 'undefined';
+      
+      console.log("FallbackContent - App component exists:", hasAppComponent, "OnlineGuide component exists:", hasOnlineGuideComponent);
       
       // Only run when we're on a route that should show content
       if (isGuiaRoute || isBirthPlanRoute) {
@@ -558,14 +711,19 @@ function createFallbackContent(container) {
           var hasOnlySimpleElements = false;
           if (!isEmpty) {
             // Check if the content has actual complex components or only basic HTML
-            var contentText = mainContent.innerText.trim();
-            hasOnlySimpleElements = !mainContent.querySelector('.min-h-screen.bg-white p-6') &&
+            var contentText = mainContent.innerText;
+            hasOnlySimpleElements = !mainContent.querySelector('.min-h-screen.bg-white') &&
                                    !mainContent.querySelector('.max-w-7xl') &&
                                    !mainContent.querySelector('.maternal-900');
           }
           
+          // For guia-online routes, check if we have the specific components rendered
+          var hasProperGuideContent = mainContent.querySelector('.min-h-screen.bg-white') !== null;
+          
           // Check if App component exists but hasn't rendered correctly
-          var needsFallback = isEmpty || hasOnlySimpleElements || !hasAppComponent;
+          var needsFallback = isEmpty || hasOnlySimpleElements || 
+                             (isGuiaRoute && !hasProperGuideContent && !hasOnlineGuideComponent) || 
+                             (isBirthPlanRoute && !hasAppComponent);
           
           if (needsFallback) {
             console.log("FallbackContent - Content area needs proper rendering, showing enhanced fallback");
@@ -576,7 +734,14 @@ function createFallbackContent(container) {
             console.log("FallbackContent - Content area already has content, no fallback needed");
           }
         } else {
-          console.log("FallbackContent - Main content element not found");
+          console.log("FallbackContent - Main content element not found, creating it");
+          
+          // Create a main element if it doesn't exist
+          mainContent = document.createElement('main');
+          mainContent.id = 'root';
+          document.body.appendChild(mainContent);
+          
+          createFallbackContent(mainContent);
         }
       } else {
         console.log("FallbackContent - Not on a content route, skipping content check");
@@ -606,10 +771,22 @@ function createFallbackContent(container) {
   }, 10000);
 })();
 
+// Create a directly accessible method to force triggering the fallback content
+window.forceFallbackContent = function() {
+  console.log("FallbackContent - Forcing fallback content display");
+  const container = document.querySelector('main') || document.getElementById('root');
+  if (container) {
+    createFallbackContent(container);
+  } else {
+    console.error("FallbackContent - No suitable container found for forced fallback");
+  }
+};
+
 // Export the function for non-module environments
 if (typeof window !== 'undefined') {
   window.__birthPlanFallback = {
-    createFallbackContent: createFallbackContent
+    createFallbackContent: createFallbackContent,
+    forceFallback: window.forceFallbackContent
   };
 }
 
