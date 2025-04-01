@@ -1,3 +1,4 @@
+
 // Override fetch and XMLHttpRequest for CORS handling
 (function() {
   console.log("[Fetch Override] Setting up fetch and XHR overrides");
@@ -24,6 +25,27 @@
     if (proxyIndex >= config.corsProxies.length) {
       console.error("[Fetch Override] All proxies failed for URL:", url);
       
+      // Check if resource exists before fallback
+      try {
+        // Try a HEAD request first to check if the resource exists
+        const checkResponse = await originalFetch(url, { 
+          method: 'HEAD',
+          mode: 'cors',
+          credentials: 'omit',
+          cache: 'no-store'
+        });
+        
+        if (!checkResponse.ok && checkResponse.status === 404) {
+          console.warn("[Fetch Override] Resource not found (404) at:", url);
+          return new Response(
+            JSON.stringify({ error: 'Resource not found', url }),
+            { status: 404, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      } catch (headError) {
+        console.warn("[Fetch Override] HEAD check failed:", headError);
+      }
+      
       // Last resort: try without proxy but with modified headers
       try {
         const modifiedInit = { ...init };
@@ -48,6 +70,15 @@
       if (response.ok) {
         config.currentProxyIndex = proxyIndex; // Remember which proxy worked
         return response;
+      }
+      // Check for 404 specifically
+      if (response.status === 404) {
+        console.warn("[Fetch Override] Resource not found (404) at:", url);
+        // Return a proper 404 response rather than continuing to try other proxies
+        return new Response(
+          JSON.stringify({ error: 'Resource not found', url }),
+          { status: 404, headers: { 'Content-Type': 'application/json' } }
+        );
       }
       throw new Error(`Proxy returned status ${response.status}`);
     } catch (error) {
@@ -102,3 +133,4 @@
 
   console.log("[Fetch Override] Fetch and XHR have been patched to handle CORS issues");
 })();
+
