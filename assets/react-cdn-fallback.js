@@ -36,13 +36,20 @@ if (typeof window.ReactDOM === 'undefined') {
   window.ReactDOM = {
     render: function(element, container) {
       console.log("ReactDOM.render fallback called");
-      container.innerHTML = '<div>Fallback Rendering Active</div>';
+      container.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando Guia de Plano de Parto...</h2><p>Por favor, aguarde enquanto carregamos a aplicação.</p></div>';
     },
     createRoot: function(container) {
       console.log("ReactDOM.createRoot fallback called");
       return {
         render: function(element) {
-          container.innerHTML = '<div>Fallback Root Rendering Active</div>';
+          container.innerHTML = '<div style="text-align: center; padding: 20px;"><h2>Carregando Guia de Plano de Parto...</h2><p>Por favor, aguarde enquanto carregamos a aplicação.</p></div>';
+          
+          // Try to load the real app after a short delay
+          setTimeout(function() {
+            if (typeof window.__appLoader === 'function') {
+              window.__appLoader();
+            }
+          }, 500);
         }
       };
     },
@@ -60,11 +67,11 @@ if (typeof window.ReactRouterDOM === 'undefined') {
     // Basic components with minimal functionality
     HashRouter: function(props) {
       console.log("HashRouter fallback rendered");
-      return React.createElement('div', null, props.children);
+      return React.createElement('div', { className: "router-container" }, props.children);
     },
     
     Routes: function(props) {
-      return React.createElement('div', null, props.children);
+      return React.createElement('div', { className: "routes-container" }, props.children);
     },
     
     Route: function(props) {
@@ -158,6 +165,24 @@ if (typeof window.ReactRouterDOM === 'undefined') {
   });
 }
 
+// Function to load the real app
+window.__appLoader = function() {
+  console.log("Attempting to load the real application");
+  
+  // Try to load the main app script
+  const script = document.createElement('script');
+  script.src = '/src/App.js';
+  script.type = 'text/javascript';
+  script.onerror = function() {
+    console.error("Failed to load App.js, trying main.js");
+    const mainScript = document.createElement('script');
+    mainScript.src = '/src/main.js';
+    mainScript.type = 'text/javascript';
+    document.body.appendChild(mainScript);
+  };
+  document.body.appendChild(script);
+};
+
 // Add a global function to test if all libs are loaded
 window.__checkReactLibs = function() {
   return {
@@ -173,3 +198,6 @@ window.__checkReactLibs = function() {
 };
 
 console.log("React, ReactDOM, and ReactRouterDOM local fallbacks loaded");
+
+// Trigger app loading after a short delay
+setTimeout(window.__appLoader, 1000);

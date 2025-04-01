@@ -46,6 +46,11 @@
       } catch (e) {
         console.error("Failed to dispatch gpteng-ready event:", e);
       }
+
+      // Try to load main app code since we're ready
+      if (window.__appLoader) {
+        window.__appLoader();
+      }
     } else {
       console.log("GPT Engineer main script loaded properly, fallback not needed");
     }
