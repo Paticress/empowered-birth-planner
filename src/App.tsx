@@ -25,14 +25,7 @@ const queryClient = new QueryClient({
 // Enhanced log for debugging
 console.log("APP COMPONENT INITIALIZING - SETTING UP ROUTES");
 
-// Mark that the main App component has loaded
-if (typeof window !== 'undefined') {
-  window.App = App;
-  console.log(`Current URL: ${window.location.href}`);
-  console.log(`Current path: ${window.location.pathname}`);
-  console.log(`Current hash: ${window.location.hash}`);
-}
-
+// Define the App component first before trying to use it
 const App = () => {
   console.log("APP COMPONENT RENDERING");
   
@@ -92,6 +85,15 @@ const App = () => {
     </QueryClientProvider>
   );
 };
+
+// Mark that the main App component has loaded 
+// (moved after App declaration to fix the order)
+if (typeof window !== 'undefined') {
+  window.App = App;
+  console.log(`Current URL: ${window.location.href}`);
+  console.log(`Current path: ${window.location.pathname}`);
+  console.log(`Current hash: ${window.location.hash}`);
+}
 
 // Ensure the App is exported correctly
 export default App;
