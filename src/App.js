@@ -52,14 +52,14 @@
       // Create a script to load App.tsx after React is loaded
       var appScript = document.createElement('script');
       appScript.type = 'text/javascript'; // Not using module to avoid import issues
-      appScript.src = './src/main.jsx'; // Use the JSX version which has better compatibility
+      appScript.src = './src/main.js'; // Use the JS version which has better compatibility
       
       appScript.onload = function() {
-        console.log("App.js - Successfully loaded main.jsx");
+        console.log("App.js - Successfully loaded main.js");
       };
       
       appScript.onerror = function(error) {
-        console.error("App.js - Failed to load main.jsx:", error);
+        console.error("App.js - Failed to load main.js:", error);
         fallbackToCompatMode();
       };
       
@@ -78,13 +78,19 @@
   }
 })();
 
-// Create a placeholder App component for module imports
-const App = () => {
-  // This is a placeholder component that will be replaced by the real App.tsx
-  return null;
-};
+// We now expose App component only if it hasn't been defined yet
+if (typeof window.App === 'undefined') {
+  // Create a placeholder App component for module imports
+  var App = function() {
+    // This is a placeholder component that will be replaced by the real App.tsx
+    return null;
+  };
 
-// Export the App component for ESM imports
-if (typeof module !== 'undefined') {
-  module.exports = { default: App };
+  // Export the App component for ESM imports
+  if (typeof module !== 'undefined') {
+    module.exports = { default: App };
+  }
+  
+  // Also expose globally
+  window.App = App;
 }

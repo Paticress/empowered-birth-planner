@@ -17,7 +17,7 @@ console.log("Compat-entry.js - Loading compatibility mode");
   });
   
   // Create and load the compatibility scripts
-  function loadCompatScript(src, callback) {
+  function loadScript(src, callback) {
     var script = document.createElement('script');
     script.src = src;
     script.onload = callback || function() {};
@@ -74,5 +74,5 @@ console.log("Compat-entry.js - Loading compatibility mode");
   createSimpleApp();
   
   // Load the non-module version of the app
-  loadCompatScript('/src/App.js');
+  loadScript('/src/App.js');
 })();
