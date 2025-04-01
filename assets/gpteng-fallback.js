@@ -21,5 +21,7 @@
         return null;
       }
     };
+  } else {
+    console.log("GPT Engineer already available, fallback not needed");
   }
 })();

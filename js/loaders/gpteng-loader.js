@@ -18,22 +18,10 @@
       return;
     }
 
-    // Check if we need to create a fallback
-    if (window.document.querySelector('script[src*="gptengineer.js"]')) {
-      console.log("GPT Engineer script tag exists but not loaded yet, using fallback temporarily");
-      
-      // Create a basic fallback that will be replaced by the real version when it loads
-      window.gptengineer = window.gptengineer || {
-        createSelect: function() {
-          console.log("Temporary GPT Engineer Select API called - real implementation will load later");
-          return null;
-        }
-      };
-    }
-    
     // Add fallback script
     const fallbackScript = document.createElement('script');
     fallbackScript.src = "/public/assets/gpteng-fallback.js";
+    fallbackScript.type = "text/javascript"; // Make sure it's not a module
     fallbackScript.onload = function() {
       console.log("GPT Engineer fallback loaded");
       if (window.__SCRIPT_LOAD_STATE) window.__SCRIPT_LOAD_STATE.gptEngineer = true;
