@@ -20,6 +20,12 @@
     }
     window.__RENDER_ATTEMPTS++;
     
+    // Ensure we export our App component to the window
+    window.App = window.App || function() {
+      console.log("App.js - Using placeholder App component until real one loads");
+      return React.createElement('div', null, "Carregando aplicação...");
+    };
+    
     // Add error handling for React Router issues
     if (!window.ReactRouterDOM) {
       console.error("App.js - ReactRouterDOM not available, trying to load it");
@@ -73,34 +79,36 @@
         return;
       }
       
-      // Check if App component is already available
-      if (typeof window.App === 'function') {
-        console.log("App.js - App component already available, rendering it");
-        renderAppComponent();
-        return;
+      // Explicitly import App.tsx to get the real App component
+      console.log("App.js - Attempting to import App.tsx directly");
+      try {
+        var appModule = document.createElement('script');
+        appModule.src = './dist/assets/index.js'; // Try bundled version first
+        appModule.type = 'text/javascript'; // Use text/javascript for maximum compatibility
+        appModule.onload = function() {
+          console.log("App.js - Successfully loaded bundled App component");
+          setTimeout(renderAppComponent, 300);
+        };
+        appModule.onerror = function() {
+          console.log("App.js - Bundled App not found, trying main.js");
+          var mainScript = document.createElement('script');
+          mainScript.src = './src/main.js';
+          mainScript.type = 'text/javascript';
+          mainScript.onload = function() {
+            console.log("App.js - Successfully loaded main.js");
+            setTimeout(renderAppComponent, 300);
+          };
+          mainScript.onerror = function() {
+            console.error("App.js - Failed to load main.js, falling back to basic content");
+            renderBasicContent();
+          };
+          document.body.appendChild(mainScript);
+        };
+        document.body.appendChild(appModule);
+      } catch (err) {
+        console.error("App.js - Error importing App:", err);
+        renderBasicContent();
       }
-      
-      console.log("App.js - Loading App.tsx content");
-      
-      // Try to import the App component properly
-      var appScript = document.createElement('script');
-      appScript.src = './src/main.js';
-      
-      appScript.onload = function() {
-        console.log("App.js - Successfully loaded main.js");
-        
-        // Force render after a short delay to ensure everything is loaded
-        setTimeout(function() {
-          renderAppComponent();
-        }, 300);
-      };
-      
-      appScript.onerror = function(error) {
-        console.error("App.js - Failed to load main.js:", error);
-        fallbackToCompatMode();
-      };
-      
-      document.body.appendChild(appScript);
     }
     
     function loadReactDependencies(callback) {
@@ -148,13 +156,10 @@
         var rootElement = document.getElementById('root');
         
         if (rootElement) {
-          // Clear any fallback content first
-          rootElement.innerHTML = '';
-          
-          // Create basic app content if needed
-          if (!window.App || typeof window.App !== 'function') {
-            console.warn("App.js - App component not properly loaded, using basic content");
-            createBasicAppContent(rootElement);
+          // Check if App is properly loaded
+          if (typeof window.App !== 'function') {
+            console.error("App.js - App component not properly loaded");
+            renderBasicContent();
             return;
           }
           
@@ -187,8 +192,16 @@
         }
       } catch (err) {
         console.error("App.js - Error rendering App component:", err);
-        fallbackToCompatMode();
+        renderBasicContent();
       }
+    }
+    
+    function renderBasicContent() {
+      console.log("App.js - Rendering basic content as fallback");
+      var rootElement = document.getElementById('root');
+      if (!rootElement) return;
+      
+      createBasicAppContent(rootElement);
     }
     
     function createBasicAppContent(rootElement) {
