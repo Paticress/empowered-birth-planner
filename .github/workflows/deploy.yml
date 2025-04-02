@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Install terser explicitly
+        run: npm install --save-dev terser@latest
+      
       - name: Build
         run: npm run build
       
@@ -51,6 +54,9 @@ jobs:
       
       - name: Setup Pages
         uses: actions/configure-pages@v3
+        with:
+          # Explicitly enable GitHub Pages
+          enablement: true
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -67,4 +73,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
-
