@@ -10,14 +10,14 @@ interface NavButtonProps {
 export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
   const { navigateTo } = useNavigation();
   
-  const goToBirthPlanBuilder = () => {
-    console.log("Navigating to birth plan builder");
-    navigateTo('/criar-plano');
+  const goToBirthPlanAccess = () => {
+    console.log("Navigating to birth plan login");
+    navigateTo('/acesso-plano');
   };
   
   return (
     <Button 
-      onClick={goToBirthPlanBuilder}
+      onClick={goToBirthPlanAccess}
       variant="birth-plan-builder"
       className={`flex items-center font-semibold ${className}`}
     >

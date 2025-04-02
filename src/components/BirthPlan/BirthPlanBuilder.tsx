@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { BirthPlanHeader } from './BirthPlanHeader';
 import { BirthPlanWelcome } from './BirthPlanWelcome';
@@ -8,6 +9,7 @@ import { BirthPlanShare } from './BirthPlanShare';
 import { Footer } from '@/components/Footer';
 import { toast } from '@/components/ui/use-toast';
 import { useBirthPlanState } from './hooks/useBirthPlanState';
+import { useNavigation } from '@/hooks/useNavigation';
 
 export function BirthPlanBuilder() {
   console.log("RENDERING BIRTH PLAN BUILDER COMPONENT - THIS SHOULD BE VISIBLE");
@@ -21,8 +23,23 @@ export function BirthPlanBuilder() {
     handleQuestionnaireSubmit,
     setBirthPlanContent
   } = useBirthPlanState();
+  
+  const { navigateTo } = useNavigation();
 
   useEffect(() => {
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
+    
+    if (!isLoggedIn) {
+      console.log("User not logged in, redirecting to login page");
+      toast({
+        title: "Acesso Restrito",
+        description: "Por favor, faça login para acessar o construtor de plano de parto."
+      });
+      navigateTo('/acesso-plano');
+      return;
+    }
+    
     // Log when the component mounts to verify it's being rendered
     console.log("BirthPlanBuilder mounted, current stage:", currentStage);
     
@@ -41,7 +58,7 @@ export function BirthPlanBuilder() {
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, [currentStage]);
+  }, [currentStage, navigateTo]);
 
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">

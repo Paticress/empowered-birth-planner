@@ -20,4 +20,14 @@
   .btn-navigation {
     @apply bg-maternal-600 text-white hover:bg-maternal-700 hover:text-white;
   }
+  
+  /* Birth plan builder button variant */
+  .btn-birth-plan-builder {
+    @apply bg-maternal-600 hover:bg-maternal-700 text-white;
+  }
+  
+  /* Logout button */
+  .btn-logout {
+    @apply text-sm px-3 py-1 rounded bg-transparent text-maternal-600 border border-maternal-300 hover:bg-maternal-50 transition-colors;
+  }
 }
