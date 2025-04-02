@@ -4,21 +4,27 @@ import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
 import { LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function BirthPlanUserInfo() {
   const [userEmail, setUserEmail] = useState<string>('');
   const { navigateTo } = useNavigation();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
-    const email = localStorage.getItem('birthPlanEmail');
-    if (email) {
-      setUserEmail(email);
+    // Prioritize Supabase auth, fallback to localStorage
+    if (user?.email) {
+      setUserEmail(user.email);
+    } else {
+      const email = localStorage.getItem('birthPlanEmail');
+      if (email) {
+        setUserEmail(email);
+      }
     }
-  }, []);
+  }, [user]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('birthPlanLoggedIn');
-    localStorage.removeItem('birthPlanEmail');
+  const handleLogout = async () => {
+    await signOut();
     toast.success('Logout realizado com sucesso');
     navigateTo('/guia-online');
   };

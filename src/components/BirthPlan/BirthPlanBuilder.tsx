@@ -10,6 +10,8 @@ import { Footer } from '@/components/Footer';
 import { toast } from 'sonner';
 import { useBirthPlanState } from './hooks/useBirthPlanState';
 import { useNavigation } from '@/hooks/useNavigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export function BirthPlanBuilder() {
   console.log("RENDERING BIRTH PLAN BUILDER COMPONENT - THIS SHOULD BE VISIBLE");
@@ -25,40 +27,73 @@ export function BirthPlanBuilder() {
   } = useBirthPlanState();
   
   const { navigateTo } = useNavigation();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    // Verificar se o usuário está logado
-    const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
-    const userEmail = localStorage.getItem('birthPlanEmail');
+    if (isLoading) return; // Don't do anything while still loading auth state
     
-    if (!isLoggedIn || !userEmail) {
-      console.log("User not logged in, redirecting to login page");
-      toast.error("Acesso Restrito", {
-        description: "Por favor, faça login para acessar o construtor de plano de parto."
+    const checkUserAccess = async () => {
+      if (!user) {
+        console.log("User not authenticated, redirecting to login page");
+        toast.error("Acesso Restrito", {
+          description: "Por favor, faça login para acessar o construtor de plano de parto."
+        });
+        navigateTo('/acesso-plano');
+        return;
+      }
+      
+      // Check if the user is in the authorized users table
+      const { data, error } = await supabase
+        .from('Users_DB_BirthPlanBuilder')
+        .select('email')
+        .eq('email', user.email)
+        .maybeSingle();
+        
+      if (error) {
+        console.error("Error checking user access:", error);
+        toast.error("Erro ao verificar acesso", {
+          description: "Ocorreu um erro ao verificar seu acesso. Por favor, tente novamente."
+        });
+        navigateTo('/acesso-plano');
+        return;
+      }
+      
+      if (!data) {
+        console.log("User not authorized, redirecting to login page");
+        toast.error("Acesso não autorizado", {
+          description: "Você não tem acesso ao construtor de plano de parto."
+        });
+        navigateTo('/acesso-plano');
+        return;
+      }
+      
+      console.log("User authorized:", user.email);
+      toast.success("Bem-vindo ao Plano de Parto", {
+        description: "Você está pronto para criar seu plano de parto personalizado."
       });
-      navigateTo('/acesso-plano');
-      return;
-    }
+    };
     
-    // Log when the component mounts to verify it's being rendered
-    console.log("BirthPlanBuilder mounted, current stage:", currentStage);
-    console.log("User logged in with email:", userEmail);
-    
-    // Show a toast to confirm the user is on the birth plan page
-    toast.success("Plano de Parto", {
-      description: "Bem-vindo ao construtor de plano de parto"
-    });
+    checkUserAccess();
     
     // Additional debugging to verify the route
     console.log("Current pathname:", window.location.pathname);
     
-    // Force a re-render after a short delay to ensure component display
-    const timer = setTimeout(() => {
-      console.log("Forcing re-render check after timeout");
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, [currentStage, navigateTo]);
+  }, [user, isLoading, navigateTo]);
+
+  // Return loading indicator if still checking auth
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-maternal-50">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-maternal-500 border-r-transparent"></div>
+          <p className="mt-4 text-maternal-800">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render the content if there's no authenticated user
+  if (!user) return null;
 
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
