@@ -40,7 +40,7 @@ export function BirthPlanCTA() {
             </span>
             <h3 className="text-xl font-bold text-maternal-900">Construtor de Plano de Parto</h3>
             <p className="text-maternal-700 text-lg mb-2">Acesso Único</p>
-            <p className="text-maternal-900 font-bold text-3xl mb-4">R$ 97,00</p>
+            <p className="text-maternal-900 font-bold text-3xl mb-4">R$ 128,00</p>
           </div>
           <BirthPlanNavButton className="w-full py-4" />
         </div>
