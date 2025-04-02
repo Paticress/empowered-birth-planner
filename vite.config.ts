@@ -12,7 +12,10 @@ export default defineConfig(({ mode }) => {
   
   return {
     plugins: [
-      react(),
+      react({
+        // Configure the React plugin to handle HMR properly
+        fastRefresh: true,
+      }),
       mode === 'development' && componentTagger(),
     ].filter(Boolean),
     resolve: {
