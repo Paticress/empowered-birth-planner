@@ -35,8 +35,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Install terser explicitly
-        run: npm install --save-dev terser@latest
+      - name: Install required packages explicitly
+        run: npm install --save-dev @vitejs/plugin-react terser@latest
       
       - name: Setup Pages
         id: pages
@@ -71,11 +71,10 @@ jobs:
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
       
-      - name: Check for symlinks or hard links
+      - name: Check for symlinks
         run: |
           echo "Checking for symlinks in the dist directory..."
           find dist -type l -ls || true
-          echo "No symlinks found."
       
       - name: List build directory contents
         run: ls -la dist/
