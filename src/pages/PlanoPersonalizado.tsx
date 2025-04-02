@@ -10,6 +10,8 @@ import { CheckoutSection } from '@/components/PlanoPersonalizado/CheckoutSection
 
 const PlanoPersonalizado = () => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  // Set a default price for the plan
+  const planPrice = 97;
   
   const handlePurchase = () => {
     setIsCheckingOut(true);
@@ -41,8 +43,8 @@ const PlanoPersonalizado = () => {
       
       {isCheckingOut && (
         <CheckoutSection 
-          // Make sure this prop is accepted in CheckoutSection component
-          onGoBack={handleGoBack} 
+          onGoBack={handleGoBack}
+          price={planPrice}
         />
       )}
       

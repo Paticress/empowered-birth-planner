@@ -7,11 +7,12 @@ import { useNavigation } from '@/hooks/useNavigation';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CheckoutSectionProps {
-  onBackToInfo: () => void;
-  price: number;
+  onBackToInfo?: () => void;
+  onGoBack?: () => void;
+  price?: number;
 }
 
-export function CheckoutSection({ onBackToInfo, price }: CheckoutSectionProps) {
+export function CheckoutSection({ onBackToInfo, onGoBack, price = 97 }: CheckoutSectionProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -74,6 +75,9 @@ export function CheckoutSection({ onBackToInfo, price }: CheckoutSectionProps) {
       setIsProcessing(false);
     }
   };
+
+  // Choose the appropriate back button handler
+  const handleBack = onGoBack || onBackToInfo;
 
   return (
     <section id="checkout" className="bg-white py-16">
@@ -143,15 +147,17 @@ export function CheckoutSection({ onBackToInfo, price }: CheckoutSectionProps) {
                 {isProcessing ? 'Processando...' : `Pagar R$ ${price.toFixed(2)}`}
               </Button>
               
-              <Button 
-                type="button" 
-                variant="ghost" 
-                className="w-full mt-2" 
-                onClick={onBackToInfo}
-                disabled={isProcessing}
-              >
-                Voltar
-              </Button>
+              {handleBack && (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  className="w-full mt-2" 
+                  onClick={handleBack}
+                  disabled={isProcessing}
+                >
+                  Voltar
+                </Button>
+              )}
             </div>
           </form>
         </div>
