@@ -1,0 +1,4 @@
+
+Domain: planodeparto.energiamaterna.com.br
+Verification timestamp: $(date)
+This file confirms that this domain is properly configured for the Energia Materna Plano de Parto application.

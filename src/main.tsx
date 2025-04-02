@@ -1,3 +1,4 @@
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
@@ -61,6 +62,9 @@ window.addEventListener('load', () => {
   // Start update checking
   setTimeout(checkForUpdates, 5 * 60 * 1000);
 });
+
+// Log React version to help with debugging
+console.log(`React version: ${React.version}`);
 
 // Initialize React
 ReactDOM.createRoot(document.getElementById('root')!).render(
