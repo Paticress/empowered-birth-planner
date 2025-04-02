@@ -36,7 +36,7 @@ jobs:
         run: npm ci
       
       - name: Install required packages explicitly
-        run: npm install --save-dev @vitejs/plugin-react terser@latest
+        run: npm install --save-dev @vitejs/plugin-react terser@latest lovable-tagger@latest
       
       - name: Setup Pages
         id: pages
@@ -63,10 +63,12 @@ jobs:
             echo "404.html file not found in public directory"
           fi
         
-      - name: Copy domain-test.txt to dist root
+      - name: Copy domain verification files
         run: |
           echo "Domain test file for planodeparto.energiamaterna.com.br - $(date)" > dist/domain-test.txt
-          echo "Domain test file created successfully"
+          cp public/domain-verification.txt dist/ || echo "Creating domain verification file"
+          echo "Domain: planodeparto.energiamaterna.com.br\nVerification timestamp: $(date)\nStatus: Active\nVersion: 2.0" > dist/domain-verification.txt
+          echo "Domain verification files created successfully"
       
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
