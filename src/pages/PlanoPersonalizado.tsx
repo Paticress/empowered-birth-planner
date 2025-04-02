@@ -40,7 +40,10 @@ const PlanoPersonalizado = () => {
       )}
       
       {isCheckingOut && (
-        <CheckoutSection onGoBack={handleGoBack} />
+        <CheckoutSection 
+          // Make sure this prop is accepted in CheckoutSection component
+          onGoBack={handleGoBack} 
+        />
       )}
       
       <Footer />

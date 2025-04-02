@@ -13,13 +13,14 @@ import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
 import { BirthPlanSuccess } from "./components/BirthPlan/BirthPlanSuccess";
 import { LoginPage } from "./components/BirthPlan/LoginPage";
 
-const queryClient = new QueryClient();
-
 // Enhanced log for debugging
 console.log("APP COMPONENT INITIALIZING - SETTING UP ROUTES");
 
 const App = () => {
   console.log("APP COMPONENT RENDERING");
+  
+  // Move QueryClient inside the component
+  const queryClient = new QueryClient();
   
   return (
     <QueryClientProvider client={queryClient}>
