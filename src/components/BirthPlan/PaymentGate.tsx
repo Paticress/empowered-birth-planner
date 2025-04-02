@@ -42,7 +42,7 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <div className="bg-maternal-600 p-6 text-white text-center">
             <h2 className="text-2xl font-bold mb-2">Construa seu Plano de Parto Personalizado</h2>
-            <p className="mb-0">Acesso único por apenas R$ 97,00</p>
+            <p className="mb-0">Acesso único por apenas R$ 128,00</p>
           </div>
           
           <div className="p-6 md:p-8">

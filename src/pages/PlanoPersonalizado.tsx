@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -315,7 +314,7 @@ const PlanoPersonalizado = () => {
                   <div className="border-t border-maternal-100 pt-4 mb-4">
                     <div className="flex justify-between items-center">
                       <span className="text-maternal-700">Preço:</span>
-                      <span className="text-maternal-900 font-bold">R$ 97,00</span>
+                      <span className="text-maternal-900 font-bold">R$ 128,00</span>
                     </div>
                   </div>
                   
