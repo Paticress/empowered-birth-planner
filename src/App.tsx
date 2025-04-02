@@ -26,9 +26,14 @@ const App = () => {
         <Sonner />
         <HashRouter>
           <Routes>
+            {/* Página inicial redireciona para o guia online */}
             <Route path="/" element={<Navigate to="/guia-online" replace />} />
+            
+            {/* Rotas do Guia (acesso livre) */}
             <Route path="/guia-online" element={<OnlineGuide />} />
             <Route path="/guia-gratuito" element={<GuiaGratuito />} />
+            
+            {/* Rotas do Plano de Parto (acesso restrito) */}
             <Route path="/acesso-plano" element={<LoginPage />} />
             <Route 
               path="/criar-plano" 
@@ -48,7 +53,8 @@ const App = () => {
                 </>
               } 
             />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            
+            {/* Rota de fallback para páginas não encontradas */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </HashRouter>

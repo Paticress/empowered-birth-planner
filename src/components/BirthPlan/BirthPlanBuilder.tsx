@@ -7,7 +7,7 @@ import { BirthPlanEditor } from './BirthPlanEditor';
 import { BirthPlanPreview } from './BirthPlanPreview';
 import { BirthPlanShare } from './BirthPlanShare';
 import { Footer } from '@/components/Footer';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { useBirthPlanState } from './hooks/useBirthPlanState';
 import { useNavigation } from '@/hooks/useNavigation';
 
@@ -27,13 +27,13 @@ export function BirthPlanBuilder() {
   const { navigateTo } = useNavigation();
 
   useEffect(() => {
-    // Check if user is logged in
+    // Verificar se o usuário está logado
     const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
+    const userEmail = localStorage.getItem('birthPlanEmail');
     
-    if (!isLoggedIn) {
+    if (!isLoggedIn || !userEmail) {
       console.log("User not logged in, redirecting to login page");
-      toast({
-        title: "Acesso Restrito",
+      toast.error("Acesso Restrito", {
         description: "Por favor, faça login para acessar o construtor de plano de parto."
       });
       navigateTo('/acesso-plano');
@@ -42,11 +42,11 @@ export function BirthPlanBuilder() {
     
     // Log when the component mounts to verify it's being rendered
     console.log("BirthPlanBuilder mounted, current stage:", currentStage);
+    console.log("User logged in with email:", userEmail);
     
     // Show a toast to confirm the user is on the birth plan page
-    toast({
-      title: "Plano de Parto",
-      description: "Você está na página de criação do plano de parto"
+    toast.success("Plano de Parto", {
+      description: "Bem-vindo ao construtor de plano de parto"
     });
     
     // Additional debugging to verify the route

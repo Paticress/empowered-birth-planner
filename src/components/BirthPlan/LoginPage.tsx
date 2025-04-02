@@ -6,12 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Footer } from '@/components/Footer';
 import { useNavigation } from '@/hooks/useNavigation';
-import { FileText, Lock } from 'lucide-react';
+import { FileText, Lock, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function LoginPage() {
   const [credentials, setCredentials] = useState({
-    username: '',
+    email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -26,13 +26,17 @@ export function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API check
+    // Simulação de verificação de acesso
     setTimeout(() => {
-      // For demonstration - we'd actually check against your user database
-      if (credentials.username && credentials.password) {
-        // Store login status in localStorage
+      const email = credentials.email.toLowerCase().trim();
+      
+      if (email && credentials.password.length >= 4) {
+        // Em uma implementação real, você verificaria o email contra uma lista de
+        // emails de usuários pagantes (do Supabase, por exemplo)
+        
+        // Armazenar informações de login no localStorage
         localStorage.setItem('birthPlanLoggedIn', 'true');
-        localStorage.setItem('birthPlanUsername', credentials.username);
+        localStorage.setItem('birthPlanEmail', email);
         
         toast.success('Login bem-sucedido');
         navigateTo('/criar-plano');
@@ -67,20 +71,22 @@ export function LoginPage() {
               Acesso Exclusivo
             </CardTitle>
             <CardDescription>
-              Entre com as credenciais recebidas após a compra
+              Entre com o email utilizado na compra do plano
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Nome de usuário</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="username"
-                  name="username"
-                  placeholder="Insira seu nome de usuário"
-                  value={credentials.username}
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Insira o email usado na compra"
+                  value={credentials.email}
                   onChange={handleInputChange}
                   required
+                  className="focus:border-maternal-500 focus:ring-maternal-400"
                 />
               </div>
               
@@ -94,7 +100,11 @@ export function LoginPage() {
                   value={credentials.password}
                   onChange={handleInputChange}
                   required
+                  className="focus:border-maternal-500 focus:ring-maternal-400"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Para o primeiro acesso, crie uma senha com no mínimo 4 caracteres
+                </p>
               </div>
               
               <Button 

@@ -11,8 +11,16 @@ export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
   const { navigateTo } = useNavigation();
   
   const goToBirthPlanAccess = () => {
-    console.log("Navigating to birth plan login");
-    navigateTo('/acesso-plano');
+    // Verificar se o usuário já está logado
+    const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
+    
+    if (isLoggedIn) {
+      console.log("User already logged in, redirecting to birth plan builder");
+      navigateTo('/criar-plano');
+    } else {
+      console.log("Navigating to birth plan login");
+      navigateTo('/acesso-plano');
+    }
   };
   
   return (
