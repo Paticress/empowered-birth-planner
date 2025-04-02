@@ -1,9 +1,9 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import fs from "fs";
 import { componentTagger } from "lovable-tagger";
+import terser from '@rollup/plugin-terser';  // Add this import
 
 // Find index.html in the project structure
 function findIndexHtml(dir: string): string | null {
@@ -64,11 +64,20 @@ export default defineConfig(({ mode }) => ({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: mode === 'production', // Only remove console logs in production, not during debugging
+        drop_console: mode === 'production',
         drop_debugger: true,
       }
     },
+    // Add Terser plugin to Rollup options
     rollupOptions: {
+      plugins: [
+        terser({
+          compress: {
+            drop_console: mode === 'production',
+            drop_debugger: true,
+          }
+        })
+      ],
       output: {
         // Generate specific filenames for better caching
         entryFileNames: 'assets/[name].[hash].js',
