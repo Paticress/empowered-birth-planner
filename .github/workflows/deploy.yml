@@ -66,10 +66,14 @@ jobs:
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
       
+      - name: List build directory contents
+        run: ls -la dist/
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'dist'
+          retention-days: 1
 
   deploy:
     environment:
