@@ -51,14 +51,9 @@ jobs:
       
       - name: Copy CNAME to dist
         run: |
-          if [ -f "public/CNAME" ]; then
-            cp public/CNAME dist/
-            echo "CNAME file copied successfully"
-          else
-            echo "planodeparto.energiamaterna.com.br" > dist/CNAME
-            echo "CNAME file created successfully"
-          fi
-
+          echo "planodeparto.energiamaterna.com.br" > dist/CNAME
+          echo "CNAME file created successfully"
+      
       - name: Copy 404.html to dist root
         run: |
           if [ -f "public/404.html" ]; then
@@ -70,28 +65,26 @@ jobs:
         
       - name: Copy domain-test.txt to dist root
         run: |
-          if [ -f "public/domain-test.txt" ]; then
-            cp public/domain-test.txt dist/
-            echo "Domain test file copied successfully"
-          else
-            echo "Creating domain-test.txt in dist directory"
-            echo "Domain test file for planodeparto.energiamaterna.com.br - $(date)" > dist/domain-test.txt
-          fi
+          echo "Domain test file for planodeparto.energiamaterna.com.br - $(date)" > dist/domain-test.txt
+          echo "Domain test file created successfully"
       
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
       
+      - name: Check for symlinks or hard links
+        run: |
+          echo "Checking for symlinks in the dist directory..."
+          find dist -type l -ls || true
+          echo "No symlinks found."
+      
       - name: List build directory contents
         run: ls -la dist/
       
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages
           path: dist
-          retention-days: 1
-          if-no-files-found: error
-
+          
   # Deployment job
   deploy:
     environment:
@@ -100,12 +93,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: github-pages
-          path: ./
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
