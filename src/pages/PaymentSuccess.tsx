@@ -2,21 +2,36 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function PaymentSuccess() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     // Show success message
     toast.success("Pagamento realizado com sucesso!");
     
-    // Redirect to the birth plan creation page after a short delay
-    const timer = setTimeout(() => {
-      navigate("/criar-plano");
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [navigate]);
+    // Check if user is authenticated before redirecting
+    if (user) {
+      console.log("User is authenticated, redirecting to birth plan builder");
+      // Redirect to the birth plan creation page after a short delay
+      const timer = setTimeout(() => {
+        navigate("/criar-plano");
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    } else {
+      console.log("User not authenticated, redirecting to login page");
+      // If not authenticated, redirect to login page
+      const timer = setTimeout(() => {
+        navigate("/acesso-plano");
+        toast.info("Por favor, faça login para acessar seu plano de parto");
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [navigate, user]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-green-50">

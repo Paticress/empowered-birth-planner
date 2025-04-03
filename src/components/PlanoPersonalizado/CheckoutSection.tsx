@@ -65,7 +65,17 @@ export function CheckoutSection({ onBackToInfo, onGoBack, price = 97 }: Checkout
       
       // Wait a bit before redirecting
       setTimeout(() => {
-        navigateTo('/criar-plano');
+        // First sign in the user to ensure they're properly authenticated
+        supabase.auth.signInWithPassword({
+          email,
+          password
+        }).then(() => {
+          navigateTo('/criar-plano');
+        }).catch((error) => {
+          console.error('Error signing in after signup:', error);
+          // If signin fails, redirect to login page
+          navigateTo('/acesso-plano');
+        });
       }, 2000);
       
     } catch (error) {

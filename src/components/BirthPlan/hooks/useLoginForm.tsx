@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,9 +40,14 @@ export function useLoginForm() {
     if (error) {
       console.error('Login error:', error);
       toast.error('Falha no login: ' + error.message);
-    } else {
-      toast.success('Login realizado com sucesso!');
-      
+      setIsLoading(false);
+      return;
+    }
+    
+    toast.success('Login realizado com sucesso!');
+    console.log("Login successful, checking user access...");
+    
+    try {
       // Check if user is in the allowed users table - using correct lowercase table name
       const { data: userData, error: userError } = await supabase
         .from('users_db_birthplanbuilder')
@@ -53,12 +57,17 @@ export function useLoginForm() {
       
       if (userError) {
         console.error('Error checking user access:', userError);
+        toast.error('Erro ao verificar acesso: ' + userError.message);
+        setIsLoading(false);
+        return;
       }
       
       // If user exists in the database, they have access
       if (userData) {
+        console.log("User found in database, redirecting to birth plan builder");
         navigateTo('/criar-plano');
       } else {
+        console.log("User not found in database, adding user");
         // Add the user to the database (they've paid) - using correct lowercase table name
         const { error: insertError } = await supabase
           .from('users_db_birthplanbuilder')
@@ -67,13 +76,19 @@ export function useLoginForm() {
         if (insertError) {
           console.error('Error adding user to database:', insertError);
           toast.error('Erro ao registrar acesso, por favor contate o suporte.');
-        } else {
-          navigateTo('/criar-plano');
+          setIsLoading(false);
+          return;
         }
+        
+        console.log("User added to database, redirecting to birth plan builder");
+        navigateTo('/criar-plano');
       }
+    } catch (error) {
+      console.error('Error in login flow:', error);
+      toast.error('Ocorreu um erro inesperado. Por favor, tente novamente.');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
