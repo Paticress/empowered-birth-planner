@@ -4,6 +4,7 @@ import { useLoginForm } from '../hooks/useLoginForm';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export function MagicLinkTab() {
   const {
@@ -17,13 +18,20 @@ export function MagicLinkTab() {
   
   const { user, isAuthenticated } = useAuth();
 
-  // Check for magic link authentication in URL without redirecting
+  // Enhanced magic link detection
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       // Check all possible locations for auth tokens
       const fullUrl = window.location.href;
       const hash = window.location.hash;
       const search = window.location.search;
+      
+      // Log for debugging
+      console.log("MagicLinkTab: Checking for auth in URL", {
+        hashPresent: hash ? true : false,
+        searchPresent: search ? true : false,
+        urlContainsToken: fullUrl.includes('access_token=')
+      });
       
       const hasAuthParams = 
         fullUrl.includes('access_token=') || 
@@ -31,15 +39,27 @@ export function MagicLinkTab() {
         (search && search.includes('access_token='));
       
       if (hasAuthParams) {
-        console.log("Magic link authentication detected in MagicLinkTab", {
-          url: fullUrl.includes('access_token=') ? 'contains-token' : 'no-token',
-          hash: hash ? 'present' : 'absent',
-          search: search ? 'present' : 'absent'
-        });
+        console.log("MagicLinkTab: Magic link detected");
         
         // Update the UI state to show that we've received the magic link
         setIsMagicLinkSent(true);
-        toast.info("Processando sua autenticação...");
+        
+        try {
+          // Check if there's an active session already
+          const { data, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error("MagicLinkTab: Error checking session:", error);
+          } else if (data.session) {
+            console.log("MagicLinkTab: Valid session found");
+            toast.success("Autenticação realizada com sucesso!");
+          } else {
+            console.log("MagicLinkTab: No session found, auth params present");
+            toast.info("Processando sua autenticação...");
+          }
+        } catch (err) {
+          console.error("MagicLinkTab: Error processing authentication:", err);
+        }
       }
     };
     
