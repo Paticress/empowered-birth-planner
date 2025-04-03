@@ -19,9 +19,9 @@ export function AuthDebugger() {
     setLoading(true);
     
     try {
-      // Fetch users that have access to the Birth Plan Builder
+      // Fetch users that have access to the Birth Plan Builder - Fix the table name to use lowercase
       const { data: accessData, error: accessError } = await supabase
-        .from('Users_DB_BirthPlanBuilder')
+        .from('users_db_birthplanbuilder')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
@@ -55,9 +55,9 @@ export function AuthDebugger() {
       
       if (authError) throw authError;
       
-      // Then add them to the birth plan users table
+      // Then add them to the birth plan users table - Fix the table name to use lowercase
       const { error: dbError } = await supabase
-        .from('Users_DB_BirthPlanBuilder')
+        .from('users_db_birthplanbuilder')
         .insert({ email: userEmail });
         
       if (dbError) throw dbError;
@@ -131,9 +131,9 @@ export function AuthDebugger() {
     setLoading(true);
     
     try {
-      // Check if the email already exists in the birth plan access table
+      // Check if the email already exists in the birth plan access table - Fix the table name to use lowercase
       const { data: existingUser } = await supabase
-        .from('Users_DB_BirthPlanBuilder')
+        .from('users_db_birthplanbuilder')
         .select('email')
         .eq('email', userEmail)
         .maybeSingle();
@@ -143,9 +143,9 @@ export function AuthDebugger() {
         return;
       }
       
-      // Add the email to the birth plan access table
+      // Add the email to the birth plan access table - Fix the table name to use lowercase
       const { error } = await supabase
-        .from('Users_DB_BirthPlanBuilder')
+        .from('users_db_birthplanbuilder')
         .insert({ email: userEmail });
         
       if (error) throw error;

@@ -79,7 +79,7 @@ export function useWebhookTesting(projectId: string) {
     setLoading(prev => ({ ...prev, database: true }));
     
     try {
-      // Direct database insertion
+      // Direct database insertion - Fix the table name to use lowercase
       const { data, error } = await supabase
         .from('users_db_birthplanbuilder')
         .upsert({ email: email.trim() }, { onConflict: 'email' });
@@ -94,7 +94,7 @@ export function useWebhookTesting(projectId: string) {
         toast.success('Email added to database!');
         addResult(true, 'Successfully inserted email directly to database');
         
-        // Check if the email was actually inserted
+        // Check if the email was actually inserted - Fix the table name to use lowercase
         const { data: checkData, error: checkError } = await supabase
           .from('users_db_birthplanbuilder')
           .select('*')
