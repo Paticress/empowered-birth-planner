@@ -10,20 +10,17 @@ import { FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function GuiaOnline() {
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const { navigateTo } = useNavigation();
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
   useEffect(() => {
     // Give auth a moment to initialize before showing auth prompt
-    if (!isLoading && !user) {
-      console.log("No authenticated user found for Guia Online");
-      setShowAuthPrompt(true);
-    } else if (user) {
-      console.log("Authenticated user found for Guia Online:", user.email);
-      setShowAuthPrompt(false);
+    if (!isLoading) {
+      console.log("Auth check for Guia Online:", { isAuthenticated });
+      setShowAuthPrompt(!isAuthenticated);
     }
-  }, [user, isLoading]);
+  }, [isAuthenticated, isLoading]);
 
   const handleLogin = () => {
     navigateTo('/acesso-plano');

@@ -27,7 +27,7 @@ export function BirthPlanBuilder() {
   } = useBirthPlanState();
   
   const { navigateTo } = useNavigation();
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
 
   useEffect(() => {
     if (isLoading) {
@@ -35,14 +35,22 @@ export function BirthPlanBuilder() {
       return; // Don't do anything while still loading auth state
     }
     
+    console.log("Auth check for BirthPlanBuilder:", { isAuthenticated, email: user?.email });
+    
+    if (!isAuthenticated) {
+      console.log("User not authenticated, redirecting to login page");
+      toast.error("Acesso Restrito", {
+        description: "Por favor, faça login para acessar o construtor de plano de parto."
+      });
+      navigateTo('/acesso-plano');
+      return;
+    }
+    
     const checkUserAccess = async () => {
-      console.log("Checking user access with auth state:", { user: !!user, email: user?.email });
+      const userEmail = user?.email || localStorage.getItem('birthPlanEmail');
       
-      if (!user) {
-        console.log("User not authenticated, redirecting to login page");
-        toast.error("Acesso Restrito", {
-          description: "Por favor, faça login para acessar o construtor de plano de parto."
-        });
+      if (!userEmail) {
+        console.log("No user email found, redirecting to login page");
         navigateTo('/acesso-plano');
         return;
       }
@@ -52,7 +60,7 @@ export function BirthPlanBuilder() {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
           .select('email')
-          .eq('email', user.email)
+          .eq('email', userEmail)
           .maybeSingle();
           
         if (error) {
@@ -65,12 +73,12 @@ export function BirthPlanBuilder() {
         }
         
         if (!data) {
-          console.log("User not authorized, redirecting to login page");
+          console.log("User not authorized, adding to database");
           
           // Try to add the user to the database since they're authenticated
           const { error: insertError } = await supabase
             .from('users_db_birthplanbuilder')
-            .insert({ email: user.email });
+            .insert({ email: userEmail });
             
           if (insertError) {
             console.error("Error adding user to database:", insertError);
@@ -80,13 +88,13 @@ export function BirthPlanBuilder() {
             navigateTo('/acesso-plano');
             return;
           } else {
-            console.log("Added user to database:", user.email);
+            console.log("Added user to database:", userEmail);
             toast.success("Acesso concedido", {
               description: "Bem-vindo ao construtor de plano de parto."
             });
           }
         } else {
-          console.log("User authorized:", user.email);
+          console.log("User authorized:", userEmail);
           toast.success("Bem-vindo ao Plano de Parto", {
             description: "Você está pronto para criar seu plano de parto personalizado."
           });
@@ -100,12 +108,14 @@ export function BirthPlanBuilder() {
       }
     };
     
-    checkUserAccess();
+    if (isAuthenticated) {
+      checkUserAccess();
+    }
     
     // Additional debugging to verify the route
     console.log("Current pathname:", window.location.pathname);
     
-  }, [user, isLoading, navigateTo]);
+  }, [isAuthenticated, user, isLoading, navigateTo]);
 
   // Return loading indicator if still checking auth
   if (isLoading) {
@@ -120,14 +130,12 @@ export function BirthPlanBuilder() {
   }
 
   // Don't render the content if there's no authenticated user
-  if (!user) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
       <div className="pt-4 md:pt-8">
         <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
-        
-        {/* Progress bar removed */}
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Versão compacta do banner de informações */}

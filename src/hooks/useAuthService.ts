@@ -39,7 +39,8 @@ export function useAuthService() {
   const signInWithMagicLink = async (email: string) => {
     try {
       const siteUrl = getCurrentSiteUrl();
-      const redirectTo = `${siteUrl}/criar-plano`;
+      // Redirect to the home page first, then we'll handle routing based on auth state
+      const redirectTo = `${siteUrl}`;
       console.log("Magic link will redirect to:", redirectTo);
       
       const { error } = await supabase.auth.signInWithOtp({
@@ -74,6 +75,7 @@ export function useAuthService() {
 
   const initializeAuth = () => {
     console.log("Initializing auth service...");
+    setIsLoading(true);
     
     // Set up auth state listener FIRST (this is critical for the correct order)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -95,7 +97,16 @@ export function useAuthService() {
           // Clear localStorage items on sign out
           localStorage.removeItem('birthPlanLoggedIn');
           localStorage.removeItem('birthPlanEmail');
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed');
+          // Update localStorage with refreshed session
+          if (currentSession?.user?.email) {
+            localStorage.setItem('birthPlanLoggedIn', 'true');
+            localStorage.setItem('birthPlanEmail', currentSession.user.email);
+          }
         }
+        
+        setIsLoading(false);
       }
     );
 
@@ -113,6 +124,16 @@ export function useAuthService() {
       
       setIsLoading(false);
     });
+
+    // Also check localStorage as a fallback for existing code patterns
+    const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
+    const storedEmail = localStorage.getItem('birthPlanEmail');
+    
+    console.log("Local storage check:", { isLoggedIn, email: storedEmail });
+    
+    if (isLoggedIn && storedEmail && !user) {
+      console.log("User found in localStorage but not in Supabase session");
+    }
 
     // Return the cleanup function
     return () => {

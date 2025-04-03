@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { useAuthService } from '@/hooks/useAuthService';
+import { toast } from 'sonner';
 
 type AuthContextType = {
   session: Session | null;
@@ -11,6 +12,7 @@ type AuthContextType = {
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signInWithMagicLink: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  isAuthenticated: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,7 +30,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   } = useAuthService();
   
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Initialize authentication
   useEffect(() => {
     if (!isInitialized) {
       console.log("Setting up auth context");
@@ -39,14 +43,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isInitialized]);
 
+  // Synchronize authentication state
+  useEffect(() => {
+    const isUserAuthenticated = !!user || localStorage.getItem('birthPlanLoggedIn') === 'true';
+    setIsAuthenticated(isUserAuthenticated);
+    
+    console.log("Auth state synchronized:", { 
+      isAuthenticated: isUserAuthenticated,
+      hasUser: !!user,
+      hasLocalStorage: localStorage.getItem('birthPlanLoggedIn') === 'true'
+    });
+  }, [user]);
+
   // Debug auth state
   useEffect(() => {
     console.log("Auth context state:", { 
-      isAuthenticated: !!user, 
-      userEmail: user?.email,
+      isAuthenticated: isAuthenticated, 
+      userEmail: user?.email || localStorage.getItem('birthPlanEmail'),
       isLoading 
     });
-  }, [user, isLoading]);
+  }, [isAuthenticated, user, isLoading]);
 
   return (
     <AuthContext.Provider
@@ -57,7 +73,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signInWithMagicLink,
-        signOut
+        signOut,
+        isAuthenticated
       }}
     >
       {children}
