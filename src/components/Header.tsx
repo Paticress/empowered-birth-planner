@@ -1,15 +1,17 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useNavigation } from '@/hooks/useNavigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { navigateTo } = useNavigation();
+  const { user } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -91,6 +93,20 @@ export function Header() {
             >
               Depoimentos
             </Link>
+            
+            {/* Add My Access link with conditional appearance based on login status */}
+            {user && (
+              <Link 
+                to="/meus-acessos" 
+                className={`transition-colors flex items-center ${isActive('/meus-acessos') 
+                  ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
+                  : 'text-maternal-800 hover:text-maternal-600'}`}
+                onClick={(e) => handleLinkClick(e, '/meus-acessos')}
+              >
+                <User className="h-4 w-4 mr-1" />
+                Meus Acessos
+              </Link>
+            )}
           </nav>
           
           {/* Mobile Menu Button */}
@@ -166,6 +182,22 @@ export function Header() {
                   >
                     Depoimentos
                   </button>
+                  
+                  {/* Add My Access button to mobile menu */}
+                  {user && (
+                    <button 
+                      className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/meus-acessos') 
+                        ? 'bg-maternal-100 text-maternal-900 font-medium' 
+                        : 'text-maternal-800 hover:bg-maternal-50'}`}
+                      onClick={() => {
+                        navigateTo('/meus-acessos');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Meus Acessos
+                    </button>
+                  )}
                 </nav>
               </div>
             </SheetContent>

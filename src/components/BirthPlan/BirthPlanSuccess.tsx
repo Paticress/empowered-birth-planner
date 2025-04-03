@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useNavigation } from '@/hooks/useNavigation';
 import { toast } from '@/components/ui/use-toast';
-import { Check, Heart, Download, Share2 } from 'lucide-react';
+import { Check, Heart, Download, Share2, User } from 'lucide-react';
 
 export function BirthPlanSuccess() {
   const { navigateTo } = useNavigation();
@@ -70,7 +70,7 @@ export function BirthPlanSuccess() {
           <h2 className="text-2xl font-semibold text-maternal-800 mb-4">
             E agora?
           </h2>
-          <div className="grid md:grid-cols-2 gap-6 mt-6">
+          <div className="grid md:grid-cols-3 gap-6 mt-6">
             <div className="border border-maternal-200 rounded-lg p-6 text-left">
               <h3 className="text-lg font-medium text-maternal-800 mb-2">
                 Compartilhe seu plano
@@ -101,6 +101,22 @@ export function BirthPlanSuccess() {
                 className="w-full flex items-center justify-center border-maternal-400"
               >
                 <Download className="mr-2 h-4 w-4" /> Voltar para Baixar
+              </Button>
+            </div>
+            
+            <div className="border border-maternal-200 rounded-lg p-6 text-left">
+              <h3 className="text-lg font-medium text-maternal-800 mb-2">
+                Central de Acesso
+              </h3>
+              <p className="text-maternal-700 mb-4">
+                Acesse todos os seus conteúdos e produtos da Energia Materna em um só lugar.
+              </p>
+              <Button
+                onClick={() => navigateTo('/meus-acessos')}
+                variant="outline"
+                className="w-full flex items-center justify-center border-maternal-400"
+              >
+                <User className="mr-2 h-4 w-4" /> Meus Acessos
               </Button>
             </div>
           </div>
