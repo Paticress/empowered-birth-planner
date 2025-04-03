@@ -34,7 +34,14 @@ export function useAuthProcessor() {
         
         // Handle error case
         if (urlInfo.hasError) {
-          handleAuthenticationError(urlInfo.hash, urlInfo.search);
+          const errorMessage = handleAuthError(urlInfo.hash, urlInfo.search) || "Erro desconhecido na autenticação";
+          
+          console.error("AuthProcessor: Authentication error:", errorMessage);
+          toast.error("Erro na autenticação: " + errorMessage);
+          setIsProcessingAuth(false);
+          
+          // Clean URL
+          cleanUrlAfterAuth();
           return;
         }
         
@@ -42,7 +49,7 @@ export function useAuthProcessor() {
         await processTokensByLocation(urlInfo);
         
         // Verify session after processing
-        await validateAndHandleSession();
+        await validateSession(setIsProcessingAuth);
       } catch (err) {
         console.error("AuthProcessor: Error processing authentication:", err);
         toast.error("Erro ao processar autenticação");
@@ -89,20 +96,6 @@ async function handlePathBasedToken(path: string, fullUrl: string): Promise<void
 }
 
 /**
- * Handle authentication errors
- */
-function handleAuthenticationError(hash: string, search: string): void {
-  const errorMessage = handleAuthError(hash, search) || "Erro desconhecido na autenticação";
-  
-  console.error("AuthProcessor: Authentication error:", errorMessage);
-  toast.error("Erro na autenticação: " + errorMessage);
-  setIsProcessingAuth(false);
-  
-  // Clean URL
-  cleanUrlAfterAuth();
-}
-
-/**
  * Process tokens based on their location in the URL
  */
 async function processTokensByLocation(urlInfo: ReturnType<typeof useAuthUrlDetection>): Promise<void> {
@@ -120,105 +113,60 @@ async function processTokensByLocation(urlInfo: ReturnType<typeof useAuthUrlDete
   
   // Process hash or path based tokens
   if (hasAuthInHash || hasAuthInPath) {
-    await processHashOrPathToken(hasAuthInHash, hasAuthInPath, hasAuthInSearch, fullUrl, search);
+    const { error } = await processAuthToken({ 
+      hasAuthInHash, 
+      hasAuthInPath, 
+      hasAuthInSearch, 
+      fullUrl, 
+      search 
+    });
+    
+    if (error) {
+      console.error("AuthProcessor: Error processing token:", error);
+      toast.error("Erro ao processar token: " + error.message);
+      throw error;
+    }
   } 
   // Process search based tokens
   else if (hasAuthInSearch) {
-    await processSearchToken(hasAuthInHash, hasAuthInPath, hasAuthInSearch, fullUrl, search);
+    const { error } = await processAuthToken({ 
+      hasAuthInHash, 
+      hasAuthInPath, 
+      hasAuthInSearch, 
+      fullUrl, 
+      search 
+    });
+    
+    if (error) {
+      console.error("AuthProcessor: Error processing token:", error);
+      toast.error("Erro ao processar token: " + error.message);
+      throw error;
+    }
   }
   // Process tokens in complex URL formats
   else if (hasAuthInUrl) {
-    await processComplexUrlToken(fullUrl);
-  }
-}
-
-/**
- * Process hash or path based tokens
- */
-async function processHashOrPathToken(
-  hasAuthInHash: boolean,
-  hasAuthInPath: boolean,
-  hasAuthInSearch: boolean,
-  fullUrl: string,
-  search: string
-): Promise<void> {
-  const { error } = await processAuthToken({ 
-    hasAuthInHash, 
-    hasAuthInPath, 
-    hasAuthInSearch, 
-    fullUrl, 
-    search 
-  });
-  
-  if (error) {
-    console.error("AuthProcessor: Error processing token:", error);
-    toast.error("Erro ao processar token: " + error.message);
-    setIsProcessingAuth(false);
+    console.log("AuthProcessor: Auth token in complex URL format");
     
-    // Clean URL
-    cleanUrlAfterAuth();
-    throw error;
-  }
-}
-
-/**
- * Process search based tokens
- */
-async function processSearchToken(
-  hasAuthInHash: boolean,
-  hasAuthInPath: boolean,
-  hasAuthInSearch: boolean,
-  fullUrl: string,
-  search: string
-): Promise<void> {
-  const { error } = await processAuthToken({ 
-    hasAuthInHash, 
-    hasAuthInPath, 
-    hasAuthInSearch, 
-    fullUrl, 
-    search 
-  });
-  
-  if (error) {
-    console.error("AuthProcessor: Error processing token:", error);
-    toast.error("Erro ao processar token: " + error.message);
-    setIsProcessingAuth(false);
+    // Extract token
+    const tokenPart = extractTokenFromUrl(fullUrl);
     
-    // Clean URL
-    cleanUrlAfterAuth();
-    throw error;
-  }
-}
-
-/**
- * Process tokens in complex URL formats
- */
-async function processComplexUrlToken(fullUrl: string): Promise<void> {
-  console.log("AuthProcessor: Auth token in complex URL format");
-  
-  // Extract token
-  const tokenPart = extractTokenFromUrl(fullUrl);
-  
-  if (tokenPart) {
-    // Update the URL to use hash format for Supabase
-    window.history.replaceState(
-      null, 
-      document.title,
-      '/acesso-plano#' + tokenPart
-    );
-    
-    // Let Supabase process the hash-based token
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const { error } = await supabase.auth.getSession();
-    if (error) {
-      console.error("AuthProcessor: Error processing complex token:", error);
-      toast.error("Erro ao processar token: " + error.message);
-      setIsProcessingAuth(false);
+    if (tokenPart) {
+      // Update the URL to use hash format for Supabase
+      window.history.replaceState(
+        null, 
+        document.title,
+        '/acesso-plano#' + tokenPart
+      );
       
-      // Clean URL
-      cleanUrlAfterAuth();
-      throw error;
+      // Let Supabase process the hash-based token
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const { error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("AuthProcessor: Error processing complex token:", error);
+        toast.error("Erro ao processar token: " + error.message);
+        throw error;
+      }
     }
   }
 }
@@ -226,7 +174,7 @@ async function processComplexUrlToken(fullUrl: string): Promise<void> {
 /**
  * Validate session and handle successful authentication
  */
-async function validateAndHandleSession(): Promise<void> {
+async function validateSession(setIsProcessingAuth: React.Dispatch<React.SetStateAction<boolean>>): Promise<void> {
   // Check if we got a valid session
   const { data, error } = await supabase.auth.getSession();
   
