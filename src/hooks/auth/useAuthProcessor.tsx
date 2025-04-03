@@ -1,16 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { 
-  processAuthToken, 
-  fixAuthTokenFormat, 
-  extractTokenFromUrl, 
-  handleAuthError,
-  ensureUserInDatabase,
-  cleanUrlAfterAuth
-} from "@/utils/auth/tokenUtils";
 import { useAuthUrlDetection } from "./useAuthUrlDetection";
+import { hasAuthParameters } from "./utils/authUrlUtils";
+import { processAuthError } from "./processors/errorProcessor";
+import { processPathToken } from "./processors/pathTokenProcessor";
+import { processHashToken } from "./processors/hashTokenProcessor";
+import { processSearchToken } from "./processors/searchTokenProcessor";
+import { processComplexUrlToken } from "./processors/complexUrlProcessor";
+import { validateSession } from "./processors/sessionValidator";
 
 /**
  * Hook to process authentication from URL parameters (magic links)
@@ -27,34 +25,45 @@ export function useAuthProcessor() {
       setIsProcessingAuth(true);
       
       try {
-        // Fix auth token format if needed
-        if (urlInfo.hasAuthInPath) {
-          await handlePathBasedToken(urlInfo.path, urlInfo.fullUrl);
-        }
+        // Process auth parameters in sequence, stopping if any processor handles them
         
-        // Handle error case
-        if (urlInfo.hasError) {
-          const errorMessage = handleAuthError(urlInfo.hash, urlInfo.search) || "Erro desconhecido na autenticação";
-          
-          console.error("AuthProcessor: Authentication error:", errorMessage);
-          toast.error("Erro na autenticação: " + errorMessage);
-          setIsProcessingAuth(false);
-          
-          // Clean URL
-          cleanUrlAfterAuth();
+        // 1. Check for errors first
+        const errorHandled = await processAuthError(urlInfo, { setIsProcessingAuth });
+        if (errorHandled) return;
+        
+        // 2. Fix path-based tokens
+        await processPathToken(urlInfo, { setIsProcessingAuth });
+        
+        // 3. Try to process the token based on its location
+        const hashHandled = await processHashToken(urlInfo, { setIsProcessingAuth });
+        if (hashHandled) {
+          // If hash token was processed, verify session
+          await validateSession({ setIsProcessingAuth });
           return;
         }
         
-        // Process the auth tokens based on their location
-        await processTokensByLocation(urlInfo);
+        const searchHandled = await processSearchToken(urlInfo, { setIsProcessingAuth });
+        if (searchHandled) {
+          // If search token was processed, verify session
+          await validateSession({ setIsProcessingAuth });
+          return;
+        }
         
-        // Verify session after processing
-        await validateSession(setIsProcessingAuth);
+        const complexUrlHandled = await processComplexUrlToken(urlInfo, { setIsProcessingAuth });
+        if (complexUrlHandled) {
+          // If complex URL token was processed, verify session
+          await validateSession({ setIsProcessingAuth });
+          return;
+        }
+        
+        // If we reached here, no processor handled the token
+        console.log("AuthProcessor: No matching processor for the auth parameters");
+        setIsProcessingAuth(false);
+        
       } catch (err) {
         console.error("AuthProcessor: Error processing authentication:", err);
         toast.error("Erro ao processar autenticação");
         setIsProcessingAuth(false);
-        cleanUrlAfterAuth();
       }
     };
     
@@ -62,156 +71,4 @@ export function useAuthProcessor() {
   }, [urlInfo, isProcessingAuth]);
 
   return { isProcessingAuth };
-}
-
-/**
- * Check if URL contains authentication parameters
- */
-function hasAuthParameters(urlInfo: ReturnType<typeof useAuthUrlDetection>): boolean {
-  const { hasAuthInHash, hasAuthInSearch, hasAuthInPath, hasAuthInUrl } = urlInfo;
-  return hasAuthInHash || hasAuthInSearch || hasAuthInPath || hasAuthInUrl;
-}
-
-/**
- * Fix token format for path-based auth tokens
- */
-async function handlePathBasedToken(path: string, fullUrl: string): Promise<void> {
-  console.log("AuthProcessor: Auth token in URL path - fixing format before processing");
-  
-  const tokenPart = fixAuthTokenFormat(path, fullUrl);
-  
-  if (tokenPart) {
-    window.history.replaceState(
-      null, 
-      document.title,
-      '/acesso-plano#' + tokenPart
-    );
-    
-    // Now set auth in hash for subsequent processing
-    window.location.hash = tokenPart;
-    
-    // Allow a moment for hash change to propagate
-    await new Promise(resolve => setTimeout(resolve, 300));
-  }
-}
-
-/**
- * Process tokens based on their location in the URL
- */
-async function processTokensByLocation(urlInfo: ReturnType<typeof useAuthUrlDetection>): Promise<void> {
-  const {
-    hasAuthInHash,
-    hasAuthInPath,
-    hasAuthInSearch,
-    hasAuthInUrl,
-    fullUrl,
-    search
-  } = urlInfo;
-  
-  // Wait a bit to ensure everything is ready
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // Process hash or path based tokens
-  if (hasAuthInHash || hasAuthInPath) {
-    const { error } = await processAuthToken({ 
-      hasAuthInHash, 
-      hasAuthInPath, 
-      hasAuthInSearch, 
-      fullUrl, 
-      search 
-    });
-    
-    if (error) {
-      console.error("AuthProcessor: Error processing token:", error);
-      toast.error("Erro ao processar token: " + error.message);
-      throw error;
-    }
-  } 
-  // Process search based tokens
-  else if (hasAuthInSearch) {
-    const { error } = await processAuthToken({ 
-      hasAuthInHash, 
-      hasAuthInPath, 
-      hasAuthInSearch, 
-      fullUrl, 
-      search 
-    });
-    
-    if (error) {
-      console.error("AuthProcessor: Error processing token:", error);
-      toast.error("Erro ao processar token: " + error.message);
-      throw error;
-    }
-  }
-  // Process tokens in complex URL formats
-  else if (hasAuthInUrl) {
-    console.log("AuthProcessor: Auth token in complex URL format");
-    
-    // Extract token
-    const tokenPart = extractTokenFromUrl(fullUrl);
-    
-    if (tokenPart) {
-      // Update the URL to use hash format for Supabase
-      window.history.replaceState(
-        null, 
-        document.title,
-        '/acesso-plano#' + tokenPart
-      );
-      
-      // Let Supabase process the hash-based token
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const { error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("AuthProcessor: Error processing complex token:", error);
-        toast.error("Erro ao processar token: " + error.message);
-        throw error;
-      }
-    }
-  }
-}
-
-/**
- * Validate session and handle successful authentication
- */
-async function validateSession(setIsProcessingAuth: React.Dispatch<React.SetStateAction<boolean>>): Promise<void> {
-  // Check if we got a valid session
-  const { data, error } = await supabase.auth.getSession();
-  
-  if (error) {
-    console.error("AuthProcessor: Error getting session after processing:", error);
-    toast.error("Erro ao obter sessão: " + error.message);
-    setIsProcessingAuth(false);
-    
-    // Clean URL
-    cleanUrlAfterAuth();
-    throw error;
-  }
-  
-  if (data.session) {
-    console.log("AuthProcessor: Authentication successful, session established");
-    
-    // Ensure user is in the database (for permissions)
-    await ensureUserInDatabase(data.session.user);
-    
-    // Clean URL before showing success message
-    cleanUrlAfterAuth();
-    
-    toast.success("Login realizado com sucesso!");
-    
-    // Short delay to allow toast to be seen
-    setTimeout(() => {
-      // Redirect to criar-plano page
-      console.log("AuthProcessor: Redirecting to criar-plano after successful auth");
-      // Use direct location change to ensure clean navigation
-      window.location.href = '/criar-plano';
-    }, 1500);
-  } else {
-    console.log("AuthProcessor: No session found after processing auth parameters");
-    toast.error("Sessão não encontrada após autenticação");
-    setIsProcessingAuth(false);
-    
-    // Clean URL
-    cleanUrlAfterAuth();
-  }
 }
