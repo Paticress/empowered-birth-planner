@@ -19,7 +19,7 @@ export function useLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isMagicLinkSent, setIsMagicLinkSent] = useState(false);
   const { navigateTo } = useNavigation();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithMagicLink } = useAuth();
 
   // Helper function to get the current site URL
   const getCurrentSiteUrl = () => {
@@ -166,18 +166,8 @@ export function useLoginForm() {
         return;
       }
       
-      // Get current site URL for the redirect
-      const siteUrl = getCurrentSiteUrl();
-      const redirectTo = `${siteUrl}/criar-plano`;
-      console.log("Using redirect URL:", redirectTo);
-      
-      // Send the magic link with dynamic redirect URL
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email,
-        options: {
-          emailRedirectTo: redirectTo
-        }
-      });
+      // Send the magic link with the appropriate redirect
+      const { error } = await signInWithMagicLink(email);
       
       if (error) {
         console.error('Magic link error:', error);

@@ -36,11 +36,11 @@ export function useAuthService() {
     }
   };
 
-  const signInWithMagicLink = async (email: string) => {
+  const signInWithMagicLink = async (email: string, redirectPath = '/criar-plano') => {
     try {
       const siteUrl = getCurrentSiteUrl();
-      // Use the explicit route to redirect to after login
-      const redirectTo = `${siteUrl}/meus-acessos`;
+      // Use absolute URL for the redirect target
+      const redirectTo = `${siteUrl}${redirectPath}`;
       console.log("Magic link will redirect to:", redirectTo);
       
       const { error } = await supabase.auth.signInWithOtp({
@@ -76,6 +76,32 @@ export function useAuthService() {
   const initializeAuth = () => {
     console.log("Initializing auth service...");
     setIsLoading(true);
+    
+    // Check for hash fragment that indicates magic link authentication
+    const handleMagicLinkAuth = async () => {
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token')) {
+        console.log("Magic link authentication detected");
+        try {
+          // The auth state change handlers will automatically update the session
+          const { data, error } = await supabase.auth.getSession();
+          if (error) {
+            console.error("Error processing magic link:", error);
+            toast.error("Erro ao processar link mágico");
+          } else if (data.session) {
+            console.log("Magic link authentication successful");
+            toast.success("Login realizado com sucesso!");
+            // Clear hash from URL without page reload
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+        } catch (err) {
+          console.error("Error processing magic link:", err);
+        }
+      }
+    };
+    
+    // Handle magic link authentication if present
+    handleMagicLinkAuth();
     
     // First, set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

@@ -103,7 +103,16 @@ export function useAuthCheck() {
       }
     };
     
-    checkAuth();
+    // If the URL contains access_token, we need to wait a bit longer for auth to complete
+    const hasAuthParams = window.location.hash.includes('access_token');
+    
+    if (hasAuthParams) {
+      console.log("Auth parameters detected in URL, waiting for auth to complete...");
+      // Add a slight delay to allow Supabase to process the token
+      setTimeout(checkAuth, 1000);
+    } else {
+      checkAuth();
+    }
     
   }, [isAuthenticated, user, isLoading, navigateTo]);
 
