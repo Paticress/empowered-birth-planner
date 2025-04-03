@@ -10,24 +10,18 @@ interface NavButtonProps {
 
 export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
   const { navigateTo } = useNavigation();
-  const { user } = useAuth();
+  const { isAuthenticated } = useAuth();
   
   const goToBirthPlanAccess = () => {
-    // Check if user is authenticated with Supabase
-    if (user) {
-      console.log("User already logged in, redirecting to birth plan builder");
+    console.log("Nav button clicked, authentication state:", isAuthenticated);
+    
+    // Check if user is authenticated
+    if (isAuthenticated) {
+      console.log("User is authenticated, navigating to birth plan builder");
       navigateTo('/criar-plano');
     } else {
-      // Also check localStorage for backward compatibility
-      const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
-      
-      if (isLoggedIn) {
-        console.log("User logged in via localStorage, redirecting to birth plan builder");
-        navigateTo('/criar-plano');
-      } else {
-        console.log("Navigating to birth plan login");
-        navigateTo('/acesso-plano');
-      }
+      console.log("User is not authenticated, navigating to login page");
+      navigateTo('/acesso-plano');
     }
   };
   

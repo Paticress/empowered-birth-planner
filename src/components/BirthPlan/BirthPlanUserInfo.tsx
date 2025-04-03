@@ -9,18 +9,20 @@ import { useAuth } from '@/contexts/AuthContext';
 export function BirthPlanUserInfo() {
   const [userEmail, setUserEmail] = useState<string>('');
   const { navigateTo } = useNavigation();
-  const { user, signOut, isAuthenticated } = useAuth();
+  const { user, signOut, isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
+    if (isLoading) return;
+    
     // Get email from multiple sources to ensure reliability
     const email = user?.email || localStorage.getItem('birthPlanEmail') || '';
     if (email) {
       setUserEmail(email);
-      console.log("User info component using email:", email);
+      console.log("BirthPlanUserInfo: Using email:", email);
     } else {
-      console.log("No user email found in BirthPlanUserInfo");
+      console.log("BirthPlanUserInfo: No user email found");
     }
-  }, [user, isAuthenticated]);
+  }, [user, isAuthenticated, isLoading]);
 
   const handleLogout = async () => {
     await signOut();
@@ -28,9 +30,9 @@ export function BirthPlanUserInfo() {
     navigateTo('/');
   };
 
-  // Return nothing if no user is logged in
-  if (!userEmail || !isAuthenticated) {
-    console.log("Not showing user info - no authenticated user");
+  // Return nothing if no user is logged in or still loading
+  if (isLoading || !isAuthenticated || !userEmail) {
+    console.log("BirthPlanUserInfo: Not showing user info - no authenticated user or still loading");
     return null;
   }
 

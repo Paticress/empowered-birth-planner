@@ -8,19 +8,81 @@ import { useNavigation } from '@/hooks/useNavigation';
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export function GuiaOnline() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const { navigateTo } = useNavigation();
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(true);
 
   useEffect(() => {
-    // Give auth a moment to initialize before showing auth prompt
-    if (!isLoading) {
-      console.log("Auth check for Guia Online:", { isAuthenticated });
-      setShowAuthPrompt(!isAuthenticated);
+    // Don't do anything while still loading auth state
+    if (isLoading) {
+      console.log("GuiaOnline: Still loading auth state, waiting...");
+      return;
     }
-  }, [isAuthenticated, isLoading]);
+    
+    console.log("GuiaOnline: Auth check running with:", { 
+      isAuthenticated, 
+      email: user?.email || localStorage.getItem('birthPlanEmail')
+    });
+    
+    const checkAccess = async () => {
+      // If user is not authenticated, show auth prompt
+      if (!isAuthenticated) {
+        console.log("GuiaOnline: User not authenticated, showing auth prompt");
+        setShowAuthPrompt(true);
+        setCheckingAccess(false);
+        return;
+      }
+      
+      // Get the email from multiple sources for reliability
+      const userEmail = user?.email || localStorage.getItem('birthPlanEmail');
+      
+      if (!userEmail) {
+        console.log("GuiaOnline: No user email found, showing auth prompt");
+        setShowAuthPrompt(true);
+        setCheckingAccess(false);
+        return;
+      }
+      
+      try {
+        // Check if the user is in the authorized users table
+        const { data, error } = await supabase
+          .from('users_db_birthplanbuilder')
+          .select('email')
+          .eq('email', userEmail)
+          .maybeSingle();
+          
+        if (error) {
+          console.error("GuiaOnline: Error checking user access:", error);
+          setShowAuthPrompt(true);
+          setCheckingAccess(false);
+          return;
+        }
+        
+        if (data) {
+          console.log("GuiaOnline: User authorized:", userEmail);
+          setIsAuthorized(true);
+          setShowAuthPrompt(false);
+        } else {
+          console.log("GuiaOnline: User not found in database, showing auth prompt");
+          setShowAuthPrompt(true);
+        }
+        
+        setCheckingAccess(false);
+      } catch (error) {
+        console.error("GuiaOnline: Unexpected error during access check:", error);
+        setShowAuthPrompt(true);
+        setCheckingAccess(false);
+      }
+    };
+    
+    checkAccess();
+    
+  }, [isAuthenticated, user, isLoading]);
 
   const handleLogin = () => {
     navigateTo('/acesso-plano');
@@ -28,7 +90,7 @@ export function GuiaOnline() {
   };
 
   // Show loading state while checking auth
-  if (isLoading) {
+  if (isLoading || checkingAccess) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />

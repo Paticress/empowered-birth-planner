@@ -39,8 +39,8 @@ export function useAuthService() {
   const signInWithMagicLink = async (email: string) => {
     try {
       const siteUrl = getCurrentSiteUrl();
-      // Redirect to the home page first, then we'll handle routing based on auth state
-      const redirectTo = `${siteUrl}`;
+      // Use the explicit route to redirect to after login
+      const redirectTo = `${siteUrl}/meus-acessos`;
       console.log("Magic link will redirect to:", redirectTo);
       
       const { error } = await supabase.auth.signInWithOtp({
@@ -77,63 +77,63 @@ export function useAuthService() {
     console.log("Initializing auth service...");
     setIsLoading(true);
     
-    // Set up auth state listener FIRST (this is critical for the correct order)
+    // First, set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        console.log('Auth state changed:', event);
+        console.log('Auth state changed:', event, currentSession?.user?.email);
+        
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        if (event === 'SIGNED_IN') {
-          console.log('User signed in:', currentSession?.user?.email);
-          // Store the login status in localStorage too for our existing mechanism
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          console.log('User signed in or token refreshed:', currentSession?.user?.email);
+          
+          // Make sure to update localStorage for our existing mechanism
           if (currentSession?.user?.email) {
             localStorage.setItem('birthPlanLoggedIn', 'true');
             localStorage.setItem('birthPlanEmail', currentSession.user.email);
-            toast.success('Login realizado com sucesso');
+            
+            if (event === 'SIGNED_IN') {
+              toast.success('Login realizado com sucesso');
+            }
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
           // Clear localStorage items on sign out
           localStorage.removeItem('birthPlanLoggedIn');
           localStorage.removeItem('birthPlanEmail');
-        } else if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed');
-          // Update localStorage with refreshed session
-          if (currentSession?.user?.email) {
-            localStorage.setItem('birthPlanLoggedIn', 'true');
-            localStorage.setItem('birthPlanEmail', currentSession.user.email);
-          }
         }
         
         setIsLoading(false);
       }
     );
 
-    // THEN check for existing session
+    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       console.log("Initial session check:", initialSession ? "Session found" : "No session");
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
       
-      // Also update localStorage for compatibility with existing code
-      if (initialSession?.user?.email) {
+      if (initialSession?.user) {
+        console.log("Found session for user:", initialSession.user.email);
+        setSession(initialSession);
+        setUser(initialSession.user);
+        
+        // Also update localStorage for compatibility with existing code
         localStorage.setItem('birthPlanLoggedIn', 'true');
         localStorage.setItem('birthPlanEmail', initialSession.user.email);
+      } else {
+        console.log("No session found, checking localStorage");
+        
+        // In case we have localStorage but no session
+        const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
+        const storedEmail = localStorage.getItem('birthPlanEmail');
+        
+        if (isLoggedIn && storedEmail) {
+          console.log("Found login info in localStorage, but no active session");
+        }
       }
       
       setIsLoading(false);
     });
-
-    // Also check localStorage as a fallback for existing code patterns
-    const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
-    const storedEmail = localStorage.getItem('birthPlanEmail');
-    
-    console.log("Local storage check:", { isLoggedIn, email: storedEmail });
-    
-    if (isLoggedIn && storedEmail && !user) {
-      console.log("User found in localStorage but not in Supabase session");
-    }
 
     // Return the cleanup function
     return () => {
