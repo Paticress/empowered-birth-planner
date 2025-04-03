@@ -27,10 +27,10 @@ export const useSupabaseTest = () => {
   const testSupabaseConnection = async () => {
     setIsLoading(prev => ({ ...prev, connection: true }));
     try {
-      // Fixed query: Use count() as an alias instead of count(*)
+      // Use a simple select without any count parameter to avoid the parsing error
       const { data, error } = await supabase
         .from('users_db_birthplanbuilder')
-        .select('id', { count: 'exact' });
+        .select('id');
       
       if (error) throw error;
       
@@ -38,7 +38,7 @@ export const useSupabaseTest = () => {
         'Supabase Connection', 
         true, 
         'Successfully connected to Supabase database',
-        { count: data.length, data }
+        { count: data?.length || 0, data }
       );
       
       toast({
