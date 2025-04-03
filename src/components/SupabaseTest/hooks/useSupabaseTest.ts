@@ -1,13 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { TestResultItemType } from '../ResultItem';
 
-export function SupabaseTest() {
+export const useSupabaseTest = () => {
   const { toast } = useToast();
   const [testEmail, setTestEmail] = useState('test@example.com');
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<TestResultItemType[]>([]);
   const [isLoading, setIsLoading] = useState<{[key: string]: boolean}>({});
 
   // Function to add a result to the list
@@ -201,106 +201,13 @@ export function SupabaseTest() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">Supabase Integration Test</h1>
-      
-      <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Test Configuration</h2>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1" htmlFor="test-email">
-            Test Email
-          </label>
-          <input
-            id="test-email"
-            type="email"
-            className="w-full p-2 border rounded"
-            value={testEmail}
-            onChange={(e) => setTestEmail(e.target.value)}
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button
-            onClick={testSupabaseConnection}
-            disabled={isLoading.connection}
-            className="w-full"
-          >
-            {isLoading.connection ? 'Testing...' : 'Test Supabase Connection'}
-          </Button>
-          
-          <Button
-            onClick={testWebhookFunction}
-            disabled={isLoading.webhook}
-            className="w-full"
-            variant="outline"
-          >
-            {isLoading.webhook ? 'Testing...' : 'Test Webhook Function'}
-          </Button>
-          
-          <Button
-            onClick={testSimpleFunction}
-            disabled={isLoading.testFunc}
-            className="w-full"
-            variant="secondary"
-          >
-            {isLoading.testFunc ? 'Testing...' : 'Test Simple Function'}
-          </Button>
-        </div>
-      </div>
-      
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Test Results</h2>
-        
-        {results.length === 0 ? (
-          <p className="text-gray-500 italic">No tests run yet</p>
-        ) : (
-          <div className="space-y-4">
-            {results.map((result) => (
-              <div 
-                key={result.id} 
-                className={`p-4 rounded-md ${
-                  result.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium flex items-center">
-                      {result.success ? (
-                        <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                      {result.test}
-                    </h3>
-                    <p className={result.success ? 'text-green-800' : 'text-red-800'}>
-                      {result.message}
-                    </p>
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    {new Date(result.timestamp).toLocaleTimeString()}
-                  </span>
-                </div>
-                
-                {result.data && (
-                  <details className="mt-2">
-                    <summary className="text-sm cursor-pointer hover:text-blue-600">
-                      Response Details
-                    </summary>
-                    <pre className="mt-2 p-2 bg-gray-100 rounded overflow-x-auto text-xs">
-                      {JSON.stringify(result.data, null, 2)}
-                    </pre>
-                  </details>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+  return {
+    testEmail,
+    setTestEmail,
+    results,
+    isLoading,
+    testSupabaseConnection,
+    testWebhookFunction,
+    testSimpleFunction
+  };
+};
