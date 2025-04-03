@@ -95,6 +95,33 @@ export function AuthDebugger() {
     }
   };
 
+  const testMagicLink = async () => {
+    if (!userEmail) {
+      toast.error('Please enter an email');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: userEmail,
+        options: {
+          emailRedirectTo: window.location.origin + '/webhook-test'
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Magic link sent successfully');
+    } catch (error: any) {
+      console.error('Magic link error:', error);
+      toast.error(`Failed to send magic link: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addUserToBirthPlan = async () => {
     if (!userEmail) {
       toast.error('Please enter an email');
@@ -184,7 +211,7 @@ export function AuthDebugger() {
                 value={userPassword}
                 onChange={(e) => setUserPassword(e.target.value)}
               />
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 <Button 
                   variant="default" 
                   onClick={testLogin}
@@ -205,6 +232,14 @@ export function AuthDebugger() {
                   disabled={loading}
                 >
                   Add to Birth Plan
+                </Button>
+                <Button 
+                  variant="default"
+                  onClick={testMagicLink}
+                  disabled={loading}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  Test Magic Link
                 </Button>
               </div>
             </div>

@@ -124,6 +124,36 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    
+    // Check if user account exists in auth system
+    const { data: userData, error: userError } = await supabase
+      .auth
+      .admin
+      .getUserByEmail(purchaserEmail);
+      
+    console.log(`📣 Checking if user already exists: ${!!userData}`);
+    
+    // If user doesn't exist, create one with a temporary password
+    if (!userData && !userError) {
+      // Generate a secure random password (user will never need to know this)
+      const tempPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).toUpperCase().slice(2);
+      
+      console.log(`📣 Creating new Supabase auth account for: ${purchaserEmail}`);
+      
+      // Create a new user
+      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+        email: purchaserEmail,
+        password: tempPassword,
+        email_confirm: true // Automatically confirm email
+      });
+      
+      if (createError) {
+        console.error('❌ Error creating user account:', createError.message);
+        // Continue without failing - the user can still sign up manually
+      } else {
+        console.log('✅ User account created successfully:', newUser);
+      }
+    }
 
     console.log('✅ Purchase processed successfully for email:', purchaserEmail);
     return new Response(JSON.stringify({ 

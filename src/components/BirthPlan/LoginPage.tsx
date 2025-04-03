@@ -6,11 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Footer } from '@/components/Footer';
 import { useNavigation } from '@/hooks/useNavigation';
-import { FileText, Lock, Mail, UserPlus } from 'lucide-react';
+import { FileText, Lock, Mail, UserPlus, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function LoginPage() {
   const [loginCredentials, setLoginCredentials] = useState({
@@ -22,7 +23,9 @@ export function LoginPage() {
     password: '',
     confirmPassword: '',
   });
+  const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMagicLinkSent, setIsMagicLinkSent] = useState(false);
   const { navigateTo } = useNavigation();
   const { signIn, signUp } = useAuth();
 
@@ -123,6 +126,55 @@ export function LoginPage() {
     setIsLoading(false);
   };
 
+  const handleMagicLinkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    const email = magicLinkEmail.toLowerCase().trim();
+    if (!email) {
+      toast.error('Por favor, insira seu email');
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      // First check if this email has purchased access
+      const { data: userData, error: userError } = await supabase
+        .from('Users_DB_BirthPlanBuilder')
+        .select('email')
+        .eq('email', email)
+        .maybeSingle();
+        
+      if (!userData && !userError) {
+        toast.error('Este email não foi encontrado em nossos registros de compra. Por favor, verifique o email ou adquira o plano em nosso site.');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Send the magic link
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: window.location.origin + '/criar-plano'
+        }
+      });
+      
+      if (error) {
+        console.error('Magic link error:', error);
+        toast.error('Falha ao enviar o link mágico: ' + error.message);
+      } else {
+        setIsMagicLinkSent(true);
+        toast.success('Link de acesso enviado com sucesso!');
+        toast.info('Por favor, verifique seu email para acessar sua conta');
+      }
+    } catch (error) {
+      console.error('Error sending magic link:', error);
+      toast.error('Ocorreu um erro ao enviar o link de acesso');
+    }
+    
+    setIsLoading(false);
+  };
+
   return (
     <div className="bg-maternal-50 min-h-screen">
       <header className="bg-white text-brand-black py-4 px-4 sm:px-6 lg:px-8 shadow-md">
@@ -151,11 +203,65 @@ export function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <Tabs defaultValue="login">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+            <Tabs defaultValue="magic-link">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsTrigger value="magic-link">Link Mágico</TabsTrigger>
                 <TabsTrigger value="login" id="login-tab">Login</TabsTrigger>
                 <TabsTrigger value="signup">Cadastro</TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="magic-link">
+                {isMagicLinkSent ? (
+                  <div className="space-y-4">
+                    <Alert className="bg-maternal-50 border-maternal-200">
+                      <AlertDescription className="text-maternal-800">
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <Mail className="h-12 w-12 text-maternal-600 mb-2" />
+                          <h3 className="font-semibold text-lg">Link Enviado!</h3>
+                          <p>Verifique seu email para acessar sua conta com apenas um clique.</p>
+                          <p className="text-sm text-maternal-600 mt-2">Não recebeu? Verifique sua pasta de spam ou solicite novamente.</p>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                    <Button 
+                      onClick={() => setIsMagicLinkSent(false)}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Solicitar Novamente
+                    </Button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleMagicLinkSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="magic-link-email">Email</Label>
+                      <Input
+                        id="magic-link-email"
+                        type="email"
+                        placeholder="Insira o email usado na compra"
+                        value={magicLinkEmail}
+                        onChange={(e) => setMagicLinkEmail(e.target.value)}
+                        required
+                        className="focus:border-maternal-500 focus:ring-maternal-400"
+                      />
+                    </div>
+                    
+                    <div className="bg-maternal-50 p-3 rounded-md border border-maternal-100 text-sm text-maternal-700">
+                      <p>Receba um link de acesso direto no seu email. Sem necessidade de lembrar senhas!</p>
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full font-semibold"
+                      disabled={isLoading}
+                      variant="birth-plan-builder"
+                    >
+                      <Wand2 className="mr-2 h-5 w-5" />
+                      {isLoading ? 'Enviando...' : 'Enviar Link de Acesso'}
+                    </Button>
+                  </form>
+                )}
+              </TabsContent>
               
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">

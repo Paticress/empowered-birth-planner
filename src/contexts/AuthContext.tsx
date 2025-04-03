@@ -10,6 +10,7 @@ type AuthContextType = {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithMagicLink: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 };
 
@@ -76,6 +77,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithMagicLink = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin + '/criar-plano'
+        }
+      });
+      return { error };
+    } catch (error) {
+      console.error('Error sending magic link:', error);
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -93,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         signIn,
         signUp,
+        signInWithMagicLink,
         signOut
       }}
     >
