@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, User, GraduationCap, BookOpen, FileText } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -45,7 +45,7 @@ export function Header() {
             <Link 
               to="/" 
               className="flex items-center" 
-              onClick={(e) => handleLinkClick(e, '/guia-online')}
+              onClick={(e) => handleLinkClick(e, '/')}
             >
               <img 
                 src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
@@ -58,40 +58,33 @@ export function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link 
-              to="/guia-gratuito" 
-              className={`transition-colors ${isActive('/guia-gratuito') 
-                ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
-                : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => handleLinkClick(e, '/guia-gratuito')}
-            >
-              Guia Gratuito
-            </Link>
-            <Link 
               to="/guia-online" 
-              className={`transition-colors ${isActive('/guia-online') 
+              className={`transition-colors flex items-center ${isActive('/guia-online') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
               onClick={(e) => handleLinkClick(e, '/guia-online')}
             >
+              <BookOpen className="h-4 w-4 mr-1" />
               Guia Online
             </Link>
             <Link 
-              to="/plano-personalizado" 
-              className={`transition-colors ${isActive('/plano-personalizado') 
+              to="/plano-de-parto" 
+              className={`transition-colors flex items-center ${isActive('/plano-de-parto') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => handleLinkClick(e, '/plano-personalizado')}
+              onClick={(e) => handleLinkClick(e, '/plano-de-parto')}
             >
-              Plano Personalizado
+              <FileText className="h-4 w-4 mr-1" />
+              Construtor Virtual
             </Link>
             <Link 
-              to="/depoimentos" 
-              className={`transition-colors ${isActive('/depoimentos') 
-                ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
-                : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => handleLinkClick(e, '/depoimentos')}
+              to="https://www.energiamaterna.com.br/gestando" 
+              className="text-maternal-800 hover:text-maternal-600 transition-colors flex items-center"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Depoimentos
+              <GraduationCap className="h-4 w-4 mr-1" />
+              Curso Gestando
             </Link>
             
             {/* Add My Access link with conditional appearance based on login status */}
@@ -139,18 +132,7 @@ export function Header() {
                 </div>
                 <nav className="flex flex-col space-y-4">
                   <button 
-                    className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/guia-gratuito') 
-                      ? 'bg-maternal-100 text-maternal-900 font-medium' 
-                      : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => {
-                      navigateTo('/guia-gratuito');
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    Guia Gratuito
-                  </button>
-                  <button 
-                    className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/guia-online') 
+                    className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/guia-online') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
                     onClick={() => {
@@ -158,30 +140,31 @@ export function Header() {
                       setMobileMenuOpen(false);
                     }}
                   >
+                    <BookOpen className="h-4 w-4 mr-2" />
                     Guia Online
                   </button>
                   <button 
-                    className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/plano-personalizado') 
+                    className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/plano-de-parto') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
                     onClick={() => {
-                      navigateTo('/plano-personalizado');
+                      navigateTo('/plano-de-parto');
                       setMobileMenuOpen(false);
                     }}
                   >
-                    Plano Personalizado
+                    <FileText className="h-4 w-4 mr-2" />
+                    Construtor Virtual
                   </button>
-                  <button 
-                    className={`py-2 px-3 rounded-md transition-colors text-left ${isActive('/depoimentos') 
-                      ? 'bg-maternal-100 text-maternal-900 font-medium' 
-                      : 'text-maternal-800 hover:bg-maternal-50'}`}
-                    onClick={() => {
-                      navigateTo('/depoimentos');
-                      setMobileMenuOpen(false);
-                    }}
+                  <a 
+                    href="https://www.energiamaterna.com.br/gestando"
+                    className="py-2 px-3 rounded-md transition-colors text-left flex items-center text-maternal-800 hover:bg-maternal-50"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
                   >
-                    Depoimentos
-                  </button>
+                    <GraduationCap className="h-4 w-4 mr-2" />
+                    Curso Gestando
+                  </a>
                   
                   {/* Add My Access button to mobile menu */}
                   {user && (

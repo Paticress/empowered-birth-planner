@@ -25,16 +25,6 @@ export function Footer() {
               <ul className="space-y-2">
                 <li>
                   <a 
-                    href="https://www.energiamaterna.com.br/meu-plano-de-parto" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-maternal-700 hover:text-maternal-600 transition-colors"
-                  >
-                    Modelo de Plano de Parto
-                  </a>
-                </li>
-                <li>
-                  <a 
                     href="https://www.energiamaterna.com.br/especiais" 
                     target="_blank" 
                     rel="noopener noreferrer" 
@@ -52,6 +42,14 @@ export function Footer() {
                   >
                     Blog
                   </a>
+                </li>
+                <li>
+                  <Link 
+                    to="/faq" 
+                    className="text-maternal-700 hover:text-maternal-600 transition-colors"
+                  >
+                    FAQ
+                  </Link>
                 </li>
               </ul>
               

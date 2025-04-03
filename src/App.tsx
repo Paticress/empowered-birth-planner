@@ -13,6 +13,7 @@ import { CriarPlano } from "./pages/CriarPlano";
 import { PaymentSuccess } from "./pages/PaymentSuccess";
 import { PaymentCancel } from "./pages/PaymentCancel";
 import { MyAccess } from "./pages/MyAccess";
+import { FAQ } from "./pages/FAQ";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from '@vercel/analytics/react';
@@ -36,6 +37,7 @@ function AppContent() {
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/meus-acessos" element={<MyAccess />} />
+        <Route path="/faq" element={<FAQ />} />
         <Route path="/test-supabase" element={<SupabaseTest />} />
         <Route path="/webhook-test" element={<WebhookTest />} />
       </Routes>
