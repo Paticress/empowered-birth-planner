@@ -6,7 +6,7 @@
   <title>Redirecionando...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript">
-    // Improved SPA routing handler for 404 pages
+    // Improved SPA routing handler for 404 pages with better handling of auth redirects
     (function() {
       try {
         var l = window.location;
@@ -16,6 +16,16 @@
         var hash = l.hash;
         
         console.log('404 handler running with:', {hostname, pathname, search, hash});
+        
+        // Special handling for authentication URLs with hash fragments
+        if (hash && hash.includes('access_token')) {
+          console.log('Auth redirect detected in hash, preserving hash fragment');
+          // For auth redirects, preserve the hash and just fix the pathname if needed
+          if (pathname !== '/acesso-plano' && pathname !== '/') {
+            l.replace('/' + hash);
+          }
+          return; // Don't continue with normal redirect handling
+        }
         
         // Make the redirection more reliable by being explicit
         if (hostname === 'planodeparto.energiamaterna.com.br') {

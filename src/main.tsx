@@ -68,18 +68,26 @@ const setupServiceWorker = () => {
   }
 };
 
-// Fix for hash-based routing for GitHub Pages
+// Fix for hash-based routing for GitHub Pages with special handling for auth redirects
 const fixHashRouting = () => {
   try {
-    // Check if we have a hash route that needs to be fixed
-    const { hash, pathname } = window.location;
+    // Get current URL parts
+    const { hash, pathname, search } = window.location;
+    
+    // Special handling for authentication hashes (don't modify these)
+    if (hash.includes('access_token=') || hash.includes('type=recovery')) {
+      console.log("Auth hash detected, not modifying URL");
+      return;
+    }
+    
+    // Check if we have a regular hash route that needs to be fixed
     if (hash.startsWith('#/') && pathname === '/') {
       // Remove the hash and navigate to the clean path
       const path = hash.substring(1); // Remove the # character
       console.log(`Fixing hash route: ${hash} -> ${path}`);
       
       // Use history API to replace the URL without reloading
-      window.history.replaceState(null, '', path);
+      window.history.replaceState(null, '', path + search);
     }
   } catch (error) {
     console.error('Error fixing hash routes:', error);
@@ -89,7 +97,7 @@ const fixHashRouting = () => {
 // Initialize the app with better error handling
 window.addEventListener('load', () => {
   try {
-    // Fix any hash-based routes first
+    // Fix any hash-based routes first (but not auth hashes)
     fixHashRouting();
     
     // Then measure and report performance

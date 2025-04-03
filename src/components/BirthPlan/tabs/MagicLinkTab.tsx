@@ -3,6 +3,8 @@ import { MagicLinkForm } from '../forms/MagicLinkForm';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigation } from '@/hooks/useNavigation';
 
 export function MagicLinkTab() {
   const {
@@ -13,6 +15,9 @@ export function MagicLinkTab() {
     setIsMagicLinkSent,
     handleMagicLinkSubmit
   } = useLoginForm();
+  
+  const { user, isAuthenticated } = useAuth();
+  const { navigateTo } = useNavigation();
 
   // Check for magic link authentication in URL
   useEffect(() => {
@@ -23,8 +28,18 @@ export function MagicLinkTab() {
       console.log("Magic link authentication detected in tab");
       setIsMagicLinkSent(true);
       toast.info("Processando sua autenticação...");
+      
+      // If already authenticated, redirect to criar-plano
+      if (isAuthenticated && user) {
+        console.log("User already authenticated, redirecting to birth plan builder");
+        // Add a short delay to ensure auth state is fully processed
+        setTimeout(() => {
+          // Use window.location directly to ensure a clean navigation
+          window.location.href = '/criar-plano';
+        }, 1500);
+      }
     }
-  }, [setIsMagicLinkSent]);
+  }, [setIsMagicLinkSent, isAuthenticated, user, navigateTo]);
 
   return (
     <MagicLinkForm 

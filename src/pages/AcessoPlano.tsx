@@ -29,6 +29,9 @@ export function AcessoPlano() {
           console.error("Error in magic link authentication:", errorMessage);
           toast.error("Erro ao processar o link mágico: " + errorMessage);
           setIsProcessingAuth(false);
+          
+          // Clean the URL to remove error parameters
+          window.history.replaceState(null, "", window.location.pathname);
           return;
         }
         
@@ -40,6 +43,9 @@ export function AcessoPlano() {
             console.error("Error processing magic link:", error);
             toast.error("Erro ao processar o link mágico: " + error.message);
             setIsProcessingAuth(false);
+            
+            // Clean the URL to remove error parameters
+            window.history.replaceState(null, "", window.location.pathname);
             return;
           }
           
@@ -66,20 +72,27 @@ export function AcessoPlano() {
             
             toast.success("Login realizado com sucesso!");
             
-            // Remove hash from URL without reloading
-            setTimeout(() => {
-              window.history.replaceState(null, "", window.location.pathname);
-              navigateTo('/criar-plano');
-            }, 1500);
+            // Remove hash from URL without reloading and redirect
+            window.history.replaceState(null, "", window.location.pathname);
+            
+            // Use a direct location change instead of navigateTo to ensure a clean navigation
+            window.location.href = '/criar-plano';
+            return;
           } else {
             console.log("No session found after magic link auth");
             toast.error("Sessão de autenticação não encontrada");
             setIsProcessingAuth(false);
+            
+            // Clean the URL anyway
+            window.history.replaceState(null, "", window.location.pathname);
           }
         } catch (err) {
           console.error("Error during magic link auth:", err);
           toast.error("Erro durante a autenticação com link mágico");
           setIsProcessingAuth(false);
+          
+          // Clean the URL to remove auth parameters
+          window.history.replaceState(null, "", window.location.pathname);
         }
       }
     };
@@ -91,7 +104,9 @@ export function AcessoPlano() {
   useEffect(() => {
     if (!isLoading && !isProcessingAuth && user && session) {
       console.log("User already authenticated, redirecting to birth plan builder");
-      navigateTo('/criar-plano');
+      
+      // Use direct location change for more reliable redirection
+      window.location.href = '/criar-plano';
     }
   }, [user, navigateTo, isLoading, isProcessingAuth, session]);
 
