@@ -6,30 +6,40 @@
   <title>Redirecionando...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript">
-    // Single Page Apps for GitHub Pages with custom domain
-    // Modified version of the script from https://github.com/rafgraph/spa-github-pages
-    
-    // Redirect to index.html with hash route
-    var segmentCount = 0;
-    var l = window.location;
-    
-    // Handle custom domain redirects differently
-    if (l.hostname === 'planodeparto.energiamaterna.com.br') {
-      // For custom domain, redirect to hashtag-based routing
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        '/#' + l.pathname
-      );
-    } else {
-      // For GitHub Pages domain
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
-    }
+    // Improved SPA routing handler for 404 pages
+    (function() {
+      try {
+        var l = window.location;
+        var hostname = l.hostname;
+        var pathname = l.pathname;
+        var search = l.search;
+        var hash = l.hash;
+        
+        console.log('404 handler running with:', {hostname, pathname, search, hash});
+        
+        // Make the redirection more reliable by being explicit
+        if (hostname === 'planodeparto.energiamaterna.com.br') {
+          // For official domain, handle common paths
+          if (pathname === '/acesso-plano' || pathname.startsWith('/acesso-plano/')) {
+            l.replace('/acesso-plano');
+          } else if (pathname === '/criar-plano' || pathname.startsWith('/criar-plano/')) {
+            l.replace('/criar-plano');
+          } else if (pathname === '/guia-online' || pathname.startsWith('/guia-online/')) {
+            l.replace('/guia-online');
+          } else {
+            // For any other path, go to home
+            l.replace('/');
+          }
+        } else {
+          // For development or other domains, redirect to home page
+          l.replace('/');
+        }
+      } catch (error) {
+        console.error('Error in 404 redirect script:', error);
+        // Fallback to home page if anything goes wrong
+        window.location.href = '/';
+      }
+    })();
   </script>
   <style>
     body {

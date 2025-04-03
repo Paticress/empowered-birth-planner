@@ -31,6 +31,7 @@ export function useAuthCheck() {
         toast.error("Acesso Restrito", {
           description: "Por favor, faça login para acessar o construtor de plano de parto."
         });
+        // Use replace: true to avoid history issues
         navigateTo('/acesso-plano');
         setAuthCheckComplete(true);
         return;
@@ -109,7 +110,7 @@ export function useAuthCheck() {
     if (hasAuthParams) {
       console.log("Auth parameters detected in URL, waiting for auth to complete...");
       // Add a slight delay to allow Supabase to process the token
-      setTimeout(checkAuth, 1000);
+      setTimeout(checkAuth, 1500);
     } else {
       checkAuth();
     }
