@@ -1,22 +1,9 @@
 
-import { useToast } from "@/hooks/use-toast"
-import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from "@/components/ui/toast"
+// This component is now a compatibility layer for applications that might still
+// import this older version of the Toaster component
+
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
 export function Toaster() {
-  const { toast } = useToast()
-  
-  // Since we're using sonner now, we don't need to use the toasts array
-  // Just return an empty provider
-  return (
-    <ToastProvider>
-      <ToastViewport />
-    </ToastProvider>
-  )
+  return <SonnerToaster />;
 }

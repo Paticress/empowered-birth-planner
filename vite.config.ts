@@ -12,9 +12,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     plugins: [
-      react({
-        // Use standard React refresh configuration without explicit fastRefresh option
-      }),
+      react(), // Use default React refresh settings
       mode === 'development' && componentTagger(),
     ].filter(Boolean),
     resolve: {

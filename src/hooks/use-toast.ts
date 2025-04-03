@@ -1,5 +1,6 @@
 
-import { toast as sonnerToast, ToastT } from "sonner";
+import { toast as sonnerToast } from "sonner"
+import type { ToastT } from "sonner"
 
 // Wrapper function for sonner toast to handle both string and object formats
 export const toast = (

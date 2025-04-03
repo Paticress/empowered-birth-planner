@@ -1,13 +1,10 @@
-
 "use client"
 
 import { Toaster as Sonner } from "sonner"
-
-type ToasterProps = React.ComponentProps<typeof Sonner>
+import type { ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  // Since we're not using next-themes properly yet, let's simplify this component
-  // We'll use a fixed theme instead of dynamically accessing it
+  // Use a fixed theme (light) for now since we're not using next-themes
   const theme = "light"
 
   return (
