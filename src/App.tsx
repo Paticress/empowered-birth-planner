@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter as Router,
   Route,
@@ -15,6 +16,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from '@vercel/analytics/react';
 import { SupabaseTest } from './components/SupabaseTest';
+import { WebhookTest } from './pages/WebhookTest';
 
 function AppContent() {
   const location = useLocation();
@@ -33,6 +35,7 @@ function AppContent() {
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/test-supabase" element={<SupabaseTest />} />
+        <Route path="/webhook-test" element={<WebhookTest />} />
       </Routes>
       <Toaster />
       <Analytics />

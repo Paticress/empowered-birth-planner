@@ -41,26 +41,9 @@ serve(async (req) => {
   }
 
   console.log("📣 Request URL:", req.url);
-  console.log("📣 Request headers:", JSON.stringify(Object.fromEntries(req.headers.entries()), null, 2));
-
+  
   try {
-    // Log Supabase credentials (without revealing actual values)
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    console.log(`📣 Supabase URL available: ${!!supabaseUrl}`);
-    console.log(`📣 Supabase service role key available: ${!!supabaseKey}`);
-    
-    if (!supabaseUrl || !supabaseKey) {
-      console.error("❌ Supabase credentials missing!");
-      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Get the raw request body text for logging
+    // Get and log the raw request body
     const clonedRequest = req.clone();
     const rawBody = await clonedRequest.text();
     console.log("📣 Raw webhook payload:", rawBody);
@@ -74,38 +57,48 @@ serve(async (req) => {
       console.error("❌ Failed to parse JSON payload:", parseError);
       return new Response(JSON.stringify({ 
         error: 'Invalid JSON payload',
-        rawBody: rawBody.substring(0, 200) + (rawBody.length > 200 ? '...' : '')
+        rawPayload: rawBody.substring(0, 200) + (rawBody.length > 200 ? '...' : '')
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Extract email from the Wix webhook payload structure with thorough logging
+    // Extract email from the Wix webhook payload structure
     let purchaserEmail = null;
     
-    // Check for email in data.email as confirmed by your test
+    // IMPORTANT: The format is confirmed to be {"data": {"email": "example@email.com"}}
     if (webhookData?.data?.email) {
       purchaserEmail = webhookData.data.email.trim();
       console.log(`📣 Found email in data.email: "${purchaserEmail}"`);
-    }
-    
-    // Fallback for other possible structures just in case
-    if (!purchaserEmail && webhookData?.email) {
-      purchaserEmail = webhookData.email.trim();
-      console.log(`📣 Found email directly in payload: "${purchaserEmail}"`);
-    }
-    
-    if (!purchaserEmail) {
-      console.error('❌ No email found in the webhook payload');
+    } else {
+      console.error('❌ Email not found in expected format. Payload structure:', JSON.stringify(webhookData));
       return new Response(JSON.stringify({ 
-        error: 'No email found in payload',
+        error: 'Email not found in payload',
         payload: webhookData
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Log Supabase credentials availability (without revealing values)
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    console.log(`📣 Supabase URL available: ${!!supabaseUrl}`);
+    console.log(`📣 Supabase key available: ${!!supabaseKey}`);
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("❌ Supabase credentials missing!");
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Initialize Supabase client
+    console.log(`📣 Initializing Supabase client`);
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     console.log(`📣 Attempting to insert email "${purchaserEmail}" into users_db_birthplanbuilder table`);
     
@@ -119,11 +112,13 @@ serve(async (req) => {
       });
 
     if (error) {
-      console.error('❌ Error inserting user:', error);
+      console.error('❌ Database error:', error.message);
+      console.error('❌ Error details:', error.code, error.hint || 'No hint available');
       return new Response(JSON.stringify({ 
         error: 'Failed to process purchase',
         details: error.message,
-        emailFound: purchaserEmail
+        code: error.code,
+        hint: error.hint
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -132,6 +127,7 @@ serve(async (req) => {
 
     console.log('✅ Purchase processed successfully for email:', purchaserEmail);
     return new Response(JSON.stringify({ 
+      success: true,
       message: 'Purchase processed successfully',
       email: purchaserEmail
     }), {
