@@ -11,9 +11,7 @@ export const useNavigation = () => {
   const navigateTo = (path: string) => {
     // Special handling for URLs with auth data (access_token)
     if (path.includes('access_token=')) {
-      console.log("Detected auth data in navigation target:", {
-        path: path.substring(0, path.indexOf('access_token=')) + 'access_token=***'
-      });
+      console.log("Detected auth data in navigation target - special handling");
       
       // Always navigate to the login page for auth-related URLs
       const loginPath = '/acesso-plano';
@@ -21,7 +19,7 @@ export const useNavigation = () => {
       // For URLs with auth tokens in the hash fragment
       if (path.includes('#access_token=')) {
         const hashFragment = path.substring(path.indexOf('#'));
-        console.log(`Auth redirect: ${loginPath} with hash fragment`);
+        console.log(`Auth redirect to ${loginPath} with hash fragment`);
         
         // Use window.location.href for more reliable auth handling with hash fragments
         window.location.href = loginPath + hashFragment;
@@ -31,7 +29,7 @@ export const useNavigation = () => {
       // For URLs with auth tokens in the query parameters
       if (path.includes('?access_token=')) {
         const queryParams = path.substring(path.indexOf('?'));
-        console.log(`Auth redirect: ${loginPath} with query params`);
+        console.log(`Auth redirect to ${loginPath} with query params`);
         
         // Use window.location.href for more reliable auth handling with query params
         window.location.href = loginPath + queryParams;
@@ -41,7 +39,7 @@ export const useNavigation = () => {
       // Extract token part from path if in non-standard format
       const tokenIndex = path.indexOf('access_token=');
       const tokenPart = path.substring(tokenIndex);
-      console.log(`Auth redirect fallback: ${loginPath} with token appended`);
+      console.log(`Auth redirect fallback to ${loginPath} with token appended`);
       
       // Use window.location.href for more reliable auth handling
       window.location.href = `${loginPath}?${tokenPart}`;

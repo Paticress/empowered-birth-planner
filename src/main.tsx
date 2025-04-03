@@ -96,10 +96,10 @@ const handleAuthRedirects = () => {
         // Preserve the format of the auth token (hash or search)
         if (hasAuthInHash) {
           console.log("Auth in hash: redirecting to login page with hash preserved");
-          window.location.replace(redirectPath + hash);
+          window.location.href = redirectPath + hash;
         } else {
           console.log("Auth in search: redirecting to login page with search params preserved");
-          window.location.replace(redirectPath + search);
+          window.location.href = redirectPath + search;
         }
         return;
       }
@@ -123,11 +123,39 @@ const handleAuthRedirects = () => {
   }
 };
 
+// Fix for Vercel analytics error by adding a fallback
+const fixVercelAnalytics = () => {
+  try {
+    // Check if the problem script is not loaded correctly
+    const vercelScripts = document.querySelectorAll('script[src*="vercel/insights/script.js"]');
+    if (vercelScripts.length === 0) {
+      console.log('Vercel analytics not found, adding fallback script');
+      
+      // Create and add the script tag with error handling
+      const script = document.createElement('script');
+      script.src = 'https://vercel.com/analytics';
+      script.defer = true;
+      script.onerror = () => {
+        console.log('Vercel analytics fallback script failed to load, continuing without it');
+        // Remove the script to avoid console errors
+        script.remove();
+      };
+      
+      document.head.appendChild(script);
+    }
+  } catch (error) {
+    console.error('Error fixing Vercel analytics:', error);
+  }
+};
+
 // Initialize the app with better error handling
 window.addEventListener('load', () => {
   try {
     // First handle any auth/hash routing needs
     handleAuthRedirects();
+    
+    // Fix Vercel analytics
+    fixVercelAnalytics();
     
     // Then measure and report performance
     setTimeout(reportPerformance, 3000);

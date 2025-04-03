@@ -22,19 +22,21 @@ export function AcessoPlano() {
         const hash = window.location.hash;
         const search = window.location.search;
         
+        console.log("AcessoPlano page loaded, URL check:", { 
+          path: window.location.pathname,
+          hasHash: hash ? true : false,
+          hasSearch: search ? true : false,
+          isProcessing: isProcessingAuth
+        });
+        
         // Detect auth parameters
         const hasAuthInHash = hash && hash.includes('access_token=');
         const hasAuthInSearch = search && search.includes('access_token=');
         const hasError = (hash && hash.includes('error=')) || (search && search.includes('error='));
         
-        if (hasAuthInHash || hasAuthInSearch || hasError) {
-          console.log("Auth parameters detected in AcessoPlano:", { 
-            fullUrl: fullUrl.substring(0, fullUrl.indexOf('access_token=')) + 'access_token=***',
-            hasAuthInHash,
-            hasAuthInSearch,
-            hasError,
-            pathname: window.location.pathname
-          });
+        // Only process if we have auth parameters and are not already processing
+        if ((hasAuthInHash || hasAuthInSearch || hasError) && !isProcessingAuth) {
+          console.log("Auth parameters detected in AcessoPlano");
           
           setIsProcessingAuth(true);
           
@@ -61,64 +63,86 @@ export function AcessoPlano() {
             return;
           }
           
-          // Wait a short moment to ensure Supabase has processed the token
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Process the authentication - wait a bit to ensure everything is ready
+          await new Promise(resolve => setTimeout(resolve, 1000));
           
-          // Process Supabase authentication
-          const { data, error } = await supabase.auth.getSession();
-          
-          if (error) {
-            console.error("Error getting session:", error);
-            toast.error("Erro ao processar autenticação: " + error.message);
-            setIsProcessingAuth(false);
-            
-            // Clean the URL
-            window.history.replaceState(null, "", window.location.pathname);
-            return;
-          }
-          
-          if (data.session) {
-            console.log("Authentication successful:", {
-              email: data.session.user?.email,
-              authEvent: 'magic_link'
-            });
-            
-            // Ensure user is in the database
-            try {
-              if (data.session.user?.email) {
-                const email = data.session.user.email;
-                
-                // Add/update user in database
-                const { error: insertError } = await supabase
-                  .from('users_db_birthplanbuilder')
-                  .upsert({ email }, { onConflict: 'email' });
-                  
-                if (insertError) {
-                  console.error("Error adding user to database:", insertError);
-                  // Continue anyway - this shouldn't block login
-                }
+          try {
+            // Directly exchange the token in the URL for a session
+            if (hasAuthInHash) {
+              console.log("Processing auth token from hash");
+              // For hash-based tokens, we need to let Supabase handle it
+              await supabase.auth.getSession();
+            } else if (hasAuthInSearch) {
+              console.log("Processing auth token from search params");
+              const token = new URLSearchParams(search).get('access_token');
+              if (token) {
+                // If we have the token directly in the query params, we can set it
+                await supabase.auth.setSession({ access_token: token, refresh_token: '' });
               }
-            } catch (dbError) {
-              console.error("Database error:", dbError);
-              // Continue anyway - database error shouldn't block login
             }
             
-            toast.success("Login realizado com sucesso!");
+            // Check if we got a session
+            const { data, error } = await supabase.auth.getSession();
             
-            // Clean URL before redirecting
-            window.history.replaceState(null, "", window.location.pathname);
+            if (error) {
+              console.error("Error getting session:", error);
+              toast.error("Erro ao processar autenticação: " + error.message);
+              setIsProcessingAuth(false);
+              
+              // Clean the URL
+              window.history.replaceState(null, "", window.location.pathname);
+              return;
+            }
             
-            // Short delay to allow toast to be seen
-            setTimeout(() => {
-              // Redirect to criar-plano page
-              console.log("Redirecting to criar-plano after successful auth");
-              // Use direct location change to ensure clean navigation
-              window.location.href = '/criar-plano';
-            }, 1000);
-            return;
-          } else {
-            console.log("No session found after processing auth parameters");
-            toast.error("Sessão não encontrada após autenticação");
+            if (data.session) {
+              console.log("Authentication successful:", {
+                email: data.session.user?.email
+              });
+              
+              // Ensure user is in the database
+              try {
+                if (data.session.user?.email) {
+                  const email = data.session.user.email;
+                  
+                  // Add/update user in database
+                  const { error: insertError } = await supabase
+                    .from('users_db_birthplanbuilder')
+                    .upsert({ email }, { onConflict: 'email' });
+                    
+                  if (insertError) {
+                    console.error("Error adding user to database:", insertError);
+                    // Continue anyway - this shouldn't block login
+                  }
+                }
+              } catch (dbError) {
+                console.error("Database error:", dbError);
+                // Continue anyway - database error shouldn't block login
+              }
+              
+              toast.success("Login realizado com sucesso!");
+              
+              // Clean URL before redirecting
+              window.history.replaceState(null, "", window.location.pathname);
+              
+              // Short delay to allow toast to be seen
+              setTimeout(() => {
+                // Redirect to criar-plano page
+                console.log("Redirecting to criar-plano after successful auth");
+                // Use direct location change to ensure clean navigation
+                window.location.href = '/criar-plano';
+              }, 1000);
+              return;
+            } else {
+              console.log("No session found after processing auth parameters");
+              toast.error("Sessão não encontrada após autenticação");
+              setIsProcessingAuth(false);
+              
+              // Clean URL
+              window.history.replaceState(null, "", window.location.pathname);
+            }
+          } catch (err) {
+            console.error("Error processing authentication:", err);
+            toast.error("Erro ao processar autenticação");
             setIsProcessingAuth(false);
             
             // Clean URL
@@ -137,7 +161,7 @@ export function AcessoPlano() {
     
     // Only run this when the component mounts or when URL changes
     checkForAuthInUrl();
-  }, [navigateTo]);
+  }, [navigateTo, isProcessingAuth]);
   
   // Redirect if user is already authenticated
   useEffect(() => {

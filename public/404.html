@@ -9,6 +9,9 @@
     // Enhanced SPA routing handler for 404 pages with improved auth handling
     (function() {
       try {
+        // Log page load for debugging
+        console.log('404 handler running on path:', window.location.pathname);
+        
         // Extract all parts of the current URL
         var l = window.location;
         var fullUrl = l.href || '';
@@ -18,12 +21,24 @@
         var hash = l.hash || '';
         
         console.log('404 handler analyzing URL:', {
-          fullUrl: fullUrl,
+          fullUrl: fullUrl.includes('access_token') ? 'contains-auth-token' : fullUrl,
           host: host,
           pathname: pathname,
           search: search ? 'present' : 'none',
           hash: hash ? 'present' : 'none'
         });
+        
+        // Special handling for acesso-plano#access_token=... URLs
+        if (pathname.includes('/acesso-plano') && (hash.includes('access_token=') || search.includes('access_token='))) {
+          console.log('Access token detected in acesso-plano URL - no redirect needed');
+          // We're already on the correct page, just update the URL to remove any trailing fragments
+          if (pathname.includes('/acesso-plano#')) {
+            l.replace('/acesso-plano' + hash);
+          } else if (pathname !== '/acesso-plano') {
+            l.replace('/acesso-plano' + (hash ? hash : '') + (search ? search : ''));
+          }
+          return;
+        }
         
         // CRITICAL: Handle authentication tokens in URL - look for access_token in both search and hash
         if (fullUrl.includes('access_token=')) {
@@ -36,11 +51,13 @@
           if (hash && hash.includes('access_token=')) {
             console.log('Token found in hash - maintaining hash format');
             // Token is in hash fragment - preserve it
-            window.location.replace(loginPath + hash);
+            window.location.href = loginPath + hash; // Use .href for full page refresh with hash
+            return;
           } else if (search && search.includes('access_token=')) {
             console.log('Token found in search params - maintaining query format');
             // Token is in search parameters - preserve it
-            window.location.replace(loginPath + search);
+            window.location.href = loginPath + search; // Use .href for full page refresh with params
+            return;
           } else {
             // Fallback - extract token portion from full URL
             console.log('Token found in URL but not in standard location - extracting');
@@ -49,12 +66,12 @@
             
             // Determine if it should be a hash or search parameter
             if (fullUrl.indexOf('#access_token=') >= 0) {
-              window.location.replace(loginPath + '#' + tokenPart);
+              window.location.href = loginPath + '#' + tokenPart;
             } else {
-              window.location.replace(loginPath + '?' + tokenPart);
+              window.location.href = loginPath + '?' + tokenPart;
             }
+            return;
           }
-          return;
         }
         
         // For non-auth paths, handle standard SPA routing
