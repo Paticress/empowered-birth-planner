@@ -68,55 +68,68 @@ const setupServiceWorker = () => {
   }
 };
 
-// Fix for hash-based routing for GitHub Pages with special handling for auth redirects
-const fixHashRouting = () => {
+// Improved hash/auth handling for SPA routing
+const handleAuthRedirects = () => {
   try {
     // Get current URL parts
+    const fullUrl = window.location.href;
     const { hash, pathname, search } = window.location;
     
-    // Special handling for authentication data
-    const hasAuthData = (hash && (hash.includes('access_token=') || hash.includes('type=recovery'))) ||
-                        (search && search.includes('access_token='));
+    console.log("URL check on page load:", { pathname, hash: hash ? "present" : "none", search: search ? "present" : "none" });
     
-    if (hasAuthData) {
-      console.log("Auth data detected, processing special redirect");
+    // Detect auth parameters in URL (both hash and search params)
+    const hasAuthInHash = hash && hash.includes('access_token=');
+    const hasAuthInSearch = search && search.includes('access_token=');
+    
+    if (hasAuthInHash || hasAuthInSearch) {
+      console.log("Auth token detected in URL");
       
-      // Always redirect auth data to the login page
+      // Special case: If we're not on the login page but have auth params,
+      // redirect to login page while preserving auth data
       if (pathname !== '/acesso-plano') {
-        const authRedirectUrl = '/acesso-plano' + search + hash;
-        console.log("Redirecting auth data to login page:", authRedirectUrl);
-        window.location.href = authRedirectUrl;
+        let redirectPath = '/acesso-plano';
+        
+        if (hasAuthInHash) {
+          redirectPath += hash;
+        } else if (hasAuthInSearch) {
+          redirectPath += search;
+        }
+        
+        console.log("Redirecting auth flow to login page:", redirectPath);
+        // Use direct location change for reliable auth handling
+        window.location.replace(redirectPath);
         return;
       }
       
-      console.log("Already on the correct page for auth processing");
+      // If we're already on the correct page, do nothing
+      console.log("Already on login page with auth parameters");
       return;
     }
     
-    // Standard hash route fixing (non-auth related)
-    if (hash.startsWith('#/') && pathname === '/') {
-      // Remove the hash and navigate to the clean path
-      const path = hash.substring(1); // Remove the # character
-      console.log(`Fixing hash route: ${hash} -> ${path}`);
+    // Handle standard hash-based routing (for non-auth cases)
+    if (hash && hash.startsWith('#/') && pathname === '/') {
+      // Extract the path from the hash
+      const path = hash.substring(1);
+      console.log(`Converting hash route to clean path: ${hash} → ${path}`);
       
       // Use history API to replace the URL without reloading
       window.history.replaceState(null, '', path + search);
     }
   } catch (error) {
-    console.error('Error fixing hash routes:', error);
+    console.error('Error handling URL routing:', error);
   }
 };
 
 // Initialize the app with better error handling
 window.addEventListener('load', () => {
   try {
-    // Fix any hash-based routes first
-    fixHashRouting();
+    // First handle any auth/hash routing needs
+    handleAuthRedirects();
     
     // Then measure and report performance
     setTimeout(reportPerformance, 3000);
     
-    // Set up service worker (with error handling)
+    // Set up service worker
     setupServiceWorker();
     
     // Mark app as stable after first week of use

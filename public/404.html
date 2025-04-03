@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,31 +9,47 @@
     (function() {
       try {
         var l = window.location;
-        var hostname = l.hostname;
-        var pathname = l.pathname;
+        var href = l.href || '';
+        var pathname = l.pathname || '';
         var search = l.search || '';
         var hash = l.hash || '';
         
-        console.log('404 handler running with:', {hostname, pathname, search, hash});
+        console.log('404 handler running with:', {pathname, search, hash});
         
         // Special handling for authentication URLs with tokens
-        var hasAuthToken = (search.includes('access_token') || hash.includes('access_token'));
-        
-        if (hasAuthToken) {
-          console.log('Auth token detected, redirecting to login page with auth data');
+        if (href.includes('access_token=')) {
+          console.log('Auth token detected in URL');
           
           // Always redirect to the login page with the auth parameters
-          var redirectPath = '/acesso-plano';
+          var redirectUrl = '/acesso-plano';
           
-          // Preserve both query parameters and hash fragments
-          var fullRedirectUrl = redirectPath + search + hash;
+          // We need to preserve the original format of the token
+          // If it's in the hash, keep it as hash, if in query params, keep as query params
+          if (hash && hash.includes('access_token=')) {
+            redirectUrl += hash;
+          } else if (search && search.includes('access_token=')) {
+            redirectUrl += search;
+          } else {
+            // Fallback: look for token in full URL
+            var tokenPart = href.substring(href.indexOf('access_token='));
+            if (tokenPart.includes('&')) {
+              tokenPart = tokenPart.substring(0, tokenPart.indexOf('&'));
+            }
+            
+            // Determine if we should add it as a hash or search param
+            if (href.indexOf('#access_token=') >= 0) {
+              redirectUrl += '#' + tokenPart;
+            } else {
+              redirectUrl += '?' + tokenPart;
+            }
+          }
           
-          console.log('Redirecting to:', fullRedirectUrl);
-          l.replace(fullRedirectUrl);
+          console.log('Redirecting to:', redirectUrl);
+          l.replace(redirectUrl);
           return;
         }
         
-        // Make the redirection more reliable by being explicit
+        // Standard SPA routing fixes for specific paths
         if (pathname === '/acesso-plano' || pathname.startsWith('/acesso-plano/')) {
           l.replace('/acesso-plano' + search + hash);
         } else if (pathname === '/criar-plano' || pathname.startsWith('/criar-plano/')) {

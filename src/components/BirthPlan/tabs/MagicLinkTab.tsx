@@ -24,24 +24,22 @@ export function MagicLinkTab() {
     // Check both hash fragments and query parameters for auth tokens
     const hash = window.location.hash;
     const search = window.location.search;
-    const hasAuthParams = (hash && hash.includes('access_token')) || 
-                          (search && search.includes('access_token'));
+    const hasAuthParams = 
+      (hash && (hash.includes('access_token=') || hash.includes('type=recovery'))) || 
+      (search && search.includes('access_token='));
     
     if (hasAuthParams) {
-      console.log("Magic link authentication detected in tab");
+      console.log("Magic link authentication detected in tab", {
+        hash: hash ? 'present' : 'absent',
+        search: search ? 'present' : 'absent'
+      });
       setIsMagicLinkSent(true);
       toast.info("Processando sua autenticação...");
       
-      // If already authenticated, redirect to criar-plano
-      if (isAuthenticated && user) {
-        console.log("User already authenticated, redirecting to birth plan builder");
-        // Add a short delay to ensure auth state is fully processed
-        setTimeout(() => {
-          window.location.href = '/criar-plano';
-        }, 1500);
-      }
+      // No need to redirect here - let the AcessoPlano component handle this
+      // This prevents duplicate redirects that could cause loops
     }
-  }, [setIsMagicLinkSent, isAuthenticated, user, navigateTo]);
+  }, [setIsMagicLinkSent]);
 
   return (
     <MagicLinkForm 

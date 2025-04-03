@@ -16,44 +16,43 @@ export function AcessoPlano() {
   // Check if we're in the middle of magic link authentication
   useEffect(() => {
     const checkForAuthInUrl = async () => {
-      // Check both hash fragments and query parameters for auth tokens
-      const hash = window.location.hash;
-      const search = window.location.search;
-      const hasAuthParams = (hash && (hash.includes('access_token') || hash.includes('error'))) || 
-                           (search && (search.includes('access_token') || search.includes('error')));
-      
-      if (hasAuthParams) {
-        console.log("Authentication in progress via magic link...", { hash, search });
-        setIsProcessingAuth(true);
+      try {
+        // Check both hash fragments and query parameters for auth tokens
+        const fullUrl = window.location.href;
+        const hash = window.location.hash;
+        const search = window.location.search;
         
-        // Check if there's an error in the URL
-        const errorInHash = hash.includes('error=');
-        const errorInSearch = search.includes('error=');
+        // Detect auth parameters
+        const hasAuthInHash = hash && hash.includes('access_token=');
+        const hasAuthInSearch = search && search.includes('access_token=');
+        const hasError = (hash && hash.includes('error=')) || (search && search.includes('error='));
         
-        if (errorInHash || errorInSearch) {
-          let errorMessage;
-          if (errorInHash) {
-            errorMessage = decodeURIComponent(hash.split('error=')[1].split('&')[0]);
-          } else {
-            errorMessage = decodeURIComponent(search.split('error=')[1].split('&')[0]);
-          }
+        if (hasAuthInHash || hasAuthInSearch || hasError) {
+          console.log("Auth parameters detected in URL:", { 
+            hasAuthInHash,
+            hasAuthInSearch,
+            hasError,
+            pathname: window.location.pathname
+          });
           
-          console.error("Error in magic link authentication:", errorMessage);
-          toast.error("Erro ao processar o link mágico: " + errorMessage);
-          setIsProcessingAuth(false);
+          setIsProcessingAuth(true);
           
-          // Clean the URL to remove error parameters
-          window.history.replaceState(null, "", window.location.pathname);
-          return;
-        }
-        
-        try {
-          // Process the authentication parameters
-          const { data, error } = await supabase.auth.getSession();
-          
-          if (error) {
-            console.error("Error processing magic link:", error);
-            toast.error("Erro ao processar o link mágico: " + error.message);
+          // Handle error case first
+          if (hasError) {
+            let errorMessage = "Erro desconhecido na autenticação";
+            
+            try {
+              if (hash.includes('error=')) {
+                errorMessage = decodeURIComponent(hash.split('error=')[1].split('&')[0]);
+              } else if (search.includes('error=')) {
+                errorMessage = decodeURIComponent(search.split('error=')[1].split('&')[0]);
+              }
+            } catch (e) {
+              console.error("Error parsing error message:", e);
+            }
+            
+            console.error("Authentication error:", errorMessage);
+            toast.error("Erro na autenticação: " + errorMessage);
             setIsProcessingAuth(false);
             
             // Clean the URL to remove error parameters
@@ -61,63 +60,77 @@ export function AcessoPlano() {
             return;
           }
           
-          if (data.session) {
-            console.log("Magic link authentication successful:", data.session);
+          // Process Supabase authentication
+          const { data, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error("Error getting session:", error);
+            toast.error("Erro ao processar autenticação: " + error.message);
+            setIsProcessingAuth(false);
             
-            // Make sure user is added to the database
+            // Clean the URL
+            window.history.replaceState(null, "", window.location.pathname);
+            return;
+          }
+          
+          if (data.session) {
+            console.log("Authentication successful:", data.session.user?.email);
+            
+            // Ensure user is in the database
             try {
               if (data.session.user?.email) {
                 const email = data.session.user.email;
                 
-                // Add user to database
+                // Add/update user in database
                 const { error: insertError } = await supabase
                   .from('users_db_birthplanbuilder')
                   .upsert({ email }, { onConflict: 'email' });
                   
                 if (insertError) {
                   console.error("Error adding user to database:", insertError);
+                  // Continue anyway - this shouldn't block login
                 }
               }
             } catch (dbError) {
-              console.error("Error updating user database:", dbError);
+              console.error("Database error:", dbError);
+              // Continue anyway - database error shouldn't block login
             }
             
             toast.success("Login realizado com sucesso!");
             
-            // Remove auth parameters from URL without reloading
+            // Clean URL before redirecting
             window.history.replaceState(null, "", window.location.pathname);
             
-            // Use a direct location change for more reliable redirection
+            // Redirect to criar-plano page
+            console.log("Redirecting to criar-plano after successful auth");
             window.location.href = '/criar-plano';
             return;
           } else {
-            console.log("No session found after magic link auth");
-            toast.error("Sessão de autenticação não encontrada");
+            console.log("No session found after processing auth parameters");
+            toast.error("Sessão não encontrada após autenticação");
             setIsProcessingAuth(false);
             
-            // Clean the URL anyway
+            // Clean URL
             window.history.replaceState(null, "", window.location.pathname);
           }
-        } catch (err) {
-          console.error("Error during magic link auth:", err);
-          toast.error("Erro durante a autenticação com link mágico");
-          setIsProcessingAuth(false);
-          
-          // Clean the URL to remove auth parameters
-          window.history.replaceState(null, "", window.location.pathname);
         }
+      } catch (err) {
+        console.error("Unexpected error during auth processing:", err);
+        toast.error("Erro inesperado durante autenticação");
+        setIsProcessingAuth(false);
+        
+        // Clean URL
+        window.history.replaceState(null, "", window.location.pathname);
       }
     };
     
     checkForAuthInUrl();
   }, [navigateTo]);
   
-  // If user is already authenticated, redirect to birth plan builder
+  // Redirect if user is already authenticated
   useEffect(() => {
     if (!isLoading && !isProcessingAuth && user && session) {
       console.log("User already authenticated, redirecting to birth plan builder");
-      
-      // Use direct location change for more reliable redirection
       window.location.href = '/criar-plano';
     }
   }, [user, navigateTo, isLoading, isProcessingAuth, session]);
