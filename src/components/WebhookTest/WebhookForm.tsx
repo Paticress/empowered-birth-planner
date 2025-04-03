@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { AlertTriangle, Clipboard, Database, RefreshCw } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface WebhookFormProps {
   email: string;
@@ -32,6 +32,11 @@ export function WebhookForm({
         <CardDescription>
           Test the Wix purchase webhook integration with a sample email
         </CardDescription>
+        <div className="mt-2">
+          <Link to="/test-supabase" className="text-blue-600 hover:underline text-sm">
+            Back to Supabase Test Page
+          </Link>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
