@@ -31,6 +31,9 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    optimizeDeps: {
+      include: ['@vercel/analytics/react'],
+    },
     base: '/',
     server: {
       host: '::',

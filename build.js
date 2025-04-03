@@ -8,6 +8,21 @@ const path = require('path');
 
 console.log('🚀 Starting build process...');
 
+// Ensure all dependencies are installed
+console.log('📦 Checking for required dependencies...');
+try {
+  // Make sure @vercel/analytics is installed
+  try {
+    require.resolve('@vercel/analytics/react');
+    console.log('✅ @vercel/analytics is installed');
+  } catch (e) {
+    console.log('⚠️ Installing @vercel/analytics...');
+    execSync('npm install --save @vercel/analytics@latest', { stdio: 'inherit' });
+  }
+} catch (error) {
+  console.error('❌ Failed to install dependencies:', error.message);
+}
+
 // Find index.html in the project structure
 function findIndexHtml(dir) {
   const files = fs.readdirSync(dir);

@@ -36,7 +36,7 @@ jobs:
         run: npm ci
       
       - name: Install required packages explicitly
-        run: npm install --save-dev @vitejs/plugin-react terser@latest lovable-tagger@latest
+        run: npm install --save-dev @vitejs/plugin-react terser@latest lovable-tagger@latest @vercel/analytics@latest
       
       - name: Setup Pages
         id: pages
