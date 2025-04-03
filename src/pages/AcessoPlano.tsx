@@ -17,22 +17,50 @@ export function AcessoPlano() {
   useEffect(() => {
     const checkForAuthInUrl = async () => {
       try {
-        // Check both hash fragments and query parameters for auth tokens
+        // Check all possible locations for auth tokens
         const fullUrl = window.location.href;
         const hash = window.location.hash;
         const search = window.location.search;
+        const path = window.location.pathname;
         
         console.log("AcessoPlano page loaded, URL check:", { 
-          path: window.location.pathname,
+          path: path,
           hasHash: hash ? true : false,
           hasSearch: search ? true : false,
+          hasAuthInPath: path.includes('access_token='),
+          fullUrl: fullUrl.includes('access_token=') ? 'contains-token' : 'normal',
           isProcessing: isProcessingAuth
         });
         
-        // Detect auth parameters
+        // Detect auth parameters in all possible locations
         const hasAuthInHash = hash && hash.includes('access_token=');
         const hasAuthInSearch = search && search.includes('access_token=');
-        const hasError = (hash && hash.includes('error=')) || (search && search.includes('error='));
+        const hasAuthInPath = path.includes('access_token=');
+        const hasError = (hash && hash.includes('error=')) || 
+                        (search && search.includes('error=')) || 
+                        (path.includes('error='));
+        
+        // If auth params are in the wrong place (path), fix them
+        if (hasAuthInPath) {
+          console.log("Auth token in URL path - fixing format before processing");
+          
+          // Extract token and other params
+          const tokenPart = path.substring(path.indexOf('access_token='));
+          
+          // Fix the URL without reloading
+          window.history.replaceState(
+            null, 
+            document.title,
+            '/acesso-plano#' + tokenPart
+          );
+          
+          // Now set auth in hash for subsequent processing
+          const newHash = '#' + tokenPart;
+          window.location.hash = tokenPart;
+          
+          // Allow a moment for hash change to propagate
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
         
         // Only process if we have auth parameters and are not already processing
         if ((hasAuthInHash || hasAuthInSearch || hasError) && !isProcessingAuth) {
@@ -58,48 +86,87 @@ export function AcessoPlano() {
             toast.error("Erro na autenticação: " + errorMessage);
             setIsProcessingAuth(false);
             
-            // Clean the URL to remove error parameters
-            window.history.replaceState(null, "", window.location.pathname);
+            // Clean URL
+            window.history.replaceState(null, document.title, window.location.pathname);
             return;
           }
           
           // Process the authentication - wait a bit to ensure everything is ready
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 500));
           
           try {
-            // Directly exchange the token in the URL for a session
+            // For hash-based tokens (most common with magic links)
             if (hasAuthInHash) {
               console.log("Processing auth token from hash");
-              // For hash-based tokens, we need to let Supabase handle it
-              await supabase.auth.getSession();
-            } else if (hasAuthInSearch) {
-              console.log("Processing auth token from search params");
-              const token = new URLSearchParams(search).get('access_token');
+              
+              // For supabase magic links, we need to let Supabase handle it directly
+              const { error } = await supabase.auth.getSession();
+              
+              if (error) {
+                console.error("Error getting session from hash:", error);
+                toast.error("Erro ao processar magic link: " + error.message);
+                setIsProcessingAuth(false);
+                
+                // Clean URL
+                window.history.replaceState(null, document.title, window.location.pathname);
+                return;
+              }
+              
+              // Supabase should have set up the session automatically
+              console.log("Supabase processed the hash-based auth token");
+            } 
+            // For query parameter tokens
+            else if (hasAuthInSearch) {
+              console.log("Processing auth token from query parameters");
+              
+              // Extract token
+              const params = new URLSearchParams(search);
+              const token = params.get('access_token');
+              
               if (token) {
-                // If we have the token directly in the query params, we can set it
-                await supabase.auth.setSession({ access_token: token, refresh_token: '' });
+                // Set session manually
+                const { error } = await supabase.auth.setSession({
+                  access_token: token,
+                  refresh_token: ''
+                });
+                
+                if (error) {
+                  console.error("Error setting session from query params:", error);
+                  toast.error("Erro ao processar token: " + error.message);
+                  setIsProcessingAuth(false);
+                  
+                  // Clean URL
+                  window.history.replaceState(null, document.title, window.location.pathname);
+                  return;
+                }
+              } else {
+                console.error("No token found in query parameters");
+                toast.error("Token de autenticação não encontrado");
+                setIsProcessingAuth(false);
+                
+                // Clean URL
+                window.history.replaceState(null, document.title, window.location.pathname);
+                return;
               }
             }
             
-            // Check if we got a session
+            // Now check if we got a valid session
             const { data, error } = await supabase.auth.getSession();
             
             if (error) {
-              console.error("Error getting session:", error);
-              toast.error("Erro ao processar autenticação: " + error.message);
+              console.error("Error getting session after processing:", error);
+              toast.error("Erro ao obter sessão: " + error.message);
               setIsProcessingAuth(false);
               
-              // Clean the URL
-              window.history.replaceState(null, "", window.location.pathname);
+              // Clean URL
+              window.history.replaceState(null, document.title, window.location.pathname);
               return;
             }
             
             if (data.session) {
-              console.log("Authentication successful:", {
-                email: data.session.user?.email
-              });
+              console.log("Authentication successful, session established");
               
-              // Ensure user is in the database
+              // Ensure user is in the database (for permissions)
               try {
                 if (data.session.user?.email) {
                   const email = data.session.user.email;
@@ -112,6 +179,8 @@ export function AcessoPlano() {
                   if (insertError) {
                     console.error("Error adding user to database:", insertError);
                     // Continue anyway - this shouldn't block login
+                  } else {
+                    console.log("User added/updated in the database");
                   }
                 }
               } catch (dbError) {
@@ -119,10 +188,10 @@ export function AcessoPlano() {
                 // Continue anyway - database error shouldn't block login
               }
               
-              toast.success("Login realizado com sucesso!");
+              // Clean URL before showing success message
+              window.history.replaceState(null, document.title, window.location.pathname);
               
-              // Clean URL before redirecting
-              window.history.replaceState(null, "", window.location.pathname);
+              toast.success("Login realizado com sucesso!");
               
               // Short delay to allow toast to be seen
               setTimeout(() => {
@@ -130,7 +199,7 @@ export function AcessoPlano() {
                 console.log("Redirecting to criar-plano after successful auth");
                 // Use direct location change to ensure clean navigation
                 window.location.href = '/criar-plano';
-              }, 1000);
+              }, 1500);
               return;
             } else {
               console.log("No session found after processing auth parameters");
@@ -138,7 +207,7 @@ export function AcessoPlano() {
               setIsProcessingAuth(false);
               
               // Clean URL
-              window.history.replaceState(null, "", window.location.pathname);
+              window.history.replaceState(null, document.title, window.location.pathname);
             }
           } catch (err) {
             console.error("Error processing authentication:", err);
@@ -146,7 +215,7 @@ export function AcessoPlano() {
             setIsProcessingAuth(false);
             
             // Clean URL
-            window.history.replaceState(null, "", window.location.pathname);
+            window.history.replaceState(null, document.title, window.location.pathname);
           }
         }
       } catch (err) {
@@ -155,13 +224,13 @@ export function AcessoPlano() {
         setIsProcessingAuth(false);
         
         // Clean URL
-        window.history.replaceState(null, "", window.location.pathname);
+        window.history.replaceState(null, document.title, window.location.pathname);
       }
     };
     
     // Only run this when the component mounts or when URL changes
     checkForAuthInUrl();
-  }, [navigateTo, isProcessingAuth]);
+  }, [isProcessingAuth]);
   
   // Redirect if user is already authenticated
   useEffect(() => {
@@ -170,7 +239,7 @@ export function AcessoPlano() {
       // Use a direct location change for more reliable navigation
       window.location.href = '/criar-plano';
     }
-  }, [user, navigateTo, isLoading, isProcessingAuth, session]);
+  }, [user, isLoading, isProcessingAuth, session]);
 
   if (isLoading || isProcessingAuth) {
     return (

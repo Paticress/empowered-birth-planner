@@ -14,15 +14,17 @@
     <!-- Favicon -->
     <link rel="icon" href="/favicon.ico" />
     
-    <!-- Analytics Fallback -->
-    <script async src="https://vercel.com/analytics" defer></script>
+    <!-- Analytics -->
+    <script async src="https://va.vercel-scripts.com/v1/script.js"></script>
     
     <!-- GitHub Pages SPA support -->
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages
       // MIT License
       // https://github.com/rafgraph/spa-github-pages
+      // This script handles more complex routing situations for SPAs on GitHub Pages
       (function(l) {
+        // Only run this if search params need to be processed
         if (l.search[1] === '/' ) {
           var decoded = l.search.slice(1).split('&').map(function(s) { 
             return s.replace(/~and~/g, '&')
@@ -30,6 +32,29 @@
           window.history.replaceState(null, null,
               l.pathname.slice(0, -1) + decoded + l.hash
           );
+        }
+        
+        // Special handling for auth tokens
+        var fullUrl = l.href;
+        var pathname = l.pathname;
+        
+        // If auth token is in the URL but not in expected places (query or hash)
+        if (fullUrl.includes('access_token=') && 
+            !l.search.includes('access_token=') && 
+            !l.hash.includes('access_token=') && 
+            pathname.includes('access_token=')) {
+          
+          console.log("Auth token found in unexpected location in URL, fixing...");
+          
+          // Determine the base path (everything before access_token)
+          var basePath = '/acesso-plano';
+          
+          // Get the token part
+          var tokenIndex = pathname.indexOf('access_token=');
+          var tokenPart = pathname.substring(tokenIndex);
+          
+          // Redirect with proper format
+          l.href = basePath + '#' + tokenPart;
         }
       }(window.location))
     </script>

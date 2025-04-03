@@ -36,13 +36,25 @@ export const useNavigation = () => {
         return;
       }
       
+      // For magic links specifically
+      if (path.includes('type=magiclink')) {
+        console.log(`Magic link authentication detected`);
+        // Extract full token part to preserve all parameters
+        const tokenIndex = path.indexOf('access_token=');
+        const tokenPart = path.substring(tokenIndex);
+        
+        // Use window.location.href for reliable magic link handling
+        window.location.href = `${loginPath}#${tokenPart}`;
+        return;
+      }
+      
       // Extract token part from path if in non-standard format
       const tokenIndex = path.indexOf('access_token=');
       const tokenPart = path.substring(tokenIndex);
       console.log(`Auth redirect fallback to ${loginPath} with token appended`);
       
       // Use window.location.href for more reliable auth handling
-      window.location.href = `${loginPath}?${tokenPart}`;
+      window.location.href = `${loginPath}#${tokenPart}`;
       return;
     }
     

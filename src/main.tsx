@@ -68,7 +68,7 @@ const setupServiceWorker = () => {
   }
 };
 
-// Improved hash/auth handling for SPA routing
+// Improved hash/auth handling for SPA routing with better magic link support
 const handleAuthRedirects = () => {
   try {
     // Get current URL parts
@@ -78,35 +78,54 @@ const handleAuthRedirects = () => {
     console.log("URL check on page load:", { 
       pathname, 
       hash: hash ? "present" : "none", 
-      search: search ? "present" : "none" 
+      search: search ? "present" : "none",
+      fullUrl: fullUrl.includes('access_token') ? 'contains-auth-token' : 'normal-url'
     });
     
-    // Detect auth parameters in URL (both hash and search params)
+    // Special case for magic links with access_token in the path
+    if (pathname.includes('access_token=')) {
+      console.log("Token found in URL path - fixing format");
+      
+      // Extract the token
+      const tokenPart = pathname.substring(pathname.indexOf('access_token='));
+      // Get clean base path (/acesso-plano)
+      const basePath = '/acesso-plano';
+      
+      // Redirect to correct format
+      window.location.href = basePath + '#' + tokenPart;
+      return;
+    }
+    
+    // Detect auth parameters in URL (hash, search params, and direct path)
     const hasAuthInHash = hash && hash.includes('access_token=');
     const hasAuthInSearch = search && search.includes('access_token=');
+    const hasAuthInPath = pathname.includes('access_token=');
     
-    if (hasAuthInHash || hasAuthInSearch) {
+    if (hasAuthInHash || hasAuthInSearch || hasAuthInPath) {
       console.log("Auth token detected in URL on page load");
       
-      // Special case: If we're not on the login page but have auth params,
-      // redirect to login page while preserving auth data
+      // If we're not on the login page, redirect there with auth data
       if (pathname !== '/acesso-plano') {
-        let redirectPath = '/acesso-plano';
+        console.log("Not on login page - redirecting properly with auth data");
         
-        // Preserve the format of the auth token (hash or search)
+        const redirectPath = '/acesso-plano';
+        
         if (hasAuthInHash) {
-          console.log("Auth in hash: redirecting to login page with hash preserved");
+          // Format with hash preserved
           window.location.href = redirectPath + hash;
-        } else {
-          console.log("Auth in search: redirecting to login page with search params preserved");
+        } else if (hasAuthInSearch) {
+          // Format with search params 
           window.location.href = redirectPath + search;
+        } else if (hasAuthInPath) {
+          // Fix path-based token
+          const tokenPart = pathname.substring(pathname.indexOf('access_token='));
+          window.location.href = redirectPath + '#' + tokenPart;
         }
         return;
       }
       
-      // If we're already on the correct page, do nothing
+      // Already on correct page
       console.log("Already on login page with auth parameters");
-      return;
     }
     
     // Handle standard hash-based routing (for non-auth cases)
@@ -123,39 +142,11 @@ const handleAuthRedirects = () => {
   }
 };
 
-// Fix for Vercel analytics error by adding a fallback
-const fixVercelAnalytics = () => {
-  try {
-    // Check if the problem script is not loaded correctly
-    const vercelScripts = document.querySelectorAll('script[src*="vercel/insights/script.js"]');
-    if (vercelScripts.length === 0) {
-      console.log('Vercel analytics not found, adding fallback script');
-      
-      // Create and add the script tag with error handling
-      const script = document.createElement('script');
-      script.src = 'https://vercel.com/analytics';
-      script.defer = true;
-      script.onerror = () => {
-        console.log('Vercel analytics fallback script failed to load, continuing without it');
-        // Remove the script to avoid console errors
-        script.remove();
-      };
-      
-      document.head.appendChild(script);
-    }
-  } catch (error) {
-    console.error('Error fixing Vercel analytics:', error);
-  }
-};
-
 // Initialize the app with better error handling
 window.addEventListener('load', () => {
   try {
     // First handle any auth/hash routing needs
     handleAuthRedirects();
-    
-    // Fix Vercel analytics
-    fixVercelAnalytics();
     
     // Then measure and report performance
     setTimeout(reportPerformance, 3000);
