@@ -53,97 +53,26 @@ serve(async (req) => {
     let webhookData;
     try {
       webhookData = JSON.parse(rawBody);
-      console.log("Parsed webhook data:", JSON.stringify(webhookData));
+      console.log("Parsed webhook data:", JSON.stringify(webhookData, null, 2));
     } catch (parseError) {
       console.error("Failed to parse JSON payload:", parseError);
       return new Response(JSON.stringify({ 
         error: 'Invalid JSON payload',
-        rawBody: rawBody.substring(0, 200) + (rawBody.length > 200 ? '...' : '') // Log partial raw body for debugging
+        rawBody: rawBody.substring(0, 200) + (rawBody.length > 200 ? '...' : '')
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Try multiple ways to extract email based on Wix webhook structure
-    // We're checking multiple possible paths since we don't know the exact format
-    let purchaserEmail = null;
-    console.log("Starting email extraction from payload");
+    // Extract email from the Wix webhook payload structure
+    const purchaserEmail = webhookData?.data?.email?.trim();
     
-    // Direct email property
-    if (webhookData.email) {
-      purchaserEmail = webhookData.email;
-      console.log("Found email directly in payload:", purchaserEmail);
-    } 
-    // Check in data.email
-    else if (webhookData.data && webhookData.data.email) {
-      purchaserEmail = webhookData.data.email;
-      console.log("Found email in data.email:", purchaserEmail);
-    }
-    // Check in order info
-    else if (webhookData.order && webhookData.order.buyerInfo && webhookData.order.buyerInfo.email) {
-      purchaserEmail = webhookData.order.buyerInfo.email;
-      console.log("Found email in order.buyerInfo.email:", purchaserEmail);
-    }
-    // Check in contact info
-    else if (webhookData.contactInfo && webhookData.contactInfo.email) {
-      purchaserEmail = webhookData.contactInfo.email;
-      console.log("Found email in contactInfo.email:", purchaserEmail);
-    }
-    // Check in customer
-    else if (webhookData.customer && webhookData.customer.email) {
-      purchaserEmail = webhookData.customer.email;
-      console.log("Found email in customer.email:", purchaserEmail);
-    }
-    // Check in buyer
-    else if (webhookData.buyer && webhookData.buyer.email) {
-      purchaserEmail = webhookData.buyer.email;
-      console.log("Found email in buyer.email:", purchaserEmail);
-    }
-    // Check in contact
-    else if (webhookData.contact && webhookData.contact.email) {
-      purchaserEmail = webhookData.contact.email;
-      console.log("Found email in contact.email:", purchaserEmail);
-    }
-    // Check in user
-    else if (webhookData.user && webhookData.user.email) {
-      purchaserEmail = webhookData.user.email;
-      console.log("Found email in user.email:", purchaserEmail);
-    }
-    
-    // If we still don't have an email, look through all properties recursively
-    if (!purchaserEmail) {
-      console.log("Searching for email field recursively in payload...");
-      const findEmail = (obj: any, path = ""): string | null => {
-        if (!obj || typeof obj !== 'object') return null;
-        
-        for (const [key, value] of Object.entries(obj)) {
-          const currentPath = path ? `${path}.${key}` : key;
-          
-          // If this property is called email and has a string value
-          if (key.toLowerCase() === 'email' && typeof value === 'string' && value.includes('@')) {
-            console.log(`Found email at path ${currentPath}:`, value);
-            return value;
-          }
-          
-          // If this is an object or array, search recursively
-          if (typeof value === 'object' && value !== null) {
-            const result = findEmail(value, currentPath);
-            if (result) return result;
-          }
-        }
-        
-        return null;
-      };
-      
-      purchaserEmail = findEmail(webhookData);
-    }
-
     if (!purchaserEmail) {
       console.error('No email found in the webhook payload');
       return new Response(JSON.stringify({ 
         error: 'No email found in payload',
-        payloadStructure: JSON.stringify(webhookData, null, 2)
+        payload: webhookData
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
