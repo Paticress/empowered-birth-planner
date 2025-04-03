@@ -125,22 +125,33 @@ serve(async (req) => {
       });
     }
     
-    // Check if user account exists in auth system
-    const { data: userData, error: userError } = await supabase
-      .auth
-      .admin
-      .getUserByEmail(purchaserEmail);
-      
-    console.log(`📣 Checking if user already exists: ${!!userData}`);
+    // Check if user account exists in auth system - FIXED METHOD
+    console.log(`📣 Checking if user already exists for email: ${purchaserEmail}`);
     
+    // Use the Auth API to list users and filter by email
+    const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1,
+      filter: {
+        email: purchaserEmail
+      }
+    });
+    
+    if (listError) {
+      console.error('❌ Error checking existing users:', listError.message);
+    }
+    
+    const userExists = existingUsers && existingUsers.users && existingUsers.users.length > 0;
+    console.log(`📣 User exists: ${userExists}`);
+      
     // If user doesn't exist, create one with a temporary password
-    if (!userData && !userError) {
+    if (!userExists) {
       // Generate a secure random password (user will never need to know this)
       const tempPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).toUpperCase().slice(2);
       
       console.log(`📣 Creating new Supabase auth account for: ${purchaserEmail}`);
       
-      // Create a new user
+      // Create a new user using the updated method
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email: purchaserEmail,
         password: tempPassword,
@@ -151,7 +162,7 @@ serve(async (req) => {
         console.error('❌ Error creating user account:', createError.message);
         // Continue without failing - the user can still sign up manually
       } else {
-        console.log('✅ User account created successfully:', newUser);
+        console.log('✅ User account created successfully');
       }
     }
 
