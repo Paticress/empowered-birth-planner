@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User, GraduationCap, BookOpen, FileText } from 'lucide-react';
@@ -55,7 +54,6 @@ export function Header() {
             </Link>
           </div>
           
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link 
               to="/guia-online" 
@@ -78,7 +76,7 @@ export function Header() {
               Construtor Virtual
             </Link>
             <Link 
-              to="https://www.energiamaterna.com.br/gestando" 
+              to="https://www.energiamaterna.com.br/programas" 
               className="text-maternal-800 hover:text-maternal-600 transition-colors flex items-center"
               target="_blank"
               rel="noopener noreferrer"
@@ -87,7 +85,6 @@ export function Header() {
               Curso Gestando
             </Link>
             
-            {/* Add My Access link with conditional appearance based on login status */}
             {user && (
               <Link 
                 to="/meus-acessos" 
@@ -102,7 +99,6 @@ export function Header() {
             )}
           </nav>
           
-          {/* Mobile Menu Button */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
               <button 
@@ -156,7 +152,7 @@ export function Header() {
                     Construtor Virtual
                   </button>
                   <a 
-                    href="https://www.energiamaterna.com.br/gestando"
+                    href="https://www.energiamaterna.com.br/programas"
                     className="py-2 px-3 rounded-md transition-colors text-left flex items-center text-maternal-800 hover:bg-maternal-50"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -166,7 +162,6 @@ export function Header() {
                     Curso Gestando
                   </a>
                   
-                  {/* Add My Access button to mobile menu */}
                   {user && (
                     <button 
                       className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/meus-acessos') 

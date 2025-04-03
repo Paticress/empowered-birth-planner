@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { BookOpen, FileText, GraduationCap, User } from 'lucide-react';
@@ -42,7 +41,7 @@ export function DesktopNavigation() {
         Construtor Virtual
       </Link>
       <a 
-        href="https://www.energiamaterna.com.br/gestando" 
+        href="https://www.energiamaterna.com.br/programas" 
         className="text-maternal-800 hover:text-maternal-600 transition-colors flex items-center"
         target="_blank"
         rel="noopener noreferrer"
@@ -51,7 +50,6 @@ export function DesktopNavigation() {
         Curso Gestando
       </a>
       
-      {/* Add My Access link with conditional appearance based on login status */}
       {user && (
         <Link 
           to="/meus-acessos" 
