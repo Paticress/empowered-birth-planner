@@ -19,6 +19,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from '@vercel/analytics/react';
 import { SupabaseTest } from './components/SupabaseTest';
 import { WebhookTest } from './pages/WebhookTest';
+import NotFound from './pages/NotFound';
 
 function AppContent() {
   const location = useLocation();
@@ -40,6 +41,7 @@ function AppContent() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/test-supabase" element={<SupabaseTest />} />
         <Route path="/webhook-test" element={<WebhookTest />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
       <Analytics />

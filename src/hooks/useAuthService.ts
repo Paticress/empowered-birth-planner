@@ -36,7 +36,7 @@ export function useAuthService() {
     }
   };
 
-  const signInWithMagicLink = async (email: string, redirectPath = '/criar-plano') => {
+  const signInWithMagicLink = async (email: string, redirectPath = '/acesso-plano') => {
     try {
       const siteUrl = getCurrentSiteUrl();
       // Use absolute URL for the redirect target
@@ -46,7 +46,8 @@ export function useAuthService() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: redirectTo
+          emailRedirectTo: redirectTo,
+          shouldCreateUser: true
         }
       });
       return { error };
@@ -91,6 +92,13 @@ export function useAuthService() {
           } else if (data.session) {
             console.log("Magic link authentication successful");
             toast.success("Login realizado com sucesso!");
+            
+            // Store email in localStorage for compatibility with existing code
+            if (data.session.user?.email) {
+              localStorage.setItem('birthPlanLoggedIn', 'true');
+              localStorage.setItem('birthPlanEmail', data.session.user.email);
+            }
+            
             // Clear hash from URL without page reload
             window.history.replaceState(null, '', window.location.pathname + window.location.search);
           }

@@ -2,6 +2,7 @@
 import { MagicLinkForm } from '../forms/MagicLinkForm';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 export function MagicLinkTab() {
   const {
@@ -20,8 +21,8 @@ export function MagicLinkTab() {
     
     if (hasAuthParams) {
       console.log("Magic link authentication detected in tab");
-      // We'll handle this in useAuthService, but we can show a friendly message
       setIsMagicLinkSent(true);
+      toast.info("Processando sua autenticação...");
     }
   }, [setIsMagicLinkSent]);
 

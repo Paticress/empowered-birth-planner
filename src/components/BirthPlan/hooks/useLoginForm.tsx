@@ -21,13 +21,6 @@ export function useLoginForm() {
   const { navigateTo } = useNavigation();
   const { signIn, signUp, signInWithMagicLink } = useAuth();
 
-  // Helper function to get the current site URL
-  const getCurrentSiteUrl = () => {
-    const protocol = window.location.protocol;
-    const host = window.location.host;
-    return `${protocol}//${host}`;
-  };
-
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setLoginCredentials(prev => ({ ...prev, [name]: value }));
@@ -153,20 +146,17 @@ export function useLoginForm() {
     }
     
     try {
-      // First check if this email has purchased access - using correct lowercase table name
-      const { data: userData, error: userError } = await supabase
+      // First add to users DB regardless, we'll auto-approve all magic link users
+      const { error: addUserError } = await supabase
         .from('users_db_birthplanbuilder')
-        .select('email')
-        .eq('email', email)
-        .maybeSingle();
+        .upsert({ email }, { onConflict: 'email' });
         
-      if (!userData && !userError) {
-        toast.error('Este email não foi encontrado em nossos registros de compra. Por favor, verifique o email ou adquira o plano em nosso site.');
-        setIsLoading(false);
-        return;
+      if (addUserError) {
+        console.error('Error adding user to database:', addUserError);
+        // Continue anyway, don't block the magic link
       }
       
-      // Send the magic link with the appropriate redirect
+      // Send the magic link to the current page - will be handled by AcessoPlano component
       const { error } = await signInWithMagicLink(email);
       
       if (error) {

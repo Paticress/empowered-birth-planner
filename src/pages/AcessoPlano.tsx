@@ -5,37 +5,64 @@ import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigation } from "@/hooks/useNavigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AcessoPlano() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, session } = useAuth();
   const { navigateTo } = useNavigation();
   const [isProcessingAuth, setIsProcessingAuth] = useState(false);
   
   // Check if we're in the middle of magic link authentication
   useEffect(() => {
-    const hash = window.location.hash;
-    const hasAuthParams = hash && hash.includes('access_token');
+    const checkForAuthInUrl = async () => {
+      const hash = window.location.hash;
+      const hasAuthParams = hash && hash.includes('access_token');
+      
+      if (hasAuthParams) {
+        console.log("Authentication in progress via magic link...");
+        setIsProcessingAuth(true);
+        
+        try {
+          // Process the hash fragment
+          const { data, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error("Error processing magic link:", error);
+            toast.error("Erro ao processar o link mágico");
+            setIsProcessingAuth(false);
+            return;
+          }
+          
+          if (data.session) {
+            console.log("Magic link authentication successful:", data.session);
+            toast.success("Login realizado com sucesso!");
+            
+            // Small delay to ensure auth state is updated
+            setTimeout(() => {
+              navigateTo('/criar-plano');
+            }, 1500);
+          } else {
+            console.log("No session found after magic link auth");
+            setIsProcessingAuth(false);
+          }
+        } catch (err) {
+          console.error("Error during magic link auth:", err);
+          setIsProcessingAuth(false);
+        }
+      }
+    };
     
-    if (hasAuthParams) {
-      console.log("Authentication in progress via magic link...");
-      setIsProcessingAuth(true);
-      
-      // Give some time for auth to complete
-      const timer = setTimeout(() => {
-        setIsProcessingAuth(false);
-      }, 3000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, []);
+    checkForAuthInUrl();
+  }, [navigateTo]);
   
   // If user is already authenticated, redirect to birth plan builder
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && !isProcessingAuth && user && session) {
       console.log("User already authenticated, redirecting to birth plan builder");
       navigateTo('/criar-plano');
     }
-  }, [user, navigateTo, isLoading]);
+  }, [user, navigateTo, isLoading, isProcessingAuth, session]);
 
   if (isLoading || isProcessingAuth) {
     return (
