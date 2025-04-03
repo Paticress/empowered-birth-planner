@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { useAuthService } from '@/hooks/useAuthService';
 
@@ -26,11 +26,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     initializeAuth
   } = useAuthService();
+  
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const cleanup = initializeAuth();
-    return cleanup;
-  }, []);
+    if (!isInitialized) {
+      console.log("Setting up auth context");
+      const cleanup = initializeAuth();
+      setIsInitialized(true);
+      
+      return cleanup;
+    }
+  }, [isInitialized]);
+
+  // Debug auth state
+  useEffect(() => {
+    console.log("Auth context state:", { 
+      isAuthenticated: !!user, 
+      userEmail: user?.email,
+      isLoading 
+    });
+  }, [user, isLoading]);
 
   return (
     <AuthContext.Provider

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -58,6 +58,14 @@ export function useAuthService() {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      console.log("User signed out");
+      
+      // Clear localStorage after sign out
+      localStorage.removeItem('birthPlanLoggedIn');
+      localStorage.removeItem('birthPlanEmail');
+      
+      toast.success('Logout realizado com sucesso');
+      
     } catch (error) {
       console.error('Error signing out:', error);
       toast.error('Erro ao fazer logout');
@@ -65,7 +73,9 @@ export function useAuthService() {
   };
 
   const initializeAuth = () => {
-    // Set up auth state listener FIRST
+    console.log("Initializing auth service...");
+    
+    // Set up auth state listener FIRST (this is critical for the correct order)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log('Auth state changed:', event);
@@ -78,6 +88,7 @@ export function useAuthService() {
           if (currentSession?.user?.email) {
             localStorage.setItem('birthPlanLoggedIn', 'true');
             localStorage.setItem('birthPlanEmail', currentSession.user.email);
+            toast.success('Login realizado com sucesso');
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
@@ -90,11 +101,20 @@ export function useAuthService() {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      console.log("Initial session check:", initialSession ? "Session found" : "No session");
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
+      
+      // Also update localStorage for compatibility with existing code
+      if (initialSession?.user?.email) {
+        localStorage.setItem('birthPlanLoggedIn', 'true');
+        localStorage.setItem('birthPlanEmail', initialSession.user.email);
+      }
+      
       setIsLoading(false);
     });
 
+    // Return the cleanup function
     return () => {
       subscription.unsubscribe();
     };
