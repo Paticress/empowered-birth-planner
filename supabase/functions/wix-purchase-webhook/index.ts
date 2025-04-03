@@ -9,6 +9,8 @@ const corsHeaders = {
 
 serve(async (req) => {
   console.log("Webhook received - Method:", req.method);
+  console.log("Request URL:", req.url);
+  console.log("Request Headers:", JSON.stringify(Object.fromEntries(req.headers.entries()), null, 2));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -54,7 +56,10 @@ serve(async (req) => {
       console.log("Parsed webhook data:", JSON.stringify(webhookData));
     } catch (parseError) {
       console.error("Failed to parse JSON payload:", parseError);
-      return new Response(JSON.stringify({ error: 'Invalid JSON payload' }), {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid JSON payload',
+        rawBody: rawBody.substring(0, 200) + (rawBody.length > 200 ? '...' : '') // Log partial raw body for debugging
+      }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -63,6 +68,7 @@ serve(async (req) => {
     // Try multiple ways to extract email based on Wix webhook structure
     // We're checking multiple possible paths since we don't know the exact format
     let purchaserEmail = null;
+    console.log("Starting email extraction from payload");
     
     // Direct email property
     if (webhookData.email) {
@@ -88,6 +94,21 @@ serve(async (req) => {
     else if (webhookData.customer && webhookData.customer.email) {
       purchaserEmail = webhookData.customer.email;
       console.log("Found email in customer.email:", purchaserEmail);
+    }
+    // Check in buyer
+    else if (webhookData.buyer && webhookData.buyer.email) {
+      purchaserEmail = webhookData.buyer.email;
+      console.log("Found email in buyer.email:", purchaserEmail);
+    }
+    // Check in contact
+    else if (webhookData.contact && webhookData.contact.email) {
+      purchaserEmail = webhookData.contact.email;
+      console.log("Found email in contact.email:", purchaserEmail);
+    }
+    // Check in user
+    else if (webhookData.user && webhookData.user.email) {
+      purchaserEmail = webhookData.user.email;
+      console.log("Found email in user.email:", purchaserEmail);
     }
     
     // If we still don't have an email, look through all properties recursively
@@ -144,7 +165,8 @@ serve(async (req) => {
       console.error('Error inserting user:', error);
       return new Response(JSON.stringify({ 
         error: 'Failed to process purchase',
-        details: error.message
+        details: error.message,
+        emailFound: purchaserEmail
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -164,7 +186,7 @@ serve(async (req) => {
     console.error('Webhook processing error:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
-      details: error.message
+      details: error instanceof Error ? error.message : String(error)
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
