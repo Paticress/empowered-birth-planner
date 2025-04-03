@@ -1,29 +1,13 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
-import { MagicLinkForm } from './forms/MagicLinkForm';
-import { LoginForm } from './forms/LoginForm';
-import { SignupForm } from './forms/SignupForm';
-import { useLoginForm } from './hooks/useLoginForm';
+import { MagicLinkTab } from './tabs/MagicLinkTab';
+import { LoginTab } from './tabs/LoginTab';
+import { SignupTab } from './tabs/SignupTab';
+import { LoginCardFooter } from './components/LoginCardFooter';
 
 export function LoginCard() {
-  const {
-    loginCredentials,
-    signupCredentials,
-    magicLinkEmail,
-    isLoading,
-    isMagicLinkSent,
-    setMagicLinkEmail,
-    setIsMagicLinkSent,
-    handleLoginChange,
-    handleSignupChange,
-    handleLogin,
-    handleSignup,
-    handleMagicLinkSubmit
-  } = useLoginForm();
-
   return (
     <Card className="border-maternal-200 shadow-lg">
       <CardHeader className="text-center bg-maternal-100 border-b border-maternal-200">
@@ -44,47 +28,19 @@ export function LoginCard() {
           </TabsList>
           
           <TabsContent value="magic-link">
-            <MagicLinkForm 
-              magicLinkEmail={magicLinkEmail}
-              setMagicLinkEmail={setMagicLinkEmail}
-              isLoading={isLoading}
-              isMagicLinkSent={isMagicLinkSent}
-              setIsMagicLinkSent={setIsMagicLinkSent}
-              handleMagicLinkSubmit={handleMagicLinkSubmit}
-            />
+            <MagicLinkTab />
           </TabsContent>
           
           <TabsContent value="login">
-            <LoginForm 
-              loginCredentials={loginCredentials}
-              isLoading={isLoading}
-              handleLoginChange={handleLoginChange}
-              handleLogin={handleLogin}
-            />
+            <LoginTab />
           </TabsContent>
           
           <TabsContent value="signup">
-            <SignupForm 
-              signupCredentials={signupCredentials}
-              isLoading={isLoading}
-              handleSignupChange={handleSignupChange}
-              handleSignup={handleSignup}
-            />
+            <SignupTab />
           </TabsContent>
         </Tabs>
         
-        <div className="mt-6 text-center text-sm text-maternal-700">
-          <p>
-            Ainda não tem acesso? Adquira seu plano em nosso site.
-          </p>
-          <Button
-            variant="link"
-            className="text-maternal-600 hover:text-maternal-800"
-            onClick={() => window.open('https://www.energiamaterna.com.br', '_blank')}
-          >
-            Saiba mais
-          </Button>
-        </div>
+        <LoginCardFooter />
       </CardContent>
     </Card>
   );
