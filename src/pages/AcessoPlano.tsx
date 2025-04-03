@@ -17,11 +17,20 @@ export function AcessoPlano() {
   useEffect(() => {
     const checkForAuthInUrl = async () => {
       const hash = window.location.hash;
-      const hasAuthParams = hash && hash.includes('access_token');
+      const hasAuthParams = hash && (hash.includes('access_token') || hash.includes('error'));
       
       if (hasAuthParams) {
-        console.log("Authentication in progress via magic link...");
+        console.log("Authentication in progress via magic link...", { hash });
         setIsProcessingAuth(true);
+        
+        // Check if there's an error in the URL
+        if (hash.includes('error=')) {
+          const errorMessage = decodeURIComponent(hash.split('error=')[1].split('&')[0]);
+          console.error("Error in magic link authentication:", errorMessage);
+          toast.error("Erro ao processar o link mágico: " + errorMessage);
+          setIsProcessingAuth(false);
+          return;
+        }
         
         try {
           // Process the hash fragment
@@ -29,25 +38,47 @@ export function AcessoPlano() {
           
           if (error) {
             console.error("Error processing magic link:", error);
-            toast.error("Erro ao processar o link mágico");
+            toast.error("Erro ao processar o link mágico: " + error.message);
             setIsProcessingAuth(false);
             return;
           }
           
           if (data.session) {
             console.log("Magic link authentication successful:", data.session);
+            
+            // Make sure user is added to the database
+            try {
+              if (data.session.user?.email) {
+                const email = data.session.user.email;
+                
+                // Add user to database
+                const { error: insertError } = await supabase
+                  .from('users_db_birthplanbuilder')
+                  .upsert({ email }, { onConflict: 'email' });
+                  
+                if (insertError) {
+                  console.error("Error adding user to database:", insertError);
+                }
+              }
+            } catch (dbError) {
+              console.error("Error updating user database:", dbError);
+            }
+            
             toast.success("Login realizado com sucesso!");
             
-            // Small delay to ensure auth state is updated
+            // Remove hash from URL without reloading
             setTimeout(() => {
+              window.history.replaceState(null, "", window.location.pathname);
               navigateTo('/criar-plano');
             }, 1500);
           } else {
             console.log("No session found after magic link auth");
+            toast.error("Sessão de autenticação não encontrada");
             setIsProcessingAuth(false);
           }
         } catch (err) {
           console.error("Error during magic link auth:", err);
+          toast.error("Erro durante a autenticação com link mágico");
           setIsProcessingAuth(false);
         }
       }

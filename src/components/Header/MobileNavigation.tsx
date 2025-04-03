@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Menu, X, BookOpen, FileText, GraduationCap, User } from 'lucide-react';
@@ -78,6 +79,21 @@ export function MobileNavigation() {
               <GraduationCap className="h-4 w-4 mr-2" />
               Curso Gestando
             </a>
+            
+            {user && (
+              <button 
+                className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/meus-acessos') 
+                  ? 'bg-maternal-100 text-maternal-900 font-medium' 
+                  : 'text-maternal-800 hover:bg-maternal-50'}`}
+                onClick={() => {
+                  navigateTo('/meus-acessos');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <User className="h-4 w-4 mr-2" />
+                Meus Acessos
+              </button>
+            )}
           </nav>
         </div>
       </SheetContent>

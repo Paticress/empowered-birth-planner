@@ -3,7 +3,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { registerServiceWorker, updateServiceWorker } from './registerSW.tsx';
+import { registerServiceWorker, updateServiceWorker, unregisterServiceWorker } from './registerSW.tsx';
 
 // Performance monitoring
 const reportPerformance = () => {
@@ -28,25 +28,49 @@ const reportPerformance = () => {
   }
 };
 
-// Register service worker for offline capabilities
-registerServiceWorker();
-
-// Check for updates on schedule
-const checkForUpdates = () => {
-  updateServiceWorker();
-  
-  // Adaptive update interval - less frequent checks when app is stable
-  const nextInterval = localStorage.getItem('app-stable') ? 
-    120 * 60 * 1000 : // 2 hours if app is stable
-    30 * 60 * 1000;   // 30 minutes on new deployments
-  
-  setTimeout(checkForUpdates, nextInterval);
+// Try to handle service worker errors gracefully
+const setupServiceWorker = () => {
+  try {
+    // Check if we're in dev mode or debugging
+    const isDevMode = process.env.NODE_ENV === 'development';
+    const isDebugMode = new URLSearchParams(window.location.search).has('debug');
+    
+    if (isDevMode || isDebugMode) {
+      // During development, unregister service workers to avoid caching issues
+      console.log('Development mode: Unregistering service workers...');
+      unregisterServiceWorker();
+    } else {
+      // In production, register the service worker
+      console.log('Production mode: Registering service worker...');
+      registerServiceWorker();
+      
+      // Set up periodic updates for the service worker
+      const checkForUpdates = () => {
+        updateServiceWorker();
+        
+        // Adaptive update interval - less frequent checks when app is stable
+        const nextInterval = localStorage.getItem('app-stable') ? 
+          120 * 60 * 1000 : // 2 hours if app is stable
+          30 * 60 * 1000;   // 30 minutes on new deployments
+        
+        setTimeout(checkForUpdates, nextInterval);
+      };
+      
+      // Start update checking after initial load
+      setTimeout(checkForUpdates, 5 * 60 * 1000);
+    }
+  } catch (error) {
+    console.error('Service worker setup failed:', error);
+  }
 };
 
-// Start update checking after initial load - wait for initial load to complete
+// Initialize the app
 window.addEventListener('load', () => {
   // Measure and report performance
   setTimeout(reportPerformance, 3000);
+  
+  // Set up service worker (with error handling)
+  setupServiceWorker();
   
   // Mark app as stable after first week of use
   const firstUse = localStorage.getItem('first-use-date');
@@ -58,13 +82,7 @@ window.addEventListener('load', () => {
       localStorage.setItem('app-stable', 'true');
     }
   }
-  
-  // Start update checking
-  setTimeout(checkForUpdates, 5 * 60 * 1000);
 });
-
-// Log React version to help with debugging
-console.log(`React version: ${React.version}`);
 
 // Initialize React
 ReactDOM.createRoot(document.getElementById('root')!).render(
