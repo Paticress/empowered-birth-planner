@@ -75,29 +75,32 @@ const handleAuthRedirects = () => {
     const fullUrl = window.location.href;
     const { hash, pathname, search } = window.location;
     
-    console.log("URL check on page load:", { pathname, hash: hash ? "present" : "none", search: search ? "present" : "none" });
+    console.log("URL check on page load:", { 
+      pathname, 
+      hash: hash ? "present" : "none", 
+      search: search ? "present" : "none" 
+    });
     
     // Detect auth parameters in URL (both hash and search params)
     const hasAuthInHash = hash && hash.includes('access_token=');
     const hasAuthInSearch = search && search.includes('access_token=');
     
     if (hasAuthInHash || hasAuthInSearch) {
-      console.log("Auth token detected in URL");
+      console.log("Auth token detected in URL on page load");
       
       // Special case: If we're not on the login page but have auth params,
       // redirect to login page while preserving auth data
       if (pathname !== '/acesso-plano') {
         let redirectPath = '/acesso-plano';
         
+        // Preserve the format of the auth token (hash or search)
         if (hasAuthInHash) {
-          redirectPath += hash;
-        } else if (hasAuthInSearch) {
-          redirectPath += search;
+          console.log("Auth in hash: redirecting to login page with hash preserved");
+          window.location.replace(redirectPath + hash);
+        } else {
+          console.log("Auth in search: redirecting to login page with search params preserved");
+          window.location.replace(redirectPath + search);
         }
-        
-        console.log("Redirecting auth flow to login page:", redirectPath);
-        // Use direct location change for reliable auth handling
-        window.location.replace(redirectPath);
         return;
       }
       

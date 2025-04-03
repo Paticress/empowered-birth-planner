@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,65 +6,76 @@
   <title>Redirecionando...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript">
-    // Improved SPA routing handler for 404 pages with better handling of auth redirects
+    // Enhanced SPA routing handler for 404 pages with improved auth handling
     (function() {
       try {
+        // Extract all parts of the current URL
         var l = window.location;
-        var href = l.href || '';
+        var fullUrl = l.href || '';
+        var host = l.host || '';
         var pathname = l.pathname || '';
         var search = l.search || '';
         var hash = l.hash || '';
         
-        console.log('404 handler running with:', {pathname, search, hash});
+        console.log('404 handler analyzing URL:', {
+          fullUrl: fullUrl,
+          host: host,
+          pathname: pathname,
+          search: search ? 'present' : 'none',
+          hash: hash ? 'present' : 'none'
+        });
         
-        // Special handling for authentication URLs with tokens
-        if (href.includes('access_token=')) {
-          console.log('Auth token detected in URL');
+        // CRITICAL: Handle authentication tokens in URL - look for access_token in both search and hash
+        if (fullUrl.includes('access_token=')) {
+          console.log('Auth token detected in URL - preparing redirect to login page');
           
-          // Always redirect to the login page with the auth parameters
-          var redirectUrl = '/acesso-plano';
+          // Always redirect to the main login page
+          var loginPath = '/acesso-plano';
           
-          // We need to preserve the original format of the token
-          // If it's in the hash, keep it as hash, if in query params, keep as query params
+          // First, determine if token is in hash or search params
           if (hash && hash.includes('access_token=')) {
-            redirectUrl += hash;
+            console.log('Token found in hash - maintaining hash format');
+            // Token is in hash fragment - preserve it
+            window.location.replace(loginPath + hash);
           } else if (search && search.includes('access_token=')) {
-            redirectUrl += search;
+            console.log('Token found in search params - maintaining query format');
+            // Token is in search parameters - preserve it
+            window.location.replace(loginPath + search);
           } else {
-            // Fallback: look for token in full URL
-            var tokenPart = href.substring(href.indexOf('access_token='));
-            if (tokenPart.includes('&')) {
-              tokenPart = tokenPart.substring(0, tokenPart.indexOf('&'));
-            }
+            // Fallback - extract token portion from full URL
+            console.log('Token found in URL but not in standard location - extracting');
+            var tokenStartIndex = fullUrl.indexOf('access_token=');
+            var tokenPart = fullUrl.substring(tokenStartIndex);
             
-            // Determine if we should add it as a hash or search param
-            if (href.indexOf('#access_token=') >= 0) {
-              redirectUrl += '#' + tokenPart;
+            // Determine if it should be a hash or search parameter
+            if (fullUrl.indexOf('#access_token=') >= 0) {
+              window.location.replace(loginPath + '#' + tokenPart);
             } else {
-              redirectUrl += '?' + tokenPart;
+              window.location.replace(loginPath + '?' + tokenPart);
             }
           }
-          
-          console.log('Redirecting to:', redirectUrl);
-          l.replace(redirectUrl);
           return;
         }
         
-        // Standard SPA routing fixes for specific paths
-        if (pathname === '/acesso-plano' || pathname.startsWith('/acesso-plano/')) {
+        // For non-auth paths, handle standard SPA routing
+        // Take the pathname and redirect to the appropriate SPA route
+        if (pathname.includes('/acesso-plano')) {
+          // Handle /acesso-plano path and its subpaths
           l.replace('/acesso-plano' + search + hash);
-        } else if (pathname === '/criar-plano' || pathname.startsWith('/criar-plano/')) {
+        } else if (pathname.includes('/criar-plano')) {
+          // Handle /criar-plano path and its subpaths
           l.replace('/criar-plano' + search + hash);
-        } else if (pathname === '/guia-online' || pathname.startsWith('/guia-online/')) {
+        } else if (pathname.includes('/guia-online')) {
+          // Handle /guia-online path and its subpaths
           l.replace('/guia-online' + search + hash);
         } else {
-          // For any other path, go to home
+          // Default: redirect to home
           l.replace('/' + search + hash);
         }
       } catch (error) {
         console.error('Error in 404 redirect script:', error);
-        // Fallback to home page if anything goes wrong
-        window.location.href = '/';
+        // Fallback to home page on any error
+        window.location.replace('/');
       }
     })();
   </script>
@@ -82,10 +94,23 @@
       text-align: center;
       padding: 20px;
     }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 20px;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #7983ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
   <div class="message">
+    <div class="spinner"></div>
     <h1>Redirecionando...</h1>
     <p>Aguarde enquanto redirecionamos você para o Guia de Plano de Parto.</p>
   </div>

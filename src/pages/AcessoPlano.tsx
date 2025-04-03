@@ -28,7 +28,8 @@ export function AcessoPlano() {
         const hasError = (hash && hash.includes('error=')) || (search && search.includes('error='));
         
         if (hasAuthInHash || hasAuthInSearch || hasError) {
-          console.log("Auth parameters detected in URL:", { 
+          console.log("Auth parameters detected in AcessoPlano:", { 
+            fullUrl: fullUrl.substring(0, fullUrl.indexOf('access_token=')) + 'access_token=***',
             hasAuthInHash,
             hasAuthInSearch,
             hasError,
@@ -60,6 +61,9 @@ export function AcessoPlano() {
             return;
           }
           
+          // Wait a short moment to ensure Supabase has processed the token
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           // Process Supabase authentication
           const { data, error } = await supabase.auth.getSession();
           
@@ -74,7 +78,10 @@ export function AcessoPlano() {
           }
           
           if (data.session) {
-            console.log("Authentication successful:", data.session.user?.email);
+            console.log("Authentication successful:", {
+              email: data.session.user?.email,
+              authEvent: 'magic_link'
+            });
             
             // Ensure user is in the database
             try {
@@ -101,9 +108,13 @@ export function AcessoPlano() {
             // Clean URL before redirecting
             window.history.replaceState(null, "", window.location.pathname);
             
-            // Redirect to criar-plano page
-            console.log("Redirecting to criar-plano after successful auth");
-            window.location.href = '/criar-plano';
+            // Short delay to allow toast to be seen
+            setTimeout(() => {
+              // Redirect to criar-plano page
+              console.log("Redirecting to criar-plano after successful auth");
+              // Use direct location change to ensure clean navigation
+              window.location.href = '/criar-plano';
+            }, 1000);
             return;
           } else {
             console.log("No session found after processing auth parameters");
@@ -124,6 +135,7 @@ export function AcessoPlano() {
       }
     };
     
+    // Only run this when the component mounts or when URL changes
     checkForAuthInUrl();
   }, [navigateTo]);
   
@@ -131,6 +143,7 @@ export function AcessoPlano() {
   useEffect(() => {
     if (!isLoading && !isProcessingAuth && user && session) {
       console.log("User already authenticated, redirecting to birth plan builder");
+      // Use a direct location change for more reliable navigation
       window.location.href = '/criar-plano';
     }
   }, [user, navigateTo, isLoading, isProcessingAuth, session]);

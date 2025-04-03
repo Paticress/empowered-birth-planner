@@ -11,34 +11,40 @@ export const useNavigation = () => {
   const navigateTo = (path: string) => {
     // Special handling for URLs with auth data (access_token)
     if (path.includes('access_token=')) {
-      console.log("Detected auth data in navigation target");
+      console.log("Detected auth data in navigation target:", {
+        path: path.substring(0, path.indexOf('access_token=')) + 'access_token=***'
+      });
       
-      // Always direct auth links to the login page
-      const basePath = '/acesso-plano';
+      // Always navigate to the login page for auth-related URLs
+      const loginPath = '/acesso-plano';
       
       // For URLs with auth tokens in the hash fragment
       if (path.includes('#access_token=')) {
         const hashFragment = path.substring(path.indexOf('#'));
-        console.log(`Auth redirect: ${basePath} with hash fragment`);
-        // Use direct location change for more reliable auth handling
-        window.location.href = basePath + hashFragment;
+        console.log(`Auth redirect: ${loginPath} with hash fragment`);
+        
+        // Use window.location.href for more reliable auth handling with hash fragments
+        window.location.href = loginPath + hashFragment;
         return;
       }
       
       // For URLs with auth tokens in the query parameters
       if (path.includes('?access_token=')) {
         const queryParams = path.substring(path.indexOf('?'));
-        console.log(`Auth redirect: ${basePath} with query params`);
-        // Use direct location change for more reliable auth handling
-        window.location.href = basePath + queryParams;
+        console.log(`Auth redirect: ${loginPath} with query params`);
+        
+        // Use window.location.href for more reliable auth handling with query params
+        window.location.href = loginPath + queryParams;
         return;
       }
       
-      // Fallback case - just append entire token part to the login page
+      // Extract token part from path if in non-standard format
       const tokenIndex = path.indexOf('access_token=');
       const tokenPart = path.substring(tokenIndex);
-      console.log(`Auth redirect fallback: ${basePath} with token appended`);
-      window.location.href = `${basePath}?${tokenPart}`;
+      console.log(`Auth redirect fallback: ${loginPath} with token appended`);
+      
+      // Use window.location.href for more reliable auth handling
+      window.location.href = `${loginPath}?${tokenPart}`;
       return;
     }
     

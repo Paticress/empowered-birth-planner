@@ -4,7 +4,6 @@ import { useLoginForm } from '../hooks/useLoginForm';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigation } from '@/hooks/useNavigation';
 
 export function MagicLinkTab() {
   const {
@@ -17,9 +16,8 @@ export function MagicLinkTab() {
   } = useLoginForm();
   
   const { user, isAuthenticated } = useAuth();
-  const { navigateTo } = useNavigation();
 
-  // Check for magic link authentication in URL
+  // Check for magic link authentication in URL without redirecting
   useEffect(() => {
     // Check both hash fragments and query parameters for auth tokens
     const hash = window.location.hash;
@@ -29,15 +27,15 @@ export function MagicLinkTab() {
       (search && search.includes('access_token='));
     
     if (hasAuthParams) {
-      console.log("Magic link authentication detected in tab", {
+      console.log("Magic link authentication detected in MagicLinkTab", {
         hash: hash ? 'present' : 'absent',
         search: search ? 'present' : 'absent'
       });
+      
+      // Just update the UI state to show that we've received the magic link
+      // The actual auth processing happens in AcessoPlano component
       setIsMagicLinkSent(true);
       toast.info("Processando sua autenticação...");
-      
-      // No need to redirect here - let the AcessoPlano component handle this
-      // This prevents duplicate redirects that could cause loops
     }
   }, [setIsMagicLinkSent]);
 
