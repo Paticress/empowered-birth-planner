@@ -13,8 +13,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react({
-        // Use standard React refresh configuration
-        // fastRefresh was causing problems
+        // Use standard React refresh configuration without explicit fastRefresh option
       }),
       mode === 'development' && componentTagger(),
     ].filter(Boolean),
