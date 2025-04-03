@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Footer } from '@/components/Footer';
 import { useNavigation } from '@/hooks/useNavigation';
-import { CreditCard, Landmark, QrCode } from 'lucide-react';
+import { CreditCard, Landmark, QrCode, Bug } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface PaymentGateProps {
   onPaymentComplete: () => void;
@@ -11,7 +12,10 @@ interface PaymentGateProps {
 
 export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+  const [testEmail, setTestEmail] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { navigateTo } = useNavigation();
+  const { toast } = useToast();
   
   // This is a placeholder for demonstration purposes
   // In a real implementation, this would connect to a payment gateway
@@ -20,6 +24,59 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
     setTimeout(() => {
       onPaymentComplete();
     }, 1500);
+  };
+  
+  // Debug function to test the webhook directly
+  const testWebhook = async () => {
+    if (!testEmail.trim() || !testEmail.includes('@')) {
+      toast({
+        title: "Email inválido",
+        description: "Por favor, informe um email válido para o teste.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Test the webhook with a sample payload mimicking the Wix structure
+      const response = await fetch('https://xzgbdaejjcdusbtwejom.functions.supabase.co/wix-purchase-webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: {
+            email: testEmail
+          }
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Teste bem-sucedido!",
+          description: `Webhook processado: ${result.message}`,
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "Erro no teste",
+          description: `Erro: ${result.error || 'Desconhecido'}`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Falha na conexão",
+        description: `Não foi possível conectar ao webhook: ${error instanceof Error ? error.message : String(error)}`,
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (
@@ -141,6 +198,33 @@ export function PaymentGate({ onPaymentComplete }: PaymentGateProps) {
             <p className="text-sm text-center text-gray-500 mt-4">
               Pagamento único e seguro. Acesso imediato após confirmação.
             </p>
+            
+            {/* Webhook Test Section - For Development Only */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-8 p-4 border border-dashed border-gray-300 rounded-lg">
+                <h4 className="text-sm font-semibold flex items-center">
+                  <Bug className="w-4 h-4 mr-1" /> Ferramenta de Teste (Apenas Desenvolvimento)
+                </h4>
+                <div className="mt-2">
+                  <input
+                    type="email"
+                    placeholder="Email para teste"
+                    className="border p-2 rounded w-full mb-2"
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                  />
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={testWebhook}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Testando...' : 'Testar Webhook Diretamente'}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

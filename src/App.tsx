@@ -1,71 +1,53 @@
-
-import React from "react";
-import { Toaster } from "@/components/ui/sonner"; // Make sure this import is correct
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate, HashRouter } from "react-router-dom";
-import NotFound from "./pages/NotFound";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
+import { Home } from "./pages/Home";
+import { GuiaOnline } from "./pages/GuiaOnline";
+import { BirthPlan } from "./pages/BirthPlan";
+import { AcessoPlano } from "./pages/AcessoPlano";
+import { CriarPlano } from "./pages/CriarPlano";
+import { PaymentSuccess } from "./pages/PaymentSuccess";
+import { PaymentCancel } from "./pages/PaymentCancel";
 import { AuthProvider } from "./contexts/AuthContext";
+import { Toaster } from "@/components/ui/toaster";
+import { Analytics } from '@vercel/analytics/react';
+import { SupabaseTest } from './components/SupabaseTest';
 
-// Pages
-import { OnlineGuide } from "./components/Guide/OnlineGuide";
-import GuiaGratuito from "./pages/GuiaGratuito";
-import { BirthPlanBuilder } from "./components/BirthPlan/BirthPlanBuilder";
-import { BirthPlanSuccess } from "./components/BirthPlan/BirthPlanSuccess";
-import { LoginPage } from "./components/BirthPlan/LoginPage";
+function AppContent() {
+  const location = useLocation();
+  // Conditionally apply the background class based on the route
+  const isBirthPlanRoute = location.pathname.startsWith('/criar-plano');
+  const backgroundClass = isBirthPlanRoute ? 'bg-maternal-100' : 'bg-white';
 
-// Enhanced log for debugging
-console.log("APP COMPONENT INITIALIZING - SETTING UP ROUTES");
-
-const App = () => {
-  console.log("APP COMPONENT RENDERING");
-  
-  // Move QueryClient inside the component
-  const queryClient = new QueryClient();
-  
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <HashRouter>
-            <Routes>
-              {/* Página inicial redireciona para o guia online */}
-              <Route path="/" element={<Navigate to="/guia-online" replace />} />
-              
-              {/* Rotas do Guia (acesso livre) */}
-              <Route path="/guia-online" element={<OnlineGuide />} />
-              <Route path="/guia-gratuito" element={<GuiaGratuito />} />
-              
-              {/* Rotas do Plano de Parto (acesso restrito) */}
-              <Route path="/acesso-plano" element={<LoginPage />} />
-              <Route 
-                path="/criar-plano" 
-                element={
-                  <>
-                    {console.log("ROUTE /criar-plano ACCESSED - RENDERING BIRTH PLAN BUILDER")}
-                    <BirthPlanBuilder />
-                  </>
-                } 
-              />
-              <Route 
-                path="/plano-concluido" 
-                element={
-                  <>
-                    {console.log("ROUTE /plano-concluido ACCESSED - RENDERING SUCCESS PAGE")}
-                    <BirthPlanSuccess />
-                  </>
-                } 
-              />
-              
-              {/* Rota de fallback para páginas não encontradas */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </HashRouter>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <div className={`min-h-screen ${backgroundClass}`}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/guia-online" element={<GuiaOnline />} />
+        <Route path="/plano-de-parto" element={<BirthPlan />} />
+        <Route path="/acesso-plano" element={<AcessoPlano />} />
+        <Route path="/criar-plano" element={<CriarPlano />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancel" element={<PaymentCancel />} />
+        <Route path="/test-supabase" element={<SupabaseTest />} />
+      </Routes>
+      <Toaster />
+      <Analytics />
+    </div>
   );
-};
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
+  );
+}
 
 export default App;
