@@ -21,8 +21,11 @@ export function MagicLinkTab() {
 
   // Check for magic link authentication in URL
   useEffect(() => {
+    // Check both hash fragments and query parameters for auth tokens
     const hash = window.location.hash;
-    const hasAuthParams = hash && hash.includes('access_token');
+    const search = window.location.search;
+    const hasAuthParams = (hash && hash.includes('access_token')) || 
+                          (search && search.includes('access_token'));
     
     if (hasAuthParams) {
       console.log("Magic link authentication detected in tab");
@@ -34,7 +37,6 @@ export function MagicLinkTab() {
         console.log("User already authenticated, redirecting to birth plan builder");
         // Add a short delay to ensure auth state is fully processed
         setTimeout(() => {
-          // Use window.location directly to ensure a clean navigation
           window.location.href = '/criar-plano';
         }, 1500);
       }

@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 
 /**
@@ -9,19 +10,28 @@ export const useNavigation = () => {
   
   const navigateTo = (path: string) => {
     // Special handling for URLs with hash fragments containing auth data
-    if (path.includes('#access_token=')) {
-      console.log("Detected auth hash in navigation target, processing carefully");
+    if (path.includes('#access_token=') || path.includes('access_token=')) {
+      console.log("Detected auth data in navigation target, processing carefully");
       
-      // Extract the base path without the hash
-      const basePath = path.split('#')[0] || '/acesso-plano';
+      // For URLs with auth tokens in the hash fragment
+      if (path.includes('#access_token=')) {
+        const basePath = '/acesso-plano';
+        const hashFragment = path.includes('#') ? path.substring(path.indexOf('#')) : '';
+        
+        console.log(`Redirecting to ${basePath} with auth hash preserved`);
+        window.location.href = basePath + hashFragment;
+        return;
+      }
       
-      // Keep the hash fragment for auth processing
-      const hashFragment = path.includes('#') ? path.substring(path.indexOf('#')) : '';
-      
-      // Use the base path but preserve the hash
-      console.log(`Navigating to ${basePath} with auth hash preserved`);
-      window.location.href = basePath + hashFragment;
-      return;
+      // For URLs with auth tokens in the query parameters
+      if (path.includes('access_token=')) {
+        const basePath = '/acesso-plano';
+        const queryParams = path.includes('?') ? path.substring(path.indexOf('?')) : '';
+        
+        console.log(`Redirecting to ${basePath} with auth query params preserved`);
+        window.location.href = basePath + queryParams;
+        return;
+      }
     }
     
     // Normal navigation path (non-auth related)

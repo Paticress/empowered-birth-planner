@@ -16,16 +16,28 @@ export function AcessoPlano() {
   // Check if we're in the middle of magic link authentication
   useEffect(() => {
     const checkForAuthInUrl = async () => {
+      // Check both hash fragments and query parameters for auth tokens
       const hash = window.location.hash;
-      const hasAuthParams = hash && (hash.includes('access_token') || hash.includes('error'));
+      const search = window.location.search;
+      const hasAuthParams = (hash && (hash.includes('access_token') || hash.includes('error'))) || 
+                           (search && (search.includes('access_token') || search.includes('error')));
       
       if (hasAuthParams) {
-        console.log("Authentication in progress via magic link...", { hash });
+        console.log("Authentication in progress via magic link...", { hash, search });
         setIsProcessingAuth(true);
         
         // Check if there's an error in the URL
-        if (hash.includes('error=')) {
-          const errorMessage = decodeURIComponent(hash.split('error=')[1].split('&')[0]);
+        const errorInHash = hash.includes('error=');
+        const errorInSearch = search.includes('error=');
+        
+        if (errorInHash || errorInSearch) {
+          let errorMessage;
+          if (errorInHash) {
+            errorMessage = decodeURIComponent(hash.split('error=')[1].split('&')[0]);
+          } else {
+            errorMessage = decodeURIComponent(search.split('error=')[1].split('&')[0]);
+          }
+          
           console.error("Error in magic link authentication:", errorMessage);
           toast.error("Erro ao processar o link mágico: " + errorMessage);
           setIsProcessingAuth(false);
@@ -36,7 +48,7 @@ export function AcessoPlano() {
         }
         
         try {
-          // Process the hash fragment
+          // Process the authentication parameters
           const { data, error } = await supabase.auth.getSession();
           
           if (error) {
@@ -72,10 +84,10 @@ export function AcessoPlano() {
             
             toast.success("Login realizado com sucesso!");
             
-            // Remove hash from URL without reloading and redirect
+            // Remove auth parameters from URL without reloading
             window.history.replaceState(null, "", window.location.pathname);
             
-            // Use a direct location change instead of navigateTo to ensure a clean navigation
+            // Use a direct location change for more reliable redirection
             window.location.href = '/criar-plano';
             return;
           } else {

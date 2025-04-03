@@ -74,13 +74,26 @@ const fixHashRouting = () => {
     // Get current URL parts
     const { hash, pathname, search } = window.location;
     
-    // Special handling for authentication hashes (don't modify these)
-    if (hash.includes('access_token=') || hash.includes('type=recovery')) {
-      console.log("Auth hash detected, not modifying URL");
+    // Special handling for authentication data
+    const hasAuthData = (hash && (hash.includes('access_token=') || hash.includes('type=recovery'))) ||
+                        (search && search.includes('access_token='));
+    
+    if (hasAuthData) {
+      console.log("Auth data detected, processing special redirect");
+      
+      // Always redirect auth data to the login page
+      if (pathname !== '/acesso-plano') {
+        const authRedirectUrl = '/acesso-plano' + search + hash;
+        console.log("Redirecting auth data to login page:", authRedirectUrl);
+        window.location.href = authRedirectUrl;
+        return;
+      }
+      
+      console.log("Already on the correct page for auth processing");
       return;
     }
     
-    // Check if we have a regular hash route that needs to be fixed
+    // Standard hash route fixing (non-auth related)
     if (hash.startsWith('#/') && pathname === '/') {
       // Remove the hash and navigate to the clean path
       const path = hash.substring(1); // Remove the # character
@@ -97,7 +110,7 @@ const fixHashRouting = () => {
 // Initialize the app with better error handling
 window.addEventListener('load', () => {
   try {
-    // Fix any hash-based routes first (but not auth hashes)
+    // Fix any hash-based routes first
     fixHashRouting();
     
     // Then measure and report performance

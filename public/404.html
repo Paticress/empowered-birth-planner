@@ -12,37 +12,38 @@
         var l = window.location;
         var hostname = l.hostname;
         var pathname = l.pathname;
-        var search = l.search;
-        var hash = l.hash;
+        var search = l.search || '';
+        var hash = l.hash || '';
         
         console.log('404 handler running with:', {hostname, pathname, search, hash});
         
-        // Special handling for authentication URLs with hash fragments
-        if (hash && hash.includes('access_token')) {
-          console.log('Auth redirect detected in hash, preserving hash fragment');
-          // For auth redirects, preserve the hash and just fix the pathname if needed
-          if (pathname !== '/acesso-plano' && pathname !== '/') {
-            l.replace('/' + hash);
-          }
-          return; // Don't continue with normal redirect handling
+        // Special handling for authentication URLs with tokens
+        var hasAuthToken = (search.includes('access_token') || hash.includes('access_token'));
+        
+        if (hasAuthToken) {
+          console.log('Auth token detected, redirecting to login page with auth data');
+          
+          // Always redirect to the login page with the auth parameters
+          var redirectPath = '/acesso-plano';
+          
+          // Preserve both query parameters and hash fragments
+          var fullRedirectUrl = redirectPath + search + hash;
+          
+          console.log('Redirecting to:', fullRedirectUrl);
+          l.replace(fullRedirectUrl);
+          return;
         }
         
         // Make the redirection more reliable by being explicit
-        if (hostname === 'planodeparto.energiamaterna.com.br') {
-          // For official domain, handle common paths
-          if (pathname === '/acesso-plano' || pathname.startsWith('/acesso-plano/')) {
-            l.replace('/acesso-plano');
-          } else if (pathname === '/criar-plano' || pathname.startsWith('/criar-plano/')) {
-            l.replace('/criar-plano');
-          } else if (pathname === '/guia-online' || pathname.startsWith('/guia-online/')) {
-            l.replace('/guia-online');
-          } else {
-            // For any other path, go to home
-            l.replace('/');
-          }
+        if (pathname === '/acesso-plano' || pathname.startsWith('/acesso-plano/')) {
+          l.replace('/acesso-plano' + search + hash);
+        } else if (pathname === '/criar-plano' || pathname.startsWith('/criar-plano/')) {
+          l.replace('/criar-plano' + search + hash);
+        } else if (pathname === '/guia-online' || pathname.startsWith('/guia-online/')) {
+          l.replace('/guia-online' + search + hash);
         } else {
-          // For development or other domains, redirect to home page
-          l.replace('/');
+          // For any other path, go to home
+          l.replace('/' + search + hash);
         }
       } catch (error) {
         console.error('Error in 404 redirect script:', error);
