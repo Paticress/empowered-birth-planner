@@ -9,6 +9,13 @@ export function useAuthService() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Helper function to get the current site URL
+  const getCurrentSiteUrl = () => {
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    return `${protocol}//${host}`;
+  };
+
   const signIn = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -31,10 +38,14 @@ export function useAuthService() {
 
   const signInWithMagicLink = async (email: string) => {
     try {
+      const siteUrl = getCurrentSiteUrl();
+      const redirectTo = `${siteUrl}/criar-plano`;
+      console.log("Magic link will redirect to:", redirectTo);
+      
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: window.location.origin + '/criar-plano'
+          emailRedirectTo: redirectTo
         }
       });
       return { error };

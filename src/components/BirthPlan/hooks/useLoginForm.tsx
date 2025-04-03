@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +20,13 @@ export function useLoginForm() {
   const [isMagicLinkSent, setIsMagicLinkSent] = useState(false);
   const { navigateTo } = useNavigation();
   const { signIn, signUp } = useAuth();
+
+  // Helper function to get the current site URL
+  const getCurrentSiteUrl = () => {
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    return `${protocol}//${host}`;
+  };
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -158,11 +166,16 @@ export function useLoginForm() {
         return;
       }
       
-      // Send the magic link
+      // Get current site URL for the redirect
+      const siteUrl = getCurrentSiteUrl();
+      const redirectTo = `${siteUrl}/criar-plano`;
+      console.log("Using redirect URL:", redirectTo);
+      
+      // Send the magic link with dynamic redirect URL
       const { error } = await supabase.auth.signInWithOtp({
         email: email,
         options: {
-          emailRedirectTo: window.location.origin + '/criar-plano'
+          emailRedirectTo: redirectTo
         }
       });
       
