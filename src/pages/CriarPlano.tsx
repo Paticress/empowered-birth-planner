@@ -9,7 +9,7 @@ export function CriarPlano() {
       <Header />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
-          <BirthPlanBuilder isEditing={true} />
+          <BirthPlanBuilder />
         </div>
       </main>
       <Footer />

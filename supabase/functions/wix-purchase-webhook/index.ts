@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
@@ -102,7 +101,7 @@ serve(async (req) => {
 
     console.log(`📣 Attempting to insert email "${purchaserEmail}" into users_db_birthplanbuilder table`);
     
-    // Insert the email into the users_db_birthplanbuilder table
+    // Insert the email into the users_db_birthplanbuilder table - using correct lowercase table name
     const { data, error } = await supabase
       .from('users_db_birthplanbuilder')
       .upsert({ 

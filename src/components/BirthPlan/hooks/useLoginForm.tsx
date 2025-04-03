@@ -44,9 +44,9 @@ export function useLoginForm() {
     } else {
       toast.success('Login realizado com sucesso!');
       
-      // Check if user is in the allowed users table
+      // Check if user is in the allowed users table - using correct lowercase table name
       const { data: userData, error: userError } = await supabase
-        .from('Users_DB_BirthPlanBuilder')
+        .from('users_db_birthplanbuilder')
         .select('email')
         .eq('email', email)
         .maybeSingle();
@@ -59,9 +59,9 @@ export function useLoginForm() {
       if (userData) {
         navigateTo('/criar-plano');
       } else {
-        // Add the user to the database (they've paid)
+        // Add the user to the database (they've paid) - using correct lowercase table name
         const { error: insertError } = await supabase
-          .from('Users_DB_BirthPlanBuilder')
+          .from('users_db_birthplanbuilder')
           .insert({ email });
           
         if (insertError) {
@@ -130,9 +130,9 @@ export function useLoginForm() {
     }
     
     try {
-      // First check if this email has purchased access
+      // First check if this email has purchased access - using correct lowercase table name
       const { data: userData, error: userError } = await supabase
-        .from('Users_DB_BirthPlanBuilder')
+        .from('users_db_birthplanbuilder')
         .select('email')
         .eq('email', email)
         .maybeSingle();

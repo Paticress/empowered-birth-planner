@@ -50,9 +50,9 @@ export function CheckoutSection({ onBackToInfo, onGoBack, price = 97 }: Checkout
         throw new Error(authError.message);
       }
       
-      // Then add them to the birth plan users table
+      // Then add them to the birth plan users table - using correct lowercase table name
       const { error: dbError } = await supabase
-        .from('Users_DB_BirthPlanBuilder')
+        .from('users_db_birthplanbuilder')
         .insert({ email });
         
       if (dbError) {

@@ -42,9 +42,9 @@ export function BirthPlanBuilder() {
         return;
       }
       
-      // Check if the user is in the authorized users table
+      // Check if the user is in the authorized users table - using correct lowercase table name
       const { data, error } = await supabase
-        .from('Users_DB_BirthPlanBuilder')
+        .from('users_db_birthplanbuilder')
         .select('email')
         .eq('email', user.email)
         .maybeSingle();
