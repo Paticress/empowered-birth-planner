@@ -68,85 +68,51 @@ const setupServiceWorker = () => {
   }
 };
 
-// Improved hash/auth handling for SPA routing with better magic link support
-const handleAuthRedirects = () => {
+// Special handling for auth tokens in the URL path
+const handleAuthTokens = () => {
   try {
-    // Get current URL parts
     const fullUrl = window.location.href;
-    const { hash, pathname, search } = window.location;
+    const pathname = window.location.pathname;
     
-    console.log("URL check on page load:", { 
-      pathname, 
-      hash: hash ? "present" : "none", 
-      search: search ? "present" : "none",
-      fullUrl: fullUrl.includes('access_token') ? 'contains-auth-token' : 'normal-url'
-    });
-    
-    // Special case for magic links with access_token in the path
-    if (pathname.includes('access_token=')) {
-      console.log("Token found in URL path - fixing format");
+    // Check if auth token is in direct path or unusual format
+    if (pathname.includes('access_token=') || 
+        (fullUrl.includes('access_token=') && 
+         !window.location.hash.includes('access_token=') && 
+         !window.location.search.includes('access_token='))) {
       
-      // Extract the token
-      const tokenPart = pathname.substring(pathname.indexOf('access_token='));
-      // Get clean base path (/acesso-plano)
-      const basePath = '/acesso-plano';
+      console.log("Auth token detected in URL path - needs fixing");
       
-      // Redirect to correct format
-      window.location.href = basePath + '#' + tokenPart;
-      return;
-    }
-    
-    // Detect auth parameters in URL (hash, search params, and direct path)
-    const hasAuthInHash = hash && hash.includes('access_token=');
-    const hasAuthInSearch = search && search.includes('access_token=');
-    const hasAuthInPath = pathname.includes('access_token=');
-    
-    if (hasAuthInHash || hasAuthInSearch || hasAuthInPath) {
-      console.log("Auth token detected in URL on page load");
-      
-      // If we're not on the login page, redirect there with auth data
-      if (pathname !== '/acesso-plano') {
-        console.log("Not on login page - redirecting properly with auth data");
+      // Extract token part
+      const tokenIndex = pathname.includes('access_token=') 
+        ? pathname.indexOf('access_token=')
+        : fullUrl.indexOf('access_token=');
         
-        const redirectPath = '/acesso-plano';
-        
-        if (hasAuthInHash) {
-          // Format with hash preserved
-          window.location.href = redirectPath + hash;
-        } else if (hasAuthInSearch) {
-          // Format with search params 
-          window.location.href = redirectPath + search;
-        } else if (hasAuthInPath) {
-          // Fix path-based token
-          const tokenPart = pathname.substring(pathname.indexOf('access_token='));
-          window.location.href = redirectPath + '#' + tokenPart;
-        }
-        return;
+      if (tokenIndex !== -1) {
+        const tokenPart = pathname.includes('access_token=')
+          ? pathname.substring(tokenIndex)
+          : fullUrl.substring(tokenIndex);
+          
+        // Redirect to correct format
+        window.location.href = '/acesso-plano#' + tokenPart;
+        return true;
       }
-      
-      // Already on correct page
-      console.log("Already on login page with auth parameters");
     }
     
-    // Handle standard hash-based routing (for non-auth cases)
-    if (hash && hash.startsWith('#/') && pathname === '/') {
-      // Extract the path from the hash
-      const path = hash.substring(1);
-      console.log(`Converting hash route to clean path: ${hash} → ${path}`);
-      
-      // Use history API to replace the URL without reloading
-      window.history.replaceState(null, '', path + search);
-    }
+    return false;
   } catch (error) {
-    console.error('Error handling URL routing:', error);
+    console.error('Error handling auth tokens:', error);
+    return false;
   }
 };
 
 // Initialize the app with better error handling
 window.addEventListener('load', () => {
   try {
-    // First handle any auth/hash routing needs
-    handleAuthRedirects();
+    // First check for auth tokens that need fixing
+    if (handleAuthTokens()) {
+      // If we're redirecting for auth, don't continue with normal init
+      return;
+    }
     
     // Then measure and report performance
     setTimeout(reportPerformance, 3000);

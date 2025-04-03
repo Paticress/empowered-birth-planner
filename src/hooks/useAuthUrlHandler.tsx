@@ -28,7 +28,7 @@ export function useAuthUrlHandler() {
         // Detect auth parameters in all possible locations
         const hasAuthInHash = hash && hash.includes('access_token=');
         const hasAuthInSearch = search && search.includes('access_token=');
-        const hasAuthInPath = path.includes('access_token=');
+        const hasAuthInPath = path.includes('access_token=') || fullUrl.includes('/acesso-plano#access_token=');
         const hasAuthInUrl = fullUrl.includes('access_token=');
         const hasError = (hash && hash.includes('error=')) || 
                         (search && search.includes('error=')) || 
@@ -44,21 +44,32 @@ export function useAuthUrlHandler() {
           if (hasAuthInPath) {
             console.log("AuthUrlHandler: Auth token in URL path - fixing format before processing");
             
-            // Extract token and other params
-            const tokenPart = path.substring(path.indexOf('access_token='));
+            // Extract token and other params - handle different URL formats
+            let tokenPart;
+            
+            if (path.includes('access_token=')) {
+              // Case: token directly in path
+              tokenPart = path.substring(path.indexOf('access_token='));
+            } else if (fullUrl.includes('/acesso-plano#access_token=')) {
+              // Case: token in hash but not correctly detected
+              const hashIndex = fullUrl.indexOf('#access_token=');
+              tokenPart = fullUrl.substring(hashIndex + 1); // Skip the # character
+            }
             
             // Fix the URL without reloading
-            window.history.replaceState(
-              null, 
-              document.title,
-              '/acesso-plano#' + tokenPart
-            );
-            
-            // Now set auth in hash for subsequent processing
-            window.location.hash = tokenPart;
-            
-            // Allow a moment for hash change to propagate
-            await new Promise(resolve => setTimeout(resolve, 300));
+            if (tokenPart) {
+              window.history.replaceState(
+                null, 
+                document.title,
+                '/acesso-plano#' + tokenPart
+              );
+              
+              // Now set auth in hash for subsequent processing
+              window.location.hash = tokenPart;
+              
+              // Allow a moment for hash change to propagate
+              await new Promise(resolve => setTimeout(resolve, 300));
+            }
           }
           
           // Handle error case first
@@ -89,8 +100,8 @@ export function useAuthUrlHandler() {
           
           try {
             // For hash-based tokens (most common with magic links)
-            if (hasAuthInHash) {
-              console.log("AuthUrlHandler: Processing auth token from hash");
+            if (hasAuthInHash || hasAuthInPath) {
+              console.log("AuthUrlHandler: Processing auth token from hash or path");
               
               // For supabase magic links, we need to let Supabase handle it directly
               const { data, error } = await supabase.auth.getSession();

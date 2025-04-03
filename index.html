@@ -17,6 +17,50 @@
     <!-- Analytics - Updated to use correct URL -->
     <script defer src="https://va.vercel-analytics.com/v1/script.js"></script>
     
+    <!-- Auth token handler - Detect any auth tokens in URL and fix their format -->
+    <script type="text/javascript">
+      (function() {
+        try {
+          var fullUrl = window.location.href;
+          
+          // Only run for URLs containing auth tokens
+          if (fullUrl.includes('access_token=')) {
+            console.log('Auth token detector running');
+            
+            var hash = window.location.hash;
+            var search = window.location.search;
+            var pathname = window.location.pathname;
+            
+            // Check if token is in a non-standard location
+            if ((pathname.includes('access_token=') || 
+                (fullUrl.includes('access_token=') && 
+                 !hash.includes('access_token=') && 
+                 !search.includes('access_token='))) &&
+                 !pathname.includes('/acesso-plano')) {
+              
+              console.log('Auth token in non-standard format, redirecting to auth page');
+              
+              // Extract token part
+              var tokenIndex = pathname.includes('access_token=') 
+                ? pathname.indexOf('access_token=')
+                : fullUrl.indexOf('access_token=');
+                
+              if (tokenIndex !== -1) {
+                var tokenPart = pathname.includes('access_token=')
+                  ? pathname.substring(tokenIndex)
+                  : fullUrl.substring(tokenIndex);
+                  
+                // Redirect to correct format
+                window.location.href = '/acesso-plano#' + tokenPart;
+              }
+            }
+          }
+        } catch(e) {
+          console.error('Error in auth token handler:', e);
+        }
+      })();
+    </script>
+    
     <!-- GitHub Pages SPA support - Improved version that handles auth tokens -->
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages

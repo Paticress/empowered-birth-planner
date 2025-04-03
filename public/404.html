@@ -28,99 +28,28 @@
           hash: hash ? 'present' : 'none'
         });
         
-        // Function to clean path and extract domains if needed
-        function cleanPath(path) {
-          // Handle cases where a domain might be included in the path
-          // (which can happen with some types of redirects)
-          if (path.includes('http://') || path.includes('https://')) {
-            try {
-              var url = new URL(path);
-              return url.pathname;
-            } catch (e) {
-              // If parsing fails, just return the original path
-              return path;
-            }
-          }
-          return path;
-        }
-        
-        // Clean the path before processing
-        pathname = cleanPath(pathname);
-        
-        // Function to extract token part from a URL
-        function extractTokenPart(url) {
-          if (!url) return '';
-          
-          var tokenIndex = url.indexOf('access_token=');
-          if (tokenIndex === -1) return '';
-          
-          return url.substring(tokenIndex);
-        }
-        
-        // Special handling for magic links which might come in various formats
+        // Special handling for auth tokens in URL
         if (fullUrl.includes('access_token=')) {
           console.log('Auth token detected in URL - preparing for redirect');
           
-          // Get clean path for acesso-plano (remove any trailing segments after acesso-plano)
-          var accessoPlanoCleaned = '/acesso-plano';
+          // Get the token from the URL
+          var tokenIndex = fullUrl.indexOf('access_token=');
+          var tokenPart = '';
           
-          // Check if token is in the hash (common format)
-          if (hash && hash.includes('access_token=')) {
-            console.log('Token in hash format - redirecting with hash intact');
-            window.location.href = accessoPlanoCleaned + hash;
-            return;
+          if (tokenIndex !== -1) {
+            tokenPart = fullUrl.substring(tokenIndex);
           }
           
-          // Check if token is in URL path itself (like /acesso-plano/access_token=...)
-          if (pathname.includes('access_token=')) {
-            console.log('Token found in path - extracting and redirecting properly');
-            var tokenPart = extractTokenPart(pathname);
-            if (tokenPart) {
-              window.location.href = accessoPlanoCleaned + '#' + tokenPart;
-              return;
-            }
-          }
+          // Construct the target URL with the token correctly positioned in the hash
+          var targetUrl = '/acesso-plano#' + tokenPart;
+          console.log('Redirecting auth token to:', targetUrl);
           
-          // Check if token is in full URL path (for cases where the domain gets embedded)
-          if (pathname.includes('/acesso-plano') && fullUrl.includes('access_token=')) {
-            console.log('Token and path in complex format - extracting both');
-            var tokenPart = extractTokenPart(fullUrl);
-            if (tokenPart) {
-              window.location.href = accessoPlanoCleaned + '#' + tokenPart;
-              return;
-            }
-          }
-          
-          // Check if token is in search parameters
-          if (search && search.includes('access_token=')) {
-            console.log('Token in search params - redirecting with params in hash');
-            var tokenPart = extractTokenPart(search);
-            if (tokenPart) {
-              window.location.href = accessoPlanoCleaned + '#' + tokenPart.substring(1); // remove leading '?' 
-              return;
-            }
-          }
-          
-          // Handle the case where the token appears in a non-standard format
-          // Extract it and add it as a hash parameter
-          console.log('Token in non-standard format - extracting and reformatting');
-          var tokenPart = extractTokenPart(fullUrl);
-          if (tokenPart) {
-            // Clean up the token part if needed
-            tokenPart = tokenPart.split(' ')[0].split('\n')[0].split('\r')[0];
-            
-            // If it's a magic link, format it properly
-            window.location.href = accessoPlanoCleaned + '#' + tokenPart;
-            return;
-          }
-          
-          // Last resort fallback - just redirect to login page
-          console.log('Unable to extract token properly - redirecting to login page');
-          window.location.href = accessoPlanoCleaned;
+          // Immediate redirect for auth tokens
+          l.replace(targetUrl);
           return;
         }
         
-        // For acesso-plano URLs with different formats (without tokens)
+        // For acesso-plano URLs (without tokens)
         if (pathname.includes('/acesso-plano')) {
           // Just redirect to the clean version
           l.replace('/acesso-plano' + search + hash);
