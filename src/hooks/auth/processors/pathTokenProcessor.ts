@@ -1,7 +1,6 @@
-
 import { toast } from "sonner";
 import { AuthUrlInfo, AuthProcessOptions } from "@/types/auth";
-import { fixAuthTokenFormat } from "@/utils/auth/tokenUtils";
+import { fixAuthTokenFormat } from "@/utils/auth/token";
 
 /**
  * Process authentication tokens that come in the URL path

@@ -2,7 +2,7 @@
 import { AuthUrlInfo } from "@/types/auth";
 import { AuthProcessOptions } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { cleanUrlAfterAuth } from "@/utils/auth/tokenUtils";
+import { cleanUrlAfterAuth } from "@/utils/auth/token";
 import { toast } from "sonner";
 
 /**

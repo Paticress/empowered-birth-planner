@@ -1,6 +1,6 @@
 
 import { AuthProcessOptions, AuthUrlInfo } from "@/types/auth";
-import { handleAuthError, cleanUrlAfterAuth } from "@/utils/auth/tokenUtils";
+import { handleAuthError, cleanUrlAfterAuth } from "@/utils/auth/token";
 import { toast } from "sonner";
 
 /**

@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { cleanUrlAfterAuth, ensureUserInDatabase } from "@/utils/auth/tokenUtils";
+import { cleanUrlAfterAuth, ensureUserInDatabase } from "@/utils/auth/token";
 import { AuthProcessOptions } from "@/types/auth";
 import { toast } from "sonner";
 
