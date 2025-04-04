@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { processPathToken } from '../../processors/pathTokenProcessor';
 import { AuthProcessOptions, AuthUrlInfo } from '@/types/auth';
@@ -31,7 +30,7 @@ describe('processPathToken', () => {
     vi.useFakeTimers();
   });
   
-  afterEach(() => {
+  afterAll(() => {
     // Restore original implementations
     window.history.replaceState = originalReplaceState;
     vi.useRealTimers();

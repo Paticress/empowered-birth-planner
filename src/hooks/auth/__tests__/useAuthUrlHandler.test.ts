@@ -1,22 +1,22 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useAuthUrlHandler } from '../useAuthUrlHandler';
+import { renderHook } from '@testing-library/react';
+import { useAuthUrlHandler } from '@/hooks/useAuthUrlHandler';
 
 // Mock dependencies
-vi.mock('../processors/pathTokenProcessor', () => ({
+vi.mock('@/hooks/auth/processors/pathTokenProcessor', () => ({
   processPathToken: vi.fn()
 }));
 
-vi.mock('../processors/errorProcessor', () => ({
+vi.mock('@/hooks/auth/processors/errorProcessor', () => ({
   processAuthError: vi.fn()
 }));
 
-vi.mock('../utils/authUrlUtils', () => ({
+vi.mock('@/hooks/auth/utils/authUrlUtils', () => ({
   hasAuthParameters: vi.fn()
 }));
 
-vi.mock('../useAuthUrlDetection', () => ({
+vi.mock('@/hooks/auth/useAuthUrlDetection', () => ({
   useAuthUrlDetection: vi.fn(() => ({
     hasAuthInHash: false,
     hasAuthInSearch: false,

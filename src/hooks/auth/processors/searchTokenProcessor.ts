@@ -10,7 +10,7 @@ export async function processSearchToken(
   urlInfo: AuthUrlInfo,
   options: AuthProcessOptions
 ): Promise<boolean> {
-  const { hasAuthInHash, hasAuthInPath, hasAuthInSearch, fullUrl, search } = urlInfo;
+  const { hasAuthInHash, hasAuthInPath, hasAuthInSearch, fullUrl, search, hash } = urlInfo;
   
   if (!hasAuthInSearch) return false;
   
@@ -22,7 +22,8 @@ export async function processSearchToken(
       hasAuthInPath, 
       hasAuthInSearch, 
       fullUrl, 
-      search 
+      search,
+      hash 
     });
     
     if (error) {
