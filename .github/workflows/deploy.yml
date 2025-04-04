@@ -32,11 +32,19 @@ jobs:
           node-version: 18
           cache: 'npm'
       
-      - name: Install dependencies
-        run: npm ci
+      # Force clean install to resolve dependency issues
+      - name: Clean npm cache
+        run: npm cache clean --force
+        
+      - name: Remove package-lock.json
+        run: rm -f package-lock.json
+        
+      - name: Install dependencies with clean slate
+        run: npm install --no-fund --no-audit
       
+      # Explicitly install the packages that were missing in the error logs
       - name: Install required packages explicitly
-        run: npm install --save-dev @vitejs/plugin-react terser@latest lovable-tagger@latest @vercel/analytics@latest
+        run: npm install --save-dev @vitejs/plugin-react terser@latest lovable-tagger@latest @vercel/analytics@latest @testing-library/react vitest jsdom
       
       - name: Setup Pages
         id: pages
