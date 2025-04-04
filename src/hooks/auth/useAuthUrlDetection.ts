@@ -35,7 +35,7 @@ export function useAuthUrlDetection(): AuthUrlInfo {
     
     // More comprehensive token detection
     const hasAuthInHash = hash && hash.includes('access_token=');
-    const hasAuthInSearch = search && search.includes('access_token=');
+    const hasAuthInSearch = search && (search.includes('access_token=') || search.includes('access_entry=magiclink'));
     
     // Enhanced path detection - check both direct path and full URL for acesso-plano#access_token pattern
     const hasAuthInPath = path.includes('access_token=') || 

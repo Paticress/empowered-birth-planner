@@ -1,5 +1,5 @@
 
-import { AuthUrlInfo } from "../useAuthUrlDetection";
+import { AuthUrlInfo } from "@/types/auth";
 import { AuthProcessOptions } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { cleanUrlAfterAuth } from "@/utils/auth/tokenUtils";

@@ -59,11 +59,18 @@
           }
           
           if (tokenPart) {
-            // IMPORTANT UPDATE: Ensure token is in the hash format that Supabase expects
-            console.log('Redirecting auth token to proper format');
+            // IMPORTANT: Always redirect to /acesso-plano#token for processing with exchangeCodeForSession
+            console.log('Redirecting auth token to proper format for exchangeCodeForSession');
             window.location.replace('/acesso-plano#' + tokenPart);
             return;
           }
+        }
+        
+        // Special handling for magiclink in query params (for older Supabase versions)
+        if (search.includes('access_entry=magiclink')) {
+          console.log('Detected magic link parameter in query string');
+          window.location.replace('/acesso-plano' + search);
+          return;
         }
 
         // For all other acesso-plano URLs

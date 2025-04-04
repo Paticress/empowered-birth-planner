@@ -16,7 +16,7 @@ export function AcessoPlano() {
   
   // Process magic link tokens directly using exchangeCodeForSession
   useEffect(() => {
-    // Check if we have auth params in URL
+    // Check if we have auth params in URL hash
     const hasAuthParams = window.location.hash && 
                           window.location.hash.includes('access_token');
     
