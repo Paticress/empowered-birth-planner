@@ -33,13 +33,14 @@ export async function processSearchToken(
       return false;
     }
     
-    console.log("SearchTokenProcessor: Using exchangeCodeForSession with search params directly");
+    console.log("SearchTokenProcessor: Using exchangeCodeForSession with current URL directly");
     
-    // Pass the entire URL when calling exchangeCodeForSession
+    // Pass the entire URL when calling exchangeCodeForSession for best compatibility
     const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
     
     if (error) {
       console.error("SearchTokenProcessor: Error processing search token:", error);
+      console.error("Error details:", error.message, error.status);
       toast.error("Erro ao processar token: " + error.message);
       setIsProcessingAuth(false);
       
@@ -49,10 +50,20 @@ export async function processSearchToken(
     }
     
     console.log("SearchTokenProcessor: Successfully processed search token");
+    
+    // If we have a valid session, clean up the URL
+    if (data.session) {
+      console.log("SearchTokenProcessor: Valid session created");
+      cleanUrlAfterAuth();
+    } else {
+      console.log("SearchTokenProcessor: No session created from token");
+    }
+    
     return true; // Successfully handled
     
   } catch (err) {
     console.error("SearchTokenProcessor: Exception processing search token:", err);
+    console.error("Error type:", typeof err, "Error object:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
     toast.error("Erro ao processar autenticação");
     setIsProcessingAuth(false);
     

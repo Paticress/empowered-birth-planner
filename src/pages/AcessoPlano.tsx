@@ -41,10 +41,12 @@ export function AcessoPlano() {
       setIsProcessingMagicLink(true);
       
       try {
-        // Let Supabase process the authentication
+        // Let Supabase process the authentication - IMPORTANT: Use the entire URL
         console.log("AcessoPlano: Calling exchangeCodeForSession with current URL");
+        
+        // Pass the entire URL to supabase instead of just the hash or search portion
         const { data, error } = await supabase.auth.exchangeCodeForSession(
-          hasAuthInHash ? window.location.hash : window.location.search
+          window.location.href
         );
         
         if (error) {
