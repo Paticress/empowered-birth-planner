@@ -16,6 +16,22 @@ export function AcessoPlano() {
   const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(false);
   const navigate = useNavigate();
   
+  // New logging for token detection
+  useEffect(() => {
+    console.log("AcessoPlano.tsx carregado.");
+    console.log("URL atual:", window.location.href);
+
+    const hash = window.location.hash;
+    console.log("Hash extraído:", hash);
+
+    if (hash.startsWith("#access_token=")) {
+      const token = hash.replace("#access_token=", "");
+      console.log("Token extraído:", token);
+    } else {
+      console.error("Nenhum token encontrado na URL.");
+    }
+  }, []);
+  
   // Process magic link tokens directly using exchangeCodeForSession
   useEffect(() => {
     const handleAuth = async () => {
