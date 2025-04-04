@@ -16,50 +16,66 @@ export function AcessoPlano() {
   
   // Process magic link tokens directly using exchangeCodeForSession
   useEffect(() => {
-    // Check if we have auth params in URL hash
-    const hasAuthParams = window.location.hash && 
-                          window.location.hash.includes('access_token');
-    
-    if (hasAuthParams && !isLoading && !isProcessingAuth) {
-      console.log("AcessoPlano: Auth parameters detected in URL, using exchangeCodeForSession");
+    const handleAuth = async () => {
+      // Don't process if already handled by other components
+      if (isLoading || isProcessingAuth || isProcessingMagicLink) {
+        return;
+      }
       
-      const handleMagicLink = async () => {
-        setIsProcessingMagicLink(true);
+      // Detect auth in URL (either in hash or query parameters)
+      const hasAuthInHash = window.location.hash && 
+                            window.location.hash.includes('access_token');
+      const hasAuthInQuery = window.location.search && 
+                            (window.location.search.includes('access_token') || 
+                             window.location.search.includes('access_entry=magiclink'));
+                            
+      if (!hasAuthInHash && !hasAuthInQuery) {
+        return; // No auth parameters to process
+      }
+      
+      console.log("AcessoPlano: Auth parameters detected, processing authentication");
+      setIsProcessingMagicLink(true);
+      
+      try {
+        // Let Supabase process the authentication
+        const { data, error } = await supabase.auth.exchangeCodeForSession(
+          hasAuthInHash ? window.location.hash : window.location.search
+        );
         
-        try {
-          // Use Supabase's updated method to handle the URL
-          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.hash);
+        if (error) {
+          console.error("AcessoPlano: Error processing authentication:", error);
+          toast.error("Erro ao processar o token de autenticação: " + error.message);
+          setIsProcessingMagicLink(false);
+          return;
+        }
+        
+        if (data.session) {
+          console.log("AcessoPlano: Successfully authenticated user:", data.session.user.email);
           
-          if (error) {
-            console.error("Error processing authentication token:", error);
-            toast.error("Erro ao processar o token de autenticação");
-            setIsProcessingMagicLink(false);
-            return;
-          }
+          // Clean URL after successful authentication
+          window.history.replaceState(null, document.title, window.location.pathname);
           
-          if (data.session) {
-            console.log("AcessoPlano: Successfully authenticated with magic link");
-            toast.success("Login realizado com sucesso!");
-            
-            // After successful login, redirect to criar-plano
-            setTimeout(() => {
-              window.location.href = '/criar-plano';
-            }, 1500);
-          } else {
-            console.error("No session returned from exchangeCodeForSession");
-            toast.error("Falha na autenticação. Por favor, tente novamente.");
-            setIsProcessingMagicLink(false);
-          }
-        } catch (err) {
-          console.error("Unexpected error processing magic link:", err);
-          toast.error("Erro inesperado. Por favor, tente novamente.");
+          toast.success("Login realizado com sucesso!");
+          
+          // After successful login, redirect to criar-plano
+          setTimeout(() => {
+            window.location.href = '/criar-plano';
+          }, 1500);
+        } else {
+          console.error("AcessoPlano: No session returned from exchangeCodeForSession");
+          toast.error("Falha na autenticação. Por favor, tente novamente.");
           setIsProcessingMagicLink(false);
         }
-      };
-      
-      handleMagicLink();
-    }
-  }, [isLoading, isProcessingAuth]);
+      } catch (err) {
+        console.error("AcessoPlano: Unexpected error processing authentication:", err);
+        toast.error("Erro inesperado. Por favor, tente novamente.");
+        setIsProcessingMagicLink(false);
+      }
+    };
+    
+    // Process auth parameters 
+    handleAuth();
+  }, [isLoading, isProcessingAuth, isProcessingMagicLink]);
 
   // Redirect if user is already authenticated
   useEffect(() => {

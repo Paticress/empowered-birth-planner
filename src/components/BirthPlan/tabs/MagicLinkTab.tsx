@@ -19,7 +19,7 @@ export function MagicLinkTab() {
   const { user, isAuthenticated } = useAuth();
   const [isProcessingToken, setIsProcessingToken] = useState(false);
 
-  // Enhanced magic link detection with support for custom domains
+  // Enhanced magic link detection with support for both hash and query parameters
   useEffect(() => {
     const checkAuth = async () => {
       // We only need to check if the user hasn't been authenticated yet 
@@ -28,11 +28,15 @@ export function MagicLinkTab() {
         return;
       }
       
-      // Check for auth token in hash
+      // Check for auth token in hash or query parameters
       const hash = window.location.hash;
-      const hasAuthParams = hash && hash.includes('access_token=');
+      const search = window.location.search;
+      const hasAuthInHash = hash && hash.includes('access_token=');
+      const hasAuthInQuery = search && 
+                           (search.includes('access_token=') || 
+                            search.includes('access_entry=magiclink'));
       
-      if (hasAuthParams) {
+      if (hasAuthInHash || hasAuthInQuery) {
         console.log("MagicLinkTab: Magic link parameters detected in URL");
         
         // Update the UI state to show that we've received the magic link
@@ -41,7 +45,9 @@ export function MagicLinkTab() {
         
         try {
           // Use Supabase's updated method to handle the URL
-          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.hash);
+          const { data, error } = await supabase.auth.exchangeCodeForSession(
+            hasAuthInHash ? window.location.hash : window.location.search
+          );
           
           if (error) {
             console.error("MagicLinkTab: Error processing auth token:", error);
@@ -52,6 +58,10 @@ export function MagicLinkTab() {
           
           if (data.session) {
             console.log("MagicLinkTab: Valid session created:", data.session.user.email);
+            
+            // Clean URL after successful authentication
+            window.history.replaceState(null, document.title, window.location.pathname);
+            
             toast.success("Autenticação realizada com sucesso!");
             
             // After successful login, redirect to criar-plano

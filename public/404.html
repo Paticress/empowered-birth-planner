@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -59,16 +58,17 @@
           }
           
           if (tokenPart) {
-            // IMPORTANT: Always redirect to /acesso-plano#token for processing with exchangeCodeForSession
-            console.log('Redirecting auth token to proper format for exchangeCodeForSession');
+            // IMPORTANT: Always redirect to /acesso-plano#token for processing
+            console.log('Redirecting auth token to proper hash format');
             window.location.replace('/acesso-plano#' + tokenPart);
             return;
           }
         }
         
-        // Special handling for magiclink in query params (for older Supabase versions)
+        // Special handling for magiclink parameters
         if (search.includes('access_entry=magiclink')) {
           console.log('Detected magic link parameter in query string');
+          // Keep as query parameter since that's how magic links work
           window.location.replace('/acesso-plano' + search);
           return;
         }

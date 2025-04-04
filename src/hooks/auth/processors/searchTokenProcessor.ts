@@ -21,23 +21,22 @@ export async function processSearchToken(
   console.log("SearchTokenProcessor: Processing token in URL search parameters");
   
   try {
-    // For search parameters, we need to convert them to a hash format
+    // For search parameters with magic links or access tokens
     const search = window.location.search;
-    const tokenIndex = search.indexOf('access_token=');
     
-    if (tokenIndex === -1) {
-      console.log("SearchTokenProcessor: No access_token found in search params");
+    // Handle both standard access_token and magic link parameters
+    const hasMagicLink = search.includes('access_entry=magiclink');
+    const hasAccessToken = search.includes('access_token=');
+    
+    if (!hasMagicLink && !hasAccessToken) {
+      console.log("SearchTokenProcessor: No access_token or magic link found in search params");
       return false;
     }
     
-    // Extract just the token part and create a hash fragment
-    const tokenPart = search.substring(tokenIndex);
-    const hashFragment = '#' + tokenPart.replace(/^\?/, ''); // Remove leading ? if present
+    console.log("SearchTokenProcessor: Using exchangeCodeForSession with search params directly");
     
-    console.log("SearchTokenProcessor: Converting search params to hash format");
-    
-    // Process the hash fragment using exchangeCodeForSession
-    const { data, error } = await supabase.auth.exchangeCodeForSession(hashFragment);
+    // Process the search params using exchangeCodeForSession
+    const { data, error } = await supabase.auth.exchangeCodeForSession(search);
     
     if (error) {
       console.error("SearchTokenProcessor: Error processing search token:", error);
