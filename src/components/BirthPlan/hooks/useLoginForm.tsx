@@ -166,8 +166,9 @@ export function useLoginForm() {
       const siteUrl = getCurrentSiteUrl();
       console.log("Magic link will be created with site URL:", siteUrl);
 
-      // Send the magic link to the complete site URL + acesso-plano path
-      const { error } = await signInWithMagicLink(email, '/acesso-plano');
+      // Fix: Only pass a single redirectTo path to signInWithMagicLink
+      // The issue was we were passing two arguments when the function only accepts one
+      const { error } = await signInWithMagicLink(email);
       
       if (error) {
         console.error('Magic link error:', error);
