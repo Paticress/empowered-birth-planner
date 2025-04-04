@@ -1,50 +1,65 @@
 
+import { AuthUrlInfo } from "../useAuthUrlDetection";
+import { AuthProcessOptions } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { extractTokenFromUrl } from "@/utils/auth/tokenUtils";
-import { AuthProcessOptions, AuthUrlInfo } from "@/types/auth";
+import { cleanUrlAfterAuth } from "@/utils/auth/tokenUtils";
 import { toast } from "sonner";
 
 /**
- * Processor for auth tokens in complex URL formats
+ * Processes auth tokens that appear in complex URL formats
+ * (e.g., when the token is in a format we don't specifically handle elsewhere)
  */
 export async function processComplexUrlToken(
   urlInfo: AuthUrlInfo,
   options: AuthProcessOptions
 ): Promise<boolean> {
-  const { hasAuthInUrl, fullUrl } = urlInfo;
+  const { setIsProcessingAuth } = options;
   
-  if (!hasAuthInUrl) return false;
+  if (!urlInfo.hasAuthInUrl) {
+    return false;
+  }
   
-  console.log("ComplexUrlProcessor: Auth token in complex URL format");
+  console.log("ComplexUrlProcessor: Processing complex URL token format");
   
   try {
-    // Extract token
-    const tokenPart = extractTokenFromUrl(fullUrl);
+    // Try to extract token from full URL if other methods failed
+    const fullUrl = window.location.href;
+    const tokenIndex = fullUrl.indexOf('access_token=');
     
-    if (tokenPart) {
-      // Update the URL to use hash format for Supabase
-      window.history.replaceState(
-        null, 
-        document.title,
-        '/acesso-plano#' + tokenPart
-      );
-      
-      // Let Supabase process the hash-based token
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const { error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("ComplexUrlProcessor: Error processing token:", error);
-        toast.error("Erro ao processar token: " + error.message);
-        throw error;
-      }
-      
-      return true;
+    if (tokenIndex === -1) {
+      console.log("ComplexUrlProcessor: No access_token found in URL");
+      return false;
     }
     
-    return false;
-  } catch (error) {
-    console.error("ComplexUrlProcessor: Error:", error);
-    return false;
+    // Create a hash fragment with just the token part
+    const tokenPart = fullUrl.substring(tokenIndex);
+    const hashFragment = '#' + tokenPart;
+    
+    console.log("ComplexUrlProcessor: Extracted token from complex URL");
+    
+    // Process the extracted token using exchangeCodeForSession
+    const { data, error } = await supabase.auth.exchangeCodeForSession(hashFragment);
+    
+    if (error) {
+      console.error("ComplexUrlProcessor: Error processing token:", error);
+      toast.error("Erro ao processar token: " + error.message);
+      setIsProcessingAuth(false);
+      
+      // Clean URL
+      cleanUrlAfterAuth();
+      return true; // We handled it, even though there was an error
+    }
+    
+    console.log("ComplexUrlProcessor: Successfully processed complex URL token");
+    return true; // Successfully handled
+    
+  } catch (err) {
+    console.error("ComplexUrlProcessor: Exception processing token:", err);
+    toast.error("Erro ao processar autenticação");
+    setIsProcessingAuth(false);
+    
+    // Clean URL
+    cleanUrlAfterAuth();
+    return true; // We handled it, even though there was an error
   }
 }

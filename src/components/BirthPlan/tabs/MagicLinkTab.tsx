@@ -40,8 +40,8 @@ export function MagicLinkTab() {
         setIsProcessingToken(true);
         
         try {
-          // Use Supabase's built-in method to handle the URL
-          const { data, error } = await supabase.auth.getSessionFromUrl();
+          // Use Supabase's updated method to handle the URL
+          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.hash);
           
           if (error) {
             console.error("MagicLinkTab: Error processing auth token:", error);
@@ -59,7 +59,7 @@ export function MagicLinkTab() {
               window.location.href = '/criar-plano';
             }, 1500);
           } else {
-            console.log("MagicLinkTab: No session returned from getSessionFromUrl");
+            console.log("MagicLinkTab: No session returned from exchangeCodeForSession");
             toast.error("Falha na autenticação. Por favor, tente novamente.");
             setIsProcessingToken(false);
           }

@@ -14,21 +14,21 @@ export function AcessoPlano() {
   const { isProcessingAuth } = useAuthUrlHandler();
   const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(false);
   
-  // Process magic link tokens directly using getSessionFromUrl
+  // Process magic link tokens directly using exchangeCodeForSession
   useEffect(() => {
     // Check if we have auth params in URL
     const hasAuthParams = window.location.hash && 
                           window.location.hash.includes('access_token');
     
     if (hasAuthParams && !isLoading && !isProcessingAuth) {
-      console.log("AcessoPlano: Auth parameters detected in URL, using getSessionFromUrl");
+      console.log("AcessoPlano: Auth parameters detected in URL, using exchangeCodeForSession");
       
       const handleMagicLink = async () => {
         setIsProcessingMagicLink(true);
         
         try {
-          // Use Supabase's direct method to handle the URL
-          const { data, error } = await supabase.auth.getSessionFromUrl();
+          // Use Supabase's updated method to handle the URL
+          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.hash);
           
           if (error) {
             console.error("Error processing authentication token:", error);
@@ -46,7 +46,7 @@ export function AcessoPlano() {
               window.location.href = '/criar-plano';
             }, 1500);
           } else {
-            console.error("No session returned from getSessionFromUrl");
+            console.error("No session returned from exchangeCodeForSession");
             toast.error("Falha na autenticação. Por favor, tente novamente.");
             setIsProcessingMagicLink(false);
           }
