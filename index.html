@@ -23,6 +23,7 @@
         try {
           var fullUrl = window.location.href;
           var hostname = window.location.hostname;
+          var pathname = window.location.pathname;
           
           // Check if this is a custom domain
           var isCustomDomain = hostname !== 'localhost' && 
@@ -38,19 +39,15 @@
           if (fullUrl.includes('access_token=')) {
             console.log('Auth token detector running on:', window.location.pathname);
             
-            var hash = window.location.hash;
-            var search = window.location.search;
-            var pathname = window.location.pathname;
-            
-            // Special handling for custom domains
-            if (isCustomDomain && pathname.includes('access_token=')) {
+            // Special handling for custom domains with auth token in path
+            if (pathname.includes('access_token=')) {
               console.log('Custom domain with auth token in path detected - special handling');
               
               // Extract token part
               var tokenIndex = pathname.indexOf('access_token=');
               var tokenPart = pathname.substring(tokenIndex);
               
-              // Redirect to acesso-plano with token in hash
+              // IMPORTANT: Direct to acesso-plano with token in hash
               console.log('Redirecting to correct path format: /acesso-plano#' + tokenPart);
               window.location.href = '/acesso-plano#' + tokenPart;
               return;
@@ -58,7 +55,6 @@
             
             // Ensure we're on the acesso-plano page for auth processing
             if (!pathname.includes('/acesso-plano')) {
-              // We need to redirect to acesso-plano with the token in the hash
               console.log('Auth token detected outside of acesso-plano, redirecting');
               
               // Extract token part
@@ -68,21 +64,6 @@
               // Redirect to correct location
               window.location.href = '/acesso-plano#' + tokenPart;
               return;
-            }
-            
-            // If token is not in the hash where it should be, fix it
-            if (!hash.includes('access_token=')) {
-              console.log('Auth token in wrong format, fixing');
-              
-              // Extract token
-              var tokenIndex = fullUrl.indexOf('access_token=');
-              var tokenPart = fullUrl.substring(tokenIndex);
-              
-              // Replace history and update hash
-              window.history.replaceState(null, document.title, '/acesso-plano#' + tokenPart);
-              window.location.hash = tokenPart;
-              
-              console.log('Auth token format fixed, now in hash');
             }
           }
         } catch(e) {
@@ -95,40 +76,22 @@
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages
       // MIT License
-      // https://github.com/rafgraph/spa-github-pages
-      // This script handles more complex routing situations for SPAs on GitHub Pages
+      // This script handles routing for SPAs on GitHub Pages with auth token support
       (function(l) {
-        // Only run this if search params need to be processed
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
-        }
-        
-        // Special handling for auth tokens
-        var fullUrl = l.href;
+        // Process path-based tokens (for custom domains)
         var pathname = l.pathname;
+        var fullUrl = l.href;
         
-        // If auth token is in the URL but not in expected places (query or hash)
-        if (fullUrl.includes('access_token=') && 
-            !l.search.includes('access_token=') && 
-            !l.hash.includes('access_token=') && 
-            pathname.includes('access_token=')) {
-          
-          console.log("Auth token found in unexpected location in URL, fixing...");
-          
-          // Determine the base path (everything before access_token)
-          var basePath = '/acesso-plano';
+        // If auth token is in the URL path
+        if (pathname.includes('access_token=')) {
+          console.log("Auth token found in path, fixing format...");
           
           // Get the token part
           var tokenIndex = pathname.indexOf('access_token=');
           var tokenPart = pathname.substring(tokenIndex);
           
           // Redirect with proper format
-          l.href = basePath + '#' + tokenPart;
+          l.href = '/acesso-plano#' + tokenPart;
         }
       }(window.location))
     </script>

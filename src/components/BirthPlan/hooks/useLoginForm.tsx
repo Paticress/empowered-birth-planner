@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -49,7 +48,6 @@ export function useLoginForm() {
     console.log("Login successful, checking user access...");
     
     try {
-      // Check if user is in the allowed users table - using correct lowercase table name
       const { data: userData, error: userError } = await supabase
         .from('users_db_birthplanbuilder')
         .select('email')
@@ -63,13 +61,11 @@ export function useLoginForm() {
         return;
       }
       
-      // If user exists in the database, they have access
       if (userData) {
         console.log("User found in database, redirecting to birth plan builder");
         navigateTo('/criar-plano');
       } else {
         console.log("User not found in database, adding user");
-        // Add the user to the database (they've paid) - using correct lowercase table name
         const { error: insertError } = await supabase
           .from('users_db_birthplanbuilder')
           .insert({ email });
@@ -118,12 +114,10 @@ export function useLoginForm() {
       toast.success('Cadastro realizado com sucesso!');
       toast.info('Por favor, verifique seu email para confirmar o cadastro');
       
-      // After signup, wait a moment and switch to the login tab
       setTimeout(() => {
         const loginTab = document.getElementById('login-tab') as HTMLButtonElement;
         if (loginTab) loginTab.click();
         
-        // Pre-fill the login email field
         setLoginCredentials(prev => ({
           ...prev,
           email: email
@@ -146,28 +140,14 @@ export function useLoginForm() {
     }
     
     try {
-      // First add to users DB regardless, we'll auto-approve all magic link users
       const { error: addUserError } = await supabase
         .from('users_db_birthplanbuilder')
         .upsert({ email }, { onConflict: 'email' });
         
       if (addUserError) {
         console.error('Error adding user to database:', addUserError);
-        // Continue anyway, don't block the magic link
       }
       
-      // Get the current site URL for proper redirects across environments
-      const getCurrentSiteUrl = () => {
-        const protocol = window.location.protocol;
-        const host = window.location.host;
-        return `${protocol}//${host}`;
-      };
-      
-      const siteUrl = getCurrentSiteUrl();
-      console.log("Magic link will be created with site URL:", siteUrl);
-
-      // Fix: Only pass a single redirectTo path to signInWithMagicLink
-      // The issue was we were passing two arguments when the function only accepts one
       const { error } = await signInWithMagicLink(email);
       
       if (error) {

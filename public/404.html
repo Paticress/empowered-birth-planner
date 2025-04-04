@@ -59,29 +59,13 @@
           }
           
           if (tokenPart) {
-            // Construct the clean target URL - always use /acesso-plano page
-            var targetUrl = '/acesso-plano#' + tokenPart;
-            console.log('Redirecting auth token to:', targetUrl);
-            
-            // Immediate redirect for auth tokens
-            l.replace(targetUrl);
+            // IMPORTANT UPDATE: Ensure token is in the hash format that Supabase expects
+            console.log('Redirecting auth token to proper format');
+            window.location.replace('/acesso-plano#' + tokenPart);
             return;
           }
         }
 
-        // Handle access_token on paths that are /acesso-plano
-        if (pathname.includes('/acesso-plano') && fullUrl.includes('access_token=')) {
-          console.log('Already on acesso-plano with token - just need to fix format');
-          
-          // Extract token
-          var tokenIndex = fullUrl.indexOf('access_token=');
-          var tokenPart = fullUrl.substring(tokenIndex);
-          
-          // Ensure token is in hash format
-          l.replace('/acesso-plano#' + tokenPart);
-          return;
-        }
-        
         // For all other acesso-plano URLs
         if (pathname.includes('/acesso-plano')) {
           console.log('On acesso-plano path without token - simple redirect');
