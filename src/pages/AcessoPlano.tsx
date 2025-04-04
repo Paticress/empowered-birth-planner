@@ -1,4 +1,3 @@
-
 import { LoginPage } from "@/components/BirthPlan/LoginPage";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -16,7 +15,6 @@ export function AcessoPlano() {
   const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(false);
   const navigate = useNavigate();
   
-  // New logging for token detection
   useEffect(() => {
     console.log("AcessoPlano.tsx carregado.");
     console.log("URL atual:", window.location.href);
@@ -32,15 +30,12 @@ export function AcessoPlano() {
     }
   }, []);
   
-  // Process magic link tokens directly using exchangeCodeForSession
   useEffect(() => {
     const handleAuth = async () => {
-      // Don't process if already handled by other components
       if (isLoading || isProcessingAuth || isProcessingMagicLink) {
         return;
       }
       
-      // Detect auth in URL (either in hash or query parameters)
       const hasAuthInHash = window.location.hash && 
                             window.location.hash.includes('access_token');
       const hasAuthInQuery = window.location.search && 
@@ -49,29 +44,25 @@ export function AcessoPlano() {
                             
       if (!hasAuthInHash && !hasAuthInQuery) {
         console.log("AcessoPlano: No auth parameters detected in URL");
-        return; // No auth parameters to process
+        return;
       }
       
       console.log("AcessoPlano: Auth parameters detected, processing authentication");
       console.log("Current URL: ", window.location.href);
       
-      // Show toast that we're processing the authentication
       toast.info("Processando autenticação...");
       
       setIsProcessingMagicLink(true);
       
       try {
-        // Let Supabase process the authentication - IMPORTANT: Use the entire URL
         console.log("AcessoPlano: Calling exchangeCodeForSession with current URL");
         
-        // Debug log the token format
         if (hasAuthInHash) {
           console.log("Token in hash format: detected");
         } else if (hasAuthInQuery) {
           console.log("Token in query format: detected");
         }
         
-        // Pass the entire URL to supabase instead of just the hash or search portion
         const { data, error } = await supabase.auth.exchangeCodeForSession(
           window.location.href
         );
@@ -80,7 +71,6 @@ export function AcessoPlano() {
           console.error("AcessoPlano: Error processing authentication:", error);
           console.error("Error details:", error.message, error.status, error.stack);
           
-          // Display user-visible error with alert (as requested)
           alert(`Erro no login: ${error.message}`);
           
           toast.error("Erro ao processar o token de autenticação: " + error.message);
@@ -96,12 +86,10 @@ export function AcessoPlano() {
             token_type: data.session.token_type
           }));
           
-          // Clean URL after successful authentication
           window.history.replaceState(null, document.title, window.location.pathname);
           
           toast.success("Login realizado com sucesso!");
           
-          // After successful login, redirect to criar-plano
           setTimeout(() => {
             navigate('/criar-plano', { replace: true });
           }, 1500);
@@ -109,7 +97,6 @@ export function AcessoPlano() {
           console.error("AcessoPlano: No session returned from exchangeCodeForSession");
           console.log("Response data:", data);
           
-          // Display user-visible error with alert
           alert("Falha na autenticação: nenhuma sessão retornada");
           
           toast.error("Falha na autenticação. Por favor, tente novamente.");
@@ -119,7 +106,6 @@ export function AcessoPlano() {
         console.error("AcessoPlano: Unexpected error processing authentication:", err);
         console.error("Error type:", typeof err, "Error object:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
         
-        // Display user-visible error with alert
         alert(`Erro inesperado: ${err instanceof Error ? err.message : JSON.stringify(err)}`);
         
         toast.error("Erro inesperado. Por favor, tente novamente.");
@@ -127,18 +113,38 @@ export function AcessoPlano() {
       }
     };
     
-    // Process auth parameters 
     handleAuth();
   }, [isLoading, isProcessingAuth, isProcessingMagicLink, navigate]);
 
-  // Redirect if user is already authenticated
   useEffect(() => {
     if (!isLoading && !isProcessingAuth && !isProcessingMagicLink && user && session) {
       console.log("AcessoPlano: User already authenticated, redirecting to birth plan builder");
-      // Use navigate for more consistent routing within the React app
       navigate('/criar-plano', { replace: true });
     }
   }, [user, isLoading, isProcessingAuth, isProcessingMagicLink, session, navigate]);
+
+  useEffect(() => {
+    const checkAuthError = () => {
+      const hash = window.location.hash;
+      const search = window.location.search;
+
+      const hashError = hash.match(/error=([^&]+)/);
+      const searchError = search.match(/error=([^&]+)/);
+
+      if (hashError || searchError) {
+        const errorMessage = decodeURIComponent(hashError?.[1] || searchError?.[1] || 'Erro desconhecido');
+        
+        console.error("Erro de autenticação detectado:", errorMessage);
+        
+        toast.error("Erro ao autenticar", {
+          description: "O link pode ter expirado. Tente solicitar um novo link de acesso.",
+          duration: 5000
+        });
+      }
+    };
+
+    checkAuthError();
+  }, []);
 
   if (isLoading || isProcessingAuth || isProcessingMagicLink) {
     return (
