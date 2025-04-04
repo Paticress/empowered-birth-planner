@@ -44,9 +44,9 @@ export function MagicLinkTab() {
         setIsProcessingToken(true);
         
         try {
-          // Use Supabase's updated method to handle the URL
+          // Pass the entire URL to exchangeCodeForSession
           const { data, error } = await supabase.auth.exchangeCodeForSession(
-            hasAuthInHash ? window.location.hash : window.location.search
+            window.location.href
           );
           
           if (error) {
@@ -81,8 +81,8 @@ export function MagicLinkTab() {
       }
     };
     
-    // Run the check with a slight delay to avoid interference with other effects
-    setTimeout(checkAuth, 500);
+    // Run the check immediately
+    checkAuth();
   }, [isAuthenticated, isMagicLinkSent, setIsMagicLinkSent, isProcessingToken]);
 
   return (

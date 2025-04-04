@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -24,6 +23,7 @@
           var fullUrl = window.location.href;
           var hostname = window.location.hostname;
           var pathname = window.location.pathname;
+          var search = window.location.search; 
           
           // Check if this is a custom domain
           var isCustomDomain = hostname !== 'localhost' && 
@@ -32,39 +32,47 @@
           
           console.log('Domain check:', { 
             hostname: hostname, 
-            isCustomDomain: isCustomDomain 
+            isCustomDomain: isCustomDomain,
+            pathname: pathname
           });
           
-          // Only run for URLs containing auth tokens
-          if (fullUrl.includes('access_token=')) {
-            console.log('Auth token detector running on:', window.location.pathname);
+          // Check for auth token in path for custom domains
+          if (pathname.includes('access_token=')) {
+            console.log('Custom domain with auth token in path detected - special handling');
             
-            // Special handling for custom domains with auth token in path
-            if (pathname.includes('access_token=')) {
-              console.log('Custom domain with auth token in path detected - special handling');
-              
-              // Extract token part
-              var tokenIndex = pathname.indexOf('access_token=');
-              var tokenPart = pathname.substring(tokenIndex);
-              
-              // IMPORTANT: Direct to acesso-plano with token in hash
-              console.log('Redirecting to correct path format: /acesso-plano#' + tokenPart);
-              window.location.href = '/acesso-plano#' + tokenPart;
-              return;
-            }
+            // Extract token part
+            var tokenIndex = pathname.indexOf('access_token=');
+            var tokenPart = pathname.substring(tokenIndex);
             
-            // Ensure we're on the acesso-plano page for auth processing
+            // IMPORTANT: Direct to acesso-plano with token in hash
+            console.log('Redirecting to correct path format: /acesso-plano#' + tokenPart);
+            window.location.href = '/acesso-plano#' + tokenPart;
+            return;
+          }
+          
+          // Check for magic link parameters
+          if (search && search.includes('access_entry=magiclink')) {
+            console.log('Magic link parameter detected in query string - special handling');
+            
+            // Keep as query parameter, but redirect to acesso-plano
             if (!pathname.includes('/acesso-plano')) {
-              console.log('Auth token detected outside of acesso-plano, redirecting');
-              
-              // Extract token part
-              var tokenIndex = fullUrl.indexOf('access_token=');
-              var tokenPart = fullUrl.substring(tokenIndex);
-              
-              // Redirect to correct location
-              window.location.href = '/acesso-plano#' + tokenPart;
+              console.log('Redirecting magic link to acesso-plano page');
+              window.location.href = '/acesso-plano' + search;
               return;
             }
+          }
+          
+          // Ensure access_token is always processed on the acesso-plano page
+          if (fullUrl.includes('access_token=') && !pathname.includes('/acesso-plano')) {
+            console.log('Auth token detected outside of acesso-plano, redirecting');
+            
+            // Extract token part
+            var tokenIndex = fullUrl.indexOf('access_token=');
+            var tokenPart = fullUrl.substring(tokenIndex);
+            
+            // Redirect to correct location
+            window.location.href = '/acesso-plano#' + tokenPart;
+            return;
           }
         } catch(e) {
           console.error('Error in auth token handler:', e);

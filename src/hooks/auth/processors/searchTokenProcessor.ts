@@ -35,8 +35,8 @@ export async function processSearchToken(
     
     console.log("SearchTokenProcessor: Using exchangeCodeForSession with search params directly");
     
-    // Process the search params using exchangeCodeForSession
-    const { data, error } = await supabase.auth.exchangeCodeForSession(search);
+    // Pass the entire URL when calling exchangeCodeForSession
+    const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
     
     if (error) {
       console.error("SearchTokenProcessor: Error processing search token:", error);
