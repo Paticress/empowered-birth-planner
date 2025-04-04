@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import { processPathToken } from '../../processors/pathTokenProcessor';
 import { AuthProcessOptions, AuthUrlInfo } from '@/types/auth';
 

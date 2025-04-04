@@ -43,9 +43,9 @@ describe('useAuthUrlHandler', () => {
   
   it('should call processors in useEffect when hasAuthParameters is true', async () => {
     // Setup mocks
-    const { hasAuthParameters } = await import('../utils/authUrlUtils');
-    const { processPathToken } = await import('../processors/pathTokenProcessor');
-    const { processAuthError } = await import('../processors/errorProcessor');
+    const { hasAuthParameters } = require('@/hooks/auth/utils/authUrlUtils');
+    const { processPathToken } = require('@/hooks/auth/processors/pathTokenProcessor');
+    const { processAuthError } = require('@/hooks/auth/processors/errorProcessor');
     
     // Make hasAuthParameters return true
     (hasAuthParameters as any).mockReturnValue(true);
@@ -54,10 +54,12 @@ describe('useAuthUrlHandler', () => {
     (processPathToken as any).mockResolvedValue(false);
     (processAuthError as any).mockResolvedValue(false);
     
-    const { result, waitForNextUpdate } = renderHook(() => useAuthUrlHandler());
+    // Use act when working with hooks
+    // For React 18+, waitFor is often needed for async operations
+    const { result, rerender } = renderHook(() => useAuthUrlHandler());
     
     // Wait for the effect to run
-    await waitForNextUpdate();
+    await vi.runAllTimersAsync();
     
     // Verify the processors were called
     expect(processPathToken).toHaveBeenCalled();
@@ -69,8 +71,8 @@ describe('useAuthUrlHandler', () => {
   
   it('should set isProcessingAuth=true when a processor returns true', async () => {
     // Setup mocks
-    const { hasAuthParameters } = await import('../utils/authUrlUtils');
-    const { processPathToken } = await import('../processors/pathTokenProcessor');
+    const { hasAuthParameters } = require('@/hooks/auth/utils/authUrlUtils');
+    const { processPathToken } = require('@/hooks/auth/processors/pathTokenProcessor');
     
     // Make hasAuthParameters return true
     (hasAuthParameters as any).mockReturnValue(true);
@@ -78,10 +80,10 @@ describe('useAuthUrlHandler', () => {
     // Make pathTokenProcessor return true (processed)
     (processPathToken as any).mockResolvedValue(true);
     
-    const { result, waitForNextUpdate } = renderHook(() => useAuthUrlHandler());
+    const { result, rerender } = renderHook(() => useAuthUrlHandler());
     
     // Wait for the effect to run
-    await waitForNextUpdate();
+    await vi.runAllTimersAsync();
     
     // isProcessingAuth should be true since pathTokenProcessor returned true
     expect(result.current.isProcessingAuth).toBe(true);
@@ -89,9 +91,9 @@ describe('useAuthUrlHandler', () => {
   
   it('should not call processors when hasAuthParameters is false', async () => {
     // Setup mocks
-    const { hasAuthParameters } = await import('../utils/authUrlUtils');
-    const { processPathToken } = await import('../processors/pathTokenProcessor');
-    const { processAuthError } = await import('../processors/errorProcessor');
+    const { hasAuthParameters } = require('@/hooks/auth/utils/authUrlUtils');
+    const { processPathToken } = require('@/hooks/auth/processors/pathTokenProcessor');
+    const { processAuthError } = require('@/hooks/auth/processors/errorProcessor');
     
     // Make hasAuthParameters return false
     (hasAuthParameters as any).mockReturnValue(false);
@@ -99,7 +101,7 @@ describe('useAuthUrlHandler', () => {
     renderHook(() => useAuthUrlHandler());
     
     // Wait a tick to ensure effects have run
-    await vi.runAllTimers();
+    await vi.runAllTimersAsync();
     
     // Verify the processors were not called
     expect(processPathToken).not.toHaveBeenCalled();
