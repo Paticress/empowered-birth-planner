@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -17,7 +16,7 @@
     <!-- Analytics - Updated to use correct URL -->
     <script defer src="https://va.vercel-analytics.com/v1/script.js"></script>
     
-    <!-- Auth token handler - Detect any auth tokens in URL and fix their format -->
+    <!-- Enhanced Auth token handler - Detect and repair any auth tokens in URL -->
     <script type="text/javascript">
       (function() {
         try {
@@ -31,28 +30,33 @@
             var search = window.location.search;
             var pathname = window.location.pathname;
             
-            // Check if token is in a non-standard location
-            if ((pathname.includes('access_token=') || 
-                (fullUrl.includes('access_token=') && 
-                 !hash.includes('access_token=') && 
-                 !search.includes('access_token='))) &&
-                 !pathname.includes('/acesso-plano')) {
-              
-              console.log('Auth token in non-standard format, redirecting to auth page');
+            // Ensure we're on the acesso-plano page for auth processing
+            if (!pathname.includes('/acesso-plano')) {
+              // We need to redirect to acesso-plano with the token in the hash
+              console.log('Auth token detected outside of acesso-plano, redirecting');
               
               // Extract token part
-              var tokenIndex = pathname.includes('access_token=') 
-                ? pathname.indexOf('access_token=')
-                : fullUrl.indexOf('access_token=');
-                
-              if (tokenIndex !== -1) {
-                var tokenPart = pathname.includes('access_token=')
-                  ? pathname.substring(tokenIndex)
-                  : fullUrl.substring(tokenIndex);
-                  
-                // Redirect to correct format
-                window.location.href = '/acesso-plano#' + tokenPart;
-              }
+              var tokenIndex = fullUrl.indexOf('access_token=');
+              var tokenPart = fullUrl.substring(tokenIndex);
+              
+              // Redirect to correct location
+              window.location.href = '/acesso-plano#' + tokenPart;
+              return;
+            }
+            
+            // If token is not in the hash where it should be, fix it
+            if (!hash.includes('access_token=')) {
+              console.log('Auth token in wrong format, fixing');
+              
+              // Extract token
+              var tokenIndex = fullUrl.indexOf('access_token=');
+              var tokenPart = fullUrl.substring(tokenIndex);
+              
+              // Replace history and update hash
+              window.history.replaceState(null, document.title, '/acesso-plano#' + tokenPart);
+              window.location.hash = tokenPart;
+              
+              console.log('Auth token format fixed, now in hash');
             }
           }
         } catch(e) {

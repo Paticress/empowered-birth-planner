@@ -21,6 +21,12 @@ export function MagicLinkTab() {
   // Enhanced magic link detection
   useEffect(() => {
     const checkAuth = async () => {
+      // We only need to check if the user hasn't been authenticated yet 
+      // and we're not already showing the "link sent" message
+      if (isAuthenticated || isMagicLinkSent) {
+        return;
+      }
+      
       // Check all possible locations for auth tokens
       const fullUrl = window.location.href;
       const hash = window.location.hash;
@@ -28,8 +34,8 @@ export function MagicLinkTab() {
       
       // Log for debugging
       console.log("MagicLinkTab: Checking for auth in URL", {
-        hashPresent: hash ? true : false,
-        searchPresent: search ? true : false,
+        hashPresent: hash ? (hash.includes('access_token') ? 'contains-token' : true) : false,
+        searchPresent: search ? (search.includes('access_token') ? 'contains-token' : true) : false,
         urlContainsToken: fullUrl.includes('access_token=')
       });
       
@@ -39,19 +45,20 @@ export function MagicLinkTab() {
         (search && search.includes('access_token='));
       
       if (hasAuthParams) {
-        console.log("MagicLinkTab: Magic link detected");
+        console.log("MagicLinkTab: Magic link parameters detected in URL");
         
         // Update the UI state to show that we've received the magic link
         setIsMagicLinkSent(true);
         
         try {
-          // Check if there's an active session already
+          // Check if there's an active session already - we might need to wait for Supabase to process the token
+          await new Promise(resolve => setTimeout(resolve, 800));
           const { data, error } = await supabase.auth.getSession();
           
           if (error) {
             console.error("MagicLinkTab: Error checking session:", error);
           } else if (data.session) {
-            console.log("MagicLinkTab: Valid session found");
+            console.log("MagicLinkTab: Valid session found for", data.session.user.email);
             toast.success("Autenticação realizada com sucesso!");
           } else {
             console.log("MagicLinkTab: No session found, auth params present");
@@ -64,8 +71,8 @@ export function MagicLinkTab() {
     };
     
     // Run the check with a slight delay to avoid interference with other effects
-    setTimeout(checkAuth, 200);
-  }, [setIsMagicLinkSent]);
+    setTimeout(checkAuth, 500);
+  }, [isAuthenticated, isMagicLinkSent, setIsMagicLinkSent]);
 
   return (
     <MagicLinkForm 

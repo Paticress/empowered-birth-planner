@@ -28,28 +28,47 @@
           hash: hash ? 'present' : 'none'
         });
         
-        // Special handling for auth tokens in URL
-        if (fullUrl.includes('access_token=')) {
-          console.log('Auth token detected in URL - preparing for redirect');
+        // Special handling for auth tokens - Handle both /acesso-plano#access_token and direct access_token in URL
+        if (pathname.includes('acesso-plano') && (fullUrl.includes('access_token=') || hash.includes('access_token='))) {
+          console.log('Auth token detected in acesso-plano URL - preparing for redirect');
           
-          // Get the token from the URL
-          var tokenIndex = fullUrl.indexOf('access_token=');
+          // Extract token part
           var tokenPart = '';
-          
-          if (tokenIndex !== -1) {
+          if (hash.includes('access_token=')) {
+            tokenPart = hash.substring(1); // Remove the # at the beginning
+          } else if (pathname.includes('access_token=')) {
+            var tokenIndex = pathname.indexOf('access_token=');
+            tokenPart = pathname.substring(tokenIndex);
+          } else if (fullUrl.includes('access_token=')) {
+            var tokenIndex = fullUrl.indexOf('access_token=');
             tokenPart = fullUrl.substring(tokenIndex);
           }
           
-          // Construct the target URL with the token correctly positioned in the hash
-          var targetUrl = '/acesso-plano#' + tokenPart;
-          console.log('Redirecting auth token to:', targetUrl);
+          if (tokenPart) {
+            // Construct the clean target URL
+            var targetUrl = '/acesso-plano#' + tokenPart;
+            console.log('Redirecting auth token to:', targetUrl);
+            
+            // Immediate redirect for auth tokens
+            l.replace(targetUrl);
+            return;
+          }
+        }
+        
+        // Handle case where token is directly in URL but not in acesso-plano path
+        if (fullUrl.includes('access_token=') && !pathname.includes('acesso-plano')) {
+          console.log('Auth token found outside acesso-plano path - redirecting');
           
-          // Immediate redirect for auth tokens
-          l.replace(targetUrl);
+          // Get the token part
+          var tokenIndex = fullUrl.indexOf('access_token=');
+          var tokenPart = fullUrl.substring(tokenIndex);
+          
+          // Redirect to acesso-plano with token in hash
+          l.replace('/acesso-plano#' + tokenPart);
           return;
         }
         
-        // For acesso-plano URLs (without tokens)
+        // For acesso-plano URLs (without tokens or already processed)
         if (pathname.includes('/acesso-plano')) {
           // Just redirect to the clean version
           l.replace('/acesso-plano' + search + hash);

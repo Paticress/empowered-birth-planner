@@ -1,17 +1,6 @@
 
 import { useState, useEffect } from "react";
-
-interface AuthUrlInfo {
-  fullUrl: string;
-  hash: string;
-  search: string;
-  path: string;
-  hasAuthInHash: boolean;
-  hasAuthInSearch: boolean;
-  hasAuthInPath: boolean;
-  hasAuthInUrl: boolean;
-  hasError: boolean;
-}
+import { AuthUrlInfo } from "@/types/auth";
 
 /**
  * Hook to detect and analyze authentication parameters in the URL
@@ -40,15 +29,25 @@ export function useAuthUrlDetection(): AuthUrlInfo {
     console.log("AuthUrlDetection: Page loaded, URL check:", { 
       path: path,
       fullUrl: fullUrl.includes('access_token=') ? 'contains-token' : 'normal',
-      hash: hash ? hash.substring(0, Math.min(20, hash.length)) + '...' : 'none',
-      search: search ? search.substring(0, Math.min(20, search.length)) + '...' : 'none'
+      hash: hash ? (hash.includes('access_token') ? 'contains-token' : hash.substring(0, Math.min(20, hash.length)) + '...') : 'none',
+      search: search ? (search.includes('access_token') ? 'contains-token' : search.substring(0, Math.min(20, search.length)) + '...') : 'none'
     });
     
-    // Detect auth parameters in all possible locations
+    // More comprehensive token detection
     const hasAuthInHash = hash && hash.includes('access_token=');
     const hasAuthInSearch = search && search.includes('access_token=');
-    const hasAuthInPath = path.includes('access_token=') || fullUrl.includes('/acesso-plano#access_token=');
-    const hasAuthInUrl = fullUrl.includes('access_token=');
+    
+    // Enhanced path detection - check both direct path and full URL for acesso-plano#access_token pattern
+    const hasAuthInPath = path.includes('access_token=') || 
+                        (path.includes('acesso-plano') && fullUrl.includes('access_token=') && !hasAuthInHash);
+    
+    // Token in URL but not in any of the specific locations
+    const hasAuthInUrl = fullUrl.includes('access_token=') && 
+                        !hasAuthInHash && 
+                        !hasAuthInSearch && 
+                        !hasAuthInPath;
+    
+    // Check for errors in any location
     const hasError = (hash && hash.includes('error=')) || 
                     (search && search.includes('error=')) || 
                     (path.includes('error='));
@@ -61,9 +60,20 @@ export function useAuthUrlDetection(): AuthUrlInfo {
       hasAuthInHash,
       hasAuthInSearch,
       hasAuthInPath,
-      hasAuthInUrl: hasAuthInUrl && !hasAuthInHash && !hasAuthInSearch && !hasAuthInPath,
+      hasAuthInUrl,
       hasError
     });
+    
+    // Log summary of detection
+    if (hasAuthInHash || hasAuthInSearch || hasAuthInPath || hasAuthInUrl) {
+      console.log("AuthUrlDetection: Auth parameters detected:", {
+        inHash: hasAuthInHash,
+        inSearch: hasAuthInSearch,
+        inPath: hasAuthInPath,
+        inUrl: hasAuthInUrl,
+        hasError: hasError
+      });
+    }
   }, []);
 
   return urlInfo;
