@@ -156,8 +156,18 @@ export function useLoginForm() {
         // Continue anyway, don't block the magic link
       }
       
-      // Send the magic link to the current page - will be handled by AcessoPlano component
-      const { error } = await signInWithMagicLink(email);
+      // Get the current site URL for proper redirects across environments
+      const getCurrentSiteUrl = () => {
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        return `${protocol}//${host}`;
+      };
+      
+      const siteUrl = getCurrentSiteUrl();
+      console.log("Magic link will be created with site URL:", siteUrl);
+
+      // Send the magic link to the complete site URL + acesso-plano path
+      const { error } = await signInWithMagicLink(email, '/acesso-plano');
       
       if (error) {
         console.error('Magic link error:', error);

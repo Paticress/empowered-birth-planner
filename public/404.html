@@ -6,7 +6,7 @@
   <title>Redirecionando...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript">
-    // Enhanced SPA routing handler for 404 pages with improved auth handling
+    // Enhanced SPA routing handler for 404 pages with improved auth handling for custom domains
     (function() {
       try {
         // Log page load for debugging
@@ -16,36 +16,50 @@
         var l = window.location;
         var fullUrl = l.href || '';
         var host = l.host || '';
+        var hostname = l.hostname || '';
         var pathname = l.pathname || '';
         var search = l.search || '';
         var hash = l.hash || '';
         
         console.log('404 handler analyzing URL:', {
-          fullUrl: fullUrl.includes('access_token') ? 'contains-auth-token' : fullUrl,
           host: host,
+          hostname: hostname, 
           pathname: pathname,
           search: search ? 'present' : 'none',
           hash: hash ? 'present' : 'none'
         });
+
+        // First check if we're on a custom domain
+        var isCustomDomain = hostname !== 'localhost' && 
+                           !hostname.includes('.vercel.app') && 
+                           !hostname.includes('.github.io');
         
-        // Special handling for auth tokens - Handle both /acesso-plano#access_token and direct access_token in URL
-        if (pathname.includes('acesso-plano') && (fullUrl.includes('access_token=') || hash.includes('access_token='))) {
-          console.log('Auth token detected in acesso-plano URL - preparing for redirect');
+        console.log('Domain detection:', { 
+          isCustomDomain: isCustomDomain,
+          hostname: hostname
+        });
+        
+        // Special handling for auth tokens in custom domains - very important!
+        if (fullUrl.includes('access_token=')) {
+          console.log('Auth token detected in URL - preparing special handling for authentication');
           
-          // Extract token part
+          // Extract token part - regardless of where it is in the URL
           var tokenPart = '';
           if (hash.includes('access_token=')) {
             tokenPart = hash.substring(1); // Remove the # at the beginning
           } else if (pathname.includes('access_token=')) {
             var tokenIndex = pathname.indexOf('access_token=');
             tokenPart = pathname.substring(tokenIndex);
+          } else if (search.includes('access_token=')) {
+            var tokenIndex = search.indexOf('access_token=');
+            tokenPart = search.substring(tokenIndex + (search.startsWith('?') ? 1 : 0));
           } else if (fullUrl.includes('access_token=')) {
             var tokenIndex = fullUrl.indexOf('access_token=');
             tokenPart = fullUrl.substring(tokenIndex);
           }
           
           if (tokenPart) {
-            // Construct the clean target URL
+            // Construct the clean target URL - always use /acesso-plano page
             var targetUrl = '/acesso-plano#' + tokenPart;
             console.log('Redirecting auth token to:', targetUrl);
             
@@ -54,23 +68,23 @@
             return;
           }
         }
-        
-        // Handle case where token is directly in URL but not in acesso-plano path
-        if (fullUrl.includes('access_token=') && !pathname.includes('acesso-plano')) {
-          console.log('Auth token found outside acesso-plano path - redirecting');
+
+        // Handle access_token on paths that are /acesso-plano
+        if (pathname.includes('/acesso-plano') && fullUrl.includes('access_token=')) {
+          console.log('Already on acesso-plano with token - just need to fix format');
           
-          // Get the token part
+          // Extract token
           var tokenIndex = fullUrl.indexOf('access_token=');
           var tokenPart = fullUrl.substring(tokenIndex);
           
-          // Redirect to acesso-plano with token in hash
+          // Ensure token is in hash format
           l.replace('/acesso-plano#' + tokenPart);
           return;
         }
         
-        // For acesso-plano URLs (without tokens or already processed)
+        // For all other acesso-plano URLs
         if (pathname.includes('/acesso-plano')) {
-          // Just redirect to the clean version
+          console.log('On acesso-plano path without token - simple redirect');
           l.replace('/acesso-plano' + search + hash);
           return;
         }

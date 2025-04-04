@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -13,7 +14,7 @@
     <!-- Favicon -->
     <link rel="icon" href="/favicon.ico" />
     
-    <!-- Analytics - Updated to use correct URL -->
+    <!-- Analytics -->
     <script defer src="https://va.vercel-analytics.com/v1/script.js"></script>
     
     <!-- Enhanced Auth token handler - Detect and repair any auth tokens in URL -->
@@ -21,14 +22,39 @@
       (function() {
         try {
           var fullUrl = window.location.href;
+          var hostname = window.location.hostname;
+          
+          // Check if this is a custom domain
+          var isCustomDomain = hostname !== 'localhost' && 
+                             !hostname.includes('.vercel.app') && 
+                             !hostname.includes('.github.io');
+          
+          console.log('Domain check:', { 
+            hostname: hostname, 
+            isCustomDomain: isCustomDomain 
+          });
           
           // Only run for URLs containing auth tokens
           if (fullUrl.includes('access_token=')) {
-            console.log('Auth token detector running');
+            console.log('Auth token detector running on:', window.location.pathname);
             
             var hash = window.location.hash;
             var search = window.location.search;
             var pathname = window.location.pathname;
+            
+            // Special handling for custom domains
+            if (isCustomDomain && pathname.includes('access_token=')) {
+              console.log('Custom domain with auth token in path detected - special handling');
+              
+              // Extract token part
+              var tokenIndex = pathname.indexOf('access_token=');
+              var tokenPart = pathname.substring(tokenIndex);
+              
+              // Redirect to acesso-plano with token in hash
+              console.log('Redirecting to correct path format: /acesso-plano#' + tokenPart);
+              window.location.href = '/acesso-plano#' + tokenPart;
+              return;
+            }
             
             // Ensure we're on the acesso-plano page for auth processing
             if (!pathname.includes('/acesso-plano')) {
