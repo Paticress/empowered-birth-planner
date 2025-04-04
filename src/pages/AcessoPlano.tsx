@@ -38,11 +38,22 @@ export function AcessoPlano() {
       
       console.log("AcessoPlano: Auth parameters detected, processing authentication");
       console.log("Current URL: ", window.location.href);
+      
+      // Show toast that we're processing the authentication
+      toast.info("Processando autenticação...");
+      
       setIsProcessingMagicLink(true);
       
       try {
         // Let Supabase process the authentication - IMPORTANT: Use the entire URL
         console.log("AcessoPlano: Calling exchangeCodeForSession with current URL");
+        
+        // Debug log the token format
+        if (hasAuthInHash) {
+          console.log("Token in hash format: detected");
+        } else if (hasAuthInQuery) {
+          console.log("Token in query format: detected");
+        }
         
         // Pass the entire URL to supabase instead of just the hash or search portion
         const { data, error } = await supabase.auth.exchangeCodeForSession(
@@ -51,7 +62,11 @@ export function AcessoPlano() {
         
         if (error) {
           console.error("AcessoPlano: Error processing authentication:", error);
-          console.error("Error details:", error.message, error.status);
+          console.error("Error details:", error.message, error.status, error.stack);
+          
+          // Display user-visible error with alert (as requested)
+          alert(`Erro no login: ${error.message}`);
+          
           toast.error("Erro ao processar o token de autenticação: " + error.message);
           setIsProcessingMagicLink(false);
           return;
@@ -77,12 +92,20 @@ export function AcessoPlano() {
         } else {
           console.error("AcessoPlano: No session returned from exchangeCodeForSession");
           console.log("Response data:", data);
+          
+          // Display user-visible error with alert
+          alert("Falha na autenticação: nenhuma sessão retornada");
+          
           toast.error("Falha na autenticação. Por favor, tente novamente.");
           setIsProcessingMagicLink(false);
         }
       } catch (err) {
         console.error("AcessoPlano: Unexpected error processing authentication:", err);
         console.error("Error type:", typeof err, "Error object:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
+        
+        // Display user-visible error with alert
+        alert(`Erro inesperado: ${err instanceof Error ? err.message : JSON.stringify(err)}`);
+        
         toast.error("Erro inesperado. Por favor, tente novamente.");
         setIsProcessingMagicLink(false);
       }

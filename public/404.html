@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -47,19 +46,23 @@
           var tokenPart = '';
           if (hash.includes('access_token=')) {
             tokenPart = hash.substring(1); // Remove the # at the beginning
+            console.log('Token detected in hash');
           } else if (pathname.includes('access_token=')) {
             var tokenIndex = pathname.indexOf('access_token=');
             tokenPart = pathname.substring(tokenIndex);
+            console.log('Token detected in path: ' + tokenPart.substring(0, 20) + '...');
           } else if (search.includes('access_token=')) {
             tokenPart = search.substring(1); // Remove the ? at the beginning
+            console.log('Token detected in search: ' + tokenPart.substring(0, 20) + '...');
           } else if (fullUrl.includes('access_token=')) {
             var tokenIndex = fullUrl.indexOf('access_token=');
             tokenPart = fullUrl.substring(tokenIndex);
+            console.log('Token detected in full URL: ' + tokenPart.substring(0, 20) + '...');
           }
           
           if (tokenPart) {
             // IMPORTANT: Always redirect to /acesso-plano#token for processing
-            console.log('Redirecting auth token to proper hash format');
+            console.log('Redirecting auth token to proper hash format: /acesso-plano#' + tokenPart.substring(0, 20) + '...');
             window.location.replace('/acesso-plano#' + tokenPart);
             return;
           }
@@ -67,8 +70,9 @@
         
         // Special handling for magiclink parameters
         if (search.includes('access_entry=magiclink')) {
-          console.log('Detected magic link parameter in query string');
+          console.log('Detected magic link parameter in query string: ' + search);
           // Keep as query parameter since that's how magic links work
+          console.log('Redirecting to: /acesso-plano' + search);
           window.location.replace('/acesso-plano' + search);
           return;
         }
@@ -133,6 +137,19 @@
     <div class="spinner"></div>
     <h1>Redirecionando...</h1>
     <p>Aguarde enquanto redirecionamos você para o Guia de Plano de Parto.</p>
+    <div id="debug-info" style="margin-top: 20px; font-size: 12px; color: #666; text-align: left;"></div>
   </div>
+  <script>
+    // Display current URL information for debugging purposes
+    document.addEventListener('DOMContentLoaded', function() {
+      var debugInfo = document.getElementById('debug-info');
+      if (debugInfo) {
+        debugInfo.innerHTML = 'URL: ' + window.location.href + '<br>' + 
+                             'Path: ' + window.location.pathname + '<br>' +
+                             'Search: ' + window.location.search + '<br>' +
+                             'Hash: ' + window.location.hash;
+      }
+    });
+  </script>
 </body>
 </html>
