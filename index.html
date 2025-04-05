@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -16,7 +17,7 @@
     <!-- Analytics -->
     <script defer src="https://va.vercel-analytics.com/v1/script.js"></script>
     
-    <!-- Enhanced Auth token handler - Detect and repair any auth tokens in URL -->
+    <!-- Enhanced Auth token handler with improved error handling -->
     <script type="text/javascript">
       (function() {
         try {
@@ -24,6 +25,7 @@
           var hostname = window.location.hostname;
           var pathname = window.location.pathname;
           var search = window.location.search; 
+          var hash = window.location.hash;
           
           // Check if this is a custom domain
           var isCustomDomain = hostname !== 'localhost' && 
@@ -35,6 +37,34 @@
             isCustomDomain: isCustomDomain,
             pathname: pathname
           });
+          
+          // Check for auth errors first before any other processing
+          if (fullUrl.includes('error=') || fullUrl.includes('error_code=') || fullUrl.includes('error_description=')) {
+            console.log('Auth error detected in URL - special handling needed');
+            
+            // Extract error parameters to preserve them
+            var errorParams = '';
+            
+            if (pathname.includes('error=') || pathname.includes('error_code=')) {
+              errorParams = pathname.substring(pathname.indexOf('error'));
+            } else if (search.includes('error=') || search.includes('error_code=')) {
+              errorParams = search.substring(1); // remove the ? at the beginning
+            } else if (hash.includes('error=')) {
+              errorParams = hash.substring(1); // remove the # at the beginning
+            }
+            
+            // Always redirect errors to acesso-plano page with error parameters as hash
+            if (errorParams) {
+              console.log('Redirecting with error parameters to: /acesso-plano#' + errorParams);
+              window.location.href = '/acesso-plano#' + errorParams;
+              return;
+            } else {
+              // If we can't extract specific params but know there's an error, just go to acesso-plano
+              console.log('Error detected but params not extracted, redirecting to /acesso-plano');
+              window.location.href = '/acesso-plano';
+              return;
+            }
+          }
           
           // Check for auth token in path for custom domains
           if (pathname.includes('access_token=')) {

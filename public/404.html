@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,6 +38,38 @@
           isCustomDomain: isCustomDomain,
           hostname: hostname
         });
+        
+        // Check for auth errors first - this is crucial for displaying user-friendly error messages
+        if (fullUrl.includes('error=') || fullUrl.includes('error_code=') || fullUrl.includes('error_description=')) {
+          console.log('Auth error detected in URL - handling error redirect');
+
+          // Handle special case where we have an error in the path on custom domains
+          var errorParams = '';
+          
+          // Extract error parameters to preserve them
+          if (pathname.includes('error=') || pathname.includes('error_code=')) {
+            errorParams = pathname.substring(pathname.indexOf('error'));
+            console.log('Error parameters extracted from path:', errorParams);
+          } else if (search.includes('error=') || search.includes('error_code=')) {
+            errorParams = search.substring(1); // remove the ? at the beginning
+            console.log('Error parameters extracted from search:', errorParams);
+          } else if (hash.includes('error=')) {
+            errorParams = hash.substring(1); // remove the # at the beginning
+            console.log('Error parameters extracted from hash:', errorParams);
+          }
+          
+          // Always redirect errors to acesso-plano page with error parameters as hash
+          if (errorParams) {
+            console.log('Redirecting with error parameters to: /acesso-plano#' + errorParams);
+            window.location.replace('/acesso-plano#' + errorParams);
+            return;
+          } else {
+            // If we can't extract specific params but know there's an error, just go to acesso-plano
+            console.log('Error detected but params not extracted, redirecting to /acesso-plano');
+            window.location.replace('/acesso-plano');
+            return;
+          }
+        }
         
         // Special handling for auth tokens in custom domains - very important!
         if (pathname.includes('access_token=') || fullUrl.includes('access_token=')) {
@@ -117,6 +150,8 @@
     .message {
       text-align: center;
       padding: 20px;
+      max-width: 90%;
+      width: 600px;
     }
     .spinner {
       width: 40px;
@@ -126,6 +161,27 @@
       border-left-color: #7983ff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
+    }
+    .error-message {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #ffeeee;
+      border: 1px solid #ffcccc;
+      border-radius: 4px;
+      color: #cc0000;
+      display: none;
+    }
+    .debug-info {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #666;
+      text-align: left;
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      word-break: break-all;
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -137,17 +193,32 @@
     <div class="spinner"></div>
     <h1>Redirecionando...</h1>
     <p>Aguarde enquanto redirecionamos você para o Guia de Plano de Parto.</p>
-    <div id="debug-info" style="margin-top: 20px; font-size: 12px; color: #666; text-align: left;"></div>
+    <div id="error-message" class="error-message">
+      <h3>Erro de autenticação detectado</h3>
+      <p>O link de acesso pode ter expirado ou ser inválido.</p>
+      <p>Você será redirecionado para solicitar um novo link.</p>
+    </div>
+    <div id="debug-info" class="debug-info"></div>
   </div>
   <script>
     // Display current URL information for debugging purposes
     document.addEventListener('DOMContentLoaded', function() {
       var debugInfo = document.getElementById('debug-info');
+      var errorMessage = document.getElementById('error-message');
+      
       if (debugInfo) {
         debugInfo.innerHTML = 'URL: ' + window.location.href + '<br>' + 
                              'Path: ' + window.location.pathname + '<br>' +
                              'Search: ' + window.location.search + '<br>' +
                              'Hash: ' + window.location.hash;
+      }
+      
+      // Check if URL contains error parameters and display error message
+      if (errorMessage && (
+          window.location.href.includes('error=') || 
+          window.location.href.includes('error_code=') || 
+          window.location.href.includes('error_description='))) {
+        errorMessage.style.display = 'block';
       }
     });
   </script>
