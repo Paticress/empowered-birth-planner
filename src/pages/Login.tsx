@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuthProcessor } from '@/hooks/auth/useAuthProcessor';
 import { useAuthUrlDetection } from '@/hooks/auth/useAuthUrlDetection';
 import { LoginContent } from '@/components/Login/LoginContent';
-import { supabase } from '@/integrations/supabase/client';
+import { getSessionFromUrl } from '@/utils/auth/token';
 
 export function Login() {
   const [error, setError] = useState<string | null>(null);
@@ -26,8 +26,8 @@ export function Login() {
       toast.loading("Processando autenticação...");
       
       try {
-        // Usar o método recomendado para obter a sessão diretamente da URL
-        const { data, error } = await supabase.auth.getSessionFromUrl();
+        // Use our updated utility function instead of getSessionFromUrl
+        const { data, error } = await getSessionFromUrl();
         
         if (error) {
           console.error("Erro ao obter sessão da URL:", error);

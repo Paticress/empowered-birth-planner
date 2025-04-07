@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { cleanUrlAfterAuth } from '@/utils/auth/token';
+import { cleanUrlAfterAuth, getSessionFromUrl } from '@/utils/auth/token';
 
 export function MagicLinkTab() {
   const {
@@ -20,7 +20,7 @@ export function MagicLinkTab() {
   const { user, isAuthenticated } = useAuth();
   const [isLocalProcessing, setIsLocalProcessing] = useState(false);
 
-  // Enhanced magic link detection with getSessionFromUrl
+  // Enhanced magic link detection
   useEffect(() => {
     const checkAuth = async () => {
       // We only need to check if the user hasn't been authenticated yet 
@@ -46,8 +46,8 @@ export function MagicLinkTab() {
         toast.loading("Processando sua autenticação...");
         
         try {
-          // Usar o método recomendado para obter a sessão diretamente da URL
-          const { data, error } = await supabase.auth.getSessionFromUrl();
+          // Use our updated utility function instead of getSessionFromUrl
+          const { data, error } = await getSessionFromUrl();
           
           if (error) {
             console.error("MagicLinkTab: Error processing auth code:", error);
@@ -74,7 +74,7 @@ export function MagicLinkTab() {
               window.location.href = '/criar-plano';
             }, 1500);
           } else {
-            console.log("MagicLinkTab: No session returned from getSessionFromUrl");
+            console.log("MagicLinkTab: No session returned from auth process");
             toast.error("Falha ao processar autenticação. Tente novamente.");
             setIsLocalProcessing(false);
             // Clean up URL

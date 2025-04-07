@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingState";
 import { toast } from "sonner";
+import { getSessionFromUrl } from "@/utils/auth/token";
 
 export function AuthCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -21,8 +22,8 @@ export function AuthCallback() {
       toast.loading("Processando autenticação...");
       
       try {
-        // Usar o método recomendado para obter a sessão diretamente da URL
-        const { data, error } = await supabase.auth.getSessionFromUrl();
+        // Use our updated utility function instead of getSessionFromUrl
+        const { data, error } = await getSessionFromUrl();
         
         if (error) {
           console.error("Erro ao obter sessão da URL:", error);

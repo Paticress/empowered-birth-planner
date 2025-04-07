@@ -8,6 +8,7 @@ import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingS
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { getSessionFromUrl } from "@/utils/auth/token";
 
 export function AcessoPlano() {
   const { user, isLoading, session } = useAuth();
@@ -41,8 +42,8 @@ export function AcessoPlano() {
         toast.loading("Processando autenticação...");
         
         try {
-          // Usar o método recomendado para obter a sessão diretamente da URL
-          const { data, error } = await supabase.auth.getSessionFromUrl();
+          // Use our updated utility function instead of getSessionFromUrl
+          const { data, error } = await getSessionFromUrl();
           
           if (error) {
             console.error("Erro ao obter sessão da URL:", error);
