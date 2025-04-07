@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,7 +8,6 @@ export function useAuthService() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Helper function to get the current site URL
   const getCurrentSiteUrl = () => {
     const protocol = window.location.protocol;
     const host = window.location.host;
@@ -36,10 +34,9 @@ export function useAuthService() {
     }
   };
 
-  const signInWithMagicLink = async (email: string, redirectPath = '/acesso-plano') => {
+  const signInWithMagicLink = async (email: string, redirectPath = '/auth/callback') => {
     try {
       const siteUrl = getCurrentSiteUrl();
-      // Use absolute URL for the redirect target
       const redirectTo = `${siteUrl}${redirectPath}`;
       console.log("Magic link will redirect to:", redirectTo);
       
@@ -62,7 +59,6 @@ export function useAuthService() {
       await supabase.auth.signOut();
       console.log("User signed out");
       
-      // Clear localStorage after sign out
       localStorage.removeItem('birthPlanLoggedIn');
       localStorage.removeItem('birthPlanEmail');
       
@@ -78,13 +74,11 @@ export function useAuthService() {
     console.log("Initializing auth service...");
     setIsLoading(true);
     
-    // Check for hash fragment that indicates magic link authentication
     const handleMagicLinkAuth = async () => {
       const hash = window.location.hash;
       if (hash && hash.includes('access_token')) {
         console.log("Magic link authentication detected");
         try {
-          // The auth state change handlers will automatically update the session
           const { data, error } = await supabase.auth.getSession();
           if (error) {
             console.error("Error processing magic link:", error);
@@ -93,13 +87,11 @@ export function useAuthService() {
             console.log("Magic link authentication successful");
             toast.success("Login realizado com sucesso!");
             
-            // Store email in localStorage for compatibility with existing code
             if (data.session.user?.email) {
               localStorage.setItem('birthPlanLoggedIn', 'true');
               localStorage.setItem('birthPlanEmail', data.session.user.email);
             }
             
-            // Clear hash from URL without page reload
             window.history.replaceState(null, '', window.location.pathname + window.location.search);
           }
         } catch (err) {
@@ -108,10 +100,8 @@ export function useAuthService() {
       }
     };
     
-    // Handle magic link authentication if present
     handleMagicLinkAuth();
     
-    // First, set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log('Auth state changed:', event, currentSession?.user?.email);
@@ -122,7 +112,6 @@ export function useAuthService() {
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           console.log('User signed in or token refreshed:', currentSession?.user?.email);
           
-          // Make sure to update localStorage for our existing mechanism
           if (currentSession?.user?.email) {
             localStorage.setItem('birthPlanLoggedIn', 'true');
             localStorage.setItem('birthPlanEmail', currentSession.user.email);
@@ -133,7 +122,6 @@ export function useAuthService() {
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
-          // Clear localStorage items on sign out
           localStorage.removeItem('birthPlanLoggedIn');
           localStorage.removeItem('birthPlanEmail');
         }
@@ -142,7 +130,6 @@ export function useAuthService() {
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       console.log("Initial session check:", initialSession ? "Session found" : "No session");
       
@@ -151,13 +138,11 @@ export function useAuthService() {
         setSession(initialSession);
         setUser(initialSession.user);
         
-        // Also update localStorage for compatibility with existing code
         localStorage.setItem('birthPlanLoggedIn', 'true');
         localStorage.setItem('birthPlanEmail', initialSession.user.email);
       } else {
         console.log("No session found, checking localStorage");
         
-        // In case we have localStorage but no session
         const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
         const storedEmail = localStorage.getItem('birthPlanEmail');
         
@@ -169,7 +154,6 @@ export function useAuthService() {
       setIsLoading(false);
     });
 
-    // Return the cleanup function
     return () => {
       subscription.unsubscribe();
     };

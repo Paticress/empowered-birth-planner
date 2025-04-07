@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,6 +38,13 @@
           isCustomDomain: isCustomDomain,
           hostname: hostname
         });
+        
+        // Special handling for Supabase auth callback path
+        if (pathname.includes('/auth/callback')) {
+          console.log('Auth callback path detected, redirecting to auth callback handler');
+          window.location.replace('/auth/callback' + search + hash);
+          return;
+        }
         
         // Check for auth errors first - this is crucial for displaying user-friendly error messages
         if (fullUrl.includes('error=') || fullUrl.includes('error_code=') || fullUrl.includes('error_description=')) {
