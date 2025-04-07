@@ -1,6 +1,6 @@
 
-export { processAuthToken, fixAuthTokenFormat } from "./processToken";
-export { cleanUrlAfterAuth } from "./cleanupToken";
+export { getSessionFromUrl, cleanUrlAfterAuth } from "./token";
+export { handleAuthError } from "./errorHandler";
 export { extractTokenFromUrl } from "./extractToken";
 export { ensureUserInDatabase } from "./sessionUtils";
-export { handleAuthError } from "./errorHandler";
+export { fixAuthTokenFormat, processAuthToken } from "./processToken";
