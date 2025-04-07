@@ -13,9 +13,9 @@ export function useAuthCheck() {
   const [isInitialCheck, setIsInitialCheck] = useState(true);
 
   useEffect(() => {
-    // Inicialização: não fazer nada até que a autenticação esteja totalmente carregada
+    // Don't do anything until the authentication is fully loaded
     if (isLoading) {
-      console.log("Still loading auth state, waiting...");
+      console.log("Auth still loading, waiting before checking authorization...");
       return;
     }
     
@@ -28,21 +28,21 @@ export function useAuthCheck() {
     });
     
     const checkAuth = async () => {
-      // Verificar se já temos uma sessão válida
+      // Check if we already have a valid session
       if (isAuthenticated) {
         console.log("User is authenticated, checking authorization");
         await checkUserAuthorization();
         return;
       }
       
-      // Verificar se há uma sessão válida no localStorage antes de redirecionar
+      // Check if there's a valid session in localStorage before redirecting
       const isLoggedInLocally = localStorage.getItem('birthPlanLoggedIn') === 'true';
       const storedEmail = localStorage.getItem('birthPlanEmail');
       
       if (isLoggedInLocally && storedEmail) {
         console.log("Found login info in localStorage, attempting to restore session");
         
-        // Tentar atualizar a sessão
+        // Try to update the session
         const sessionRestored = await refreshSession();
         
         if (sessionRestored) {
@@ -57,7 +57,7 @@ export function useAuthCheck() {
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           console.log("Session found directly from Supabase:", data.session.user?.email);
-          // Tentar atualizar o contexto com a sessão encontrada
+          // Try to update the context with the session found
           await refreshSession();
           await checkUserAuthorization();
           return;
@@ -66,9 +66,9 @@ export function useAuthCheck() {
         console.error("Error checking session directly:", error);
       }
       
-      // Se não conseguiu restaurar a sessão, redirecionar para login
+      // If we couldn't restore the session, redirect to login
       if (isInitialCheck) {
-        // Na primeira verificação, mostrar mensagem e redirecionar
+        // On the first check, show a message and redirect
         toast.error("Acesso Restrito", {
           description: "Por favor, faça login para acessar o construtor de plano de parto."
         });
@@ -80,7 +80,7 @@ export function useAuthCheck() {
     };
     
     const checkUserAuthorization = async () => {
-      // Obter o email de múltiplas fontes para confiabilidade
+      // Get the email from multiple sources for reliability
       const userEmail = user?.email || session?.user?.email || localStorage.getItem('birthPlanEmail');
       
       if (!userEmail) {
@@ -91,7 +91,7 @@ export function useAuthCheck() {
         return;
       }
       
-      // Verificar se o usuário está na tabela de usuários autorizados
+      // Check if the user is in the authorized users table
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
@@ -113,7 +113,7 @@ export function useAuthCheck() {
         if (!data) {
           console.log("User not authorized, adding to database");
           
-          // Tentar adicionar o usuário ao banco de dados já que ele está autenticado
+          // Try to add the user to the database since they are authenticated
           const { error: insertError } = await supabase
             .from('users_db_birthplanbuilder')
             .insert({ email: userEmail });
@@ -153,12 +153,12 @@ export function useAuthCheck() {
       }
     };
     
-    // Se há parâmetros de auth na URL, esperar um pouco mais para a autenticação completar
+    // If there are auth parameters in the URL, wait a bit longer for authentication to complete
     const hasAuthParams = window.location.hash.includes('access_token=');
     
     if (hasAuthParams) {
       console.log("Auth parameters detected in URL, waiting for auth to complete...");
-      // Adicionar um pequeno atraso para permitir que o Supabase processe o token
+      // Add a small delay to allow Supabase to process the token
       setTimeout(checkAuth, 1500);
     } else {
       checkAuth();

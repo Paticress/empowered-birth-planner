@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingState";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 
 export function AcessoPlano() {
   const { user, isLoading, session, refreshSession, isAuthenticated } = useAuth();
@@ -113,7 +115,17 @@ export function AcessoPlano() {
     return (
       <div className="min-h-screen flex flex-col bg-maternal-50">
         <Header />
-        <AuthLoadingState isProcessingAuth={isProcessingAuth} />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center bg-white p-8 rounded-lg shadow-md">
+            <Loader2 className="h-12 w-12 animate-spin text-maternal-500 mx-auto" />
+            <p className="mt-4 text-lg font-medium text-maternal-800">
+              {isProcessingAuth ? "Processando autenticação..." : "Verificando seu acesso..."}
+            </p>
+            <p className="mt-2 text-sm text-maternal-600">
+              Aguarde um momento, estamos preparando tudo para você.
+            </p>
+          </div>
+        </main>
         <Footer />
       </div>
     );

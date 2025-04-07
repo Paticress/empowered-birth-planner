@@ -2,9 +2,10 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function BirthPlanUserInfo() {
   const [userEmail, setUserEmail] = useState<string>('');
@@ -39,9 +40,14 @@ export function BirthPlanUserInfo() {
     }
   };
 
-  // Return nothing if no user is logged in or still loading
+  // Show loading skeleton if still loading
   if (isLoading) {
-    return null;
+    return (
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-8 w-20" />
+      </div>
+    );
   }
 
   // Show user info if authenticated, even if we only have email from localStorage

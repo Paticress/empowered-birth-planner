@@ -59,19 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, session, isLoading, isAuthenticated]);
 
-  // Render a loading state while authentication is being initialized
-  if (isLoading) {
-    console.log("Auth context is still loading...");
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-maternal-50">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-maternal-500 border-r-transparent"></div>
-          <p className="mt-4 text-maternal-800">Carregando informações de autenticação...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // We don't want to render any loading state here, as we're now handling it in AppContent
   return (
     <AuthContext.Provider
       value={{

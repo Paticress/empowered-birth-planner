@@ -16,18 +16,30 @@ import { MyAccess } from "./pages/MyAccess";
 import { FAQ } from "./pages/FAQ";
 import { AuthCallback } from "./pages/AuthCallback";
 import { Login } from "./pages/Login";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from '@vercel/analytics/react';
 import { SupabaseTest } from './components/SupabaseTest';
 import { WebhookTest } from './pages/WebhookTest';
 import NotFound from './pages/NotFound';
+import { Loader2 } from 'lucide-react';
 
 function AppContent() {
   const location = useLocation();
+  const { isLoading } = useAuth();
+  
   // Conditionally apply the background class based on the route
   const isBirthPlanRoute = location.pathname.startsWith('/criar-plano');
   const backgroundClass = isBirthPlanRoute ? 'bg-maternal-100' : 'bg-white';
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="h-8 w-8 animate-spin text-pink-600" />
+        <span className="ml-2 text-pink-600 font-medium">Carregando sessão...</span>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${backgroundClass}`}>

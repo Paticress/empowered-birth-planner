@@ -62,34 +62,7 @@ export function useAuthSession() {
     setAuthDebugInfo(debugInfo);
     
     try {
-      // First, explicitly check for a session to initialize quickly
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error("Error getting initial session:", sessionError);
-      } else if (sessionData.session) {
-        console.log("Found initial session for user:", sessionData.session.user?.email);
-        setSession(sessionData.session);
-        setUser(sessionData.session.user);
-        
-        // Backup to localStorage
-        localStorage.setItem('birthPlanLoggedIn', 'true');
-        localStorage.setItem('birthPlanEmail', sessionData.session.user.email || '');
-      } else {
-        console.log("No session found during initialization");
-        
-        // Check localStorage as fallback
-        const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
-        const storedEmail = localStorage.getItem('birthPlanEmail');
-        
-        if (isLoggedIn && storedEmail) {
-          console.log("Found login info in localStorage, attempting session recovery");
-          // Try to trigger a session recovery
-          await refreshSession();
-        }
-      }
-      
-      // AFTER session check, set up auth state change listener
+      // First, set up auth state change listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         (event, currentSession) => {
           console.log('Auth state changed:', event, 'User:', currentSession?.user?.email);
@@ -134,6 +107,33 @@ export function useAuthSession() {
         }
       );
       
+      // AFTER setting up listener, check for a session to initialize quickly
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("Error getting initial session:", sessionError);
+      } else if (sessionData.session) {
+        console.log("Found initial session for user:", sessionData.session.user?.email);
+        setSession(sessionData.session);
+        setUser(sessionData.session.user);
+        
+        // Backup to localStorage
+        localStorage.setItem('birthPlanLoggedIn', 'true');
+        localStorage.setItem('birthPlanEmail', sessionData.session.user.email || '');
+      } else {
+        console.log("No session found during initialization");
+        
+        // Check localStorage as fallback
+        const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
+        const storedEmail = localStorage.getItem('birthPlanEmail');
+        
+        if (isLoggedIn && storedEmail) {
+          console.log("Found login info in localStorage, attempting session recovery");
+          // Try to trigger a session recovery
+          await refreshSession();
+        }
+      }
+      
       // Set up cleanup function to unsubscribe
       return () => {
         subscription.unsubscribe();
@@ -141,8 +141,12 @@ export function useAuthSession() {
     } catch (error) {
       console.error("Error during session initialization:", error);
     } finally {
-      setIsLoading(false);
-      setIsInitialized(true);
+      // Ensure we always finish loading after a reasonable timeout
+      // even if something goes wrong
+      setTimeout(() => {
+        setIsLoading(false);
+        setIsInitialized(true);
+      }, 1000);
     }
   }, [refreshSession]);
 

@@ -5,8 +5,8 @@ import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingState";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export function CriarPlano() {
   const { user, isLoading, session, refreshSession, isAuthenticated } = useAuth();
@@ -81,7 +81,17 @@ export function CriarPlano() {
     return (
       <div className="min-h-screen flex flex-col bg-maternal-50">
         <Header />
-        <AuthLoadingState isProcessingAuth={true} />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center bg-white p-8 rounded-lg shadow-md">
+            <Loader2 className="h-12 w-12 animate-spin text-maternal-500 mx-auto" />
+            <p className="mt-4 text-lg font-medium text-maternal-800">
+              {isCheckingAuth ? "Verificando seu acesso..." : "Carregando construtor de plano..."}
+            </p>
+            <p className="mt-2 text-sm text-maternal-600">
+              Aguarde um momento, estamos preparando tudo para você.
+            </p>
+          </div>
+        </main>
         <Footer />
       </div>
     );
