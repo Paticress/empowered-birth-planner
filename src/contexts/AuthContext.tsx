@@ -9,7 +9,6 @@ type AuthContextType = {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithMagicLink: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
 };
@@ -23,7 +22,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     signIn,
     signUp,
-    signInWithMagicLink,
     signOut,
     initializeAuth
   } = useAuthService();
@@ -68,7 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         signIn,
         signUp,
-        signInWithMagicLink,
         signOut,
         isAuthenticated
       }}

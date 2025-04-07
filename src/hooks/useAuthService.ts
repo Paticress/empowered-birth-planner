@@ -9,7 +9,6 @@ export function useAuthService() {
   const { 
     signIn, 
     signUp, 
-    signInWithMagicLink, 
     signOut,
     authDebugInfo: methodsDebugInfo 
   } = useAuthMethods();
@@ -34,7 +33,6 @@ export function useAuthService() {
     isLoading,
     signIn,
     signUp,
-    signInWithMagicLink,
     signOut,
     initializeAuth,
     authDebugInfo
