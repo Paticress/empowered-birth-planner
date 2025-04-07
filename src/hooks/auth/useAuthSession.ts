@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -15,9 +15,44 @@ export function useAuthSession() {
   const [authDebugInfo, setAuthDebugInfo] = useState<any>(null);
 
   /**
+   * Força uma atualização da sessão atual
+   */
+  const refreshSession = useCallback(async () => {
+    console.log("Refreshing session...");
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Error refreshing session:", error);
+        return false;
+      }
+      
+      if (data.session) {
+        console.log("Session refreshed successfully:", data.session.user?.email);
+        setSession(data.session);
+        setUser(data.session.user);
+        
+        // Atualizar o localStorage como backup
+        if (data.session.user?.email) {
+          localStorage.setItem('birthPlanLoggedIn', 'true');
+          localStorage.setItem('birthPlanEmail', data.session.user.email);
+        }
+        
+        return true;
+      } else {
+        console.log("No session found during refresh");
+        return false;
+      }
+    } catch (error) {
+      console.error("Exception refreshing session:", error);
+      return false;
+    }
+  }, []);
+
+  /**
    * Initialize the authentication session
    */
-  const initializeAuth = () => {
+  const initializeAuth = useCallback(() => {
     console.log("Initializing auth service...");
     setIsLoading(true);
     
@@ -62,58 +97,70 @@ export function useAuthSession() {
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      console.log("Initial session check:", initialSession ? "Session found" : "No session");
-      
-      setAuthDebugInfo(prev => ({ 
-        ...prev, 
-        initialSessionCheck: {
-          hasSession: !!initialSession,
-          userEmail: initialSession?.user?.email,
-          timestamp: new Date().toISOString()
-        }
-      }));
-      
-      if (initialSession?.user) {
-        console.log("Found session for user:", initialSession.user.email);
-        setSession(initialSession);
-        setUser(initialSession.user);
+    // Verificar sessão inicial
+    const checkInitialSession = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         
-        localStorage.setItem('birthPlanLoggedIn', 'true');
-        localStorage.setItem('birthPlanEmail', initialSession.user.email);
-      } else {
-        console.log("No session found, checking localStorage");
-        
-        const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
-        const storedEmail = localStorage.getItem('birthPlanEmail');
+        console.log("Initial session check:", initialSession ? "Session found" : "No session");
         
         setAuthDebugInfo(prev => ({ 
           ...prev, 
-          localStorageCheck: {
-            isLoggedIn,
-            storedEmail,
+          initialSessionCheck: {
+            hasSession: !!initialSession,
+            userEmail: initialSession?.user?.email,
             timestamp: new Date().toISOString()
           }
         }));
         
-        if (isLoggedIn && storedEmail) {
-          console.log("Found login info in localStorage, but no active session");
+        if (initialSession?.user) {
+          console.log("Found session for user:", initialSession.user.email);
+          setSession(initialSession);
+          setUser(initialSession.user);
+          
+          localStorage.setItem('birthPlanLoggedIn', 'true');
+          localStorage.setItem('birthPlanEmail', initialSession.user.email);
+        } else {
+          console.log("No session found, checking localStorage");
+          
+          const isLoggedIn = localStorage.getItem('birthPlanLoggedIn') === 'true';
+          const storedEmail = localStorage.getItem('birthPlanEmail');
+          
+          setAuthDebugInfo(prev => ({ 
+            ...prev, 
+            localStorageCheck: {
+              isLoggedIn,
+              storedEmail,
+              timestamp: new Date().toISOString()
+            }
+          }));
+          
+          if (isLoggedIn && storedEmail) {
+            console.log("Found login info in localStorage, but no active session");
+            
+            // Tentar restaurar sessão se necessário em uma futura iteração
+          }
         }
+      } catch (error) {
+        console.error("Error checking initial session:", error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
-    });
+    };
+    
+    checkInitialSession();
 
     return () => {
       subscription.unsubscribe();
     };
-  };
+  }, []);
 
   return {
     session,
     user,
     isLoading,
     initializeAuth,
+    refreshSession,
     authDebugInfo
   };
 }

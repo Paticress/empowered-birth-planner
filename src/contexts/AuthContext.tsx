@@ -11,6 +11,7 @@ type AuthContextType = {
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
+  refreshSession: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,7 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signUp,
     signOut,
-    initializeAuth
+    initializeAuth,
+    refreshSession
   } = useAuthService();
   
   const [isInitialized, setIsInitialized] = useState(false);
@@ -67,7 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signOut,
-        isAuthenticated
+        isAuthenticated,
+        refreshSession
       }}
     >
       {children}

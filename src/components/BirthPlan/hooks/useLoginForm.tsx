@@ -49,47 +49,66 @@ export function useLoginForm() {
       toast.success('Login realizado com sucesso!');
       console.log("Login successful, checking user access...");
       
-      try {
-        const { data: userData, error: userError } = await supabase
-          .from('users_db_birthplanbuilder')
-          .select('email')
-          .eq('email', email)
-          .maybeSingle();
+      // Força a atualização da sessão antes de redirecionar
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (sessionData.session) {
+        console.log("Session confirmed after login:", sessionData.session.user?.email);
+        localStorage.setItem('birthPlanLoggedIn', 'true');
+        localStorage.setItem('birthPlanEmail', email);
         
-        if (userError) {
-          console.error('Error checking user access:', userError);
-          toast.error('Erro ao verificar acesso: ' + userError.message);
-          setIsLoading(false);
-          return;
-        }
-        
-        if (userData) {
-          console.log("User found in database, redirecting to birth plan builder");
-          navigateTo('/criar-plano');
-        } else {
-          console.log("User not found in database, adding user");
-          const { error: insertError } = await supabase
+        try {
+          const { data: userData, error: userError } = await supabase
             .from('users_db_birthplanbuilder')
-            .insert({ email });
-            
-          if (insertError) {
-            console.error('Error adding user to database:', insertError);
-            toast.error('Erro ao registrar acesso, por favor contate o suporte.');
+            .select('email')
+            .eq('email', email)
+            .maybeSingle();
+          
+          if (userError) {
+            console.error('Error checking user access:', userError);
+            toast.error('Erro ao verificar acesso: ' + userError.message);
             setIsLoading(false);
             return;
           }
           
-          console.log("User added to database, redirecting to birth plan builder");
-          navigateTo('/criar-plano');
+          if (userData) {
+            console.log("User found in database, redirecting to birth plan builder");
+          } else {
+            console.log("User not found in database, adding user");
+            const { error: insertError } = await supabase
+              .from('users_db_birthplanbuilder')
+              .insert({ email });
+              
+            if (insertError) {
+              console.error('Error adding user to database:', insertError);
+              toast.error('Erro ao registrar acesso, por favor contate o suporte.');
+              setIsLoading(false);
+              return;
+            }
+            
+            console.log("User added to database");
+          }
+          
+          // Aguarda um pequeno delay para garantir que o contexto global seja atualizado
+          setTimeout(() => {
+            console.log("Redirecting to birth plan builder after delay");
+            navigateTo('/criar-plano');
+            setIsLoading(false);
+          }, 500);
+          
+        } catch (error) {
+          console.error('Error in login flow:', error);
+          toast.error('Ocorreu um erro inesperado. Por favor, tente novamente.');
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error('Error in login flow:', error);
-        toast.error('Ocorreu um erro inesperado. Por favor, tente novamente.');
+      } else {
+        console.error('No session found after login');
+        toast.error('Erro ao estabelecer sessão. Por favor, tente novamente.');
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Exception in login flow:', error);
       toast.error('Ocorreu um erro inesperado. Por favor, tente novamente.');
-    } finally {
       setIsLoading(false);
     }
   };

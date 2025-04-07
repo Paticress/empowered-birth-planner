@@ -18,6 +18,7 @@ export function useAuthService() {
     user, 
     isLoading, 
     initializeAuth,
+    refreshSession,
     authDebugInfo: sessionDebugInfo 
   } = useAuthSession();
 
@@ -35,6 +36,7 @@ export function useAuthService() {
     signUp,
     signOut,
     initializeAuth,
+    refreshSession,
     authDebugInfo
   };
 }

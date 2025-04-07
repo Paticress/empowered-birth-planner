@@ -8,7 +8,7 @@ import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingS
 import { useNavigate } from "react-router-dom";
 
 export function AcessoPlano() {
-  const { user, isLoading, session } = useAuth();
+  const { user, isLoading, session, refreshSession } = useAuth();
   const [isProcessingAuth, setIsProcessingAuth] = useState(false);
   const navigate = useNavigate();
   
@@ -20,11 +20,30 @@ export function AcessoPlano() {
     console.log("User status:", user ? "Logged in" : "Not logged in");
   }, [session, user]);
 
+  // Verifica a sessão ativamente quando a página carrega
+  useEffect(() => {
+    const checkAndRefreshSession = async () => {
+      if (!user && !isLoading) {
+        console.log("No user detected, attempting to refresh session");
+        const hasSession = await refreshSession();
+        if (hasSession) {
+          console.log("Session refreshed successfully, will redirect soon");
+        }
+      }
+    };
+    
+    checkAndRefreshSession();
+  }, [user, isLoading, refreshSession]);
+
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && user && session) {
-      console.log("AcessoPlano: User already authenticated, redirecting to birth plan builder");
-      navigate('/criar-plano', { replace: true });
+      console.log("AcessoPlano: User authenticated, redirecting to birth plan builder");
+      
+      // Pequeno delay para garantir que todos os estados sejam atualizados
+      setTimeout(() => {
+        navigate('/criar-plano', { replace: true });
+      }, 300);
     }
   }, [user, isLoading, session, navigate]);
 

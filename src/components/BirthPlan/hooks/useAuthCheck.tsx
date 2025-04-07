@@ -6,13 +6,14 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 export function useAuthCheck() {
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user, isLoading, session } = useAuth();
   const { navigateTo } = useNavigation();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [authCheckComplete, setAuthCheckComplete] = useState(false);
+  const [isInitialCheck, setIsInitialCheck] = useState(true);
 
   useEffect(() => {
-    // Don't do anything while still loading auth state
+    // Inicialização: não fazer nada até que a autenticação esteja totalmente carregada
     if (isLoading) {
       console.log("Still loading auth state, waiting...");
       return;
@@ -21,33 +22,59 @@ export function useAuthCheck() {
     console.log("Auth check running with:", { 
       isAuthenticated, 
       email: user?.email || localStorage.getItem('birthPlanEmail'),
-      isLoading
+      hasSession: !!session,
+      isLoading,
+      isInitialCheck
     });
     
     const checkAuth = async () => {
-      // If user is not authenticated, redirect to login page
+      // Se o usuário não está autenticado, redirecionar para a página de login
       if (!isAuthenticated) {
         console.log("User not authenticated, redirecting to login page");
-        toast.error("Acesso Restrito", {
-          description: "Por favor, faça login para acessar o construtor de plano de parto."
-        });
-        // Use replace: true to avoid history issues
-        navigateTo('/acesso-plano');
+        
+        // Verificar se há uma sessão válida no localStorage antes de redirecionar
+        const isLoggedInLocally = localStorage.getItem('birthPlanLoggedIn') === 'true';
+        const storedEmail = localStorage.getItem('birthPlanEmail');
+        
+        if (isLoggedInLocally && storedEmail) {
+          console.log("Found login info in localStorage, attempting to restore session");
+          
+          // Forçar atualização da sessão antes de decidir redirecionar
+          const { data } = await supabase.auth.getSession();
+          
+          if (data.session) {
+            console.log("Session restored from local storage:", data.session.user?.email);
+            // Se encontrou sessão, não redirecionar e esperar o próximo ciclo de useEffect
+            setAuthCheckComplete(true);
+            return;
+          }
+        }
+        
+        if (isInitialCheck) {
+          // Na primeira verificação, mostrar mensagem e redirecionar
+          toast.error("Acesso Restrito", {
+            description: "Por favor, faça login para acessar o construtor de plano de parto."
+          });
+          navigateTo('/acesso-plano');
+        }
+        
         setAuthCheckComplete(true);
+        setIsInitialCheck(false);
         return;
       }
       
-      // Get the email from multiple sources for reliability
+      // Obter o email de múltiplas fontes para confiabilidade
       const userEmail = user?.email || localStorage.getItem('birthPlanEmail');
       
       if (!userEmail) {
         console.log("No user email found, redirecting to login page");
         navigateTo('/acesso-plano');
         setAuthCheckComplete(true);
+        setIsInitialCheck(false);
         return;
       }
       
-      // Check if the user is in the authorized users table - using correct lowercase table name
+      // Verificar se o usuário está na tabela de usuários autorizados
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
@@ -62,13 +89,14 @@ export function useAuthCheck() {
           });
           navigateTo('/acesso-plano');
           setAuthCheckComplete(true);
+          setIsInitialCheck(false);
           return;
         }
         
         if (!data) {
           console.log("User not authorized, adding to database");
           
-          // Try to add the user to the database since they're authenticated
+          // Tentar adicionar o usuário ao banco de dados já que ele está autenticado
           const { error: insertError } = await supabase
             .from('users_db_birthplanbuilder')
             .insert({ email: userEmail });
@@ -80,6 +108,7 @@ export function useAuthCheck() {
             });
             navigateTo('/acesso-plano');
             setAuthCheckComplete(true);
+            setIsInitialCheck(false);
             return;
           } else {
             console.log("Added user to database:", userEmail);
@@ -88,11 +117,13 @@ export function useAuthCheck() {
             });
             setIsAuthorized(true);
             setAuthCheckComplete(true);
+            setIsInitialCheck(false);
           }
         } else {
           console.log("User authorized:", userEmail);
           setIsAuthorized(true);
           setAuthCheckComplete(true);
+          setIsInitialCheck(false);
         }
       } catch (error) {
         console.error("Unexpected error during access check:", error);
@@ -101,21 +132,22 @@ export function useAuthCheck() {
         });
         navigateTo('/acesso-plano');
         setAuthCheckComplete(true);
+        setIsInitialCheck(false);
       }
     };
     
-    // If the URL contains access_token, we need to wait a bit longer for auth to complete
+    // Se há parâmetros de auth na URL, esperar um pouco mais para a autenticação completar
     const hasAuthParams = window.location.hash.includes('access_token');
     
     if (hasAuthParams) {
       console.log("Auth parameters detected in URL, waiting for auth to complete...");
-      // Add a slight delay to allow Supabase to process the token
+      // Adicionar um pequeno atraso para permitir que o Supabase processe o token
       setTimeout(checkAuth, 1500);
     } else {
       checkAuth();
     }
     
-  }, [isAuthenticated, user, isLoading, navigateTo]);
+  }, [isAuthenticated, user, isLoading, navigateTo, session]);
 
   return { 
     isLoading: isLoading || !authCheckComplete, 
