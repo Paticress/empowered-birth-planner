@@ -40,8 +40,9 @@ export function getAuthDebugInfo(): Record<string, any> {
 
 /**
  * Log detailed authentication debug information
+ * @returns The debug information that was logged
  */
-export function logAuthDebugInfo(label: string = 'Auth Debug'): void {
+export function logAuthDebugInfo(label: string = 'Auth Debug'): Record<string, any> {
   const debugInfo = getAuthDebugInfo();
   console.log(`[${debugInfo.timestamp}] ${label}:`, debugInfo);
   return debugInfo;
