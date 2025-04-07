@@ -9,20 +9,20 @@ import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingS
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
-import { cleanUrlAfterAuth } from "@/utils/auth/token/cleanupToken";
 
 export function AcessoPlano() {
   const { user, isLoading, session } = useAuth();
   const { isProcessingAuth } = useAuthUrlHandler();
   const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [authenticatedUser, setAuthenticatedUser] = useState<any>(null);
   const navigate = useNavigate();
   const location = useLocation();
   
   // Debug logging
   useEffect(() => {
     console.log("AcessoPlano.tsx carregado.");
-    console.log("URL atual:", window.location.href);
+    console.log("🔍 URL atual:", window.location.href);
     console.log("Hash extraído:", location.hash);
     console.log("Session status:", session ? "Active" : "None");
     console.log("Auth state:", { isProcessingAuth, isProcessingMagicLink });
@@ -34,31 +34,24 @@ export function AcessoPlano() {
       if (isLoading || isProcessingAuth || isProcessingMagicLink) {
         return;
       }
+
+      // Recupera tokens da URL hash (parte após "#")
+      const fullHash = location.hash.substring(1); // remove "#"
+      const hashParams = new URLSearchParams(fullHash);
       
-      const hash = location.hash;
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
       
-      if (!hash || !hash.includes("access_token")) {
-        console.log("Nenhum token encontrado na URL.");
+      if (!accessToken || !refreshToken) {
+        console.warn("❌ Tokens ausentes na URL.");
         return;
       }
       
-      console.log("Tokens detectados. Iniciando autenticação...");
+      console.log("✅ Tokens detectados! Iniciando login...");
       setIsProcessingMagicLink(true);
       toast.info("Conectando...");
       
       try {
-        // Parse hash params (remove the '#' first)
-        const hashParams = new URLSearchParams(hash.substring(1));
-        const accessToken = hashParams.get("access_token");
-        const refreshToken = hashParams.get("refresh_token");
-        
-        if (!accessToken || !refreshToken) {
-          console.error("Tokens ausentes no hash da URL.");
-          toast.error("Erro ao autenticar. Tokens não encontrados.");
-          setIsProcessingMagicLink(false);
-          return;
-        }
-        
         // Set the session with Supabase
         const { error } = await supabase.auth.setSession({
           access_token: accessToken,
@@ -75,17 +68,20 @@ export function AcessoPlano() {
         
         console.log("Usuário autenticado com sucesso!");
         
+        // Get user information
+        const { data } = await supabase.auth.getUser();
+        setAuthenticatedUser(data.user);
+        
         // Store login info in localStorage for backup
-        const { data } = await supabase.auth.getSession();
-        if (data.session?.user?.email) {
+        if (data.user?.email) {
           localStorage.setItem('birthPlanLoggedIn', 'true');
-          localStorage.setItem('birthPlanEmail', data.session.user.email);
+          localStorage.setItem('birthPlanEmail', data.user.email);
         }
         
-        // Clean URL after successful authentication
-        cleanUrlAfterAuth();
-        
         toast.success("Login realizado com sucesso!");
+        
+        // Clean URL after successful authentication
+        navigate('/acesso-plano', { replace: true });
         
         // Short delay before redirecting
         setTimeout(() => {
@@ -133,6 +129,22 @@ export function AcessoPlano() {
               <p>O link de acesso pode ter expirado. Por favor, solicite um novo link de acesso abaixo.</p>
             </div>
           )}
+          
+          {authenticatedUser && process.env.NODE_ENV !== "production" && (
+            <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800">
+              <h3 className="text-lg font-medium mb-2">✅ Autenticação bem-sucedida</h3>
+              <p className="mb-3">Você será redirecionada para o construtor de plano de parto em instantes.</p>
+              <div className="mt-2">
+                <p className="text-sm text-green-700 mb-1">
+                  (Debug) Dados do usuário logado:
+                </p>
+                <pre className="bg-green-100 p-4 rounded text-sm">
+                  {JSON.stringify(authenticatedUser, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
+          
           <LoginPage />
         </div>
       </main>
