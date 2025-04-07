@@ -2,8 +2,8 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Mail, Loader2, CircleCheck } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, Wand2 } from 'lucide-react';
 
 interface MagicLinkFormProps {
   magicLinkEmail: string;
@@ -12,6 +12,7 @@ interface MagicLinkFormProps {
   isMagicLinkSent: boolean;
   setIsMagicLinkSent: (sent: boolean) => void;
   handleMagicLinkSubmit: (e: React.FormEvent) => Promise<void>;
+  loadingText?: string;
 }
 
 export function MagicLinkForm({
@@ -20,28 +21,40 @@ export function MagicLinkForm({
   isLoading,
   isMagicLinkSent,
   setIsMagicLinkSent,
-  handleMagicLinkSubmit
+  handleMagicLinkSubmit,
+  loadingText = "Enviando link de acesso..."
 }: MagicLinkFormProps) {
   if (isMagicLinkSent) {
     return (
-      <div className="space-y-4">
-        <Alert className="bg-maternal-50 border-maternal-200">
-          <AlertDescription className="text-maternal-800">
-            <div className="flex flex-col items-center text-center space-y-2">
-              <Mail className="h-12 w-12 text-maternal-600 mb-2" />
-              <h3 className="font-semibold text-lg">Link Enviado!</h3>
-              <p>Verifique seu email para acessar sua conta com apenas um clique.</p>
-              <p className="text-sm text-maternal-600 mt-2">Não recebeu? Verifique sua pasta de spam ou solicite novamente.</p>
-            </div>
+      <div className="space-y-6">
+        <Alert className="bg-green-50 border-green-200 text-green-800">
+          <CircleCheck className="h-5 w-5 text-green-600" />
+          <AlertDescription className="pl-6">
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>{loadingText}</span>
+              </div>
+            ) : (
+              <>
+                <p className="font-medium mb-1">Link enviado com sucesso!</p>
+                <p>Verifique seu email para acessar sua conta.</p>
+              </>
+            )}
           </AlertDescription>
         </Alert>
-        <Button 
-          onClick={() => setIsMagicLinkSent(false)}
-          variant="outline"
-          className="w-full"
-        >
-          Solicitar Novamente
-        </Button>
+        
+        <p className="text-sm text-gray-600">
+          Não recebeu o email? Verifique sua caixa de spam ou 
+          <button 
+            type="button" 
+            onClick={() => setIsMagicLinkSent(false)} 
+            className="text-maternal-600 hover:text-maternal-800 font-medium ml-1"
+            disabled={isLoading}
+          >
+            tente novamente
+          </button>
+        </p>
       </div>
     );
   }
@@ -58,11 +71,8 @@ export function MagicLinkForm({
           onChange={(e) => setMagicLinkEmail(e.target.value)}
           required
           className="focus:border-maternal-500 focus:ring-maternal-400"
+          disabled={isLoading}
         />
-      </div>
-      
-      <div className="bg-maternal-50 p-3 rounded-md border border-maternal-100 text-sm text-maternal-700">
-        <p>Receba um link de acesso direto no seu email. Sem necessidade de lembrar senhas!</p>
       </div>
       
       <Button 
@@ -71,8 +81,17 @@ export function MagicLinkForm({
         disabled={isLoading}
         variant="birth-plan-builder"
       >
-        <Wand2 className="mr-2 h-5 w-5" />
-        {isLoading ? 'Enviando...' : 'Enviar Link de Acesso'}
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {loadingText}
+          </>
+        ) : (
+          <>
+            <Mail className="mr-2 h-5 w-5" />
+            Enviar Link de Acesso
+          </>
+        )}
       </Button>
     </form>
   );

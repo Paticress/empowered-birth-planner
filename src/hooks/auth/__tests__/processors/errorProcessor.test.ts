@@ -4,7 +4,7 @@ import { processAuthError } from '../../processors/errorProcessor';
 import { AuthProcessOptions, AuthUrlInfo } from '@/types/auth';
 
 // Mock dependencies
-vi.mock('@/utils/auth/tokenUtils', () => ({
+vi.mock('@/utils/auth/token', () => ({
   handleAuthError: vi.fn((hash, search) => {
     if (hash.includes('error=') || search.includes('error=')) {
       return 'Authentication failed';
@@ -68,7 +68,7 @@ describe('processAuthError', () => {
       setIsProcessingAuth: mockSetIsProcessingAuth
     };
     
-    const { handleAuthError, cleanUrlAfterAuth } = await import('@/utils/auth/tokenUtils');
+    const { handleAuthError, cleanUrlAfterAuth } = await import('@/utils/auth/token');
     const { toast } = await import('sonner');
     
     const result = await processAuthError(urlInfo, options);
@@ -97,7 +97,7 @@ describe('processAuthError', () => {
       setIsProcessingAuth: mockSetIsProcessingAuth
     };
     
-    const { handleAuthError, cleanUrlAfterAuth } = await import('@/utils/auth/tokenUtils');
+    const { handleAuthError, cleanUrlAfterAuth } = await import('@/utils/auth/token');
     const { toast } = await import('sonner');
     
     const result = await processAuthError(urlInfo, options);
@@ -126,7 +126,7 @@ describe('processAuthError', () => {
       setIsProcessingAuth: mockSetIsProcessingAuth
     };
     
-    const { handleAuthError } = await import('@/utils/auth/tokenUtils');
+    const { handleAuthError } = await import('@/utils/auth/token');
     const { toast } = await import('sonner');
     
     // Override mock for this test case

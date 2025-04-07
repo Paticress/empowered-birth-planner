@@ -28,7 +28,10 @@ export async function processHashToken(
     
     // Use the full URL instead of just the hash for better compatibility
     const fullUrl = window.location.href;
-    console.log("Using full URL for token exchange");
+    console.log("Using full URL for token exchange:", fullUrl.substring(0, 100) + "...");
+    
+    // Log authentication attempt start
+    toast.loading("Autenticando...");
     
     // Use updated Supabase method to exchange the code for a session
     const { data, error } = await supabase.auth.exchangeCodeForSession(fullUrl);
@@ -47,8 +50,28 @@ export async function processHashToken(
     if (data.session) {
       console.log("HashTokenProcessor: Successfully processed hash token and created session");
       console.log("User email:", data.session.user.email);
+      
+      // Store authentication information in localStorage for backup
+      localStorage.setItem('birthPlanLoggedIn', 'true');
+      localStorage.setItem('birthPlanEmail', data.session.user.email || '');
+      
+      toast.success("Login realizado com sucesso!");
+      
+      // Clean up URL after successful authentication
+      cleanUrlAfterAuth();
+      
+      // Short delay before redirecting to allow toast to be seen
+      setTimeout(() => {
+        console.log("HashTokenProcessor: Redirecting to criar-plano after successful auth");
+        window.location.href = '/criar-plano';
+      }, 1500);
     } else {
       console.log("HashTokenProcessor: No session returned after processing token");
+      toast.error("Falha ao processar autenticação. Tente novamente.");
+      setIsProcessingAuth(false);
+      
+      // Clean URL
+      cleanUrlAfterAuth();
     }
     
     return true; // Successfully handled

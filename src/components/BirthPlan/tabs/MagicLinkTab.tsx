@@ -51,8 +51,7 @@ export function MagicLinkTab() {
         setIsMagicLinkSent(true);
         setIsLocalProcessing(true);
         
-        // Local processing is now handled by the auth processor
-        // Just show a UI indicator
+        // Show processing indicator
         toast.loading("Processando sua autenticação...");
       }
     };
@@ -61,14 +60,23 @@ export function MagicLinkTab() {
     checkAuth();
   }, [isAuthenticated, isMagicLinkSent, setIsMagicLinkSent, isProcessingAuth, isLocalProcessing]);
 
+  // Determine if we need to show the loading state
+  const showLoading = isLoading || isProcessingAuth || isLocalProcessing;
+  
+  // Text to display based on the current state
+  const loadingText = isProcessingAuth || isLocalProcessing 
+    ? "Processando autenticação..." 
+    : "Enviando link de acesso...";
+
   return (
     <MagicLinkForm 
       magicLinkEmail={magicLinkEmail}
       setMagicLinkEmail={setMagicLinkEmail}
-      isLoading={isLoading || isProcessingAuth || isLocalProcessing}
+      isLoading={showLoading}
       isMagicLinkSent={isMagicLinkSent}
       setIsMagicLinkSent={setIsMagicLinkSent}
       handleMagicLinkSubmit={handleMagicLinkSubmit}
+      loadingText={loadingText}
     />
   );
 }
