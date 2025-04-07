@@ -1,7 +1,6 @@
 
 import { FileText, Edit, Eye, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigation } from '@/hooks/useNavigation';
 
 type BuilderStage = 'welcome' | 'questionnaire' | 'editor' | 'preview' | 'share';
 
@@ -11,8 +10,6 @@ interface BirthPlanHeaderProps {
 }
 
 export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeaderProps) {
-  const { navigateTo } = useNavigation();
-  
   return (
     <header className="bg-maternal-500 text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center">
@@ -22,15 +19,6 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
         </div>
         
         <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigateTo("/guia-online")}
-            className="text-white bg-maternal-600 hover:bg-maternal-500 border-maternal-300"
-          >
-            Voltar ao Guia
-          </Button>
-          
           {currentStage !== 'welcome' && currentStage !== 'questionnaire' && (
             <>
               <Button 

@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, FileText, GraduationCap, User } from 'lucide-react';
+import { Menu, X, BookOpen, FileText, GraduationCap, User, Home } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -45,6 +45,21 @@ export function MobileNavigation() {
             </button>
           </div>
           <nav className="flex flex-col space-y-4">
+            {user && (
+              <button 
+                className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/dashboard') 
+                  ? 'bg-maternal-100 text-maternal-900 font-medium' 
+                  : 'text-maternal-800 hover:bg-maternal-50'}`}
+                onClick={() => {
+                  navigateTo('/dashboard');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Dashboard
+              </button>
+            )}
+            
             <button 
               className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/guia-online') 
                 ? 'bg-maternal-100 text-maternal-900 font-medium' 
@@ -57,6 +72,7 @@ export function MobileNavigation() {
               <BookOpen className="h-4 w-4 mr-2" />
               Guia Online
             </button>
+            
             <button 
               className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/plano-de-parto') 
                 ? 'bg-maternal-100 text-maternal-900 font-medium' 
@@ -69,6 +85,7 @@ export function MobileNavigation() {
               <FileText className="h-4 w-4 mr-2" />
               Construtor Virtual
             </button>
+            
             <a 
               href="https://www.energiamaterna.com.br/programas"
               className="py-2 px-3 rounded-md transition-colors text-left flex items-center text-maternal-800 hover:bg-maternal-50"

@@ -16,6 +16,7 @@ import { MyAccess } from "./pages/MyAccess";
 import { FAQ } from "./pages/FAQ";
 import { AuthCallback } from "./pages/AuthCallback";
 import { Login } from "./pages/Login";
+import { Dashboard } from "./pages/Dashboard";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from '@vercel/analytics/react';
@@ -33,6 +34,11 @@ function AppContent() {
   useEffect(() => {
     console.log("Current route:", location.pathname);
     console.log("Full URL:", window.location.href);
+    
+    // Store last visited page for the dashboard
+    if (location.pathname !== '/dashboard') {
+      localStorage.setItem('last-visited-page', location.pathname);
+    }
   }, [location]);
   
   // Conditionally apply the background class based on the route
@@ -52,6 +58,7 @@ function AppContent() {
     <div className={`min-h-screen ${backgroundClass}`}>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/guia-online" element={<GuiaOnline />} />
         <Route path="/plano-de-parto" element={<BirthPlan />} />
         <Route path="/acesso-plano" element={<AcessoPlano />} />
