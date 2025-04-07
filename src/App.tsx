@@ -15,6 +15,7 @@ import { PaymentCancel } from "./pages/PaymentCancel";
 import { MyAccess } from "./pages/MyAccess";
 import { FAQ } from "./pages/FAQ";
 import { AuthCallback } from "./pages/AuthCallback";
+import { Login } from "./pages/Login";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from '@vercel/analytics/react';
@@ -41,6 +42,7 @@ function AppContent() {
         <Route path="/meus-acessos" element={<MyAccess />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/test-supabase" element={<SupabaseTest />} />
         <Route path="/webhook-test" element={<WebhookTest />} />
         <Route path="*" element={<NotFound />} />

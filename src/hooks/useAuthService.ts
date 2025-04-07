@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,7 +34,7 @@ export function useAuthService() {
     }
   };
 
-  const signInWithMagicLink = async (email: string, redirectPath = '/auth/callback') => {
+  const signInWithMagicLink = async (email: string, redirectPath = '/login') => {
     try {
       // Get the full site URL dynamically
       const siteUrl = getCurrentSiteUrl();
