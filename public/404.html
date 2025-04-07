@@ -8,8 +8,9 @@
     // Enhanced SPA routing handler for 404 pages with improved auth handling for custom domains
     (function() {
       try {
-        // Log page load for debugging
-        console.log('404 handler running on path:', window.location.pathname);
+        // Log page load for debugging with timestamp
+        var timestamp = new Date().toISOString();
+        console.log('[' + timestamp + '] 404 handler running on path:', window.location.pathname);
         
         // Extract all parts of the current URL
         var l = window.location;
@@ -20,12 +21,14 @@
         var search = l.search || '';
         var hash = l.hash || '';
         
-        console.log('404 handler analyzing URL:', {
+        // Detailed logging of all URL components
+        console.log('[' + timestamp + '] 404 handler analyzing URL:', {
+          fullUrl: fullUrl,
           host: host,
           hostname: hostname, 
           pathname: pathname,
-          search: search ? 'present' : 'none',
-          hash: hash ? 'present' : 'none'
+          search: search ? search : 'none',
+          hash: hash ? hash : 'none'
         });
 
         // First check if we're on a custom domain
@@ -33,23 +36,61 @@
                            !hostname.includes('.vercel.app') && 
                            !hostname.includes('.github.io');
         
-        console.log('Domain detection:', { 
+        // Show debug info in the page itself
+        var debugInfoElement = document.getElementById('debug-info');
+        if (debugInfoElement) {
+          var debugData = {
+            timestamp: timestamp,
+            fullUrl: fullUrl,
+            host: host,
+            hostname: hostname,
+            pathname: pathname,
+            search: search,
+            hash: hash,
+            isCustomDomain: isCustomDomain
+          };
+          
+          debugInfoElement.innerHTML = JSON.stringify(debugData, null, 2);
+          debugInfoElement.style.display = 'block';
+        }
+        
+        console.log('[' + timestamp + '] Domain detection:', { 
           isCustomDomain: isCustomDomain,
           hostname: hostname
         });
         
         // Special handling for Supabase auth callback path - REDIRECT TO LOGIN
         if (pathname.includes('/auth/callback')) {
-          console.log('Auth callback path detected, redirecting to LOGIN page');
+          console.log('[' + timestamp + '] Auth callback path detected, redirecting to LOGIN page');
           
           // Keep all parameters (hash and search) when redirecting
-          window.location.replace('/login' + search + hash);
+          var redirectUrl = '/login' + search + hash;
+          console.log('[' + timestamp + '] Redirecting to: ' + redirectUrl);
+          
+          // Update user visible debug info
+          if (debugInfoElement) {
+            debugInfoElement.innerHTML += '\n\nRedirecting to: ' + redirectUrl;
+          }
+          
+          // Display additional debug in the error-message area if it exists
+          var errorMessageElement = document.getElementById('error-message');
+          if (errorMessageElement) {
+            errorMessageElement.innerHTML = '<h3>Redirecionando autenticação</h3><p>De: ' + 
+              pathname + '</p><p>Para: ' + redirectUrl + '</p>';
+            errorMessageElement.style.display = 'block';
+          }
+          
+          // Add a small delay before redirecting to show debug info
+          setTimeout(function() {
+            window.location.replace(redirectUrl);
+          }, 500);
+          
           return;
         }
         
         // Check for auth errors first - this is crucial for displaying user-friendly error messages
         if (fullUrl.includes('error=') || fullUrl.includes('error_code=') || fullUrl.includes('error_description=')) {
-          console.log('Auth error detected in URL - handling error redirect');
+          console.log('[' + timestamp + '] Auth error detected in URL - handling error redirect');
 
           // Handle special case where we have an error in the path on custom domains
           var errorParams = '';
@@ -57,70 +98,115 @@
           // Extract error parameters to preserve them
           if (pathname.includes('error=') || pathname.includes('error_code=')) {
             errorParams = pathname.substring(pathname.indexOf('error'));
-            console.log('Error parameters extracted from path:', errorParams);
+            console.log('[' + timestamp + '] Error parameters extracted from path:', errorParams);
           } else if (search.includes('error=') || search.includes('error_code=')) {
             errorParams = search.substring(1); // remove the ? at the beginning
-            console.log('Error parameters extracted from search:', errorParams);
+            console.log('[' + timestamp + '] Error parameters extracted from search:', errorParams);
           } else if (hash.includes('error=')) {
             errorParams = hash.substring(1); // remove the # at the beginning
-            console.log('Error parameters extracted from hash:', errorParams);
+            console.log('[' + timestamp + '] Error parameters extracted from hash:', errorParams);
           }
           
           // Always redirect errors to acesso-plano page with error parameters as hash
           if (errorParams) {
-            console.log('Redirecting with error parameters to: /acesso-plano#' + errorParams);
-            window.location.replace('/acesso-plano#' + errorParams);
+            var errorRedirectUrl = '/acesso-plano#' + errorParams;
+            console.log('[' + timestamp + '] Redirecting with error parameters to: ' + errorRedirectUrl);
+            
+            // Display debug info in the error message area
+            var errorMessageElement = document.getElementById('error-message');
+            if (errorMessageElement) {
+              errorMessageElement.innerHTML = '<h3>Erro de autenticação detectado</h3>' + 
+                '<p>Parâmetros: ' + errorParams + '</p>' + 
+                '<p>Redirecionando para: ' + errorRedirectUrl + '</p>';
+              errorMessageElement.style.display = 'block';
+            }
+            
+            // Small delay to allow reading debug info
+            setTimeout(function() {
+              window.location.replace(errorRedirectUrl);
+            }, 500);
+            
             return;
           } else {
             // If we can't extract specific params but know there's an error, just go to acesso-plano
-            console.log('Error detected but params not extracted, redirecting to /acesso-plano');
-            window.location.replace('/acesso-plano');
+            console.log('[' + timestamp + '] Error detected but params not extracted, redirecting to /acesso-plano');
+            
+            // Small delay to allow reading debug info
+            setTimeout(function() {
+              window.location.replace('/acesso-plano');
+            }, 500);
+            
             return;
           }
         }
         
         // Special handling for auth tokens in custom domains - very important!
         if (pathname.includes('access_token=') || fullUrl.includes('access_token=')) {
-          console.log('Auth token detected in URL - preparing special handling for authentication');
+          console.log('[' + timestamp + '] Auth token detected in URL - preparing special handling for authentication');
           
           // Extract token part - regardless of where it is in the URL
           var tokenPart = '';
           if (hash.includes('access_token=')) {
             tokenPart = hash.substring(1); // Remove the # at the beginning
-            console.log('Token detected in hash');
+            console.log('[' + timestamp + '] Token detected in hash');
           } else if (pathname.includes('access_token=')) {
             var tokenIndex = pathname.indexOf('access_token=');
             tokenPart = pathname.substring(tokenIndex);
-            console.log('Token detected in path: ' + tokenPart.substring(0, 20) + '...');
+            console.log('[' + timestamp + '] Token detected in path: ' + tokenPart.substring(0, 20) + '...');
           } else if (search.includes('access_token=')) {
             tokenPart = search.substring(1); // Remove the ? at the beginning
-            console.log('Token detected in search: ' + tokenPart.substring(0, 20) + '...');
+            console.log('[' + timestamp + '] Token detected in search: ' + tokenPart.substring(0, 20) + '...');
           } else if (fullUrl.includes('access_token=')) {
             var tokenIndex = fullUrl.indexOf('access_token=');
             tokenPart = fullUrl.substring(tokenIndex);
-            console.log('Token detected in full URL: ' + tokenPart.substring(0, 20) + '...');
+            console.log('[' + timestamp + '] Token detected in full URL: ' + tokenPart.substring(0, 20) + '...');
           }
           
           if (tokenPart) {
             // IMPORTANT: Direct to login page instead of auth/callback
-            console.log('Redirecting auth token to login page: /login#' + tokenPart.substring(0, 20) + '...');
-            window.location.replace('/login#' + tokenPart);
+            var tokenRedirectUrl = '/login#' + tokenPart;
+            console.log('[' + timestamp + '] Redirecting auth token to login page: ' + tokenRedirectUrl.substring(0, 30) + '...');
+            
+            // Display debug info in the page
+            var debugInfoElement = document.getElementById('debug-info');
+            if (debugInfoElement) {
+              debugInfoElement.innerHTML += '\n\nToken found: ' + tokenPart.substring(0, 30) + '...' +
+                                           '\nRedirecting to: ' + tokenRedirectUrl.substring(0, 30) + '...';
+            }
+            
+            // Small delay to allow reading debug info
+            setTimeout(function() {
+              window.location.replace(tokenRedirectUrl);
+            }, 500);
+            
             return;
           }
         }
         
         // Special handling for magiclink parameters
         if (search.includes('access_entry=magiclink')) {
-          console.log('Detected magic link parameter in query string: ' + search);
+          console.log('[' + timestamp + '] Detected magic link parameter in query string: ' + search);
           // Keep as query parameter since that's how magic links work
-          console.log('Redirecting to: /login' + search);
-          window.location.replace('/login' + search);
+          var magicLinkRedirectUrl = '/login' + search;
+          console.log('[' + timestamp + '] Redirecting to: ' + magicLinkRedirectUrl);
+          
+          // Display debug info in the page
+          var debugInfoElement = document.getElementById('debug-info');
+          if (debugInfoElement) {
+            debugInfoElement.innerHTML += '\n\nMagic link detected. Redirecting to: ' + magicLinkRedirectUrl;
+          }
+          
+          // Small delay to allow reading debug info
+          setTimeout(function() {
+            window.location.replace(magicLinkRedirectUrl);
+          }, 500);
+          
           return;
         }
 
         // For all other acesso-plano URLs
         if (pathname.includes('/acesso-plano')) {
-          console.log('On acesso-plano path without token - simple redirect');
+          console.log('[' + timestamp + '] On acesso-plano path without token - simple redirect');
           l.replace('/acesso-plano' + search + hash);
           return;
         }
@@ -138,9 +224,26 @@
           return;
         }
       } catch (error) {
-        console.error('Error in 404 redirect script:', error);
-        // Fallback to home page on any error
-        window.location.replace('/');
+        console.error('[' + (new Date().toISOString()) + '] Error in 404 redirect script:', error);
+        
+        // Show error in debug-info element
+        var debugInfoElement = document.getElementById('debug-info');
+        if (debugInfoElement) {
+          debugInfoElement.innerHTML = 'Error in redirect script: ' + error.toString();
+          debugInfoElement.style.display = 'block';
+        }
+        
+        // Show error in error-message element
+        var errorMessageElement = document.getElementById('error-message');
+        if (errorMessageElement) {
+          errorMessageElement.innerHTML = '<h3>Erro no script de redirecionamento</h3><p>' + error.toString() + '</p>';
+          errorMessageElement.style.display = 'block';
+        }
+        
+        // Fallback to home page after showing error for a while
+        setTimeout(function() {
+          window.location.replace('/');
+        }, 5000);
       }
     })();
   </script>
@@ -190,6 +293,7 @@
       max-height: 200px;
       overflow-y: auto;
       word-break: break-all;
+      display: none;
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -202,9 +306,8 @@
     <h1>Redirecionando...</h1>
     <p>Aguarde enquanto redirecionamos você para o Guia de Plano de Parto.</p>
     <div id="error-message" class="error-message">
-      <h3>Erro de autenticação detectado</h3>
-      <p>O link de acesso pode ter expirado ou ser inválido.</p>
-      <p>Você será redirecionado para solicitar um novo link.</p>
+      <h3>Redirecionando</h3>
+      <p>Processando parâmetros de autenticação...</p>
     </div>
     <div id="debug-info" class="debug-info"></div>
   </div>
@@ -215,10 +318,25 @@
       var errorMessage = document.getElementById('error-message');
       
       if (debugInfo) {
-        debugInfo.innerHTML = 'URL: ' + window.location.href + '<br>' + 
-                             'Path: ' + window.location.pathname + '<br>' +
-                             'Search: ' + window.location.search + '<br>' +
-                             'Hash: ' + window.location.hash;
+        // Always show debug info in development
+        var isLocalhost = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1';
+        
+        var debugData = {
+          url: window.location.href,
+          path: window.location.pathname,
+          search: window.location.search,
+          hash: window.location.hash,
+          host: window.location.host,
+          time: new Date().toISOString()
+        };
+        
+        debugInfo.innerHTML = JSON.stringify(debugData, null, 2);
+        
+        // Only show debug info automatically on localhost or with debug parameter
+        if (isLocalhost || window.location.href.includes('debug=true')) {
+          debugInfo.style.display = 'block';
+        }
       }
       
       // Check if URL contains error parameters and display error message
@@ -226,6 +344,9 @@
           window.location.href.includes('error=') || 
           window.location.href.includes('error_code=') || 
           window.location.href.includes('error_description='))) {
+        errorMessage.innerHTML = '<h3>Erro de autenticação detectado</h3>' +
+                               '<p>O link de acesso pode ter expirado ou ser inválido.</p>' +
+                               '<p>Você será redirecionado para solicitar um novo link.</p>';
         errorMessage.style.display = 'block';
       }
     });
