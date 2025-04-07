@@ -5,29 +5,85 @@ import { Footer } from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigation } from "@/hooks/useNavigation";
-import { Clock, BookOpen, FileText, Award, ChevronRight } from "lucide-react";
+import { Clock, BookOpen, FileText, Award, ChevronRight, CheckCircle2, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Dashboard() {
   const { user, isLoading } = useAuth();
   const { navigateTo } = useNavigation();
   const [lastVisited, setLastVisited] = useState<string | null>(null);
   const [hasStartedBirthPlan, setHasStartedBirthPlan] = useState(false);
-  const [hasReadGuide, setHasReadGuide] = useState(false);
+  const [birthPlanProgress, setBirthPlanProgress] = useState(0);
+  const [guideProgress, setGuideProgress] = useState(0);
+  const [currentGuideTab, setCurrentGuideTab] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+  
+  // Guide sections in order
+  const guideSections = [
+    { id: "introduction", name: "Introdução" },
+    { id: "structure", name: "Estrutura" },
+    { id: "rights", name: "Direitos" },
+    { id: "communication", name: "Comunicação" },
+    { id: "checklist", name: "Checklist" },
+    { id: "resources", name: "Recursos" }
+  ];
+  
+  // Birth plan stages in order
+  const birthPlanStages = [
+    { id: "welcome", name: "Início" },
+    { id: "questionnaire", name: "Questionário" },
+    { id: "editor", name: "Editor" },
+    { id: "preview", name: "Visualização" },
+    { id: "share", name: "Compartilhamento" }
+  ];
   
   useEffect(() => {
     // Check local storage for last visited page
     const lastPage = localStorage.getItem('last-visited-page');
     setLastVisited(lastPage);
     
-    // Check if user has started birth plan
+    // Check if user has started birth plan and its progress
     const birthPlanData = localStorage.getItem('birthPlanData');
     setHasStartedBirthPlan(!!birthPlanData);
     
-    // Check if user has visited the guide
+    if (birthPlanData) {
+      try {
+        const data = JSON.parse(birthPlanData);
+        // Count filled sections to determine progress
+        let filledSections = 0;
+        let totalSections = 0;
+        
+        Object.keys(data).forEach(section => {
+          if (typeof data[section] === 'object' && data[section] !== null) {
+            const sectionFields = Object.keys(data[section]).length;
+            if (sectionFields > 0) filledSections++;
+            totalSections++;
+          }
+        });
+        
+        const progress = totalSections > 0 ? (filledSections / totalSections) * 100 : 0;
+        setBirthPlanProgress(progress);
+      } catch (e) {
+        console.error("Error parsing birth plan data:", e);
+        setBirthPlanProgress(0);
+      }
+    }
+    
+    // Check guide progress
     const guideTab = localStorage.getItem('guide-current-tab');
-    setHasReadGuide(!!guideTab);
+    setCurrentGuideTab(guideTab);
+    
+    if (guideTab) {
+      const tabIndex = guideSections.findIndex(section => section.id === guideTab);
+      if (tabIndex !== -1) {
+        const progress = ((tabIndex + 1) / guideSections.length) * 100;
+        setGuideProgress(progress);
+      }
+    }
     
     // Store current page as last visited
     localStorage.setItem('last-visited-page', '/dashboard');
@@ -46,10 +102,22 @@ export function Dashboard() {
   };
   
   const getRecommendedNextStep = () => {
-    if (!hasReadGuide) {
+    if (!currentGuideTab) {
       return {
         title: "Conheça o Guia do Parto Respeitoso",
         description: "Leia nosso guia completo com informações importantes sobre o parto.",
+        path: "/guia-online",
+        icon: BookOpen
+      };
+    } else if (guideProgress < 100) {
+      const currentIndex = guideSections.findIndex(section => section.id === currentGuideTab);
+      const nextSectionName = currentIndex < guideSections.length - 1 
+        ? guideSections[currentIndex + 1].name 
+        : "restantes";
+      
+      return {
+        title: `Continue a leitura do Guia`,
+        description: `Continue de onde parou na seção "${nextSectionName}".`,
         path: "/guia-online",
         icon: BookOpen
       };
@@ -109,24 +177,101 @@ export function Dashboard() {
             
             <Card className="p-6 bg-white border border-maternal-100">
               <h2 className="text-xl font-semibold text-maternal-900 mb-4 flex items-center">
-                <Clock className="h-5 w-5 mr-2 text-maternal-600" /> Seu progresso
+                <Clock className="h-5 w-5 mr-2 text-maternal-600" /> Seu progresso geral
               </h2>
               
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <div className={`w-4 h-4 rounded-full mr-3 ${hasReadGuide ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                  <span className={hasReadGuide ? 'text-maternal-900' : 'text-maternal-600'}>
-                    Leitura do Guia do Parto Respeitoso
-                  </span>
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-maternal-800 font-medium">Guia do Parto Respeitoso</span>
+                    <span className="text-maternal-600 text-sm">{Math.round(guideProgress)}%</span>
+                  </div>
+                  <Progress value={guideProgress} className="h-2" />
                 </div>
                 
-                <div className="flex items-center">
-                  <div className={`w-4 h-4 rounded-full mr-3 ${hasStartedBirthPlan ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                  <span className={hasStartedBirthPlan ? 'text-maternal-900' : 'text-maternal-600'}>
-                    Criação do Plano de Parto
-                  </span>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-maternal-800 font-medium">Plano de Parto</span>
+                    <span className="text-maternal-600 text-sm">{Math.round(birthPlanProgress)}%</span>
+                  </div>
+                  <Progress value={birthPlanProgress} className="h-2" />
                 </div>
               </div>
+            </Card>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <Card className="p-6 bg-white border border-maternal-100">
+              <h2 className="text-xl font-semibold text-maternal-900 mb-4 flex items-center">
+                <BookOpen className="h-5 w-5 mr-2 text-maternal-600" /> Guia do Parto Respeitoso
+              </h2>
+              
+              <div className="space-y-2">
+                {guideSections.map((section, index) => {
+                  const isCompleted = currentGuideTab && 
+                    guideSections.findIndex(s => s.id === currentGuideTab) >= index;
+                    
+                  return (
+                    <div key={section.id} className="flex items-center">
+                      {isCompleted ? (
+                        <CheckCircle2 className="h-5 w-5 mr-3 text-green-500" />
+                      ) : (
+                        <Circle className="h-5 w-5 mr-3 text-gray-300" />
+                      )}
+                      <span className={isCompleted ? 'text-maternal-900' : 'text-maternal-600'}>
+                        {section.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <Separator className="my-4" />
+              
+              <Button 
+                onClick={() => navigateTo('/guia-online')}
+                variant="outline" 
+                className="w-full mt-2"
+              >
+                {currentGuideTab ? 'Continuar leitura' : 'Iniciar leitura'}
+              </Button>
+            </Card>
+            
+            <Card className="p-6 bg-white border border-maternal-100">
+              <h2 className="text-xl font-semibold text-maternal-900 mb-4 flex items-center">
+                <FileText className="h-5 w-5 mr-2 text-maternal-600" /> Plano de Parto
+              </h2>
+              
+              <div className="space-y-2">
+                {birthPlanStages.map((stage, index) => {
+                  // Estimate completion based on birth plan progress
+                  const isCompleted = hasStartedBirthPlan && 
+                    (birthPlanProgress > (index * (100 / birthPlanStages.length)));
+                    
+                  return (
+                    <div key={stage.id} className="flex items-center">
+                      {isCompleted ? (
+                        <CheckCircle2 className="h-5 w-5 mr-3 text-green-500" />
+                      ) : (
+                        <Circle className="h-5 w-5 mr-3 text-gray-300" />
+                      )}
+                      <span className={isCompleted ? 'text-maternal-900' : 'text-maternal-600'}>
+                        {stage.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <Separator className="my-4" />
+              
+              <Button 
+                onClick={() => navigateTo('/criar-plano')}
+                variant="outline" 
+                className="w-full mt-2"
+              >
+                {hasStartedBirthPlan ? 'Continuar plano' : 'Criar plano de parto'}
+              </Button>
             </Card>
           </div>
           
