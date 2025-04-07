@@ -31,33 +31,40 @@ export function CriarPlano() {
       }
       
       // Se o usuário já está autenticado, podemos mostrar o conteúdo
-      if (isAuthenticated && (user || session)) {
+      if (isAuthenticated) {
         console.log("Usuário já autenticado, mostrando conteúdo");
         setIsCheckingAuth(false);
         return;
       }
       
-      // Se não há usuário ou sessão, tentar recuperar a sessão
-      if (!user || !session) {
-        // Verificar explicitamente a sessão com o Supabase
-        console.log("Tentando obter sessão diretamente do Supabase...");
-        const { data } = await supabase.auth.getSession();
+      // Tentativa final de recuperar a sessão se ainda não estiver autenticado
+      if (!isAuthenticated) {
+        console.log("Tentando recuperar sessão diretamente...");
         
-        if (data.session) {
-          console.log("Sessão encontrada no Supabase:", data.session.user?.email);
-          // Atualizar o contexto de autenticação com a sessão encontrada
-          await refreshSession();
-          setIsCheckingAuth(false);
-          return;
+        try {
+          // Verificar explicitamente a sessão com o Supabase
+          const { data } = await supabase.auth.getSession();
+          
+          if (data.session) {
+            console.log("Sessão encontrada no Supabase:", data.session.user?.email);
+            // Atualizar o contexto de autenticação com a sessão encontrada
+            const success = await refreshSession();
+            
+            if (success) {
+              console.log("Sessão recuperada com sucesso");
+              setIsCheckingAuth(false);
+              return;
+            }
+          }
+          
+          console.log("Sem sessão após verificação direta, redirecionando para login");
+          navigate("/acesso-plano", { replace: true });
+        } catch (error) {
+          console.error("Erro ao verificar sessão:", error);
+          navigate("/acesso-plano", { replace: true });
         }
-        
-        console.log("Sem sessão após verificação direta, redirecionando para login");
-        navigate("/acesso-plano", { replace: true });
-        return;
       }
       
-      // Se chegou aqui, o usuário está autenticado
-      console.log("Usuário autenticado:", user.email);
       setIsCheckingAuth(false);
     };
     

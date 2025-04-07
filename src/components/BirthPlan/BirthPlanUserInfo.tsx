@@ -40,8 +40,12 @@ export function BirthPlanUserInfo() {
   };
 
   // Return nothing if no user is logged in or still loading
-  if (isLoading || !isAuthenticated || !userEmail) {
-    console.log("BirthPlanUserInfo: Not showing user info - no authenticated user or still loading");
+  if (isLoading) {
+    return null;
+  }
+
+  // Show user info if authenticated, even if we only have email from localStorage
+  if (!isAuthenticated && !userEmail) {
     return null;
   }
 

@@ -21,7 +21,7 @@ export function useAuthCheck() {
     
     console.log("Auth check running with:", { 
       isAuthenticated, 
-      email: user?.email || localStorage.getItem('birthPlanEmail'),
+      email: user?.email || session?.user?.email || localStorage.getItem('birthPlanEmail'),
       hasSession: !!session,
       isLoading,
       isInitialCheck
@@ -50,6 +50,20 @@ export function useAuthCheck() {
           await checkUserAuthorization();
           return;
         }
+      }
+      
+      // Final attempt to check with Supabase directly
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          console.log("Session found directly from Supabase:", data.session.user?.email);
+          // Tentar atualizar o contexto com a sessão encontrada
+          await refreshSession();
+          await checkUserAuthorization();
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking session directly:", error);
       }
       
       // Se não conseguiu restaurar a sessão, redirecionar para login
@@ -140,7 +154,7 @@ export function useAuthCheck() {
     };
     
     // Se há parâmetros de auth na URL, esperar um pouco mais para a autenticação completar
-    const hasAuthParams = window.location.hash.includes('access_token');
+    const hasAuthParams = window.location.hash.includes('access_token=');
     
     if (hasAuthParams) {
       console.log("Auth parameters detected in URL, waiting for auth to complete...");

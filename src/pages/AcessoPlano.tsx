@@ -31,18 +31,33 @@ export function AcessoPlano() {
       }
       
       // Se o usuário já está autenticado, redirecionar para criar-plano
-      if (isAuthenticated && (user || session)) {
+      if (isAuthenticated) {
         console.log("AcessoPlano: Usuário já autenticado, redirecionando para criar-plano");
         navigate('/criar-plano', { replace: true });
         return;
       }
       
-      // Se não tiver usuário nem sessão, verificar com o Supabase diretamente
-      if (!user && !session) {
-        console.log("No user detected, checking session with Supabase directly");
+      // Check explicitly for auth tokens in URL that might not have been processed yet
+      const hasAuthParams = 
+        window.location.hash.includes('access_token=') || 
+        window.location.search.includes('code=') ||
+        window.location.pathname.includes('access_token=');
+      
+      if (hasAuthParams) {
+        console.log("AcessoPlano: Auth parameters detected in URL, waiting...");
         setIsProcessingAuth(true);
-        
-        // Verificar session diretamente com o Supabase
+        // Add a slight delay to allow auth processing
+        setTimeout(() => {
+          setIsProcessingAuth(false);
+        }, 2500);
+        return;
+      }
+      
+      // If we're not authenticated and there are no URL parameters, try a final recovery
+      setIsProcessingAuth(true);
+      
+      // Verificar session diretamente com o Supabase
+      try {
         const { data } = await supabase.auth.getSession();
         
         if (data.session) {
@@ -50,14 +65,34 @@ export function AcessoPlano() {
           // Tentar atualizar o contexto com a sessão encontrada
           await refreshSession();
           
-          // Pequeno delay para garantir que o estado foi atualizado
+          // Give a moment for state to update
           setTimeout(() => {
             navigate('/criar-plano', { replace: true });
           }, 500);
         } else {
           console.log("No session found with direct check");
+          
+          // Check localStorage as last resort
+          const isLoggedInLocally = localStorage.getItem('birthPlanLoggedIn') === 'true';
+          const storedEmail = localStorage.getItem('birthPlanEmail');
+          
+          if (isLoggedInLocally && storedEmail) {
+            console.log("Found login info in localStorage, attempting to restore session");
+            const success = await refreshSession();
+            
+            if (success) {
+              setTimeout(() => {
+                navigate('/criar-plano', { replace: true });
+              }, 500);
+              return;
+            }
+          }
+          
           setIsProcessingAuth(false);
         }
+      } catch (error) {
+        console.error("Error during session check:", error);
+        setIsProcessingAuth(false);
       }
     };
     

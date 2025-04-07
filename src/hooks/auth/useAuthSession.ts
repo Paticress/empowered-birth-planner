@@ -61,53 +61,79 @@ export function useAuthSession() {
     const debugInfo = logAuthDebugInfo("Auth Initialization");
     setAuthDebugInfo(debugInfo);
     
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log('Auth state changed:', event, 'User:', currentSession?.user?.email);
-        
-        setAuthDebugInfo(prev => ({ 
-          ...prev, 
-          authStateChange: {
-            event,
-            userEmail: currentSession?.user?.email,
-            timestamp: new Date().toISOString()
-          }
-        }));
-        
-        // Always update both session and user state
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          console.log('User signed in or token refreshed:', currentSession?.user?.email);
+    // Create a promise to track auth state initialization
+    let authInitialized = false;
+    let authStateChangePromise = new Promise<void>((resolve) => {
+      // Set up auth state change listener
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, currentSession) => {
+          console.log('Auth state changed:', event, 'User:', currentSession?.user?.email);
           
-          if (currentSession?.user?.email) {
-            localStorage.setItem('birthPlanLoggedIn', 'true');
-            localStorage.setItem('birthPlanEmail', currentSession.user.email);
+          setAuthDebugInfo(prev => ({ 
+            ...prev, 
+            authStateChange: {
+              event,
+              userEmail: currentSession?.user?.email,
+              timestamp: new Date().toISOString()
+            }
+          }));
+          
+          // Always update both session and user state
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            console.log('User signed in or token refreshed:', currentSession?.user?.email);
             
-            if (event === 'SIGNED_IN') {
-              toast.success('Login realizado com sucesso');
+            if (currentSession?.user?.email) {
+              localStorage.setItem('birthPlanLoggedIn', 'true');
+              localStorage.setItem('birthPlanEmail', currentSession.user.email);
+              
+              if (event === 'SIGNED_IN') {
+                toast.success('Login realizado com sucesso');
+              }
+            }
+          } else if (event === 'SIGNED_OUT') {
+            console.log('User signed out');
+            localStorage.removeItem('birthPlanLoggedIn');
+            localStorage.removeItem('birthPlanEmail');
+          } else if (event === 'USER_UPDATED') {
+            console.log('User updated:', currentSession?.user?.email);
+            // If user was updated, ensure we have the latest data
+            const { data } = await supabase.auth.getUser();
+            if (data?.user) {
+              setUser(data.user);
             }
           }
-        } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out');
-          localStorage.removeItem('birthPlanLoggedIn');
-          localStorage.removeItem('birthPlanEmail');
-        } else if (event === 'USER_UPDATED') {
-          console.log('User updated:', currentSession?.user?.email);
-          // If user was updated, ensure we have the latest data
-          const { data } = await supabase.auth.getUser();
-          if (data?.user) {
-            setUser(data.user);
+          
+          // Resolve the promise once we've received at least one auth state change
+          if (!authInitialized) {
+            authInitialized = true;
+            resolve();
           }
         }
-      }
-    );
+      );
+      
+      // If no auth state change within 2 seconds, resolve anyway to prevent hanging
+      setTimeout(() => {
+        if (!authInitialized) {
+          console.log("No auth state change detected within timeout, continuing initialization");
+          authInitialized = true;
+          resolve();
+        }
+      }, 2000);
+      
+      return subscription;
+    });
 
     // Check for initial session
     try {
       console.log("Checking for initial session...");
+      
+      // First, wait for at least one auth state change or timeout
+      await authStateChangePromise;
+      
+      // Then, explicitly check for a session
       const { data, error } = await supabase.auth.getSession();
       
       if (error) {
@@ -141,18 +167,23 @@ export function useAuthSession() {
     }
     
     return () => {
-      subscription.unsubscribe();
+      // Cleanup function will be returned as a Promise<() => void> due to async
+      // This is fine as useEffect handles this correctly
     };
   }, [refreshSession]);
 
   // Run the initializeAuth function once when the component mounts
   useEffect(() => {
-    const cleanup = initializeAuth();
-    return () => {
-      if (typeof cleanup === 'function') {
-        cleanup();
-      }
+    const initialize = async () => {
+      const cleanup = await initializeAuth();
+      return () => {
+        if (typeof cleanup === 'function') {
+          cleanup();
+        }
+      };
     };
+    
+    initialize();
   }, [initializeAuth]);
 
   return {

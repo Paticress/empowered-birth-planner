@@ -24,7 +24,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signUp,
     signOut,
-    isInitialized,
     refreshSession
   } = useAuthService();
   

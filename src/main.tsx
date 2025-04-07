@@ -61,6 +61,10 @@ const handleAuthTokens = async () => {
           } else if (data.session) {
             console.log("Session set successfully from hash parameters:", data.session.user?.email);
             
+            // Store login information in localStorage for backup
+            localStorage.setItem('birthPlanLoggedIn', 'true');
+            localStorage.setItem('birthPlanEmail', data.session.user.email || '');
+            
             // Clean up the URL
             window.history.replaceState({}, document.title, window.location.pathname);
           }
@@ -78,6 +82,12 @@ const handleAuthTokens = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         console.log("Verified session on page load:", data.session.user?.email);
+        
+        // Store login information in localStorage for backup
+        localStorage.setItem('birthPlanLoggedIn', 'true');
+        if (data.session.user?.email) {
+          localStorage.setItem('birthPlanEmail', data.session.user.email);
+        }
       }
     } catch (error) {
       console.error("Error verifying session on page load:", error);
@@ -136,8 +146,23 @@ const initializeApp = () => {
   });
 };
 
-// Run the token handling logic first, then initialize the app
+// Handle authentication tokens first, then initialize the application
 (async () => {
+  // First, try to verify and restore any existing session
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      console.log("Existing session found on initial load:", data.session.user?.email);
+      localStorage.setItem('birthPlanLoggedIn', 'true');
+      if (data.session.user?.email) {
+        localStorage.setItem('birthPlanEmail', data.session.user.email);
+      }
+    }
+  } catch (error) {
+    console.error("Error checking initial session:", error);
+  }
+  
+  // Then, handle any auth tokens in the URL
   const shouldRedirect = await handleAuthTokens();
   if (!shouldRedirect) {
     // Only mount React if we're not redirecting for auth handling
