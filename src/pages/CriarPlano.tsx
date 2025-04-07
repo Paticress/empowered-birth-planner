@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingState";
+import { supabase } from "@/integrations/supabase/client";
 
 export function CriarPlano() {
   const { user, isLoading, session, refreshSession } = useAuth();
@@ -22,18 +23,33 @@ export function CriarPlano() {
         isLoading 
       });
       
-      if (!isLoading && !user) {
-        // Tentar atualizar a sessão antes de redirecionar
-        console.log("Tentando atualizar sessão antes de redirecionar");
-        const hasSession = await refreshSession();
-        
-        if (!hasSession) {
-          console.log("Sem sessão após refresh, redirecionando para login");
-          navigate("/acesso-plano", { replace: true });
-          return;
-        }
+      // Se ainda estiver carregando, aguardar
+      if (isLoading) {
+        console.log("Aguardando carregamento da autenticação...");
+        return;
       }
       
+      // Se não há usuário ou sessão, primeiro tentar recuperar a sessão
+      if (!user || !session) {
+        // Verificar explicitamente a sessão com o Supabase
+        console.log("Tentando obter sessão diretamente do Supabase...");
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session) {
+          console.log("Sessão encontrada no Supabase:", data.session.user?.email);
+          // Atualizar o contexto de autenticação com a sessão encontrada
+          await refreshSession();
+          setIsCheckingAuth(false);
+          return;
+        }
+        
+        console.log("Sem sessão após verificação direta, redirecionando para login");
+        navigate("/acesso-plano", { replace: true });
+        return;
+      }
+      
+      // Se chegou aqui, o usuário está autenticado
+      console.log("Usuário autenticado:", user.email);
       setIsCheckingAuth(false);
     };
     

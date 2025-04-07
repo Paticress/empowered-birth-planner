@@ -60,8 +60,9 @@ export function useAuthSession() {
     const debugInfo = logAuthDebugInfo("Auth Initialization");
     setAuthDebugInfo(debugInfo);
     
+    // Primeiro, configurar o listener de mudanças de estado de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.log('Auth state changed:', event, currentSession?.user?.email);
         
         setAuthDebugInfo(prev => ({ 
@@ -73,6 +74,7 @@ export function useAuthSession() {
           }
         }));
         
+        // Importante: sempre atualizar tanto a sessão quanto o usuário
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
@@ -91,16 +93,31 @@ export function useAuthSession() {
           console.log('User signed out');
           localStorage.removeItem('birthPlanLoggedIn');
           localStorage.removeItem('birthPlanEmail');
+        } else if (event === 'USER_UPDATED') {
+          console.log('User updated:', currentSession?.user?.email);
+          // Se o usuário foi atualizado, garantir que temos os dados mais recentes
+          const { data } = await supabase.auth.getUser();
+          if (data?.user) {
+            setUser(data.user);
+          }
         }
         
+        // Finalizar carregamento após processamento de mudança de estado
         setIsLoading(false);
       }
     );
 
-    // Verificar sessão inicial
+    // APÓS configurar o listener, verificar sessão inicial
     const checkInitialSession = async () => {
       try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        // Verificar se há uma sessão ativa ao inicializar
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting initial session:", error);
+          setIsLoading(false);
+          return;
+        }
         
         console.log("Initial session check:", initialSession ? "Session found" : "No session");
         
@@ -115,6 +132,8 @@ export function useAuthSession() {
         
         if (initialSession?.user) {
           console.log("Found session for user:", initialSession.user.email);
+          
+          // Importante: atualizar tanto a sessão quanto o usuário no estado
           setSession(initialSession);
           setUser(initialSession.user);
           
@@ -138,16 +157,29 @@ export function useAuthSession() {
           if (isLoggedIn && storedEmail) {
             console.log("Found login info in localStorage, but no active session");
             
-            // Tentar restaurar sessão se necessário em uma futura iteração
+            // Tentar reautenticar baseado no token armazenado pelo Supabase
+            const { data } = await supabase.auth.getSession();
+            if (data.session) {
+              console.log("Session retrieved from storage:", data.session.user?.email);
+              setSession(data.session);
+              setUser(data.session.user);
+            } else {
+              console.log("No session could be retrieved from storage");
+              // Limpar localStorage se não encontrou sessão válida
+              localStorage.removeItem('birthPlanLoggedIn');
+              localStorage.removeItem('birthPlanEmail');
+            }
           }
         }
       } catch (error) {
         console.error("Error checking initial session:", error);
       } finally {
+        // Garantir que o estado de carregamento seja sempre atualizado
         setIsLoading(false);
       }
     };
     
+    // Executar a verificação inicial de sessão
     checkInitialSession();
 
     return () => {

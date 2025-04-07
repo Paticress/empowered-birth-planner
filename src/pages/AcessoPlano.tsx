@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingState";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AcessoPlano() {
   const { user, isLoading, session, refreshSession } = useAuth();
@@ -23,21 +24,43 @@ export function AcessoPlano() {
   // Verifica a sessão ativamente quando a página carrega
   useEffect(() => {
     const checkAndRefreshSession = async () => {
-      if (!user && !isLoading) {
-        console.log("No user detected, attempting to refresh session");
-        const hasSession = await refreshSession();
-        if (hasSession) {
-          console.log("Session refreshed successfully, will redirect soon");
+      // Se estiver carregando, aguardar
+      if (isLoading) {
+        return;
+      }
+      
+      // Se não tiver usuário nem sessão, verificar com o Supabase diretamente
+      if (!user && !session) {
+        console.log("No user detected, checking session with Supabase directly");
+        setIsProcessingAuth(true);
+        
+        // Verificar session diretamente com o Supabase
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session) {
+          console.log("Session found directly from Supabase:", data.session.user?.email);
+          // Tentar atualizar o contexto com a sessão encontrada
+          await refreshSession();
+          setIsProcessingAuth(false);
+        } else {
+          console.log("No session found with direct check");
+          setIsProcessingAuth(false);
         }
       }
     };
     
     checkAndRefreshSession();
-  }, [user, isLoading, refreshSession]);
+  }, [user, session, isLoading, refreshSession]);
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!isLoading && user && session) {
+    // Não redirecionar se ainda estiver carregando ou processando
+    if (isLoading || isProcessingAuth) {
+      return;
+    }
+    
+    // Redirecionar se tiver usuário ou sessão
+    if (user || session) {
       console.log("AcessoPlano: User authenticated, redirecting to birth plan builder");
       
       // Pequeno delay para garantir que todos os estados sejam atualizados
@@ -45,7 +68,7 @@ export function AcessoPlano() {
         navigate('/criar-plano', { replace: true });
       }, 300);
     }
-  }, [user, isLoading, session, navigate]);
+  }, [user, isLoading, session, navigate, isProcessingAuth]);
 
   if (isLoading || isProcessingAuth) {
     return (

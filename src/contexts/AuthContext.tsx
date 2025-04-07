@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Initialize authentication
+  // Initialize authentication - this runs once
   useEffect(() => {
     if (!isInitialized) {
       console.log("Setting up auth context");
@@ -42,23 +42,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isInitialized, initializeAuth]);
 
-  // Synchronize authentication state - this runs whenever user or session changes
+  // Separate effect to handle authentication state changes
   useEffect(() => {
-    // Consider authenticated if we have a user from Supabase OR if localStorage has login info
-    const isUserAuthenticated = !!user || localStorage.getItem('birthPlanLoggedIn') === 'true';
+    // Skip if still loading
+    if (isLoading) {
+      return;
+    }
+    
+    // Consider authenticated if we have a user or a valid session
+    const isUserAuthenticated = !!user || !!session || localStorage.getItem('birthPlanLoggedIn') === 'true';
     
     if (isAuthenticated !== isUserAuthenticated) {
       console.log("Authentication state changed:", { 
         wasAuthenticated: isAuthenticated, 
         isNowAuthenticated: isUserAuthenticated,
         hasUser: !!user,
+        hasSession: !!session,
         hasLocalStorage: localStorage.getItem('birthPlanLoggedIn') === 'true',
-        email: user?.email || localStorage.getItem('birthPlanEmail')
+        email: user?.email || session?.user?.email || localStorage.getItem('birthPlanEmail')
       });
       
       setIsAuthenticated(isUserAuthenticated);
     }
-  }, [user, isAuthenticated]);
+  }, [user, session, isLoading, isAuthenticated]);
 
   return (
     <AuthContext.Provider
