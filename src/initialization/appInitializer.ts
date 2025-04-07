@@ -14,7 +14,7 @@ const initializeApp = (): void => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <App />
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 
   // Register service worker only after app has started
