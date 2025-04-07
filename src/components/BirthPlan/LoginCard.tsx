@@ -2,7 +2,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Lock } from 'lucide-react';
-import { MagicLinkTab } from './tabs/MagicLinkTab';
 import { LoginTab } from './tabs/LoginTab';
 import { SignupTab } from './tabs/SignupTab';
 import { LoginCardFooter } from './components/LoginCardFooter';
@@ -20,16 +19,11 @@ export function LoginCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
-        <Tabs defaultValue="magic-link">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="magic-link">Link Mágico</TabsTrigger>
+        <Tabs defaultValue="login">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="login" id="login-tab">Login</TabsTrigger>
             <TabsTrigger value="signup">Cadastro</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="magic-link">
-            <MagicLinkTab />
-          </TabsContent>
           
           <TabsContent value="login">
             <LoginTab />

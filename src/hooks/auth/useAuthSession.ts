@@ -25,55 +25,6 @@ export function useAuthSession() {
     const debugInfo = logAuthDebugInfo("Auth Initialization");
     setAuthDebugInfo(debugInfo);
     
-    const handleMagicLinkAuth = async () => {
-      const hash = window.location.hash;
-      if (hash && hash.includes('access_token')) {
-        console.log("Magic link authentication detected in hash");
-        setAuthDebugInfo(prev => ({ 
-          ...prev, 
-          magicLinkDetected: true,
-          authLocation: 'hash'
-        }));
-        
-        try {
-          const { data, error } = await supabase.auth.getSession();
-          if (error) {
-            console.error("Error processing magic link:", error);
-            toast.error("Erro ao processar link mágico");
-            setAuthDebugInfo(prev => ({ 
-              ...prev, 
-              magicLinkError: error.message
-            }));
-          } else if (data.session) {
-            console.log("Magic link authentication successful");
-            toast.success("Login realizado com sucesso!");
-            
-            setAuthDebugInfo(prev => ({ 
-              ...prev, 
-              magicLinkSuccess: true,
-              sessionEstablished: true,
-              userEmail: data.session.user?.email
-            }));
-            
-            if (data.session.user?.email) {
-              localStorage.setItem('birthPlanLoggedIn', 'true');
-              localStorage.setItem('birthPlanEmail', data.session.user.email);
-            }
-            
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
-          }
-        } catch (err) {
-          console.error("Error processing magic link:", err);
-          setAuthDebugInfo(prev => ({ 
-            ...prev, 
-            magicLinkException: err instanceof Error ? err.message : String(err) 
-          }));
-        }
-      }
-    };
-    
-    handleMagicLinkAuth();
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log('Auth state changed:', event, currentSession?.user?.email);
