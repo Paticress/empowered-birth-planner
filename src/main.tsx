@@ -7,7 +7,7 @@ import { registerServiceWorker, updateServiceWorker, unregisterServiceWorker } f
 import { supabase } from '@/integrations/supabase/client';
 
 // Special handling for auth tokens in the URL path
-const handleAuthTokens = () => {
+const handleAuthTokens = async () => {
   try {
     const fullUrl = window.location.href;
     const pathname = window.location.pathname;
@@ -40,37 +40,47 @@ const handleAuthTokens = () => {
     if (window.location.hash && window.location.hash.includes('access_token=')) {
       console.log("Hash-based auth token detected, ensuring processing");
       
-      // Use setTimeout to ensure this runs after other initialization
-      setTimeout(async () => {
-        try {
-          // Try to process the hash directly
-          const hashParams = window.location.hash.substring(1);
-          console.log("Processing hash auth parameters");
+      try {
+        // Try to process the hash directly
+        const hashParams = window.location.hash.substring(1);
+        console.log("Processing hash auth parameters");
+        
+        // Extract tokens
+        const access_token = extractParam(hashParams, 'access_token');
+        const refresh_token = extractParam(hashParams, 'refresh_token');
+        
+        if (access_token && refresh_token) {
+          // Set the session explicitly
+          const { data, error } = await supabase.auth.setSession({
+            access_token,
+            refresh_token
+          });
           
-          // Extract tokens
-          const access_token = extractParam(hashParams, 'access_token');
-          const refresh_token = extractParam(hashParams, 'refresh_token');
-          
-          if (access_token && refresh_token) {
-            // Set the session explicitly
-            const { data, error } = await supabase.auth.setSession({
-              access_token,
-              refresh_token
-            });
+          if (error) {
+            console.error("Error setting session from hash:", error);
+          } else if (data.session) {
+            console.log("Session set successfully from hash parameters:", data.session.user?.email);
             
-            if (error) {
-              console.error("Error setting session from hash:", error);
-            } else if (data.session) {
-              console.log("Session set successfully from hash parameters:", data.session.user?.email);
-              
-              // Clean up the URL
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
+            // Clean up the URL
+            window.history.replaceState({}, document.title, window.location.pathname);
           }
-        } catch (error) {
-          console.error("Error processing hash auth parameters:", error);
         }
-      }, 0);
+      } catch (error) {
+        console.error("Error processing hash auth parameters:", error);
+      }
+      
+      // Always clean up URL regardless of success/failure
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    // Additionally, always verify session on page load
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        console.log("Verified session on page load:", data.session.user?.email);
+      }
+    } catch (error) {
+      console.error("Error verifying session on page load:", error);
     }
     
     return false;
@@ -126,8 +136,11 @@ const initializeApp = () => {
   });
 };
 
-// Run the token handling logic, then initialize the app
-if (!handleAuthTokens()) {
-  // Only mount React if we're not redirecting for auth handling
-  initializeApp();
-}
+// Run the token handling logic first, then initialize the app
+(async () => {
+  const shouldRedirect = await handleAuthTokens();
+  if (!shouldRedirect) {
+    // Only mount React if we're not redirecting for auth handling
+    initializeApp();
+  }
+})();

@@ -9,25 +9,34 @@ import { useAuth } from '@/contexts/AuthContext';
 export function BirthPlanUserInfo() {
   const [userEmail, setUserEmail] = useState<string>('');
   const { navigateTo } = useNavigation();
-  const { user, signOut, isAuthenticated, isLoading } = useAuth();
+  const { user, signOut, isAuthenticated, isLoading, session } = useAuth();
 
   useEffect(() => {
     if (isLoading) return;
     
     // Get email from multiple sources to ensure reliability
-    const email = user?.email || localStorage.getItem('birthPlanEmail') || '';
+    const email = user?.email || session?.user?.email || localStorage.getItem('birthPlanEmail') || '';
     if (email) {
       setUserEmail(email);
       console.log("BirthPlanUserInfo: Using email:", email);
     } else {
       console.log("BirthPlanUserInfo: No user email found");
     }
-  }, [user, isAuthenticated, isLoading]);
+  }, [user, isAuthenticated, isLoading, session]);
 
   const handleLogout = async () => {
-    await signOut();
-    toast.success('Logout realizado com sucesso');
-    navigateTo('/');
+    try {
+      await signOut();
+      // Clear any local storage auth data
+      localStorage.removeItem('birthPlanLoggedIn');
+      localStorage.removeItem('birthPlanEmail');
+      
+      toast.success('Logout realizado com sucesso');
+      navigateTo('/');
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Erro ao realizar logout");
+    }
   };
 
   // Return nothing if no user is logged in or still loading

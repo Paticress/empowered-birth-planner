@@ -9,7 +9,7 @@ import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingS
 import { supabase } from "@/integrations/supabase/client";
 
 export function CriarPlano() {
-  const { user, isLoading, session, refreshSession } = useAuth();
+  const { user, isLoading, session, refreshSession, isAuthenticated } = useAuth();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
 
@@ -20,7 +20,8 @@ export function CriarPlano() {
       console.log("Status atual:", { 
         hasUser: !!user, 
         hasSession: !!session, 
-        isLoading 
+        isLoading,
+        isAuthenticated 
       });
       
       // Se ainda estiver carregando, aguardar
@@ -29,7 +30,14 @@ export function CriarPlano() {
         return;
       }
       
-      // Se não há usuário ou sessão, primeiro tentar recuperar a sessão
+      // Se o usuário já está autenticado, podemos mostrar o conteúdo
+      if (isAuthenticated && (user || session)) {
+        console.log("Usuário já autenticado, mostrando conteúdo");
+        setIsCheckingAuth(false);
+        return;
+      }
+      
+      // Se não há usuário ou sessão, tentar recuperar a sessão
       if (!user || !session) {
         // Verificar explicitamente a sessão com o Supabase
         console.log("Tentando obter sessão diretamente do Supabase...");
@@ -54,7 +62,7 @@ export function CriarPlano() {
     };
     
     checkAuth();
-  }, [user, isLoading, session, navigate, refreshSession]);
+  }, [user, isLoading, session, navigate, refreshSession, isAuthenticated]);
 
   if (isLoading || isCheckingAuth) {
     return (

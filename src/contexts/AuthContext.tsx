@@ -24,28 +24,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signUp,
     signOut,
-    initializeAuth,
+    isInitialized,
     refreshSession
   } = useAuthService();
   
-  const [isInitialized, setIsInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Initialize authentication - this runs once
-  useEffect(() => {
-    if (!isInitialized) {
-      console.log("Setting up auth context");
-      const cleanup = initializeAuth();
-      setIsInitialized(true);
-      
-      return cleanup;
-    }
-  }, [isInitialized, initializeAuth]);
-
-  // Separate effect to handle authentication state changes
+  // Effect to handle authentication state changes
   useEffect(() => {
     // Skip if still loading
     if (isLoading) {
+      console.log("Auth context still loading, skipping state update");
       return;
     }
     
@@ -65,6 +54,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAuthenticated(isUserAuthenticated);
     }
   }, [user, session, isLoading, isAuthenticated]);
+
+  // Render a loading state while authentication is being initialized
+  if (isLoading) {
+    console.log("Auth context is still loading...");
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-maternal-50">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-maternal-500 border-r-transparent"></div>
+          <p className="mt-4 text-maternal-800">Carregando informações de autenticação...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider

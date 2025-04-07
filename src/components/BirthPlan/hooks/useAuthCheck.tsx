@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 export function useAuthCheck() {
-  const { isAuthenticated, user, isLoading, session } = useAuth();
+  const { isAuthenticated, user, isLoading, session, refreshSession } = useAuth();
   const { navigateTo } = useNavigation();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [authCheckComplete, setAuthCheckComplete] = useState(false);
@@ -28,43 +28,46 @@ export function useAuthCheck() {
     });
     
     const checkAuth = async () => {
-      // Se o usuário não está autenticado, redirecionar para a página de login
-      if (!isAuthenticated) {
-        console.log("User not authenticated, redirecting to login page");
-        
-        // Verificar se há uma sessão válida no localStorage antes de redirecionar
-        const isLoggedInLocally = localStorage.getItem('birthPlanLoggedIn') === 'true';
-        const storedEmail = localStorage.getItem('birthPlanEmail');
-        
-        if (isLoggedInLocally && storedEmail) {
-          console.log("Found login info in localStorage, attempting to restore session");
-          
-          // Forçar atualização da sessão antes de decidir redirecionar
-          const { data } = await supabase.auth.getSession();
-          
-          if (data.session) {
-            console.log("Session restored from local storage:", data.session.user?.email);
-            // Se encontrou sessão, não redirecionar e esperar o próximo ciclo de useEffect
-            setAuthCheckComplete(true);
-            return;
-          }
-        }
-        
-        if (isInitialCheck) {
-          // Na primeira verificação, mostrar mensagem e redirecionar
-          toast.error("Acesso Restrito", {
-            description: "Por favor, faça login para acessar o construtor de plano de parto."
-          });
-          navigateTo('/acesso-plano');
-        }
-        
-        setAuthCheckComplete(true);
-        setIsInitialCheck(false);
+      // Verificar se já temos uma sessão válida
+      if (isAuthenticated) {
+        console.log("User is authenticated, checking authorization");
+        await checkUserAuthorization();
         return;
       }
       
+      // Verificar se há uma sessão válida no localStorage antes de redirecionar
+      const isLoggedInLocally = localStorage.getItem('birthPlanLoggedIn') === 'true';
+      const storedEmail = localStorage.getItem('birthPlanEmail');
+      
+      if (isLoggedInLocally && storedEmail) {
+        console.log("Found login info in localStorage, attempting to restore session");
+        
+        // Tentar atualizar a sessão
+        const sessionRestored = await refreshSession();
+        
+        if (sessionRestored) {
+          console.log("Session restored successfully");
+          await checkUserAuthorization();
+          return;
+        }
+      }
+      
+      // Se não conseguiu restaurar a sessão, redirecionar para login
+      if (isInitialCheck) {
+        // Na primeira verificação, mostrar mensagem e redirecionar
+        toast.error("Acesso Restrito", {
+          description: "Por favor, faça login para acessar o construtor de plano de parto."
+        });
+        navigateTo('/acesso-plano');
+      }
+      
+      setAuthCheckComplete(true);
+      setIsInitialCheck(false);
+    };
+    
+    const checkUserAuthorization = async () => {
       // Obter o email de múltiplas fontes para confiabilidade
-      const userEmail = user?.email || localStorage.getItem('birthPlanEmail');
+      const userEmail = user?.email || session?.user?.email || localStorage.getItem('birthPlanEmail');
       
       if (!userEmail) {
         console.log("No user email found, redirecting to login page");
@@ -147,7 +150,7 @@ export function useAuthCheck() {
       checkAuth();
     }
     
-  }, [isAuthenticated, user, isLoading, navigateTo, session]);
+  }, [isAuthenticated, user, isLoading, navigateTo, session, refreshSession, isInitialCheck]);
 
   return { 
     isLoading: isLoading || !authCheckComplete, 
