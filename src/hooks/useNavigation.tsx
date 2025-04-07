@@ -35,6 +35,8 @@ export const useNavigation = () => {
     if (path === '/acesso-plano' || path === '/criar-plano') {
       navigate(path, { replace: true });
     } else {
+      // For all other routes, use normal navigation
+      // This preserves the route in the browser history
       navigate(path);
     }
   };

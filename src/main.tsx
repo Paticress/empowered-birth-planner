@@ -130,6 +130,32 @@ function extractParam(query: string, paramName: string): string {
   return query.substring(startIndex + paramName.length + 1, endIndex);
 }
 
+// Check for URL-based refresh detection
+// This helps with debugging refresh issues
+const isRefresh = () => {
+  try {
+    // Try to detect if this is a page refresh using performance API
+    if (window.performance) {
+      const navEntries = performance.getEntriesByType('navigation');
+      if (navEntries.length > 0) {
+        const navType = (navEntries[0] as PerformanceNavigationTiming).type;
+        console.log("Navigation type from Performance API:", navType);
+        return navType === 'reload';
+      }
+    }
+    return false;
+  } catch (e) {
+    console.error("Error detecting refresh:", e);
+    return false;
+  }
+};
+
+// Log important navigation information on startup
+console.log("Application starting");
+console.log("Current URL:", window.location.href);
+console.log("Is refresh:", isRefresh());
+console.log("Path:", window.location.pathname);
+
 // Initialize app only after handling potential auth tokens
 const initializeApp = () => {
   ReactDOM.createRoot(document.getElementById('root')!).render(

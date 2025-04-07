@@ -23,10 +23,17 @@ import { SupabaseTest } from './components/SupabaseTest';
 import { WebhookTest } from './pages/WebhookTest';
 import NotFound from './pages/NotFound';
 import { Loader2 } from 'lucide-react';
+import { useEffect } from "react";
 
 function AppContent() {
   const location = useLocation();
   const { isLoading } = useAuth();
+  
+  // Log current location to help with debugging
+  useEffect(() => {
+    console.log("Current route:", location.pathname);
+    console.log("Full URL:", window.location.href);
+  }, [location]);
   
   // Conditionally apply the background class based on the route
   const isBirthPlanRoute = location.pathname.startsWith('/criar-plano');
@@ -66,6 +73,24 @@ function AppContent() {
 }
 
 function App() {
+  // Add useEffect to detect and log page loads and refreshes
+  useEffect(() => {
+    console.log("App mounted/remounted");
+    console.log("Initial URL:", window.location.href);
+    console.log("Navigation type:", getNavigationType());
+    
+    // Try to detect if this is a page refresh
+    if (getNavigationType() === 'reload') {
+      console.log("Page was refreshed (F5)");
+    }
+  }, []);
+  
+  // Helper function to detect navigation type
+  const getNavigationType = () => {
+    const nav = window.performance?.getEntriesByType?.('navigation')[0] as PerformanceNavigationTiming;
+    return nav?.type || 'unknown';
+  };
+
   return (
     <AuthProvider>
       <Router>
