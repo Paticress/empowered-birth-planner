@@ -8,8 +8,8 @@ import { useAuthUrlHandler } from "@/hooks/useAuthUrlHandler";
 import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingState";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { cleanUrlAfterAuth } from "@/utils/auth/token";
+import { useNavigate, useLocation } from "react-router-dom";
+import { cleanUrlAfterAuth } from "@/utils/auth/token/cleanupToken";
 
 export function AcessoPlano() {
   const { user, isLoading, session } = useAuth();
@@ -17,15 +17,16 @@ export function AcessoPlano() {
   const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Debug logging
   useEffect(() => {
     console.log("AcessoPlano.tsx carregado.");
     console.log("URL atual:", window.location.href);
-    console.log("Hash extraído:", window.location.hash);
+    console.log("Hash extraído:", location.hash);
     console.log("Session status:", session ? "Active" : "None");
     console.log("Auth state:", { isProcessingAuth, isProcessingMagicLink });
-  }, [session, isProcessingAuth, isProcessingMagicLink]);
+  }, [session, isProcessingAuth, isProcessingMagicLink, location.hash]);
   
   // Handle magic link authentication
   useEffect(() => {
@@ -34,7 +35,7 @@ export function AcessoPlano() {
         return;
       }
       
-      const hash = window.location.hash;
+      const hash = location.hash;
       
       if (!hash || !hash.includes("access_token")) {
         console.log("Nenhum token encontrado na URL.");
@@ -100,7 +101,7 @@ export function AcessoPlano() {
     };
     
     handleMagicLinkAuth();
-  }, [isLoading, isProcessingAuth, isProcessingMagicLink, navigate]);
+  }, [isLoading, isProcessingAuth, isProcessingMagicLink, navigate, location.hash]);
 
   // Redirect if already authenticated
   useEffect(() => {
