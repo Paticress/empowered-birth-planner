@@ -32,6 +32,10 @@ export async function validateSession(options: AuthProcessOptions): Promise<void
     if (data.session) {
       console.log("SessionValidator: Authentication successful, session established for:", data.session.user.email);
       
+      // Store login information in localStorage for backup
+      localStorage.setItem('birthPlanLoggedIn', 'true');
+      localStorage.setItem('birthPlanEmail', data.session.user.email || '');
+      
       // Ensure user is in the database (for permissions)
       await ensureUserInDatabase(data.session.user);
       

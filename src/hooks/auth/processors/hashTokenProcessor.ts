@@ -2,7 +2,7 @@
 import { AuthUrlInfo } from "@/types/auth";
 import { AuthProcessOptions } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { cleanUrlAfterAuth } from "@/utils/auth/tokenUtils";
+import { cleanUrlAfterAuth } from "@/utils/auth/token";
 import { toast } from "sonner";
 
 /**
@@ -19,15 +19,23 @@ export async function processHashToken(
   }
   
   console.log("HashTokenProcessor: Processing token in URL hash");
+  console.log("Hash content:", urlInfo.hash.substring(0, 20) + "...");
   
   try {
+    // Check if the hash includes magiclink type
+    const isMagicLink = urlInfo.hash.includes('type=magiclink');
+    console.log("Is magic link token:", isMagicLink);
+    
+    // Use the full URL instead of just the hash for better compatibility
+    const fullUrl = window.location.href;
+    console.log("Using full URL for token exchange");
+    
     // Use updated Supabase method to exchange the code for a session
-    const { data, error } = await supabase.auth.exchangeCodeForSession(
-      window.location.hash
-    );
+    const { data, error } = await supabase.auth.exchangeCodeForSession(fullUrl);
     
     if (error) {
       console.error("HashTokenProcessor: Error processing hash token:", error);
+      console.error("Error details:", error.message, error.status);
       toast.error("Erro ao processar token: " + error.message);
       setIsProcessingAuth(false);
       
@@ -36,7 +44,13 @@ export async function processHashToken(
       return true; // We handled it, even though there was an error
     }
     
-    console.log("HashTokenProcessor: Successfully processed hash token");
+    if (data.session) {
+      console.log("HashTokenProcessor: Successfully processed hash token and created session");
+      console.log("User email:", data.session.user.email);
+    } else {
+      console.log("HashTokenProcessor: No session returned after processing token");
+    }
+    
     return true; // Successfully handled
     
   } catch (err) {
