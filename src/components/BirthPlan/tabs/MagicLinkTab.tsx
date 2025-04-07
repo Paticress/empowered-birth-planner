@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthUrlHandler } from '@/hooks/useAuthUrlHandler';
+import { cleanUrlAfterAuth } from '@/utils/auth/token';
 
 export function MagicLinkTab() {
   const {
@@ -53,6 +54,49 @@ export function MagicLinkTab() {
         
         // Show processing indicator
         toast.loading("Processando sua autenticação...");
+        
+        try {
+          // Try to exchange the code for a session directly here
+          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          
+          if (error) {
+            console.error("MagicLinkTab: Error processing auth code:", error);
+            toast.error("Erro ao processar link de acesso: " + error.message);
+            setIsLocalProcessing(false);
+            // Clean up URL
+            cleanUrlAfterAuth();
+            return;
+          }
+          
+          if (data.session) {
+            console.log("MagicLinkTab: Successfully authenticated via magic link");
+            toast.success("Login realizado com sucesso!");
+            
+            // Store email in localStorage for backup
+            localStorage.setItem('birthPlanLoggedIn', 'true');
+            localStorage.setItem('birthPlanEmail', data.session.user.email || '');
+            
+            // Clean up URL
+            cleanUrlAfterAuth();
+            
+            // Redirect to criar-plano
+            setTimeout(() => {
+              window.location.href = '/criar-plano';
+            }, 1500);
+          } else {
+            console.log("MagicLinkTab: No session returned from exchangeCodeForSession");
+            toast.error("Falha ao processar autenticação. Tente novamente.");
+            setIsLocalProcessing(false);
+            // Clean up URL
+            cleanUrlAfterAuth();
+          }
+        } catch (err) {
+          console.error("MagicLinkTab: Exception during auth processing:", err);
+          toast.error("Erro ao processar autenticação");
+          setIsLocalProcessing(false);
+          // Clean up URL
+          cleanUrlAfterAuth();
+        }
       }
     };
     

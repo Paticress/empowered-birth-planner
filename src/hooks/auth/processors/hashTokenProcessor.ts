@@ -19,21 +19,42 @@ export async function processHashToken(
   }
   
   console.log("HashTokenProcessor: Processing token in URL hash");
-  console.log("Hash content:", urlInfo.hash.substring(0, 20) + "...");
   
   try {
     // Check if the hash includes magiclink type
     const isMagicLink = urlInfo.hash.includes('type=magiclink');
     console.log("Is magic link token:", isMagicLink);
     
-    // Use the full URL instead of just the hash for better compatibility
-    const fullUrl = window.location.href;
-    console.log("Using full URL for token exchange:", fullUrl.substring(0, 100) + "...");
-    
-    // Log authentication attempt start
+    // Show loading toast
     toast.loading("Autenticando...");
     
-    // Use updated Supabase method to exchange the code for a session
+    // Use getSession first to check if the token has already been processed
+    const { data: sessionData } = await supabase.auth.getSession();
+    
+    if (sessionData.session) {
+      console.log("HashTokenProcessor: Session already exists, using existing session");
+      
+      // Store authentication information in localStorage for backup
+      localStorage.setItem('birthPlanLoggedIn', 'true');
+      localStorage.setItem('birthPlanEmail', sessionData.session.user.email || '');
+      
+      toast.success("Login realizado com sucesso!");
+      
+      // Clean up URL after successful authentication
+      cleanUrlAfterAuth();
+      
+      // Short delay before redirecting to allow toast to be seen
+      setTimeout(() => {
+        console.log("HashTokenProcessor: Redirecting to criar-plano after successful auth");
+        window.location.href = '/criar-plano';
+      }, 1500);
+      
+      return true;
+    }
+    
+    // If no session found, exchange the code in the URL for a session
+    console.log("HashTokenProcessor: No existing session, exchanging code for session");
+    const fullUrl = window.location.href;
     const { data, error } = await supabase.auth.exchangeCodeForSession(fullUrl);
     
     if (error) {
