@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -139,6 +140,9 @@ export function useLoginForm() {
       return;
     }
     
+    console.log("Sending magic link to:", email);
+    console.log("Current URL:", window.location.href);
+    
     try {
       const { error: addUserError } = await supabase
         .from('users_db_birthplanbuilder')
@@ -148,6 +152,7 @@ export function useLoginForm() {
         console.error('Error adding user to database:', addUserError);
       }
       
+      // Will use the redirectTo parameter inside signInWithMagicLink
       const { error } = await signInWithMagicLink(email);
       
       if (error) {
@@ -157,6 +162,7 @@ export function useLoginForm() {
         setIsMagicLinkSent(true);
         toast.success('Link de acesso enviado com sucesso!');
         toast.info('Por favor, verifique seu email para acessar sua conta');
+        console.log("Magic link sent successfully! Check your email.");
       }
     } catch (error) {
       console.error('Error sending magic link:', error);

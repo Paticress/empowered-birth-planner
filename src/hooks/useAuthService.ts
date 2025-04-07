@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,10 +37,13 @@ export function useAuthService() {
 
   const signInWithMagicLink = async (email: string, redirectPath = '/auth/callback') => {
     try {
+      // Get the full site URL dynamically
       const siteUrl = getCurrentSiteUrl();
       const redirectTo = `${siteUrl}${redirectPath}`;
+      
       console.log("Magic link will redirect to:", redirectTo);
       
+      // Pass the full redirectTo URL to the Supabase auth method
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -47,6 +51,12 @@ export function useAuthService() {
           shouldCreateUser: true
         }
       });
+      
+      // If there was no error, log the redirect URL for debugging
+      if (!error) {
+        console.log("Magic link sent! It will redirect to:", redirectTo);
+      }
+      
       return { error };
     } catch (error) {
       console.error('Error sending magic link:', error);
