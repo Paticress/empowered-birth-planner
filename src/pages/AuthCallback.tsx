@@ -6,44 +6,67 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingState";
 import { toast } from "sonner";
-import { useAuthUrlDetection } from "@/hooks/auth/useAuthUrlDetection";
-import { useAuthProcessor } from "@/hooks/auth/useAuthProcessor";
 
 export function AuthCallback() {
   const [error, setError] = useState<string | null>(null);
-  const [attemptCount, setAttemptCount] = useState(0);
+  const [isProcessingAuth, setIsProcessingAuth] = useState(false);
   const navigate = useNavigate();
-  const { getAuthUrlInfo } = useAuthUrlDetection();
-  const { isProcessingAuth, processAuth, setIsProcessingAuth } = useAuthProcessor();
 
   useEffect(() => {
     console.log("AuthCallback: Processando autenticação");
     console.log("URL atual:", window.location.href);
     
-    const handleAuth = async () => {
-      // Get URL information
-      const urlInfo = getAuthUrlInfo();
-      
-      console.log("Token location check:", {
-        inHash: urlInfo.hasAuthInHash,
-        inPath: urlInfo.hasAuthInPath,
-        inUrl: urlInfo.hasAuthInUrl
-      });
-
-      // Process authentication
+    const processSessionFromUrl = async () => {
       setIsProcessingAuth(true);
+      toast.loading("Processando autenticação...");
       
-      const success = await processAuth(urlInfo);
-      
-      if (!success) {
-        console.error("Auth processing failed after trying multiple methods");
+      try {
+        // Usar o método recomendado para obter a sessão diretamente da URL
+        const { data, error } = await supabase.auth.getSessionFromUrl();
+        
+        if (error) {
+          console.error("Erro ao obter sessão da URL:", error);
+          setError(`Falha na autenticação: ${error.message}`);
+          toast.error("Erro ao processar link de acesso");
+          setIsProcessingAuth(false);
+          return;
+        }
+        
+        if (data?.session) {
+          console.log("Sessão obtida com sucesso em AuthCallback:", data.session.user?.email);
+          toast.success("Login realizado com sucesso!");
+          
+          // Guardar email no localStorage como backup
+          if (data.session.user?.email) {
+            localStorage.setItem('birthPlanLoggedIn', 'true');
+            localStorage.setItem('birthPlanEmail', data.session.user.email);
+          }
+          
+          // Limpar a URL
+          window.history.replaceState({}, document.title, '/');
+          
+          // Redirecionar para a página principal
+          setTimeout(() => {
+            navigate('/criar-plano', { replace: true });
+          }, 1000);
+          
+          return;
+        }
+        
+        // Se chegou aqui, não conseguiu processar a sessão
+        console.log("Nenhuma sessão encontrada na URL");
         setError("Falha na autenticação. O link pode ter expirado ou ser inválido.");
+        setIsProcessingAuth(false);
+      } catch (err) {
+        console.error("Exceção ao processar sessão da URL:", err);
+        setError("Erro inesperado ao processar autenticação");
+        toast.error("Erro ao processar link de acesso");
         setIsProcessingAuth(false);
       }
     };
 
-    handleAuth();
-  }, [navigate, getAuthUrlInfo, processAuth, setIsProcessingAuth, attemptCount]);
+    processSessionFromUrl();
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex flex-col bg-maternal-50">

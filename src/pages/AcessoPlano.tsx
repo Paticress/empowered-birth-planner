@@ -4,151 +4,105 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { useAuthUrlHandler } from "@/hooks/useAuthUrlHandler";
 import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingState";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuthUrlDetection } from "@/hooks/auth/useAuthUrlDetection";
-import { useAuthProcessor } from "@/hooks/auth/useAuthProcessor";
+import { useNavigate } from "react-router-dom";
 
 export function AcessoPlano() {
   const { user, isLoading, session } = useAuth();
-  const { isProcessingAuth: legacyProcessingAuth } = useAuthUrlHandler();
-  const { getAuthUrlInfo } = useAuthUrlDetection();
-  const { isProcessingAuth, processAuth, setIsProcessingAuth } = useAuthProcessor();
-  const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(false);
+  const [isProcessingAuth, setIsProcessingAuth] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authenticatedUser, setAuthenticatedUser] = useState<any>(null);
   const navigate = useNavigate();
-  const location = useLocation();
   
   // Debug logging
   useEffect(() => {
     console.log("AcessoPlano.tsx carregado.");
     console.log("🔍 URL atual:", window.location.href);
-    console.log("Hash extraído:", location.hash);
     console.log("Session status:", session ? "Active" : "None");
-    console.log("Auth state:", { isProcessingAuth, isProcessingMagicLink });
-  }, [session, isProcessingAuth, isProcessingMagicLink, location.hash]);
+    console.log("Auth state:", { isProcessingAuth });
+  }, [session, isProcessingAuth]);
   
-  // Process auth tokens in URL if any
+  // Processo de autenticação com getSessionFromUrl
   useEffect(() => {
-    const handleAuthTokens = async () => {
-      if (isLoading || isProcessingAuth || isProcessingMagicLink) {
-        return;
-      }
-      
-      // Get URL information for auth detection
-      const urlInfo = getAuthUrlInfo();
-      
-      // Skip if no auth tokens in URL
-      if (!urlInfo.hasAuthInUrl) {
-        return;
-      }
-      
-      console.log("Auth tokens detected in URL, processing...");
-      
-      // Process authentication
-      setIsProcessingAuth(true);
-      toast.loading("Processando autenticação...");
-      
-      const success = await processAuth(urlInfo);
-      
-      if (!success) {
-        console.error("Auth processing failed after trying multiple methods");
-        setAuthError("Falha na autenticação. O link pode ter expirado ou ser inválido.");
-        setIsProcessingAuth(false);
-      }
-    };
-
-    handleAuthTokens();
-  }, [isLoading, processAuth, isProcessingAuth, isProcessingMagicLink, getAuthUrlInfo, setIsProcessingAuth]);
-  
-  // Handle magic link authentication
-  useEffect(() => {
-    const handleMagicLinkAuth = async () => {
-      if (isLoading || isProcessingAuth || isProcessingMagicLink) {
-        return;
-      }
-
-      // Recupera tokens da URL hash (parte após "#")
-      const fullHash = location.hash.substring(1); // remove "#"
-      const hashParams = new URLSearchParams(fullHash);
-      
-      const accessToken = hashParams.get("access_token");
-      const refreshToken = hashParams.get("refresh_token");
-      
-      if (!accessToken || !refreshToken) {
-        console.warn("❌ Tokens ausentes na URL.");
-        return;
-      }
-      
-      console.log("✅ Tokens detectados! Iniciando login...");
-      setIsProcessingMagicLink(true);
-      toast.info("Conectando...");
-      
-      try {
-        // Set the session with Supabase
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
-        });
-        
-        if (error) {
-          console.error("Erro ao configurar sessão:", error.message);
-          setAuthError(error.message);
-          toast.error("Erro ao autenticar. Tente novamente.");
-          setIsProcessingMagicLink(false);
-          return;
-        }
-        
-        console.log("Usuário autenticado com sucesso!");
-        
-        // Get user information
-        const { data } = await supabase.auth.getUser();
-        setAuthenticatedUser(data.user);
-        
-        // Store login info in localStorage for backup
-        if (data.user?.email) {
-          localStorage.setItem('birthPlanLoggedIn', 'true');
-          localStorage.setItem('birthPlanEmail', data.user.email);
-        }
-        
-        toast.success("Login realizado com sucesso!");
-        
-        // Clean URL after successful authentication
-        navigate('/acesso-plano', { replace: true });
-        
-        // Short delay before redirecting
-        setTimeout(() => {
-          navigate('/criar-plano', { replace: true });
-        }, 1500);
-        
-      } catch (err) {
-        console.error("Erro inesperado durante autenticação:", err);
-        setAuthError(err instanceof Error ? err.message : "Erro inesperado");
-        toast.error("Erro ao autenticar. Tente novamente.");
-        setIsProcessingMagicLink(false);
-      }
-    };
+    if (isLoading || isProcessingAuth || user) {
+      return;
+    }
     
-    handleMagicLinkAuth();
-  }, [isLoading, isProcessingAuth, isProcessingMagicLink, navigate, location.hash]);
+    const processSessionFromUrl = async () => {
+      // Verifica se há hash ou token na URL
+      if (window.location.hash || 
+          window.location.href.includes('access_token=') || 
+          window.location.search.includes('code=')) {
+        
+        console.log("Tokens de autenticação detectados na URL, processando...");
+        setIsProcessingAuth(true);
+        toast.loading("Processando autenticação...");
+        
+        try {
+          // Usar o método recomendado para obter a sessão diretamente da URL
+          const { data, error } = await supabase.auth.getSessionFromUrl();
+          
+          if (error) {
+            console.error("Erro ao obter sessão da URL:", error);
+            setAuthError(`Falha na autenticação: ${error.message}`);
+            toast.error("Erro ao processar link de acesso");
+            setIsProcessingAuth(false);
+            return;
+          }
+          
+          if (data?.session) {
+            console.log("Sessão obtida com sucesso:", data.session.user?.email);
+            toast.success("Login realizado com sucesso!");
+            
+            // Guardar email no localStorage como backup
+            if (data.session.user?.email) {
+              localStorage.setItem('birthPlanLoggedIn', 'true');
+              localStorage.setItem('birthPlanEmail', data.session.user.email);
+            }
+            
+            setAuthenticatedUser(data.session.user);
+            
+            // Limpar a URL
+            window.history.replaceState({}, document.title, '/acesso-plano');
+            
+            // Redirecionar para a página principal
+            setTimeout(() => {
+              navigate('/criar-plano', { replace: true });
+            }, 1500);
+            
+            return;
+          }
+          
+          // Se chegou aqui, não conseguiu processar a sessão
+          console.log("Nenhuma sessão encontrada na URL");
+          setIsProcessingAuth(false);
+        } catch (err) {
+          console.error("Exceção ao processar sessão da URL:", err);
+          setAuthError("Erro inesperado ao processar autenticação");
+          toast.error("Erro ao processar link de acesso");
+          setIsProcessingAuth(false);
+        }
+      }
+    };
+
+    processSessionFromUrl();
+  }, [isLoading, isProcessingAuth, user, navigate]);
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!isLoading && !isProcessingAuth && !isProcessingMagicLink && user && session) {
+    if (!isLoading && !isProcessingAuth && user && session) {
       console.log("AcessoPlano: User already authenticated, redirecting to birth plan builder");
       navigate('/criar-plano', { replace: true });
     }
-  }, [user, isLoading, isProcessingAuth, isProcessingMagicLink, session, navigate]);
+  }, [user, isLoading, isProcessingAuth, session, navigate]);
 
-  if (isLoading || isProcessingAuth || isProcessingMagicLink) {
+  if (isLoading || isProcessingAuth) {
     return (
       <div className="min-h-screen flex flex-col bg-maternal-50">
         <Header />
-        <AuthLoadingState isProcessingAuth={isProcessingAuth || isProcessingMagicLink} />
+        <AuthLoadingState isProcessingAuth={isProcessingAuth} />
         <Footer />
       </div>
     );

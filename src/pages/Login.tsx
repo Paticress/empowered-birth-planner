@@ -8,52 +8,106 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuthProcessor } from '@/hooks/auth/useAuthProcessor';
 import { useAuthUrlDetection } from '@/hooks/auth/useAuthUrlDetection';
 import { LoginContent } from '@/components/Login/LoginContent';
+import { supabase } from '@/integrations/supabase/client';
 
 export function Login() {
   const [error, setError] = useState<string | null>(null);
+  const [isProcessingSession, setIsProcessingSession] = useState(false);
   const navigate = useNavigate();
   const { isProcessingAuth, setIsProcessingAuth, processAuth, debugInfo } = useAuthProcessor();
   const { getAuthUrlInfo } = useAuthUrlDetection();
 
   useEffect(() => {
-    // Process authentication as soon as the page loads
-    const handleAuthProcess = async () => {
-      // Get URL information for auth detection
-      const urlInfo = getAuthUrlInfo();
-      const { hasAuthInHash, hasAuthInSearch, hasAuthInPath, hasAuthInUrl } = urlInfo;
-      
-      // Debug logging
-      console.log("Login page loaded with URL info:", {
-        urlInfo,
-        hasAuth: hasAuthInUrl
-      });
-      
-      // If there are no auth parameters, redirect to access page after a delay
-      if (!hasAuthInUrl) {
-        console.log("No auth tokens found in URL, redirecting to acesso-plano after delay");
-        
-        // Don't redirect immediately so we can see the debug info if needed
-        setTimeout(() => {
-          navigate('/acesso-plano', { replace: true });
-        }, 3000); // 3 second delay
-        
-        return;
-      }
-      
-      // Process authentication
-      setIsProcessingAuth(true);
+    console.log("Login page loaded, checking for session from URL");
+    
+    // Novo método para processar sessão diretamente da URL
+    const processSessionFromUrl = async () => {
+      setIsProcessingSession(true);
       toast.loading("Processando autenticação...");
       
-      const success = await processAuth(urlInfo);
-      
-      if (!success) {
-        setError("Falha ao processar autenticação após tentar múltiplos métodos.");
-        toast.error("Erro no processamento de autenticação");
+      try {
+        // Usar o método recomendado para obter a sessão diretamente da URL
+        const { data, error } = await supabase.auth.getSessionFromUrl();
+        
+        if (error) {
+          console.error("Erro ao obter sessão da URL:", error);
+          setError(`Erro ao processar autenticação: ${error.message}`);
+          toast.error("Erro ao processar link de acesso");
+          setIsProcessingSession(false);
+          return false;
+        }
+        
+        if (data?.session) {
+          console.log("Sessão obtida com sucesso da URL:", data.session.user?.email);
+          toast.success("Login realizado com sucesso!");
+          
+          // Guardar email no localStorage como backup
+          if (data.session.user?.email) {
+            localStorage.setItem('birthPlanLoggedIn', 'true');
+            localStorage.setItem('birthPlanEmail', data.session.user.email);
+          }
+          
+          // Limpar a URL
+          window.history.replaceState({}, document.title, '/');
+          
+          // Redirecionar para a página principal
+          setTimeout(() => {
+            navigate('/criar-plano', { replace: true });
+          }, 1000);
+          
+          return true;
+        }
+        
+        return false;
+      } catch (err) {
+        console.error("Exceção ao processar sessão da URL:", err);
+        setError("Erro inesperado ao processar autenticação");
+        toast.error("Erro ao processar link de acesso");
+        setIsProcessingSession(false);
+        return false;
       }
     };
-    
-    handleAuthProcess();
-  }, [navigate, getAuthUrlInfo, processAuth, setIsProcessingAuth]);
+
+    // Tenta processar sessão da URL primeiro
+    processSessionFromUrl().then((success) => {
+      // Se não conseguiu processar a sessão da URL, tenta o método antigo
+      if (!success && !isProcessingSession) {
+        const handleAuthProcess = async () => {
+          // Get URL information for auth detection
+          const urlInfo = getAuthUrlInfo();
+          
+          // Debug logging
+          console.log("Fallback: Verificando URL info:", {
+            urlInfo,
+            hasAuth: urlInfo.hasAuthInUrl
+          });
+          
+          // If there are no auth parameters, redirect to access page after a delay
+          if (!urlInfo.hasAuthInUrl) {
+            console.log("Nenhum token de autenticação encontrado na URL, redirecionando para acesso-plano");
+            
+            setTimeout(() => {
+              navigate('/acesso-plano', { replace: true });
+            }, 2000);
+            
+            return;
+          }
+          
+          // Process authentication
+          setIsProcessingAuth(true);
+          
+          const success = await processAuth(urlInfo);
+          
+          if (!success) {
+            setError("Falha ao processar autenticação após tentar múltiplos métodos.");
+            toast.error("Erro no processamento de autenticação");
+          }
+        };
+        
+        handleAuthProcess();
+      }
+    });
+  }, [navigate, getAuthUrlInfo, processAuth, setIsProcessingAuth, isProcessingSession]);
 
   const handleRetry = () => {
     navigate('/acesso-plano');
@@ -66,9 +120,9 @@ export function Login() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 pb-6">
             <LoginContent 
-              isProcessing={isProcessingAuth}
+              isProcessing={isProcessingAuth || isProcessingSession}
               error={error}
-              debugInfo={debugInfo}
+              debugInfo={{...debugInfo, isProcessingSession}}
               onRetry={handleRetry}
             />
           </CardContent>

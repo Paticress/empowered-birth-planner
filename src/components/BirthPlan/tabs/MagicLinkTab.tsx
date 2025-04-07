@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuthUrlHandler } from '@/hooks/useAuthUrlHandler';
 import { cleanUrlAfterAuth } from '@/utils/auth/token';
 
 export function MagicLinkTab() {
@@ -19,34 +18,25 @@ export function MagicLinkTab() {
   } = useLoginForm();
   
   const { user, isAuthenticated } = useAuth();
-  const { isProcessingAuth } = useAuthUrlHandler();
   const [isLocalProcessing, setIsLocalProcessing] = useState(false);
 
-  // Enhanced magic link detection with support for both hash and query parameters
+  // Enhanced magic link detection with getSessionFromUrl
   useEffect(() => {
     const checkAuth = async () => {
       // We only need to check if the user hasn't been authenticated yet 
       // and we're not already showing the "link sent" message and not already processing auth
-      if (isAuthenticated || isMagicLinkSent || isProcessingAuth || isLocalProcessing) {
+      if (isAuthenticated || isMagicLinkSent || isLocalProcessing) {
         return;
       }
       
-      // Check for auth token in hash or query parameters
-      const hash = window.location.hash;
-      const search = window.location.search;
-      const hasAuthInHash = hash && hash.includes('access_token=');
-      const hasAuthInQuery = search && 
-                           (search.includes('access_token=') || 
-                            search.includes('access_entry=magiclink'));
+      // Verifica se há hash ou token na URL para magic link
+      const hasAuthInUrl = window.location.hash || 
+                           window.location.href.includes('access_token=') || 
+                           window.location.search.includes('code=') ||
+                           window.location.search.includes('access_entry=magiclink');
       
-      if (hasAuthInHash || hasAuthInQuery) {
+      if (hasAuthInUrl) {
         console.log("MagicLinkTab: Magic link parameters detected in URL");
-        console.log("URL format:", { 
-          hasAuthInHash, 
-          hasAuthInQuery,
-          hash: hasAuthInHash ? hash.substring(0, 20) + '...' : 'none',
-          search: hasAuthInQuery ? search.substring(0, 20) + '...' : 'none'
-        });
         
         // Update the UI state to show that we've received the magic link
         setIsMagicLinkSent(true);
@@ -56,8 +46,8 @@ export function MagicLinkTab() {
         toast.loading("Processando sua autenticação...");
         
         try {
-          // Try to exchange the code for a session directly here
-          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          // Usar o método recomendado para obter a sessão diretamente da URL
+          const { data, error } = await supabase.auth.getSessionFromUrl();
           
           if (error) {
             console.error("MagicLinkTab: Error processing auth code:", error);
@@ -68,7 +58,7 @@ export function MagicLinkTab() {
             return;
           }
           
-          if (data.session) {
+          if (data?.session) {
             console.log("MagicLinkTab: Successfully authenticated via magic link");
             toast.success("Login realizado com sucesso!");
             
@@ -84,7 +74,7 @@ export function MagicLinkTab() {
               window.location.href = '/criar-plano';
             }, 1500);
           } else {
-            console.log("MagicLinkTab: No session returned from exchangeCodeForSession");
+            console.log("MagicLinkTab: No session returned from getSessionFromUrl");
             toast.error("Falha ao processar autenticação. Tente novamente.");
             setIsLocalProcessing(false);
             // Clean up URL
@@ -102,13 +92,13 @@ export function MagicLinkTab() {
     
     // Run the check immediately
     checkAuth();
-  }, [isAuthenticated, isMagicLinkSent, setIsMagicLinkSent, isProcessingAuth, isLocalProcessing]);
+  }, [isAuthenticated, isMagicLinkSent, setIsMagicLinkSent, isLocalProcessing]);
 
   // Determine if we need to show the loading state
-  const showLoading = isLoading || isProcessingAuth || isLocalProcessing;
+  const showLoading = isLoading || isLocalProcessing;
   
   // Text to display based on the current state
-  const loadingText = isProcessingAuth || isLocalProcessing 
+  const loadingText = isLocalProcessing 
     ? "Processando autenticação..." 
     : "Enviando link de acesso...";
 
