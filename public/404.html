@@ -101,9 +101,9 @@
           }
           
           if (tokenPart) {
-            // IMPORTANT: Always redirect to /acesso-plano#token for processing
-            console.log('Redirecting auth token to proper hash format: /acesso-plano#' + tokenPart.substring(0, 20) + '...');
-            window.location.replace('/acesso-plano#' + tokenPart);
+            // IMPORTANT: Always redirect to /auth/callback#token for processing for direct auth handling
+            console.log('Redirecting auth token to proper callback path: /auth/callback#' + tokenPart.substring(0, 20) + '...');
+            window.location.replace('/auth/callback#' + tokenPart);
             return;
           }
         }

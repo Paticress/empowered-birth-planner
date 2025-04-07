@@ -10,11 +10,25 @@ import { toast } from "sonner";
 export function AuthCallback() {
   const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [attemptCount, setAttemptCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log("AuthCallback: Processando autenticação");
     console.log("URL atual:", window.location.href);
+    console.log("Hostname:", window.location.hostname);
+    console.log("Path:", window.location.pathname);
+    
+    // Enhanced check for tokens in different parts of the URL
+    const hasTokenInHash = window.location.hash.includes('access_token=');
+    const hasTokenInPath = window.location.pathname.includes('access_token=');
+    const hasTokenInUrl = window.location.href.includes('access_token=');
+    
+    console.log("Token location check:", {
+      inHash: hasTokenInHash,
+      inPath: hasTokenInPath,
+      inUrl: hasTokenInUrl
+    });
 
     const processAuth = async () => {
       try {
@@ -23,10 +37,26 @@ export function AuthCallback() {
         
         if (error) {
           console.error("Erro ao processar autenticação:", error);
-          setError(error.message);
-          toast.error("Erro ao processar autenticação");
-          setIsProcessing(false);
-          return;
+          
+          // Check if we need to attempt with path format correction
+          if ((error.message.includes('invalid') || error.message.includes('expired')) && attemptCount < 1) {
+            console.log("Tentando formato alternativo de URL...");
+            setAttemptCount(prev => prev + 1);
+            
+            // If token is in path instead of hash for custom domains
+            if (hasTokenInPath && !hasTokenInHash) {
+              const tokenPart = window.location.pathname.substring(window.location.pathname.indexOf('access_token='));
+              const fixedUrl = `${window.location.origin}/auth/callback#${tokenPart}`;
+              console.log("Redirecionando para formato correto:", fixedUrl);
+              window.location.href = fixedUrl;
+              return;
+            }
+          } else {
+            setError(error.message);
+            toast.error("Erro ao processar autenticação");
+            setIsProcessing(false);
+            return;
+          }
         }
         
         if (data.session) {
@@ -55,7 +85,7 @@ export function AuthCallback() {
     };
 
     processAuth();
-  }, [navigate]);
+  }, [navigate, attemptCount]);
 
   return (
     <div className="min-h-screen flex flex-col bg-maternal-50">
