@@ -1,23 +1,23 @@
 
 /**
- * Cleans up URL after authentication by removing hash and search parameters
+ * Cleans up the URL after authentication by removing tokens and parameters
  */
-export function cleanUrlAfterAuth(): void {
-  console.log("TokenUtils: Cleaning URL after auth processing");
-  
+export function cleanUrlAfterAuth() {
   try {
-    // Remove hash and search parameters from URL without reloading the page
-    const { pathname } = window.location;
+    console.log("Cleaning URL after auth processing");
     
-    // Use history API to change URL without reloading
+    // Replace the current URL with a clean version, maintaining only the path
+    const path = window.location.pathname;
+    const cleanPath = path.includes('/auth/callback') ? '/acesso-plano' : path;
+    
     window.history.replaceState(
-      {},
+      null,
       document.title,
-      pathname
+      cleanPath
     );
     
-    console.log("TokenUtils: URL cleaned successfully");
+    console.log("URL cleaned successfully:", window.location.href);
   } catch (error) {
-    console.error("TokenUtils: Error cleaning URL:", error);
+    console.error("Error cleaning URL:", error);
   }
 }
