@@ -6,92 +6,50 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingState";
 import { toast } from "sonner";
+import { useAuthUrlDetection } from "@/hooks/auth/useAuthUrlDetection";
+import { useAuthProcessor } from "@/hooks/auth/useAuthProcessor";
 
 export function AuthCallback() {
-  const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attemptCount, setAttemptCount] = useState(0);
   const navigate = useNavigate();
+  const { getAuthUrlInfo } = useAuthUrlDetection();
+  const { isProcessingAuth, processAuth, setIsProcessingAuth } = useAuthProcessor();
 
   useEffect(() => {
     console.log("AuthCallback: Processando autenticação");
     console.log("URL atual:", window.location.href);
-    console.log("Hostname:", window.location.hostname);
-    console.log("Path:", window.location.pathname);
     
-    // Enhanced check for tokens in different parts of the URL
-    const hasTokenInHash = window.location.hash.includes('access_token=');
-    const hasTokenInPath = window.location.pathname.includes('access_token=');
-    const hasTokenInUrl = window.location.href.includes('access_token=');
-    
-    console.log("Token location check:", {
-      inHash: hasTokenInHash,
-      inPath: hasTokenInPath,
-      inUrl: hasTokenInUrl
-    });
+    const handleAuth = async () => {
+      // Get URL information
+      const urlInfo = getAuthUrlInfo();
+      
+      console.log("Token location check:", {
+        inHash: urlInfo.hasAuthInHash,
+        inPath: urlInfo.hasAuthInPath,
+        inUrl: urlInfo.hasAuthInUrl
+      });
 
-    const processAuth = async () => {
-      try {
-        // O Supabase irá automaticamente trocar o código na URL por uma sessão
-        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-        
-        if (error) {
-          console.error("Erro ao processar autenticação:", error);
-          
-          // Check if we need to attempt with path format correction
-          if ((error.message.includes('invalid') || error.message.includes('expired')) && attemptCount < 1) {
-            console.log("Tentando formato alternativo de URL...");
-            setAttemptCount(prev => prev + 1);
-            
-            // If token is in path instead of hash for custom domains
-            if (hasTokenInPath && !hasTokenInHash) {
-              const tokenPart = window.location.pathname.substring(window.location.pathname.indexOf('access_token='));
-              const fixedUrl = `${window.location.origin}/auth/callback#${tokenPart}`;
-              console.log("Redirecionando para formato correto:", fixedUrl);
-              window.location.href = fixedUrl;
-              return;
-            }
-          } else {
-            setError(error.message);
-            toast.error("Erro ao processar autenticação");
-            setIsProcessing(false);
-            return;
-          }
-        }
-        
-        if (data.session) {
-          console.log("Autenticação bem-sucedida:", data.session.user.email);
-          
-          // Armazenar informações de login no localStorage como backup
-          localStorage.setItem('birthPlanLoggedIn', 'true');
-          localStorage.setItem('birthPlanEmail', data.session.user.email || '');
-          
-          toast.success("Login realizado com sucesso!");
-          
-          // Redirecionar para a página do plano de parto
-          setTimeout(() => {
-            navigate('/criar-plano', { replace: true });
-          }, 1500);
-        } else {
-          console.log("Nenhuma sessão encontrada após o processamento");
-          setError("Falha na autenticação. Por favor, tente novamente.");
-          setIsProcessing(false);
-        }
-      } catch (err) {
-        console.error("Erro inesperado durante autenticação:", err);
-        setError(err instanceof Error ? err.message : "Erro inesperado");
-        setIsProcessing(false);
+      // Process authentication
+      setIsProcessingAuth(true);
+      
+      const success = await processAuth(urlInfo);
+      
+      if (!success) {
+        console.error("Auth processing failed after trying multiple methods");
+        setError("Falha na autenticação. O link pode ter expirado ou ser inválido.");
+        setIsProcessingAuth(false);
       }
     };
 
-    processAuth();
-  }, [navigate, attemptCount]);
+    handleAuth();
+  }, [navigate, getAuthUrlInfo, processAuth, setIsProcessingAuth, attemptCount]);
 
   return (
     <div className="min-h-screen flex flex-col bg-maternal-50">
       <Header />
       <main className="flex-grow">
-        {isProcessing ? (
+        {isProcessingAuth ? (
           <AuthLoadingState isProcessingAuth={true} />
         ) : error ? (
           <div className="container mx-auto px-4 py-8">

@@ -9,10 +9,14 @@ import { AuthLoadingState } from "@/components/BirthPlan/components/AuthLoadingS
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuthUrlDetection } from "@/hooks/auth/useAuthUrlDetection";
+import { useAuthProcessor } from "@/hooks/auth/useAuthProcessor";
 
 export function AcessoPlano() {
   const { user, isLoading, session } = useAuth();
-  const { isProcessingAuth } = useAuthUrlHandler();
+  const { isProcessingAuth: legacyProcessingAuth } = useAuthUrlHandler();
+  const { getAuthUrlInfo } = useAuthUrlDetection();
+  const { isProcessingAuth, processAuth, setIsProcessingAuth } = useAuthProcessor();
   const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authenticatedUser, setAuthenticatedUser] = useState<any>(null);
@@ -27,6 +31,39 @@ export function AcessoPlano() {
     console.log("Session status:", session ? "Active" : "None");
     console.log("Auth state:", { isProcessingAuth, isProcessingMagicLink });
   }, [session, isProcessingAuth, isProcessingMagicLink, location.hash]);
+  
+  // Process auth tokens in URL if any
+  useEffect(() => {
+    const handleAuthTokens = async () => {
+      if (isLoading || isProcessingAuth || isProcessingMagicLink) {
+        return;
+      }
+      
+      // Get URL information for auth detection
+      const urlInfo = getAuthUrlInfo();
+      
+      // Skip if no auth tokens in URL
+      if (!urlInfo.hasAuthInUrl) {
+        return;
+      }
+      
+      console.log("Auth tokens detected in URL, processing...");
+      
+      // Process authentication
+      setIsProcessingAuth(true);
+      toast.loading("Processando autenticação...");
+      
+      const success = await processAuth(urlInfo);
+      
+      if (!success) {
+        console.error("Auth processing failed after trying multiple methods");
+        setAuthError("Falha na autenticação. O link pode ter expirado ou ser inválido.");
+        setIsProcessingAuth(false);
+      }
+    };
+
+    handleAuthTokens();
+  }, [isLoading, processAuth, isProcessingAuth, isProcessingMagicLink, getAuthUrlInfo, setIsProcessingAuth]);
   
   // Handle magic link authentication
   useEffect(() => {
