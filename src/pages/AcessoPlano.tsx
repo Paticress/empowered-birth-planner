@@ -29,94 +29,77 @@ export function AcessoPlano() {
   
   // Handle magic link authentication
   useEffect(() => {
-    const handleAuth = async () => {
+    const handleMagicLinkAuth = async () => {
       if (isLoading || isProcessingAuth || isProcessingMagicLink) {
         return;
       }
       
-      const hasAuthInHash = window.location.hash && 
-                            window.location.hash.includes('access_token');
-      const hasAuthInQuery = window.location.search && 
-                            (window.location.search.includes('access_token') || 
-                             window.location.search.includes('access_entry=magiclink'));
-                            
-      if (!hasAuthInHash && !hasAuthInQuery) {
-        console.log("AcessoPlano: No auth parameters detected in URL");
+      const hash = window.location.hash;
+      
+      if (!hash || !hash.includes("access_token")) {
+        console.log("Nenhum token encontrado na URL.");
         return;
       }
       
-      console.log("AcessoPlano: Auth parameters detected, processing authentication");
-      console.log("Current URL: ", window.location.href);
-      
-      toast.info("Processando autenticação...");
-      
+      console.log("Tokens detectados. Iniciando autenticação...");
       setIsProcessingMagicLink(true);
+      toast.info("Conectando...");
       
       try {
-        console.log("AcessoPlano: Calling exchangeCodeForSession with current URL");
+        // Parse hash params (remove the '#' first)
+        const hashParams = new URLSearchParams(hash.substring(1));
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
         
-        const { data, error } = await supabase.auth.exchangeCodeForSession(
-          window.location.href
-        );
-        
-        if (error) {
-          console.error("AcessoPlano: Error processing authentication:", error);
-          console.error("Error details:", error.message, error.status, error.stack);
-          
-          setAuthError(error.message);
-          
-          toast.error("Erro ao processar o token de autenticação: " + error.message);
+        if (!accessToken || !refreshToken) {
+          console.error("Tokens ausentes no hash da URL.");
+          toast.error("Erro ao autenticar. Tokens não encontrados.");
           setIsProcessingMagicLink(false);
-          // Clean URL
-          cleanUrlAfterAuth();
           return;
         }
         
-        if (data.session) {
-          console.log("AcessoPlano: Successfully authenticated user:", data.session.user.email);
-          console.log("Session data:", JSON.stringify({
-            user: data.session.user.email,
-            expires_at: data.session.expires_at,
-            token_type: data.session.token_type
-          }));
-          
-          // Store login info
-          localStorage.setItem('birthPlanLoggedIn', 'true');
-          localStorage.setItem('birthPlanEmail', data.session.user.email || '');
-          
-          // Clean URL
-          cleanUrlAfterAuth();
-          
-          toast.success("Login realizado com sucesso!");
-          
-          setTimeout(() => {
-            navigate('/criar-plano', { replace: true });
-          }, 1500);
-        } else {
-          console.error("AcessoPlano: No session returned from exchangeCodeForSession");
-          console.log("Response data:", data);
-          
-          setAuthError("Nenhuma sessão retornada após a autenticação");
-          
-          toast.error("Falha na autenticação. Por favor, tente novamente.");
+        // Set the session with Supabase
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+        
+        if (error) {
+          console.error("Erro ao configurar sessão:", error.message);
+          setAuthError(error.message);
+          toast.error("Erro ao autenticar. Tente novamente.");
           setIsProcessingMagicLink(false);
-          // Clean URL
-          cleanUrlAfterAuth();
+          return;
         }
-      } catch (err) {
-        console.error("AcessoPlano: Unexpected error processing authentication:", err);
-        console.error("Error type:", typeof err, "Error object:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
         
-        setAuthError(err instanceof Error ? err.message : "Erro inesperado");
+        console.log("Usuário autenticado com sucesso!");
         
-        toast.error("Erro inesperado. Por favor, tente novamente.");
-        setIsProcessingMagicLink(false);
-        // Clean URL
+        // Store login info in localStorage for backup
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user?.email) {
+          localStorage.setItem('birthPlanLoggedIn', 'true');
+          localStorage.setItem('birthPlanEmail', data.session.user.email);
+        }
+        
+        // Clean URL after successful authentication
         cleanUrlAfterAuth();
+        
+        toast.success("Login realizado com sucesso!");
+        
+        // Short delay before redirecting
+        setTimeout(() => {
+          navigate('/criar-plano', { replace: true });
+        }, 1500);
+        
+      } catch (err) {
+        console.error("Erro inesperado durante autenticação:", err);
+        setAuthError(err instanceof Error ? err.message : "Erro inesperado");
+        toast.error("Erro ao autenticar. Tente novamente.");
+        setIsProcessingMagicLink(false);
       }
     };
     
-    handleAuth();
+    handleMagicLinkAuth();
   }, [isLoading, isProcessingAuth, isProcessingMagicLink, navigate]);
 
   // Redirect if already authenticated
@@ -126,48 +109,6 @@ export function AcessoPlano() {
       navigate('/criar-plano', { replace: true });
     }
   }, [user, isLoading, isProcessingAuth, isProcessingMagicLink, session, navigate]);
-
-  // Enhanced error detection specifically for magic links
-  useEffect(() => {
-    const checkAuthError = () => {
-      const hash = window.location.hash;
-      const search = window.location.search;
-      const url = window.location.href;
-      
-      // Check for error in hash
-      const hashError = hash.match(/error=([^&]+)/);
-      // Check for error in search params
-      const searchError = search.match(/error=([^&]+)/);
-      // Check for specific OTP expired error in URL
-      const hasOtpExpiredError = url.includes('error_code=otp_expired') || 
-                                url.includes('error_description=Email+link+is+invalid+or+has+expired');
-      
-      if (hashError || searchError || hasOtpExpiredError) {
-        let errorMessage;
-        
-        if (hasOtpExpiredError) {
-          errorMessage = "O link de acesso expirou ou é inválido";
-        } else {
-          errorMessage = decodeURIComponent(hashError?.[1] || searchError?.[1] || 'Erro desconhecido');
-        }
-        
-        console.error("Erro de autenticação detectado:", errorMessage);
-        console.error("URL completa:", url);
-        
-        setAuthError(errorMessage);
-        
-        toast.error("Erro ao autenticar", {
-          description: "O link pode ter expirado. Tente solicitar um novo link de acesso.",
-          duration: 5000
-        });
-        
-        // Clean URL after error
-        cleanUrlAfterAuth();
-      }
-    };
-
-    checkAuthError();
-  }, []);
 
   if (isLoading || isProcessingAuth || isProcessingMagicLink) {
     return (

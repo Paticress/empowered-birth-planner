@@ -11,7 +11,7 @@ export function cleanUrlAfterAuth(): void {
     
     // Use history API to change URL without reloading
     window.history.replaceState(
-      null,
+      {},
       document.title,
       pathname
     );
