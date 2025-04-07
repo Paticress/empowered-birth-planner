@@ -14,32 +14,67 @@ export function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Processa autenticação assim que a página carrega
+    // Process authentication as soon as the page loads
     const processAuth = async () => {
       console.log("Login page loaded, checking for auth tokens");
-      console.log("Current URL:", window.location.href);
       
-      // Check for auth token in URL
+      // Get full URL for debugging
+      const fullUrl = window.location.href;
+      console.log("Current URL:", fullUrl);
+      
+      // Enhanced detection of auth tokens in different parts of the URL
+      const hasAuthInPath = fullUrl.includes('/auth/callback#access_token=') || 
+                           fullUrl.includes('/auth/callback?') || 
+                           fullUrl.includes('/auth/callback/access_token=');
+      
       const hasAuthInHash = window.location.hash && window.location.hash.includes('access_token=');
       const hasAuthInSearch = window.location.search && 
                              (window.location.search.includes('access_token=') || 
                               window.location.search.includes('code='));
       
-      if (!hasAuthInHash && !hasAuthInSearch) {
+      // If there are no auth parameters, redirect to access page
+      if (!hasAuthInHash && !hasAuthInSearch && !hasAuthInPath) {
         console.log("No auth tokens found in URL, redirecting to acesso-plano");
         navigate('/acesso-plano', { replace: true });
         return;
       }
       
-      // Processar autenticação
+      // Process authentication
       setIsProcessing(true);
       toast.loading("Processando autenticação...");
       
       try {
         console.log("Processing authentication from URL");
         
+        // Fix path-based tokens by converting them to hash format
+        if (hasAuthInPath && !hasAuthInHash) {
+          console.log("Auth token detected in path, converting to hash format");
+          
+          // Extract token from path
+          let tokenPart = '';
+          if (fullUrl.includes('/auth/callback/access_token=')) {
+            const tokenIndex = fullUrl.indexOf('/auth/callback/access_token=');
+            tokenPart = fullUrl.substring(tokenIndex + '/auth/callback/'.length);
+          } else if (fullUrl.includes('access_token=')) {
+            const tokenIndex = fullUrl.indexOf('access_token=');
+            tokenPart = fullUrl.substring(tokenIndex);
+          }
+          
+          if (tokenPart) {
+            console.log("Extracted token part:", tokenPart.substring(0, 20) + '...');
+            
+            // Create a new URL with the token in hash format
+            const baseUrl = window.location.origin + '/login';
+            const fixedUrl = baseUrl + '#' + tokenPart;
+            
+            console.log("Redirecting to:", fixedUrl.substring(0, baseUrl.length + 20) + '...');
+            window.location.href = fixedUrl;
+            return;
+          }
+        }
+        
         // Exchange the code/token for a session
-        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        const { data, error } = await supabase.auth.exchangeCodeForSession(fullUrl);
         
         if (error) {
           console.error("Error processing authentication:", error);

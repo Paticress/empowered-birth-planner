@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,11 +35,13 @@ export function useAuthService() {
     }
   };
 
-  const signInWithMagicLink = async (email: string, redirectPath = '/login') => {
+  const signInWithMagicLink = async (email: string) => {
     try {
       // Get the full site URL dynamically
       const siteUrl = getCurrentSiteUrl();
-      const redirectTo = `${siteUrl}${redirectPath}`;
+      
+      // Important: Now redirect directly to /login instead of /auth/callback
+      const redirectTo = `${siteUrl}/login`;
       
       console.log("Magic link will redirect to:", redirectTo);
       

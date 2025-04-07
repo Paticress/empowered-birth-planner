@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,10 +38,12 @@
           hostname: hostname
         });
         
-        // Special handling for Supabase auth callback path
+        // Special handling for Supabase auth callback path - REDIRECT TO LOGIN
         if (pathname.includes('/auth/callback')) {
-          console.log('Auth callback path detected, redirecting to auth callback handler');
-          window.location.replace('/auth/callback' + search + hash);
+          console.log('Auth callback path detected, redirecting to LOGIN page');
+          
+          // Keep all parameters (hash and search) when redirecting
+          window.location.replace('/login' + search + hash);
           return;
         }
         
@@ -101,9 +102,9 @@
           }
           
           if (tokenPart) {
-            // IMPORTANT: Always redirect to /auth/callback#token for processing for direct auth handling
-            console.log('Redirecting auth token to proper callback path: /auth/callback#' + tokenPart.substring(0, 20) + '...');
-            window.location.replace('/auth/callback#' + tokenPart);
+            // IMPORTANT: Direct to login page instead of auth/callback
+            console.log('Redirecting auth token to login page: /login#' + tokenPart.substring(0, 20) + '...');
+            window.location.replace('/login#' + tokenPart);
             return;
           }
         }
@@ -112,8 +113,8 @@
         if (search.includes('access_entry=magiclink')) {
           console.log('Detected magic link parameter in query string: ' + search);
           // Keep as query parameter since that's how magic links work
-          console.log('Redirecting to: /acesso-plano' + search);
-          window.location.replace('/acesso-plano' + search);
+          console.log('Redirecting to: /login' + search);
+          window.location.replace('/login' + search);
           return;
         }
 
