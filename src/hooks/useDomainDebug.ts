@@ -22,6 +22,7 @@ export const useDomainDebug = () => {
     // Check if we're on the custom domain
     const isCustomDomain = window.location.hostname === 'planodeparto.energiamaterna.com.br';
     console.log('Is Custom Domain:', isCustomDomain);
+    console.log('Is Vercel Hosted:', window.location.hostname.includes('vercel.app') || isCustomDomain);
     
     // Check if service worker is supported
     console.log('Service Worker Supported:', 'serviceWorker' in navigator);
@@ -31,6 +32,13 @@ export const useDomainDebug = () => {
       fetch('/')
         .then(() => console.log('Self-domain fetch succeeded'))
         .catch(err => console.error('Self-domain fetch failed:', err));
+      
+      // Log additional information about Vercel environment
+      console.log('Vercel Environment:', {
+        VERCEL: process.env.VERCEL,
+        VERCEL_URL: process.env.VERCEL_URL,
+        NODE_ENV: process.env.NODE_ENV
+      });
     } catch (error) {
       console.error('Error in domain debug:', error);
     }

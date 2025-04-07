@@ -1,0 +1,6 @@
+
+Domain: planodeparto.energiamaterna.com.br
+Verification timestamp: 2025-04-07
+This file confirms that this domain is properly configured for the Energia Materna Plano de Parto application on Vercel.
+Status: Active
+Version: 3.0
