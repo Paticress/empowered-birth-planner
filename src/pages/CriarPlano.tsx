@@ -68,7 +68,13 @@ export function CriarPlano() {
       setIsCheckingAuth(false);
     };
     
-    checkAuth();
+    // Adicionar um pequeno atraso para garantir que o AuthContext tenha tempo de inicializar
+    // Isso evita redirecionamentos incorretos quando há uma sessão válida
+    const timer = setTimeout(() => {
+      checkAuth();
+    }, 300);
+    
+    return () => clearTimeout(timer);
   }, [user, isLoading, session, navigate, refreshSession, isAuthenticated]);
 
   if (isLoading || isCheckingAuth) {

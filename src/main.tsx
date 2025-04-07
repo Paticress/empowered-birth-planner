@@ -64,17 +64,36 @@ const handleAuthTokens = async () => {
             // Store login information in localStorage for backup
             localStorage.setItem('birthPlanLoggedIn', 'true');
             localStorage.setItem('birthPlanEmail', data.session.user.email || '');
-            
-            // Clean up the URL
-            window.history.replaceState({}, document.title, window.location.pathname);
           }
         }
       } catch (error) {
         console.error("Error processing hash auth parameters:", error);
       }
+    }
+    
+    // Check query-string tokens
+    if (window.location.search && window.location.search.includes('code=')) {
+      console.log("Query-based auth code detected, ensuring processing");
       
-      // Always clean up URL regardless of success/failure
-      window.history.replaceState({}, document.title, window.location.pathname);
+      try {
+        // Process with Supabase directly
+        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        
+        if (error) {
+          console.error("Error exchanging code for session:", error);
+        } else if (data.session) {
+          console.log("Session set successfully from code exchange:", data.session.user?.email);
+          
+          // Store login information in localStorage for backup
+          localStorage.setItem('birthPlanLoggedIn', 'true');
+          localStorage.setItem('birthPlanEmail', data.session.user.email || '');
+          
+          // Clean up the URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (error) {
+        console.error("Error exchanging code for session:", error);
+      }
     }
     
     // Additionally, always verify session on page load

@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshSession
   } = useAuthService();
   
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   // Effect to handle authentication state changes
   useEffect(() => {
@@ -40,14 +40,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Consider authenticated if we have a user or a valid session
     const isUserAuthenticated = !!user || !!session || localStorage.getItem('birthPlanLoggedIn') === 'true';
     
+    console.log("Authentication state check:", { 
+      wasAuthenticated: isAuthenticated, 
+      isNowAuthenticated: isUserAuthenticated,
+      hasUser: !!user,
+      hasSession: !!session,
+      hasLocalStorage: localStorage.getItem('birthPlanLoggedIn') === 'true',
+      email: user?.email || session?.user?.email || localStorage.getItem('birthPlanEmail')
+    });
+    
     if (isAuthenticated !== isUserAuthenticated) {
       console.log("Authentication state changed:", { 
         wasAuthenticated: isAuthenticated, 
-        isNowAuthenticated: isUserAuthenticated,
-        hasUser: !!user,
-        hasSession: !!session,
-        hasLocalStorage: localStorage.getItem('birthPlanLoggedIn') === 'true',
-        email: user?.email || session?.user?.email || localStorage.getItem('birthPlanEmail')
+        isNowAuthenticated: isUserAuthenticated
       });
       
       setIsAuthenticated(isUserAuthenticated);

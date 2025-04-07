@@ -33,7 +33,12 @@ export function AcessoPlano() {
       // Se o usuário já está autenticado, redirecionar para criar-plano
       if (isAuthenticated) {
         console.log("AcessoPlano: Usuário já autenticado, redirecionando para criar-plano");
-        navigate('/criar-plano', { replace: true });
+        
+        // Pequeno atraso para garantir que o estado foi atualizado
+        setTimeout(() => {
+          navigate('/criar-plano', { replace: true });
+        }, 100);
+        
         return;
       }
       
@@ -56,8 +61,8 @@ export function AcessoPlano() {
       // If we're not authenticated and there are no URL parameters, try a final recovery
       setIsProcessingAuth(true);
       
-      // Verificar session diretamente com o Supabase
       try {
+        // Verificar session diretamente com o Supabase
         const { data } = await supabase.auth.getSession();
         
         if (data.session) {
@@ -68,7 +73,7 @@ export function AcessoPlano() {
           // Give a moment for state to update
           setTimeout(() => {
             navigate('/criar-plano', { replace: true });
-          }, 500);
+          }, 300);
         } else {
           console.log("No session found with direct check");
           
@@ -83,7 +88,7 @@ export function AcessoPlano() {
             if (success) {
               setTimeout(() => {
                 navigate('/criar-plano', { replace: true });
-              }, 500);
+              }, 300);
               return;
             }
           }
@@ -96,7 +101,12 @@ export function AcessoPlano() {
       }
     };
     
-    checkAndRefreshSession();
+    // Pequeno atraso para garantir que o AuthContext tenha sido inicializado
+    const timer = setTimeout(() => {
+      checkAndRefreshSession();
+    }, 300);
+    
+    return () => clearTimeout(timer);
   }, [user, session, isLoading, refreshSession, navigate, isAuthenticated]);
 
   if (isLoading || isProcessingAuth) {

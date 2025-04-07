@@ -16,13 +16,13 @@ export function BirthPlanUserInfo() {
     
     // Get email from multiple sources to ensure reliability
     const email = user?.email || session?.user?.email || localStorage.getItem('birthPlanEmail') || '';
-    if (email) {
+    if (email && email !== userEmail) {
       setUserEmail(email);
       console.log("BirthPlanUserInfo: Using email:", email);
-    } else {
+    } else if (!email) {
       console.log("BirthPlanUserInfo: No user email found");
     }
-  }, [user, isAuthenticated, isLoading, session]);
+  }, [user, isAuthenticated, isLoading, session, userEmail]);
 
   const handleLogout = async () => {
     try {
