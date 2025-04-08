@@ -45,6 +45,14 @@ export function OptionsDialog({
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField]);
   
+  // Special case for emergency scenarios and complications fields
+  const isSpecialField = activeFieldKey === 'emergencyScenarios' ||
+                       activeFieldKey === 'highRiskComplications' ||
+                       activeFieldKey === 'lowRiskOccurrences' ||
+                       activeFieldKey === 'cascadeInterventions' ||
+                       activeFieldKey === 'unexpectedScenarios' ||
+                       activeFieldKey === 'specialWishes';
+  
   return (
     <DialogContent className="max-w-md">
       <DialogHeader>
@@ -67,6 +75,7 @@ export function OptionsDialog({
                   questionId={questionId} 
                   selectedOptions={selectedOptions}
                   setSelectedOptions={setSelectedOptions}
+                  isSpecialField={isSpecialField}
                 />
               </div>
             );

@@ -81,7 +81,7 @@ export function CriarPlano() {
     return (
       <div className="min-h-screen flex flex-col bg-maternal-50">
         <Header />
-        <main className="flex-grow flex items-center justify-center">
+        <main className="flex-grow flex items-center justify-center pt-20">
           <div className="text-center bg-white p-8 rounded-lg shadow-md">
             <Loader2 className="h-12 w-12 animate-spin text-maternal-500 mx-auto" />
             <p className="mt-4 text-lg font-medium text-maternal-800">
@@ -101,7 +101,7 @@ export function CriarPlano() {
   return (
     <div className="min-h-screen flex flex-col bg-maternal-100">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow pt-20">
         <div className="container mx-auto px-4 py-8">
           <BirthPlanBuilder />
         </div>

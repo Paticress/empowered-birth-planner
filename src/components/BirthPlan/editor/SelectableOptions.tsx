@@ -8,13 +8,15 @@ interface SelectableOptionsProps {
   questionId: string;
   selectedOptions: Record<string, Record<string, boolean>>;
   setSelectedOptions: (value: Record<string, Record<string, boolean>>) => void;
+  isSpecialField?: boolean;
 }
 
 export function SelectableOptions({ 
   question, 
   questionId, 
   selectedOptions, 
-  setSelectedOptions 
+  setSelectedOptions,
+  isSpecialField = false
 }: SelectableOptionsProps) {
   if (!question.options || question.options.length === 0) {
     return null;
@@ -62,9 +64,39 @@ export function SelectableOptions({
     setSelectedOptions(newSelectedOptions);
   };
   
+  // Special handling for emergency scenarios and complications fields
+  // For these fields, we want to potentially select multiple radio options
+  // across different questions
+  if (isSpecialField && (question.type === 'radio' || question.type === 'select')) {
+    return (
+      <div className="space-y-2 ml-8 mt-2">
+        {question.options.map((option: string) => {
+          const isSelected = selectedOptions[questionId]?.[option] || false;
+          return (
+            <div key={option} className="flex items-center space-x-2">
+              <Checkbox
+                id={`option-${questionId}-${option}`}
+                checked={isSelected}
+                onCheckedChange={(checked) => {
+                  handleCheckedChange(option, !!checked);
+                }}
+              />
+              <Label 
+                htmlFor={`option-${questionId}-${option}`}
+                className={`text-sm ${isSelected ? 'font-medium' : 'text-gray-600'}`}
+              >
+                {option}
+              </Label>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+  
   // If it's a radio or select question, we should only allow one option to be selected
   if (question.type === 'radio' || question.type === 'select') {
-    // Encontrar a opção selecionada (se houver) ou deixar vazio
+    // Find the selected option (if any) or leave empty
     const selectedOption = Object.entries(selectedOptions[questionId] || {})
       .find(([_, isSelected]) => isSelected)?.[0] || '';
       

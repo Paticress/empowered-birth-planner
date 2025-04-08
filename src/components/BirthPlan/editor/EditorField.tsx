@@ -49,8 +49,24 @@ export function EditorField({
   const isContactField = field.key.toLowerCase().includes('contact');
   const isRegistryField = field.key.toLowerCase().includes('registry');
   
+  // Special fields that should always show the add button
+  const specialFields = [
+    'emergencyScenarios', 
+    'highRiskComplications', 
+    'lowRiskOccurrences', 
+    'cascadeInterventions',
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado',
+    'specialWishes',
+    'unexpectedScenarios'
+  ];
+  
   // Force single line input for contact and registry fields
   const useInputField = useSingleLineInput || isContactField || isRegistryField;
+  
+  // Force show add button for special fields
+  const forceShowAddButton = specialFields.includes(field.key);
   
   return (
     <div className="mb-4 md:mb-6 border border-maternal-100 rounded-lg p-3 md:p-4 bg-maternal-50/30">
@@ -62,7 +78,7 @@ export function EditorField({
           {field.label}
         </label>
         
-        {showAddButton && (
+        {(showAddButton || forceShowAddButton) && (
           <Dialog open={dialogOpen && activeFieldKey === field.key} onOpenChange={(open) => {
             if (open && activeFieldKey !== field.key) {
               resetOptionsForField(field.key);

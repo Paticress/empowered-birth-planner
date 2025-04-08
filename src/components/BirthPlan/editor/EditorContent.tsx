@@ -39,6 +39,23 @@ export function EditorContent({
   const singleLineFields = getSingleLineFields();
   const isMobile = useIsMobile();
 
+  // Log the questionnaire answers for debugging
+  console.log("Questionnaire answers for section:", activeSection.id, questionnaireAnswers);
+  console.log("Local birth plan for section:", activeSection.id, localBirthPlan[activeSection.id]);
+
+  // Special fields that need to show the "Add from Questionnaire" button
+  const specialFields = [
+    'emergencyScenarios', 
+    'highRiskComplications', 
+    'lowRiskOccurrences', 
+    'cascadeInterventions',
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado',
+    'specialWishes',
+    'unexpectedScenarios'
+  ];
+
   return (
     <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-4 md:p-6 mb-4 md:mb-6 shadow-md`}>
       <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-semibold text-maternal-700 mb-3 md:mb-4`}>
@@ -49,6 +66,10 @@ export function EditorContent({
         const sectionData = localBirthPlan[activeSection.id] || {};
         const useSingleLineInput = singleLineFields.includes(field.key);
         
+        // Override shouldShowAddButton for special fields
+        const showAddFromQuestionnaire = specialFields.includes(field.key) ||
+          shouldShowAddButton(field.key, questionnaireAnswers);
+          
         return (
           <EditorField 
             key={field.key}
@@ -56,7 +77,7 @@ export function EditorContent({
             activeSection={activeSection}
             sectionData={sectionData}
             handleFieldChange={handleFieldChange}
-            shouldShowAddButton={(fieldKey) => shouldShowAddButton(fieldKey, questionnaireAnswers)}
+            shouldShowAddButton={() => showAddFromQuestionnaire}
             useSingleLineInput={useSingleLineInput}
             resetOptionsForField={resetOptionsForField}
             activeFieldKey={activeFieldKey}

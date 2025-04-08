@@ -53,7 +53,13 @@ export const getRelevantQuestionsForField = (
         } else if (hasAnswer || 
                    getAlwaysShowAddButtonFields().includes(fieldKey) || 
                    question.type === 'radio' || 
-                   question.type === 'select') {
+                   question.type === 'select' ||
+                   fieldKey === 'emergencyScenarios' ||
+                   fieldKey === 'highRiskComplications' ||
+                   fieldKey === 'lowRiskOccurrences' ||
+                   fieldKey === 'cascadeInterventions' ||
+                   fieldKey === 'unexpectedScenarios' ||
+                   fieldKey === 'specialWishes') {
           // Always include specific fields or radio/select type questions even without previous answers
           relevantQuestions.push({
             question,

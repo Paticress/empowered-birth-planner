@@ -49,6 +49,19 @@ export const initializeOptionsFromCurrentField = (
           isSelected = true;
         }
         
+        // For emergency situations, high risk complications, and low risk occurrences
+        // These may have multiple radio button answers across multiple questions
+        if ((fieldKey === 'emergencyScenarios' || 
+             fieldKey === 'highRiskComplications' || 
+             fieldKey === 'lowRiskOccurrences' ||
+             fieldKey === 'cascadeInterventions' ||
+             fieldKey === 'painRelief' ||
+             fieldKey === 'interventionsRoutine' ||
+             fieldKey === 'consentimentoInformado') && 
+            typeof questionnaireAnswers[questionId] === 'string') {
+          isSelected = questionnaireAnswers[questionId] === option;
+        }
+        
         initialSelectedOptions[questionId][option] = isSelected;
       });
     }
