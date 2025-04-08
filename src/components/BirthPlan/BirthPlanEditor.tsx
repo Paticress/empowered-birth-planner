@@ -8,6 +8,7 @@ import { BirthPlanSectionProgress } from './BirthPlanSectionProgress';
 import { useEditorState } from './hooks/useEditorState';
 import { handleAddSelectedOptions } from './editor/editorHelpers';
 import { BackToTopButton } from './common/BackToTopButton';
+import { useEffect } from 'react';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -40,7 +41,8 @@ export function BirthPlanEditor({
     goToPreviousSection,
     goToNextSection,
     handleSave,
-    resetOptionsForField
+    resetOptionsForField,
+    isDirty
   } = useEditorState(birthPlan, onUpdate, questionnaireAnswers);
 
   const processAddSelectedOptions = () => {
@@ -55,6 +57,31 @@ export function BirthPlanEditor({
       setDialogOpen
     );
   };
+  
+  // Auto-save functionality
+  useEffect(() => {
+    if (isDirty) {
+      const autoSaveTimer = setTimeout(() => {
+        handleSave(false); // Pass false to avoid showing toast on auto-save
+      }, 30000); // Auto-save after 30 seconds of inactivity
+      
+      return () => clearTimeout(autoSaveTimer);
+    }
+  }, [localBirthPlan, isDirty]);
+  
+  // Save before navigating away
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        const message = "Você tem alterações não salvas. Tem certeza que deseja sair?";
+        e.returnValue = message;
+        return message;
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
   
   return (
     <div className="animate-fade-in">
@@ -92,6 +119,7 @@ export function BirthPlanEditor({
         handleSave={handleSave}
         onNext={onNext}
         setActiveSectionIndex={setActiveSectionIndex}
+        isDirty={isDirty}
       />
       
       <BackToTopButton />

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { birthPlanSections } from '../utils/birthPlanSections';
 import {
@@ -19,8 +19,10 @@ export function useEditorState(
   const [activeFieldKey, setActiveFieldKey] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [completedSections, setCompletedSections] = useState<string[]>([]);
+  const [isDirty, setIsDirty] = useState(false);
+  const [lastSaved, setLastSaved] = useState(new Date());
 
-  const handleFieldChange = (sectionId: string, fieldKey: string, value: any) => {
+  const handleFieldChange = useCallback((sectionId: string, fieldKey: string, value: any) => {
     setLocalBirthPlan(prevPlan => {
       const updatedPlan = {
         ...prevPlan,
@@ -35,21 +37,22 @@ export function useEditorState(
       
       return updatedPlan;
     });
-  };
+    setIsDirty(true);
+  }, [completedSections]);
   
   // Navigate to previous section
-  const goToPreviousSection = () => {
+  const goToPreviousSection = useCallback(() => {
     if (activeSectionIndex > 0) {
       setActiveSectionIndex(activeSectionIndex - 1);
     }
-  };
+  }, [activeSectionIndex]);
   
   // Navigate to next section
-  const goToNextSection = () => {
+  const goToNextSection = useCallback(() => {
     if (activeSectionIndex < birthPlanSections.length - 1) {
       setActiveSectionIndex(activeSectionIndex + 1);
     }
-  };
+  }, [activeSectionIndex]);
   
   // Initialize completed sections when component mounts
   useEffect(() => {
@@ -63,12 +66,17 @@ export function useEditorState(
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeSectionIndex]);
 
-  const handleSave = () => {
+  const handleSave = useCallback((showToast = true) => {
     onUpdate(localBirthPlan);
-    toast("Seu plano de parto foi atualizado com sucesso.");
-  };
+    setIsDirty(false);
+    setLastSaved(new Date());
+    
+    if (showToast) {
+      toast("Seu plano de parto foi atualizado com sucesso.");
+    }
+  }, [localBirthPlan, onUpdate]);
   
-  const resetOptionsForField = (fieldKey: string) => {
+  const resetOptionsForField = useCallback((fieldKey: string) => {
     setActiveFieldKey(fieldKey);
     
     const activeSection = birthPlanSections[activeSectionIndex];
@@ -81,7 +89,7 @@ export function useEditorState(
     
     setSelectedOptions(initialSelectedOptions);
     setDialogOpen(true);
-  };
+  }, [activeSectionIndex, localBirthPlan, questionnaireAnswers]);
 
   return {
     activeSectionIndex,
@@ -100,6 +108,8 @@ export function useEditorState(
     goToPreviousSection,
     goToNextSection,
     handleSave,
-    resetOptionsForField
+    resetOptionsForField,
+    isDirty,
+    lastSaved
   };
 }

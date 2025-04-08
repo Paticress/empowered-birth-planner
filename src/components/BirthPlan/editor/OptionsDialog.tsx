@@ -31,12 +31,18 @@ export function OptionsDialog({
   handleAddSelectedOptions
 }: OptionsDialogProps) {
   const [relevantQuestions, setRelevantQuestions] = useState<Array<{question: any, sectionId: string}>>([]);
+  const [hasRadioOnly, setHasRadioOnly] = useState(false);
   
   // Update relevant questions when activeFieldKey changes
   useEffect(() => {
     if (dialogOpen && activeFieldKey) {
       const questions = getRelevantQuestionsForField(activeFieldKey);
       setRelevantQuestions(questions);
+      
+      // Check if all questions are radio type
+      const onlyRadioQuestions = questions.length > 0 && 
+        questions.every(q => q.question.type === 'radio' || q.question.type === 'select');
+      setHasRadioOnly(onlyRadioQuestions);
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField]);
   
@@ -78,7 +84,7 @@ export function OptionsDialog({
           Cancelar
         </Button>
         <Button onClick={handleAddSelectedOptions}>
-          Adicionar Selecionados
+          {hasRadioOnly ? "Selecionar Opção" : "Adicionar Selecionadas"}
         </Button>
       </DialogFooter>
     </DialogContent>

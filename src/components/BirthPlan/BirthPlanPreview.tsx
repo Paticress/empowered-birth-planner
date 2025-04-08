@@ -31,6 +31,60 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
     window.scrollTo(0, 0);
   }, []);
   
+  // Group professional information for more compact display
+  const renderProfessionalInfo = (info: Record<string, any>) => {
+    return (
+      <div className="mb-6">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-maternal-50">
+                <th className="text-left px-3 py-2 border border-maternal-200">Profissional</th>
+                <th className="text-left px-3 py-2 border border-maternal-200">Nome</th>
+                <th className="text-left px-3 py-2 border border-maternal-200">Contato</th>
+                <th className="text-left px-3 py-2 border border-maternal-200">Registro</th>
+              </tr>
+            </thead>
+            <tbody>
+              {info.healthProvider && (
+                <tr>
+                  <td className="px-3 py-2 border border-maternal-200 font-medium">Obstetra</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.healthProvider}</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.healthProviderContact || "-"}</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.healthProviderRegistry || "-"}</td>
+                </tr>
+              )}
+              {info.pediatrician && (
+                <tr>
+                  <td className="px-3 py-2 border border-maternal-200 font-medium">Pediatra</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.pediatrician}</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.pediatricianContact || "-"}</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.pediatricianRegistry || "-"}</td>
+                </tr>
+              )}
+              {info.doula && (
+                <tr>
+                  <td className="px-3 py-2 border border-maternal-200 font-medium">Doula</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.doula}</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.doulaContact || "-"}</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.doulaRegistry || "-"}</td>
+                </tr>
+              )}
+              {info.midwife && (
+                <tr>
+                  <td className="px-3 py-2 border border-maternal-200 font-medium">Parteira</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.midwife}</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.midwifeContact || "-"}</td>
+                  <td className="px-3 py-2 border border-maternal-200">{info.midwifeRegistry || "-"}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+  
   return (
     <div className="animate-fade-in">
       <PreviewHeader title="Visualização do Plano de Parto" birthPlan={birthPlan} />
@@ -60,13 +114,61 @@ export function BirthPlanPreview({ birthPlan, onEdit, onNext }: BirthPlanPreview
           </div>
         </div>
         
-        {/* Personal information section */}
-        <PreviewSection 
-          title="Informações Pessoais" 
-          sectionData={birthPlan.personalInfo || {}}
-          sectionId="personalInfo"
-          fields={birthPlanSections.find(section => section.id === 'personalInfo')?.fields || []}
-        />
+        {/* Personal information section with compact professional info */}
+        <div className="mb-8 print:mb-6">
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">Informações Pessoais</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {personalInfo.name && (
+              <div>
+                <p className="font-medium">Nome:</p>
+                <p>{personalInfo.name}</p>
+              </div>
+            )}
+            
+            {personalInfo.dueDate && (
+              <div>
+                <p className="font-medium">Data Prevista para o Parto:</p>
+                <p>{personalInfo.dueDate}</p>
+              </div>
+            )}
+            
+            {personalInfo.birthLocation && (
+              <div>
+                <p className="font-medium">Local do Parto:</p>
+                <p>{personalInfo.birthLocation}</p>
+              </div>
+            )}
+            
+            {personalInfo.hospital && (
+              <div className="md:col-span-2">
+                <p className="font-medium">Hospital:</p>
+                <p>{personalInfo.hospital}</p>
+                {personalInfo.hospitalAddress && (
+                  <p className="text-sm text-gray-600">Endereço: {personalInfo.hospitalAddress}</p>
+                )}
+                {personalInfo.hospitalPhone && (
+                  <p className="text-sm text-gray-600">Telefone: {personalInfo.hospitalPhone}</p>
+                )}
+              </div>
+            )}
+            
+            {personalInfo.companions && (
+              <div className="md:col-span-2">
+                <p className="font-medium">Acompanhantes:</p>
+                <p>{personalInfo.companions}</p>
+              </div>
+            )}
+          </div>
+          
+          {/* Healthcare professionals table */}
+          {(personalInfo.healthProvider || personalInfo.pediatrician || personalInfo.doula || personalInfo.midwife) && (
+            <>
+              <h3 className="text-lg font-medium mt-6 mb-3">Equipe de Saúde</h3>
+              {renderProfessionalInfo(personalInfo)}
+            </>
+          )}
+        </div>
         
         {/* All other sections */}
         {birthPlanSections

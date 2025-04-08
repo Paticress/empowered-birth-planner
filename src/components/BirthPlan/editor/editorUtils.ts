@@ -39,7 +39,9 @@ export const getRelevantQuestionsForField = (
     'positions': ['positions'],
     'hydration': ['hydration'],
     'monitoring': ['monitoring'],
-    'interventions': ['painRelief', 'interventions', 'informedConsent'],
+    'interventions': ['painRelief'],
+    'procedimentosRotina': ['interventions'],
+    'consentimentoInformado': ['informedConsent'],
     
     'birthPositions': ['birthPositions'],
     'episiotomy': ['episiotomy'],
@@ -59,13 +61,14 @@ export const getRelevantQuestionsForField = (
     'vaccination': ['vaccination'],
     'motherCare': ['motherCare'],
     
-    'complications': ['complications', 'cascadeInterventions'],
+    'complications': ['complications'],
+    'cascadeInterventions': ['cascadeInterventions'],
     'nicu': ['nicu'],
     'emergencyScenarios': ['emergencyPreferences'],
     'highRiskComplications': ['highRiskComplications'],
     'lowRiskOccurrences': ['lowRiskOccurrences'],
-    'cascadeInterventions': ['cascadeInterventions'],
-    'specialWishes': ['specialWishes']
+    'specialWishes': ['specialWishes'],
+    'unexpectedScenarios': ['unexpectedScenarios']
   };
   
   const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
