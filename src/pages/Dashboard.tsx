@@ -140,6 +140,22 @@ export function Dashboard() {
   
   const recommendedStep = getRecommendedNextStep();
   
+  // Check if guide is completed
+  const isGuideCompleted = guideProgress >= 100;
+  
+  // Check if birth plan is completed
+  const isBirthPlanCompleted = birthPlanProgress >= 100;
+  
+  // Get section specific URL for guide sections
+  const getGuideSectionUrl = (sectionId: string) => {
+    return `/guia-online?tab=${sectionId}`;
+  };
+  
+  // Get stage specific URL for birth plan
+  const getBirthPlanStageUrl = (stageId: string) => {
+    return `/criar-plano?stage=${stageId}`;
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -169,7 +185,12 @@ export function Dashboard() {
                     onClick={() => navigateTo(recommendedStep.path)}
                     className="bg-maternal-600 hover:bg-maternal-700"
                   >
-                    {recommendedStep.title} <ChevronRight className="ml-2 h-4 w-4" />
+                    {isGuideCompleted && recommendedStep.title.includes("Guia") 
+                      ? "Reler o Guia Completo" 
+                      : isBirthPlanCompleted && recommendedStep.title.includes("Plano de Parto")
+                        ? "Revisar seu Plano de Parto" 
+                        : recommendedStep.title} 
+                    <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -210,9 +231,13 @@ export function Dashboard() {
                 {guideSections.map((section, index) => {
                   const isCompleted = currentGuideTab && 
                     guideSections.findIndex(s => s.id === currentGuideTab) >= index;
-                    
+                  
                   return (
-                    <div key={section.id} className="flex items-center">
+                    <div 
+                      key={section.id} 
+                      className={`flex items-center ${isCompleted ? 'cursor-pointer hover:bg-maternal-50 transition-colors rounded py-1 px-1' : ''}`}
+                      onClick={isCompleted ? () => navigateTo(getGuideSectionUrl(section.id)) : undefined}
+                    >
                       {isCompleted ? (
                         <CheckCircle2 className="h-5 w-5 mr-3 text-green-500" />
                       ) : (
@@ -233,7 +258,7 @@ export function Dashboard() {
                 variant="outline" 
                 className="w-full mt-2"
               >
-                {currentGuideTab ? 'Continuar leitura' : 'Iniciar leitura'}
+                {isGuideCompleted ? 'Leitura Concluída - Reler' : currentGuideTab ? 'Continuar leitura' : 'Iniciar leitura'}
               </Button>
             </Card>
             
@@ -249,7 +274,11 @@ export function Dashboard() {
                     (birthPlanProgress > (index * (100 / birthPlanStages.length)));
                     
                   return (
-                    <div key={stage.id} className="flex items-center">
+                    <div 
+                      key={stage.id} 
+                      className={`flex items-center ${isCompleted ? 'cursor-pointer hover:bg-maternal-50 transition-colors rounded py-1 px-1' : ''}`}
+                      onClick={isCompleted ? () => navigateTo(getBirthPlanStageUrl(stage.id)) : undefined}
+                    >
                       {isCompleted ? (
                         <CheckCircle2 className="h-5 w-5 mr-3 text-green-500" />
                       ) : (
@@ -270,7 +299,7 @@ export function Dashboard() {
                 variant="outline" 
                 className="w-full mt-2"
               >
-                {hasStartedBirthPlan ? 'Continuar plano' : 'Criar plano de parto'}
+                {isBirthPlanCompleted ? 'Plano Concluído - Revisar' : hasStartedBirthPlan ? 'Continuar plano' : 'Criar plano de parto'}
               </Button>
             </Card>
           </div>
