@@ -11,10 +11,13 @@ import { GuideProgressCard } from "@/components/Dashboard/GuideProgressCard";
 import { BirthPlanProgressCard } from "@/components/Dashboard/BirthPlanProgressCard";
 import { ResourcesSection } from "@/components/Dashboard/ResourcesSection";
 import { useDashboardData } from "@/components/Dashboard/useDashboardData";
+import { TimelineProgress } from "@/components/Dashboard/TimelineProgress";
+import { useNavigation } from "@/hooks/useNavigation";
 
 export function Dashboard() {
   const { user, isLoading } = useAuth();
   const isMobile = useIsMobile();
+  const { navigateTo } = useNavigation();
   const {
     lastVisited,
     hasStartedBirthPlan,
@@ -78,6 +81,26 @@ export function Dashboard() {
   
   const recommendedStep = getRecommendedNextStep();
   
+  // Format guide sections as timeline steps
+  const guideTimelineSteps = guideSections.map(section => ({
+    id: section.id,
+    name: section.name,
+    isCompleted: currentGuideTab ? 
+      guideSections.findIndex(s => s.id === section.id) <= 
+      guideSections.findIndex(s => s.id === currentGuideTab) : 
+      false,
+    onClick: () => navigateTo(`/guia-online?tab=${section.id}`),
+  }));
+  
+  // Format birth plan stages as timeline steps
+  const birthPlanTimelineSteps = birthPlanStages.map((stage, index) => ({
+    id: stage.id,
+    name: stage.name,
+    isCompleted: hasStartedBirthPlan && 
+      (birthPlanProgress > (index * (100 / birthPlanStages.length))),
+    onClick: () => navigateTo(`/criar-plano?stage=${stage.id}`),
+  }));
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -105,18 +128,17 @@ export function Dashboard() {
             />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <GuideProgressCard 
-              sections={guideSections}
-              currentTab={currentGuideTab}
-              isCompleted={isGuideCompleted}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+            <TimelineProgress
+              title="Guia do Parto Respeitoso"
+              steps={guideTimelineSteps}
+              icon={<BookOpen className="h-5 w-5 mr-2 text-maternal-600" />}
             />
             
-            <BirthPlanProgressCard 
-              stages={birthPlanStages}
-              hasStartedBirthPlan={hasStartedBirthPlan}
-              birthPlanProgress={birthPlanProgress}
-              isCompleted={isBirthPlanCompleted}
+            <TimelineProgress
+              title="Plano de Parto"
+              steps={birthPlanTimelineSteps}
+              icon={<FileText className="h-5 w-5 mr-2 text-maternal-600" />}
             />
           </div>
           
