@@ -28,38 +28,53 @@ export const initializeOptionsFromCurrentField = (
   
   const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
   
+  // Special fields that need special handling
+  const specialFields = [
+    'emergencyScenarios', 
+    'highRiskComplications', 
+    'lowRiskOccurrences', 
+    'cascadeInterventions',
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado',
+    'specialWishes',
+    'unexpectedScenarios'
+  ];
+  
+  const isSpecialField = specialFields.includes(fieldKey);
+  
   relevantQuestions.forEach(({ question }) => {
     const questionId = question.id;
     initialSelectedOptions[questionId] = {};
+    
+    // Handle textarea type questions
+    if (question.type === 'textarea') {
+      // For textarea, we don't have options to select
+      // We'll just check if there's a value in the questionnaire answers
+      if (questionnaireAnswers[questionId]) {
+        return; // Skip option selection for textarea
+      }
+      return;
+    }
     
     if (question.options) {
       question.options.forEach((option: string) => {
         let isSelected = currentFieldOptions.includes(option);
         
         // For checkbox questions (where answers are stored as objects)
-        if (typeof questionnaireAnswers[questionId] === 'object' && 
-            !Array.isArray(questionnaireAnswers[questionId]) && 
-            questionnaireAnswers[questionId]?.[option]) {
-          isSelected = true;
+        if (question.type === 'checkbox' && 
+            typeof questionnaireAnswers[questionId] === 'object' && 
+            !Array.isArray(questionnaireAnswers[questionId])) {
+          // Check if this specific option is selected in the questionnaire
+          isSelected = !!questionnaireAnswers[questionId]?.[option];
         }
         
         // For radio questions (where the answer is a single string)
-        if (typeof questionnaireAnswers[questionId] === 'string' &&
-            questionnaireAnswers[questionId] === option) {
-          isSelected = true;
-        }
-        
-        // For emergency situations, high risk complications, and low risk occurrences
-        // These may have multiple radio button answers across multiple questions
-        if ((fieldKey === 'emergencyScenarios' || 
-             fieldKey === 'highRiskComplications' || 
-             fieldKey === 'lowRiskOccurrences' ||
-             fieldKey === 'cascadeInterventions' ||
-             fieldKey === 'painRelief' ||
-             fieldKey === 'interventionsRoutine' ||
-             fieldKey === 'consentimentoInformado') && 
-            typeof questionnaireAnswers[questionId] === 'string') {
-          isSelected = questionnaireAnswers[questionId] === option;
+        if (question.type === 'radio' || question.type === 'select') {
+          // For special fields or radio/select questions, check the questionnaire answer
+          if (isSpecialField || (fieldKey === question.id)) {
+            isSelected = questionnaireAnswers[questionId] === option;
+          }
         }
         
         initialSelectedOptions[questionId][option] = isSelected;

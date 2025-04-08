@@ -9,6 +9,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useState, useEffect } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface OptionsDialogProps {
   dialogOpen: boolean;
@@ -31,6 +32,7 @@ export function OptionsDialog({
 }: OptionsDialogProps) {
   const [relevantQuestions, setRelevantQuestions] = useState<Array<{question: any, sectionId: string}>>([]);
   const [hasRadioOnly, setHasRadioOnly] = useState(false);
+  const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
   
   // Update relevant questions when activeFieldKey changes
   useEffect(() => {
@@ -51,7 +53,17 @@ export function OptionsDialog({
                        activeFieldKey === 'lowRiskOccurrences' ||
                        activeFieldKey === 'cascadeInterventions' ||
                        activeFieldKey === 'unexpectedScenarios' ||
-                       activeFieldKey === 'specialWishes';
+                       activeFieldKey === 'specialWishes' ||
+                       activeFieldKey === 'painRelief' ||
+                       activeFieldKey === 'interventionsRoutine' ||
+                       activeFieldKey === 'consentimentoInformado';
+  
+  const handleTextareaChange = (questionId: string, value: string) => {
+    setTextareaValues(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
+  };
   
   return (
     <DialogContent className="max-w-md">
@@ -63,6 +75,26 @@ export function OptionsDialog({
         {relevantQuestions.length > 0 ? (
           relevantQuestions.map(({ question }) => {
             const questionId = question.id;
+            
+            // Handle textarea type questions
+            if (question.type === 'textarea') {
+              return (
+                <div key={questionId} className="py-3 border-b border-gray-100">
+                  <div className="font-medium text-maternal-900">
+                    {question.text}
+                  </div>
+                  <div className="mt-2">
+                    <Textarea 
+                      value={textareaValues[questionId] || ''}
+                      onChange={(e) => handleTextareaChange(questionId, e.target.value)}
+                      placeholder="Digite sua resposta aqui..."
+                      className="w-full"
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              );
+            }
             
             return (
               <div key={questionId} className="py-3 border-b border-gray-100">

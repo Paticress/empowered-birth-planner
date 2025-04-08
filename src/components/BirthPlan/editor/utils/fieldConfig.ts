@@ -1,36 +1,43 @@
 
 /**
- * Returns a list of fields that should use single line inputs
+ * Returns the list of fields that should always use single line input
  */
-export const getSingleLineFields = () => {
+export const getSingleLineFields = (): string[] => {
   return [
-    'name', 'dueDate', 'healthProvider', 'healthProviderContact', 'healthProviderRegistry', 
-    'birthLocation', 'hospital', 'hospitalAddress', 'hospitalPhone', 
-    'midwife', 'midwifeContact', 'midwifeRegistry',
-    'doula', 'doulaContact', 'doulaRegistry',
-    'pediatrician', 'pediatricianContact', 'pediatricianRegistry'
+    'name',
+    'dueDate',
+    'healthProvider',
+    'healthProviderContact',
+    'healthProviderRegistry',
+    'birthLocation',
+    'hospital',
+    'hospitalAddress',
+    'hospitalPhone',
+    'pediatrician',
+    'pediatricianContact',
+    'pediatricianRegistry',
+    'midwife',
+    'midwifeContact',
+    'midwifeRegistry',
+    'doula',
+    'doulaContact',
+    'doulaRegistry',
   ];
 };
 
 /**
- * Returns a list of fields that should not display the "Add from Questionnaire" button
+ * Returns the list of fields that should always show the "Add from Questionnaire" button
  */
-export const getExcludedFields = () => {
-  return ['name', 'dueDate', 'healthProvider', 'hospital', 'companions'];
-};
-
-/**
- * List of fields that should always show the "Add from Questionnaire" button
- * regardless of whether there are answers available
- */
-export const getAlwaysShowAddButtonFields = () => {
+export const getAlwaysShowAddButtonFields = (): string[] => {
   return [
+    'emergencyScenarios',
     'highRiskComplications',
     'lowRiskOccurrences',
-    'emergencyScenarios',
-    'complications',
-    'interventionsRoutine',
     'cascadeInterventions',
-    'painRelief'
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado',
+    'specialWishes',
+    'unexpectedScenarios'
   ];
 };

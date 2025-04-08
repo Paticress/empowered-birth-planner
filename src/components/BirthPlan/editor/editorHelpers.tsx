@@ -51,12 +51,27 @@ export const handleAddSelectedOptions = (
     }
   });
   
+  // Special fields that need special handling
+  const specialFields = [
+    'emergencyScenarios', 
+    'highRiskComplications', 
+    'lowRiskOccurrences', 
+    'cascadeInterventions',
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado',
+    'specialWishes',
+    'unexpectedScenarios'
+  ];
+  
   // If we have selected options, update the birth plan
-  if (Object.values(allSelectedOptions).some(options => options.length > 0)) {
+  if (Object.values(allSelectedOptions).some(options => options.length > 0) || specialFields.includes(activeFieldKey)) {
     // Get the mapped section ID for this field from the first question
     const firstQuestionId = Object.keys(selectedOptions)[0];
+    const questionInfo = findQuestionById(firstQuestionId);
+    
     const mappedSectionId = mapQuestionnaireToSectionId(
-      findQuestionById(firstQuestionId)?.sectionId || ''
+      questionInfo?.sectionId || 'specialSituations'
     );
     
     // Initialize section if not exists
@@ -73,7 +88,9 @@ export const handleAddSelectedOptions = (
       // If there's just one question or all questions are the same type, 
       // use a simple format: option1, option2, etc.
       const options = Object.values(allSelectedOptions).flat();
-      updatedPlan[mappedSectionId][activeFieldKey] = options.join(', ');
+      if (options.length > 0) {
+        updatedPlan[mappedSectionId][activeFieldKey] = options.join(', ');
+      }
     } else {
       // For mixed question types, format with question prefixes:
       const formattedOptions = Object.entries(allSelectedOptions)
@@ -95,7 +112,9 @@ export const handleAddSelectedOptions = (
         .filter(text => text.length > 0)
         .join('\n\n');
       
-      updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
+      if (formattedOptions.length > 0) {
+        updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
+      }
     }
     
     setLocalBirthPlan(updatedPlan);

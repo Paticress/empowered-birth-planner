@@ -49,7 +49,7 @@ export function EditorField({
   const isContactField = field.key.toLowerCase().includes('contact');
   const isRegistryField = field.key.toLowerCase().includes('registry');
   
-  // Special fields that should always show the add button
+  // List of special fields that should always show the add button
   const specialFields = [
     'emergencyScenarios', 
     'highRiskComplications', 

@@ -33,9 +33,33 @@ export const getRelevantQuestionsForField = (
   
   const relevantQuestions: Array<{question: any, sectionId: string}> = [];
   
+  // Special fields that should always show their related questions
+  const alwaysShowFields = [
+    'emergencyScenarios', 
+    'highRiskComplications', 
+    'lowRiskOccurrences', 
+    'cascadeInterventions',
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado',
+    'specialWishes',
+    'unexpectedScenarios'
+  ];
+  
+  const isSpecialField = alwaysShowFields.includes(fieldKey);
+  
   for (const section of questionnaireSections) {
     for (const question of section.questions) {
       if (relevantQuestionIds.includes(question.id)) {
+        // For special fields, always include the question
+        if (isSpecialField) {
+          relevantQuestions.push({
+            question,
+            sectionId: section.id
+          });
+          continue;
+        }
+        
         // Check if there are answers for this question
         const hasAnswer = questionnaireAnswers[question.id] !== undefined;
         
@@ -54,13 +78,8 @@ export const getRelevantQuestionsForField = (
                    getAlwaysShowAddButtonFields().includes(fieldKey) || 
                    question.type === 'radio' || 
                    question.type === 'select' ||
-                   fieldKey === 'emergencyScenarios' ||
-                   fieldKey === 'highRiskComplications' ||
-                   fieldKey === 'lowRiskOccurrences' ||
-                   fieldKey === 'cascadeInterventions' ||
-                   fieldKey === 'unexpectedScenarios' ||
-                   fieldKey === 'specialWishes') {
-          // Always include specific fields or radio/select type questions even without previous answers
+                   question.type === 'textarea') {
+          // Always include radio/select/textarea type questions even without previous answers
           relevantQuestions.push({
             question,
             sectionId: section.id
