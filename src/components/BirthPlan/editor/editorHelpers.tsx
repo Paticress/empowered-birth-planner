@@ -14,7 +14,8 @@ export const handleAddSelectedOptions = (
 ) => {
   const updatedPlan = { ...localBirthPlan };
   
-  const allSelectedOptions: string[] = [];
+  // Group selected options by question type to maintain consistent formatting
+  const allSelectedOptions: Record<string, string[]> = {}; // questionType -> options
   
   Object.entries(selectedOptions).forEach(([questionId, options]) => {
     if (Object.values(options).some(value => value)) {
@@ -22,16 +23,35 @@ export const handleAddSelectedOptions = (
         .filter(([_, isSelected]) => isSelected)
         .map(([option]) => option);
       
-      allSelectedOptions.push(...selectedForQuestion);
+      if (selectedForQuestion.length > 0) {
+        const questionInfo = findQuestionById(questionId);
+        const questionType = questionInfo?.question?.type || 'checkbox';
+        
+        if (!allSelectedOptions[questionType]) {
+          allSelectedOptions[questionType] = [];
+        }
+        
+        allSelectedOptions[questionType].push(...selectedForQuestion);
+      }
     }
   });
   
-  if (allSelectedOptions.length > 0) {
-    const formattedOptions = allSelectedOptions.join(', ');
+  // If we have selected options, update the birth plan
+  if (Object.values(allSelectedOptions).some(options => options.length > 0)) {
+    // Combine all options respecting their selection types
+    const formattedOptions = Object.values(allSelectedOptions)
+      .flat()
+      .join(', ');
     
+    // Get the mapped section ID for this field
     const mappedSectionId = mapQuestionnaireToSectionId(
       Object.keys(selectedOptions).map(id => findQuestionById(id)?.sectionId || '')[0]
     );
+    
+    // Initialize section if not exists
+    if (!updatedPlan[mappedSectionId]) {
+      updatedPlan[mappedSectionId] = {};
+    }
     
     updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
     setLocalBirthPlan(updatedPlan);

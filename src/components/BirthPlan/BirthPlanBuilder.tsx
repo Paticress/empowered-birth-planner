@@ -32,8 +32,8 @@ export function BirthPlanBuilder() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
-      <div className="pt-4 md:pt-8">
+    <div className="bg-maternal-50 min-h-screen pt-16" role="main" aria-label="Construa seu Plano de Parto">
+      <div>
         <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useState, useEffect } from 'react';
 
 interface OptionsDialogProps {
   dialogOpen: boolean;
@@ -29,6 +30,16 @@ export function OptionsDialog({
   getRelevantQuestionsForField,
   handleAddSelectedOptions
 }: OptionsDialogProps) {
+  const [relevantQuestions, setRelevantQuestions] = useState<Array<{question: any, sectionId: string}>>([]);
+  
+  // Update relevant questions when activeFieldKey changes
+  useEffect(() => {
+    if (dialogOpen && activeFieldKey) {
+      const questions = getRelevantQuestionsForField(activeFieldKey);
+      setRelevantQuestions(questions);
+    }
+  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField]);
+  
   return (
     <DialogContent className="max-w-md">
       <DialogHeader>
@@ -36,8 +47,8 @@ export function OptionsDialog({
       </DialogHeader>
       
       <div className="max-h-[60vh] overflow-y-auto py-4">
-        {getRelevantQuestionsForField(activeFieldKey).length > 0 ? (
-          getRelevantQuestionsForField(activeFieldKey).map(({ question }) => {
+        {relevantQuestions.length > 0 ? (
+          relevantQuestions.map(({ question }) => {
             const questionId = question.id;
             
             return (

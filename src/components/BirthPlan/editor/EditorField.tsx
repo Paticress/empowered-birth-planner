@@ -45,6 +45,11 @@ export function EditorField({
   const showAddButton = shouldShowAddButton(field.key);
   const isMobile = useIsMobile();
   
+  // Check if this is a pediatrician contact or registry field
+  const isPediatricianField = field.key === 'pediatricianContact' || field.key === 'pediatricianRegistry';
+  // Force single line input for pediatrician fields
+  const useInputField = useSingleLineInput || isPediatricianField;
+  
   return (
     <div className="mb-4 md:mb-6 border border-maternal-100 rounded-lg p-3 md:p-4 bg-maternal-50/30">
       <div className={`flex flex-col ${!isMobile ? 'sm:flex-row sm:justify-between sm:items-center' : ''} mb-2`}>
@@ -86,7 +91,7 @@ export function EditorField({
         )}
       </div>
       
-      {useSingleLineInput ? (
+      {useInputField ? (
         <Input
           id={`${activeSection.id}-${field.key}`}
           value={fieldValue}

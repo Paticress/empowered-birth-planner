@@ -97,6 +97,9 @@ export const findQuestionById = (questionId: string) => {
 };
 
 export const parseCurrentFieldOptions = (fieldKey: string, sectionId: string, birthPlan: Record<string, any>): string[] => {
+  if (!birthPlan[sectionId] || !birthPlan[sectionId][fieldKey]) {
+    return [];
+  }
   const currentValue = birthPlan[sectionId][fieldKey] || '';
   return parseOptionsFromText(currentValue);
 };
@@ -120,8 +123,16 @@ export const initializeOptionsFromCurrentField = (
       question.options.forEach((option: string) => {
         let isSelected = currentFieldOptions.includes(option);
         
-        const answer = questionnaireAnswers[questionId];
-        if (typeof answer === 'object' && !Array.isArray(answer) && answer[option]) {
+        // For checkbox type questions (where answers are stored as objects)
+        if (typeof questionnaireAnswers[questionId] === 'object' && 
+            !Array.isArray(questionnaireAnswers[questionId]) && 
+            questionnaireAnswers[questionId][option]) {
+          isSelected = true;
+        }
+        
+        // For radio type questions (where answer is a single string)
+        if (typeof questionnaireAnswers[questionId] === 'string' &&
+            questionnaireAnswers[questionId] === option) {
           isSelected = true;
         }
         
@@ -153,7 +164,8 @@ export const getSingleLineFields = () => {
     'name', 'dueDate', 'healthProvider', 'healthProviderContact', 'healthProviderRegistry', 
     'birthLocation', 'hospital', 'hospitalAddress', 'hospitalPhone', 
     'midwife', 'midwifeContact', 'midwifeRegistry',
-    'doula', 'doulaContact', 'doulaRegistry'
+    'doula', 'doulaContact', 'doulaRegistry',
+    'pediatrician', 'pediatricianContact', 'pediatricianRegistry'
   ];
 };
 
