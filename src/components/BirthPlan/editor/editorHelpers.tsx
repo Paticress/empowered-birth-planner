@@ -1,6 +1,10 @@
 
 import { toast } from 'sonner';
-import { mapQuestionnaireToSectionId, findQuestionById, checkSectionCompletion } from './editorUtils';
+import { 
+  mapQuestionnaireToSectionId, 
+  findQuestionById, 
+  checkSectionCompletion 
+} from './utils';
 
 export const handleAddSelectedOptions = (
   activeFieldKey: string,

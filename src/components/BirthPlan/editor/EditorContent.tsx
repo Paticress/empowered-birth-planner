@@ -1,7 +1,11 @@
 
 import { EditorField } from './EditorField';
 import { birthPlanSections } from '../utils/birthPlanSections';
-import { getSingleLineFields, shouldShowAddButton, getRelevantQuestionsForField } from './editorUtils';
+import { 
+  getSingleLineFields, 
+  shouldShowAddButton, 
+  getRelevantQuestionsForField 
+} from './utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EditorContentProps {

@@ -6,7 +6,7 @@ import {
   initializeOptionsFromCurrentField,
   shouldShowAddButton,
   checkSectionCompletion
-} from '../editor/editorUtils';
+} from '../editor/utils';
 
 export function useEditorState(
   birthPlan: Record<string, any>,
