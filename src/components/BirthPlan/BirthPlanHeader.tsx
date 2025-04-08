@@ -1,6 +1,7 @@
 
-import { FileText, Edit, Eye, Share2 } from 'lucide-react';
+import { FileText, Edit, Eye, Share2, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 type BuilderStage = 'welcome' | 'questionnaire' | 'editor' | 'preview' | 'share';
 
@@ -19,6 +20,17 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
         </div>
         
         <div className="flex space-x-2">
+          <Link to="/dashboard">
+            <Button 
+              variant="outline"
+              size="sm" 
+              className="text-white bg-maternal-600 hover:bg-maternal-500 border-maternal-300"
+            >
+              <Home className="h-4 w-4 mr-2" /> 
+              <span className="hidden sm:inline">Dashboard</span>
+            </Button>
+          </Link>
+          
           {currentStage !== 'welcome' && currentStage !== 'questionnaire' && (
             <>
               <Button 

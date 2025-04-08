@@ -47,7 +47,6 @@ export const fieldToQuestionMap: Record<string, string[]> = {
   
   'complications': ['complications'],
   'cascadeInterventions': ['cascadeInterventions'],
-  'nicu': ['nicu'],
   'emergencyScenarios': ['emergencyPreferences'],
   'highRiskComplications': ['highRiskComplications'],
   'lowRiskOccurrences': ['lowRiskOccurrences'],
@@ -99,3 +98,18 @@ export const fieldToSectionMap: Record<string, string> = {
   'specialWishes': 'specialSituations'
 };
 
+/**
+ * Maps questionnaire field IDs to birth plan field keys
+ * This helps with direct mapping from questionnaire answers to birth plan fields
+ */
+export const questionToFieldMap: Record<string, string> = {
+  'cascadeInterventions': 'cascadeInterventions',
+  'emergencyPreferences': 'emergencyScenarios',
+  'highRiskComplications': 'highRiskComplications',
+  'lowRiskOccurrences': 'lowRiskOccurrences',
+  'unexpectedScenarios': 'unexpectedScenarios',
+  'specialWishes': 'specialWishes',
+  'painRelief': 'painRelief',
+  'interventions': 'interventionsRoutine',
+  'informedConsent': 'consentimentoInformado'
+};

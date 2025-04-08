@@ -1,9 +1,11 @@
+
 import { toast } from 'sonner';
 import { 
   mapQuestionnaireToSectionId, 
   findQuestionById, 
   checkSectionCompletion,
-  fieldToSectionMap
+  fieldToSectionMap,
+  questionToFieldMap
 } from './utils';
 
 export const handleAddSelectedOptions = (
@@ -47,12 +49,18 @@ export const handleAddSelectedOptions = (
           allSelectedOptions[questionId] = [];
         }
         
+        // Check if this field is directly mapped from this question
+        const isDirectMapping = questionToFieldMap[questionId] === activeFieldKey;
+        
         // For radio/select questions, we only want the last selected option
-        if (questionType === 'radio' || questionType === 'select') {
+        // unless it's a special field or direct mapping
+        if ((questionType === 'radio' || questionType === 'select') && 
+            !getSpecialFields().includes(activeFieldKey) &&
+            !isDirectMapping) {
           // Only take the last selected option for radio buttons
           allSelectedOptions[questionId] = [selectedForQuestion[selectedForQuestion.length - 1]];
         } else {
-          // For checkboxes, add all selected options
+          // For checkboxes or special fields, add all selected options
           allSelectedOptions[questionId] = [...selectedForQuestion];
         }
       }
@@ -100,12 +108,23 @@ export const handleAddSelectedOptions = (
       updatedPlan[mappedSectionId] = {};
     }
     
+    // Check for direct mapping from questionnaire to field
+    const hasDirectMapping = Object.entries(questionToFieldMap)
+      .some(([questionId, fieldKey]) => fieldKey === activeFieldKey && selectedOptions[questionId]);
+    
     // Determine how to format options based on the question types included
     const questionIds = Object.keys(allSelectedOptions);
     const allSameType = questionIds.length === 1 || 
                       questionIds.every(id => questionTypes[id] === questionTypes[questionIds[0]]);
     
-    if (allSameType && questionIds.length === 1 && !specialFields.includes(activeFieldKey)) {
+    // Special case for direct mapped fields - use a simple comma-separated list
+    if (hasDirectMapping || specialFields.includes(activeFieldKey)) {
+      const allOptions = Object.values(allSelectedOptions).flat();
+      if (allOptions.length > 0) {
+        updatedPlan[mappedSectionId][activeFieldKey] = allOptions.join(', ');
+      }
+    } 
+    else if (allSameType && questionIds.length === 1 && !specialFields.includes(activeFieldKey)) {
       // If there's just one question or all questions are the same type, 
       // use a simple format: option1, option2, etc.
       const options = Object.values(allSelectedOptions).flat();
@@ -190,4 +209,21 @@ export const handleTextAreaContent = (
   
   // Check if the section was completed after adding content
   checkSectionCompletion(mappedSectionId, updatedPlan, completedSections, setCompletedSections);
+};
+
+/**
+ * Returns the list of special fields that need special handling
+ */
+export const getSpecialFields = (): string[] => {
+  return [
+    'emergencyScenarios', 
+    'highRiskComplications', 
+    'lowRiskOccurrences', 
+    'cascadeInterventions',
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado',
+    'specialWishes',
+    'unexpectedScenarios'
+  ];
 };
