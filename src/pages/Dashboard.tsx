@@ -83,7 +83,14 @@ export function Dashboard() {
       <Header />
       <main className="flex-grow pt-20 bg-maternal-50">
         <div className="container max-w-5xl mx-auto px-4 py-8">
-          <DashboardHeader greeting={getWelcomeMessage()} />
+          <DashboardHeader 
+            greeting={getWelcomeMessage()} 
+            guideProgress={guideProgress}
+            birthPlanProgress={birthPlanProgress}
+            lastVisited={lastVisited}
+            isGuideCompleted={isGuideCompleted}
+            isBirthPlanCompleted={isBirthPlanCompleted}
+          />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <RecommendedStepCard 
