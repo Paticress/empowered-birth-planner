@@ -9,6 +9,8 @@ import { useEditorState } from './hooks/useEditorState';
 import { handleAddSelectedOptions } from './editor/editorHelpers';
 import { BackToTopButton } from './common/BackToTopButton';
 import { useEffect } from 'react';
+import { prefillFieldFromQuestionnaire, getSpecialFields } from './editor/utils/optionsHandling';
+import { fieldToSectionMap, mapQuestionnaireToSectionId } from './editor/utils/fieldMapping';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -57,6 +59,54 @@ export function BirthPlanEditor({
       setDialogOpen
     );
   };
+  
+  // Auto-fill special fields from questionnaire on first load
+  useEffect(() => {
+    if (Object.keys(questionnaireAnswers).length > 0) {
+      console.log("Auto-filling special fields from questionnaire");
+      
+      // Get all special fields
+      const specialFields = getSpecialFields();
+      
+      // Process each special field
+      specialFields.forEach(fieldKey => {
+        // Get the appropriate section for this field
+        const sectionId = fieldToSectionMap[fieldKey] 
+          ? mapQuestionnaireToSectionId(fieldToSectionMap[fieldKey])
+          : 'situacoesEspeciais'; // Default to special situations
+        
+        // Pre-fill the field from questionnaire answers  
+        prefillFieldFromQuestionnaire(
+          fieldKey,
+          questionnaireAnswers,
+          localBirthPlan,
+          setLocalBirthPlan,
+          sectionId
+        );
+      });
+      
+      // Also prefill the text area fields
+      if (questionnaireAnswers['unexpectedScenarios']) {
+        prefillFieldFromQuestionnaire(
+          'unexpectedScenarios',
+          questionnaireAnswers,
+          localBirthPlan,
+          setLocalBirthPlan,
+          'situacoesEspeciais'
+        );
+      }
+      
+      if (questionnaireAnswers['specialWishes']) {
+        prefillFieldFromQuestionnaire(
+          'specialWishes',
+          questionnaireAnswers,
+          localBirthPlan,
+          setLocalBirthPlan,
+          'situacoesEspeciais'
+        );
+      }
+    }
+  }, [questionnaireAnswers]);
   
   // Auto-save functionality
   useEffect(() => {

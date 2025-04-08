@@ -19,6 +19,12 @@ export const shouldShowAddButton = (fieldKey: string, questionnaireAnswers: Reco
     return true;
   }
   
+  // Always show for special fields
+  const specialFields = getSpecialFields();
+  if (specialFields.includes(fieldKey)) {
+    return true;
+  }
+  
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
   return relevantQuestions.length > 0;
 };
@@ -88,8 +94,36 @@ export const getRelevantQuestionsForField = (
     }
   }
   
+  // Special case for cascadeInterventions, emergencyScenarios, highRiskComplications, lowRiskOccurrences
+  // Ensure these fields always have their questions available
+  if (fieldKey === 'cascadeInterventions' || 
+      fieldKey === 'emergencyScenarios' || 
+      fieldKey === 'highRiskComplications' || 
+      fieldKey === 'lowRiskOccurrences' ||
+      fieldKey === 'painRelief' ||
+      fieldKey === 'interventionsRoutine' ||
+      fieldKey === 'consentimentoInformado' ||
+      fieldKey === 'unexpectedScenarios') {
+    
+    // If no questions were found, try to find them by ID
+    if (relevantQuestions.length === 0) {
+      for (const section of questionnaireSections) {
+        for (const question of section.questions) {
+          if (question.id === fieldKey) {
+            relevantQuestions.push({
+              question,
+              sectionId: section.id
+            });
+            break;
+          }
+        }
+      }
+    }
+  }
+  
   // Log the result for debugging
   console.log(`Found ${relevantQuestions.length} relevant questions for field ${fieldKey}`);
   
   return relevantQuestions;
 };
+

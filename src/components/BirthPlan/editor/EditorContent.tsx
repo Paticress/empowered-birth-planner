@@ -8,6 +8,7 @@ import {
   getSpecialFields
 } from './utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useEffect } from 'react';
 
 interface EditorContentProps {
   activeSectionIndex: number;
@@ -44,6 +45,23 @@ export function EditorContent({
   // Log the questionnaire answers for debugging
   console.log("Questionnaire answers for section:", activeSection.id, questionnaireAnswers);
   console.log("Local birth plan for section:", activeSection.id, localBirthPlan[activeSection.id]);
+  
+  // Special handling for textarea fields on first render
+  useEffect(() => {
+    if (activeSection.id === 'situacoesEspeciais' && questionnaireAnswers) {
+      // Check for textarea fields that should be auto-filled
+      const textareaFields = ['unexpectedScenarios', 'specialWishes'];
+      
+      textareaFields.forEach(fieldKey => {
+        if (questionnaireAnswers[fieldKey] && 
+            (!localBirthPlan[activeSection.id] || !localBirthPlan[activeSection.id][fieldKey])) {
+          // Auto-fill this textarea field
+          console.log(`Auto-filling textarea field ${fieldKey} with:`, questionnaireAnswers[fieldKey]);
+          handleFieldChange(activeSection.id, fieldKey, questionnaireAnswers[fieldKey]);
+        }
+      });
+    }
+  }, [activeSectionIndex, questionnaireAnswers]);
 
   return (
     <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-4 md:p-6 mb-4 md:mb-6 shadow-md`}>
