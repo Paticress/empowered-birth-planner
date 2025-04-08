@@ -42,6 +42,7 @@ export const getRelevantQuestionsForField = (
     'painRelief': ['painRelief'], // Specifically for pain relief
     'interventionsRoutine': ['interventions'], // Changed from 'procedimentosRotina'
     'consentimentoInformado': ['informedConsent'],
+    'cascadeInterventions': ['cascadeInterventions'], // Added for cascade effect prevention
     
     'birthPositions': ['birthPositions'],
     'episiotomy': ['episiotomy'],
@@ -98,6 +99,7 @@ export const getRelevantQuestionsForField = (
                    fieldKey === 'emergencyScenarios' || 
                    fieldKey === 'complications' ||
                    fieldKey === 'interventionsRoutine' ||
+                   fieldKey === 'cascadeInterventions' ||
                    question.type === 'radio' || 
                    question.type === 'select') {
           // Sempre adicionar questões específicas ou de tipo radio/select mesmo sem respostas prévias
@@ -188,6 +190,7 @@ export const shouldShowAddButton = (fieldKey: string, questionnaireAnswers: Reco
       fieldKey === 'emergencyScenarios' || 
       fieldKey === 'complications' || 
       fieldKey === 'interventionsRoutine' ||
+      fieldKey === 'cascadeInterventions' ||
       fieldKey === 'painRelief') {
     return true;
   }

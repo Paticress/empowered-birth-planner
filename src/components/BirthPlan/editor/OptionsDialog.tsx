@@ -82,7 +82,10 @@ export function OptionsDialog({
         <Button variant="outline" onClick={() => setDialogOpen(false)}>
           Cancelar
         </Button>
-        <Button onClick={handleAddSelectedOptions}>
+        <Button 
+          onClick={handleAddSelectedOptions}
+          disabled={relevantQuestions.length === 0}
+        >
           {hasRadioOnly ? "Selecionar Opção" : "Adicionar Selecionadas"}
         </Button>
       </DialogFooter>
