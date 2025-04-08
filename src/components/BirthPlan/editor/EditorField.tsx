@@ -45,10 +45,12 @@ export function EditorField({
   const showAddButton = shouldShowAddButton(field.key);
   const isMobile = useIsMobile();
   
-  // Check if this is a pediatrician contact or registry field
-  const isPediatricianField = field.key === 'pediatricianContact' || field.key === 'pediatricianRegistry';
-  // Force single line input for pediatrician fields
-  const useInputField = useSingleLineInput || isPediatricianField;
+  // Verificar se este é um campo de contato ou registro para qualquer profissional
+  const isContactField = field.key.toLowerCase().includes('contact');
+  const isRegistryField = field.key.toLowerCase().includes('registry');
+  
+  // Forçar input de linha única para campos de contato e registro
+  const useInputField = useSingleLineInput || isContactField || isRegistryField;
   
   return (
     <div className="mb-4 md:mb-6 border border-maternal-100 rounded-lg p-3 md:p-4 bg-maternal-50/30">

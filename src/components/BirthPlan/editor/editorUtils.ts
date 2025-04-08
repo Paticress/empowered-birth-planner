@@ -39,8 +39,8 @@ export const getRelevantQuestionsForField = (
     'positions': ['positions'],
     'hydration': ['hydration'],
     'monitoring': ['monitoring'],
-    'interventions': ['painRelief'],
-    'procedimentosRotina': ['interventions'],
+    'interventions': ['painRelief'], // Remédios para dor
+    'procedimentosRotina': ['interventions'], // Intervenções de rotina
     'consentimentoInformado': ['informedConsent'],
     
     'birthPositions': ['birthPositions'],
@@ -77,11 +77,29 @@ export const getRelevantQuestionsForField = (
   
   for (const section of questionnaireSections) {
     for (const question of section.questions) {
-      if (relevantQuestionIds.includes(question.id) && questionnaireAnswers[question.id] !== undefined) {
-        relevantQuestions.push({
-          question,
-          sectionId: section.id
-        });
+      if (relevantQuestionIds.includes(question.id)) {
+        // Verificar se há respostas para esta questão
+        const hasAnswer = questionnaireAnswers[question.id] !== undefined;
+        
+        // Para questões com tipo checkbox, verificar se alguma opção foi selecionada
+        if (question.type === 'checkbox' && typeof questionnaireAnswers[question.id] === 'object') {
+          const checkboxAnswers = questionnaireAnswers[question.id];
+          const hasAnySelection = Object.values(checkboxAnswers).some(value => !!value);
+          
+          if (hasAnySelection || !hasAnswer) {
+            relevantQuestions.push({
+              question,
+              sectionId: section.id
+            });
+          }
+        } else if (hasAnswer || fieldKey === 'highRiskComplications' || fieldKey === 'lowRiskOccurrences' || 
+                   fieldKey === 'emergencyScenarios' || fieldKey === 'complications') {
+          // Sempre adicionar questões específicas mesmo sem respostas prévias
+          relevantQuestions.push({
+            question,
+            sectionId: section.id
+          });
+        }
       }
     }
   }
@@ -126,14 +144,14 @@ export const initializeOptionsFromCurrentField = (
       question.options.forEach((option: string) => {
         let isSelected = currentFieldOptions.includes(option);
         
-        // For checkbox type questions (where answers are stored as objects)
+        // Para questões de checkbox (onde as respostas são armazenadas como objetos)
         if (typeof questionnaireAnswers[questionId] === 'object' && 
             !Array.isArray(questionnaireAnswers[questionId]) && 
-            questionnaireAnswers[questionId][option]) {
+            questionnaireAnswers[questionId]?.[option]) {
           isSelected = true;
         }
         
-        // For radio type questions (where answer is a single string)
+        // Para questões de radio (onde a resposta é uma única string)
         if (typeof questionnaireAnswers[questionId] === 'string' &&
             questionnaireAnswers[questionId] === option) {
           isSelected = true;
@@ -156,6 +174,13 @@ export const shouldShowAddButton = (fieldKey: string, questionnaireAnswers: Reco
   
   if (excludedFields.includes(fieldKey)) {
     return false;
+  }
+  
+  // Sempre mostrar o botão para estes campos específicos
+  if (fieldKey === 'highRiskComplications' || fieldKey === 'lowRiskOccurrences' || 
+      fieldKey === 'emergencyScenarios' || fieldKey === 'complications' || 
+      fieldKey === 'interventions' || fieldKey === 'procedimentosRotina') {
+    return true;
   }
   
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);

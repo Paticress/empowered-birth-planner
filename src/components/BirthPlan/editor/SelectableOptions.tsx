@@ -52,7 +52,7 @@ export function SelectableOptions({
     }
     
     // Unselect all options
-    Object.keys(question.options).forEach(opt => {
+    Object.keys(newSelectedOptions[questionId] || {}).forEach(opt => {
       newSelectedOptions[questionId][opt] = false;
     });
     
@@ -64,6 +64,7 @@ export function SelectableOptions({
   
   // If it's a radio or select question, we should only allow one option to be selected
   if (question.type === 'radio' || question.type === 'select') {
+    // Encontrar a opção selecionada (se houver) ou deixar vazio
     const selectedOption = Object.entries(selectedOptions[questionId] || {})
       .find(([_, isSelected]) => isSelected)?.[0] || '';
       
