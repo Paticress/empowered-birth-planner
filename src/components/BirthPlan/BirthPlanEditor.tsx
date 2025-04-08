@@ -116,7 +116,7 @@ export function BirthPlanEditor({
       <EditorFooter 
         activeSectionIndex={activeSectionIndex}
         birthPlanSectionLength={birthPlanSections.length}
-        handleSave={handleSave}
+        handleSave={() => handleSave()}
         onNext={onNext}
         setActiveSectionIndex={setActiveSectionIndex}
         isDirty={isDirty}

@@ -8,6 +8,7 @@ interface EditorFooterProps {
   handleSave: () => void;
   onNext: () => void;
   setActiveSectionIndex: (index: number) => void;
+  isDirty?: boolean;
 }
 
 export function EditorFooter({
@@ -15,7 +16,8 @@ export function EditorFooter({
   birthPlanSectionLength,
   handleSave,
   onNext,
-  setActiveSectionIndex
+  setActiveSectionIndex,
+  isDirty = false
 }: EditorFooterProps) {
   return (
     <div className="flex justify-between mt-8">
@@ -31,9 +33,9 @@ export function EditorFooter({
       <Button 
         variant="outline"
         onClick={handleSave}
-        className="flex items-center border-maternal-300 text-maternal-700 hover:bg-maternal-50"
+        className={`flex items-center border-maternal-300 text-maternal-700 hover:bg-maternal-50 ${isDirty ? 'border-maternal-500' : ''}`}
       >
-        <Save className="mr-2 h-4 w-4" /> Salvar Alterações
+        <Save className="mr-2 h-4 w-4" /> Salvar Alterações {isDirty && '*'}
       </Button>
       
       {activeSectionIndex === birthPlanSectionLength - 1 ? (
