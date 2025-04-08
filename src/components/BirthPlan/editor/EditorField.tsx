@@ -45,11 +45,11 @@ export function EditorField({
   const showAddButton = shouldShowAddButton(field.key);
   const isMobile = useIsMobile();
   
-  // Verificar se este é um campo de contato ou registro para qualquer profissional
+  // Check if this is a contact or registry field for any professional
   const isContactField = field.key.toLowerCase().includes('contact');
   const isRegistryField = field.key.toLowerCase().includes('registry');
   
-  // Forçar input de linha única para campos de contato e registro
+  // Force single line input for contact and registry fields
   const useInputField = useSingleLineInput || isContactField || isRegistryField;
   
   return (

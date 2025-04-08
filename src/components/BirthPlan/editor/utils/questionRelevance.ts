@@ -13,7 +13,7 @@ export const shouldShowAddButton = (fieldKey: string, questionnaireAnswers: Reco
     return false;
   }
   
-  // Sempre mostrar o botão para estes campos específicos
+  // Always show the button for these specific fields
   if (getAlwaysShowAddButtonFields().includes(fieldKey)) {
     return true;
   }
@@ -36,10 +36,10 @@ export const getRelevantQuestionsForField = (
   for (const section of questionnaireSections) {
     for (const question of section.questions) {
       if (relevantQuestionIds.includes(question.id)) {
-        // Verificar se há respostas para esta questão
+        // Check if there are answers for this question
         const hasAnswer = questionnaireAnswers[question.id] !== undefined;
         
-        // Para questões com tipo checkbox, verificar se alguma opção foi selecionada
+        // For checkbox type questions, check if any option was selected
         if (question.type === 'checkbox' && typeof questionnaireAnswers[question.id] === 'object') {
           const checkboxAnswers = questionnaireAnswers[question.id];
           const hasAnySelection = Object.values(checkboxAnswers).some(value => !!value);
@@ -51,10 +51,10 @@ export const getRelevantQuestionsForField = (
             });
           }
         } else if (hasAnswer || 
-                   getAlwaysShowAddButtonFields().includes(fieldKey) ||
+                   getAlwaysShowAddButtonFields().includes(fieldKey) || 
                    question.type === 'radio' || 
                    question.type === 'select') {
-          // Sempre adicionar questões específicas ou de tipo radio/select mesmo sem respostas prévias
+          // Always include specific fields or radio/select type questions even without previous answers
           relevantQuestions.push({
             question,
             sectionId: section.id

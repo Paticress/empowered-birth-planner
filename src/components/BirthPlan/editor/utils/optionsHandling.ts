@@ -36,14 +36,14 @@ export const initializeOptionsFromCurrentField = (
       question.options.forEach((option: string) => {
         let isSelected = currentFieldOptions.includes(option);
         
-        // Para questões de checkbox (onde as respostas são armazenadas como objetos)
+        // For checkbox questions (where answers are stored as objects)
         if (typeof questionnaireAnswers[questionId] === 'object' && 
             !Array.isArray(questionnaireAnswers[questionId]) && 
             questionnaireAnswers[questionId]?.[option]) {
           isSelected = true;
         }
         
-        // Para questões de radio (onde a resposta é uma única string)
+        // For radio questions (where the answer is a single string)
         if (typeof questionnaireAnswers[questionId] === 'string' &&
             questionnaireAnswers[questionId] === option) {
           isSelected = true;
