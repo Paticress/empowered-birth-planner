@@ -28,24 +28,19 @@ export const initializeOptionsFromCurrentField = (
   
   const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
   
-  // Special fields that need special handling
-  const specialFields = [
-    'emergencyScenarios', 
-    'highRiskComplications', 
-    'lowRiskOccurrences', 
-    'cascadeInterventions',
-    'painRelief',
-    'interventionsRoutine',
-    'consentimentoInformado',
-    'specialWishes',
-    'unexpectedScenarios'
-  ];
+  // Get the list of special fields that need special handling
+  const specialFields = getSpecialFields();
   
   const isSpecialField = specialFields.includes(fieldKey);
+  
+  console.log(`Initializing options for field: ${fieldKey}`);
+  console.log(`Is special field: ${isSpecialField}`);
   
   relevantQuestions.forEach(({ question }) => {
     const questionId = question.id;
     initialSelectedOptions[questionId] = {};
+    
+    console.log(`Processing question: ${questionId}, type: ${question.type}`);
     
     // Handle textarea type questions
     if (question.type === 'textarea') {
@@ -71,16 +66,49 @@ export const initializeOptionsFromCurrentField = (
         
         // For radio questions (where the answer is a single string)
         if (question.type === 'radio' || question.type === 'select') {
-          // For special fields or radio/select questions, check the questionnaire answer
-          if (isSpecialField || (fieldKey === question.id)) {
+          // For special fields that map to questionnaire responses, always check the questionnaire
+          if (isSpecialField || fieldKey === questionId) {
             isSelected = questionnaireAnswers[questionId] === option;
+            
+            // For fields like painRelief, check if the option is in the questionnaire answer
+            if (specialFields.includes(fieldKey)) {
+              if (questionnaireAnswers[questionId] === option) {
+                isSelected = true;
+              }
+              
+              // Also check if the option is in the current birth plan value
+              if (currentFieldOptions.includes(option)) {
+                isSelected = true;
+              }
+            }
           }
         }
+        
+        console.log(`Option: ${option}, isSelected: ${isSelected}`);
         
         initialSelectedOptions[questionId][option] = isSelected;
       });
     }
   });
   
+  console.log("Initial selected options:", initialSelectedOptions);
+  
   return initialSelectedOptions;
+};
+
+/**
+ * Returns the list of fields that need special handling for options
+ */
+export const getSpecialFields = (): string[] => {
+  return [
+    'emergencyScenarios', 
+    'highRiskComplications', 
+    'lowRiskOccurrences', 
+    'cascadeInterventions',
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado',
+    'specialWishes',
+    'unexpectedScenarios'
+  ];
 };

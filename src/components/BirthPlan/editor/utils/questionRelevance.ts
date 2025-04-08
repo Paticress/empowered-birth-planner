@@ -2,6 +2,7 @@
 import { questionnaireSections } from '../../questionnaire';
 import { fieldToQuestionMap } from './fieldMapping';
 import { getAlwaysShowAddButtonFields } from './fieldConfig';
+import { getSpecialFields } from './optionsHandling';
 
 /**
  * Determines if the field should show the "Add from Questionnaire" button
@@ -34,24 +35,19 @@ export const getRelevantQuestionsForField = (
   const relevantQuestions: Array<{question: any, sectionId: string}> = [];
   
   // Special fields that should always show their related questions
-  const alwaysShowFields = [
-    'emergencyScenarios', 
-    'highRiskComplications', 
-    'lowRiskOccurrences', 
-    'cascadeInterventions',
-    'painRelief',
-    'interventionsRoutine',
-    'consentimentoInformado',
-    'specialWishes',
-    'unexpectedScenarios'
-  ];
+  const specialFields = getSpecialFields();
   
-  const isSpecialField = alwaysShowFields.includes(fieldKey);
+  const isSpecialField = specialFields.includes(fieldKey);
+  
+  // For debugging
+  console.log(`Getting relevant questions for field: ${fieldKey}`);
+  console.log(`Is special field: ${isSpecialField}`);
+  console.log(`Relevant question IDs: ${relevantQuestionIds.join(', ')}`);
   
   for (const section of questionnaireSections) {
     for (const question of section.questions) {
       if (relevantQuestionIds.includes(question.id)) {
-        // For special fields, always include the question
+        // For special fields, always include the question regardless of answers
         if (isSpecialField) {
           relevantQuestions.push({
             question,
@@ -62,11 +58,14 @@ export const getRelevantQuestionsForField = (
         
         // Check if there are answers for this question
         const hasAnswer = questionnaireAnswers[question.id] !== undefined;
+        console.log(`Question ${question.id} has answer: ${hasAnswer}`);
         
         // For checkbox type questions, check if any option was selected
         if (question.type === 'checkbox' && typeof questionnaireAnswers[question.id] === 'object') {
           const checkboxAnswers = questionnaireAnswers[question.id];
           const hasAnySelection = Object.values(checkboxAnswers).some(value => !!value);
+          
+          console.log(`Checkbox ${question.id} has selections: ${hasAnySelection}`);
           
           if (hasAnySelection || !hasAnswer) {
             relevantQuestions.push({
@@ -88,6 +87,9 @@ export const getRelevantQuestionsForField = (
       }
     }
   }
+  
+  // Log the result for debugging
+  console.log(`Found ${relevantQuestions.length} relevant questions for field ${fieldKey}`);
   
   return relevantQuestions;
 };
