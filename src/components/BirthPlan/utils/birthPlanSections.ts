@@ -49,7 +49,9 @@ export const birthPlanSections = [
       { key: 'positions', label: 'Posições' },
       { key: 'hydration', label: 'Hidratação e Alimentação' },
       { key: 'monitoring', label: 'Monitoramento Fetal' },
-      { key: 'interventions', label: 'Indução e Intervenções' },
+      { key: 'painRelief', label: 'Alívio da Dor' },
+      { key: 'interventionsRoutine', label: 'Procedimentos e Intervenções' },
+      { key: 'consentimentoInformado', label: 'Consentimento Informado' },
     ],
   },
   {

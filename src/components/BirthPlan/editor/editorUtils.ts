@@ -39,8 +39,8 @@ export const getRelevantQuestionsForField = (
     'positions': ['positions'],
     'hydration': ['hydration'],
     'monitoring': ['monitoring'],
-    'interventions': ['painRelief'], // Remédios para dor
-    'procedimentosRotina': ['interventions'], // Intervenções de rotina
+    'painRelief': ['painRelief'], // Specifically for pain relief
+    'interventionsRoutine': ['interventions'], // Changed from 'procedimentosRotina'
     'consentimentoInformado': ['informedConsent'],
     
     'birthPositions': ['birthPositions'],
@@ -92,9 +92,15 @@ export const getRelevantQuestionsForField = (
               sectionId: section.id
             });
           }
-        } else if (hasAnswer || fieldKey === 'highRiskComplications' || fieldKey === 'lowRiskOccurrences' || 
-                   fieldKey === 'emergencyScenarios' || fieldKey === 'complications') {
-          // Sempre adicionar questões específicas mesmo sem respostas prévias
+        } else if (hasAnswer || 
+                   fieldKey === 'highRiskComplications' || 
+                   fieldKey === 'lowRiskOccurrences' || 
+                   fieldKey === 'emergencyScenarios' || 
+                   fieldKey === 'complications' ||
+                   fieldKey === 'interventionsRoutine' ||
+                   question.type === 'radio' || 
+                   question.type === 'select') {
+          // Sempre adicionar questões específicas ou de tipo radio/select mesmo sem respostas prévias
           relevantQuestions.push({
             question,
             sectionId: section.id
@@ -177,9 +183,12 @@ export const shouldShowAddButton = (fieldKey: string, questionnaireAnswers: Reco
   }
   
   // Sempre mostrar o botão para estes campos específicos
-  if (fieldKey === 'highRiskComplications' || fieldKey === 'lowRiskOccurrences' || 
-      fieldKey === 'emergencyScenarios' || fieldKey === 'complications' || 
-      fieldKey === 'interventions' || fieldKey === 'procedimentosRotina') {
+  if (fieldKey === 'highRiskComplications' || 
+      fieldKey === 'lowRiskOccurrences' || 
+      fieldKey === 'emergencyScenarios' || 
+      fieldKey === 'complications' || 
+      fieldKey === 'interventionsRoutine' ||
+      fieldKey === 'painRelief') {
     return true;
   }
   
