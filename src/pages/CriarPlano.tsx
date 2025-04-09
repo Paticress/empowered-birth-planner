@@ -101,7 +101,7 @@ export function CriarPlano() {
   return (
     <div className="min-h-screen flex flex-col bg-maternal-100">
       <Header />
-      <main className="flex-grow pt-40"> {/* Increased top padding to accommodate fixed headers */}
+      <main className="flex-grow pt-20">
         <div className="container mx-auto px-4 py-8">
           <BirthPlanBuilder />
         </div>

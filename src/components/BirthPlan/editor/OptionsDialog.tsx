@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { getSpecialFields } from './utils/optionsHandling';
-import { mapQuestionnaireToSectionId, fieldToSectionMap, questionToFieldMap } from './utils/fieldMapping'; 
+import { mapQuestionnaireToSectionId, fieldToSectionMap } from './utils/fieldMapping'; 
 import { handleTextAreaContent } from './editorHelpers';
 
 interface OptionsDialogProps {
@@ -49,16 +49,6 @@ export function OptionsDialog({
       const onlyRadioQuestions = questions.length > 0 && 
         questions.every(q => q.question.type === 'radio' || q.question.type === 'select');
       setHasRadioOnly(onlyRadioQuestions);
-      
-      // Check if any questions are direct matches with the field
-      const hasDirectMatches = questions.some(q => 
-        activeFieldKey === questionToFieldMap[q.question.id] || 
-        activeFieldKey === q.question.id
-      );
-      
-      if (hasDirectMatches) {
-        console.log(`Found direct matches for ${activeFieldKey}`);
-      }
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField]);
   
@@ -106,7 +96,6 @@ export function OptionsDialog({
               );
             }
             
-            // Handle regular option questions (checkbox, radio, select)
             return (
               <div key={questionId} className="py-3 border-b border-gray-100">
                 <div className="font-medium text-maternal-900">
@@ -118,7 +107,7 @@ export function OptionsDialog({
                   questionId={questionId} 
                   selectedOptions={selectedOptions}
                   setSelectedOptions={setSelectedOptions}
-                  isSpecialField={isSpecialField || activeFieldKey === questionToFieldMap[questionId] || activeFieldKey === questionId}
+                  isSpecialField={isSpecialField}
                 />
               </div>
             );

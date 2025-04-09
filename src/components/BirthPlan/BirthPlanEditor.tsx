@@ -10,7 +10,7 @@ import { handleAddSelectedOptions } from './editor/editorHelpers';
 import { BackToTopButton } from './common/BackToTopButton';
 import { useEffect } from 'react';
 import { prefillFieldFromQuestionnaire, getSpecialFields } from './editor/utils/optionsHandling';
-import { fieldToSectionMap, mapQuestionnaireToSectionId, questionToFieldMap } from './editor/utils/fieldMapping';
+import { fieldToSectionMap, mapQuestionnaireToSectionId } from './editor/utils/fieldMapping';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -68,30 +68,7 @@ export function BirthPlanEditor({
       // Get all special fields
       const specialFields = getSpecialFields();
       
-      // First, check for direct mappings from questionnaire to fields
-      Object.entries(questionToFieldMap).forEach(([questionId, fieldKey]) => {
-        if (questionnaireAnswers[questionId]) {
-          console.log(`Found direct questionnaire mapping from ${questionId} to field ${fieldKey}`);
-          
-          // Get the appropriate section for this field
-          const sectionId = fieldToSectionMap[fieldKey] 
-            ? mapQuestionnaireToSectionId(fieldToSectionMap[fieldKey])
-            : 'situacoesEspeciais'; // Default to special situations
-            
-          console.log(`Will prefill ${fieldKey} in section ${sectionId}`);
-          
-          // Pre-fill the field from questionnaire answers
-          prefillFieldFromQuestionnaire(
-            fieldKey,
-            questionnaireAnswers,
-            localBirthPlan,
-            setLocalBirthPlan,
-            sectionId
-          );
-        }
-      });
-      
-      // Then process each special field
+      // Process each special field
       specialFields.forEach(fieldKey => {
         // Get the appropriate section for this field
         const sectionId = fieldToSectionMap[fieldKey] 

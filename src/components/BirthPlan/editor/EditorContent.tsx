@@ -9,7 +9,6 @@ import {
 } from './utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect } from 'react';
-import { questionToFieldMap } from './utils/fieldMapping';
 
 interface EditorContentProps {
   activeSectionIndex: number;
@@ -59,33 +58,6 @@ export function EditorContent({
           // Auto-fill this textarea field
           console.log(`Auto-filling textarea field ${fieldKey} with:`, questionnaireAnswers[fieldKey]);
           handleFieldChange(activeSection.id, fieldKey, questionnaireAnswers[fieldKey]);
-        }
-      });
-      
-      // Also check for direct mappings from questionnaire to fields
-      Object.entries(questionToFieldMap).forEach(([questionId, fieldKey]) => {
-        if (specialFields.includes(fieldKey) && 
-            questionnaireAnswers[questionId] &&
-            (!localBirthPlan[activeSection.id] || !localBirthPlan[activeSection.id][fieldKey])) {
-          
-          // For checkbox questions, check if there are any selections
-          if (typeof questionnaireAnswers[questionId] === 'object' && 
-              !Array.isArray(questionnaireAnswers[questionId])) {
-            
-            const checkboxAnswers = questionnaireAnswers[questionId];
-            const selectedOptions = [];
-            
-            for (const [option, isSelected] of Object.entries(checkboxAnswers)) {
-              if (isSelected) {
-                selectedOptions.push(option);
-              }
-            }
-            
-            if (selectedOptions.length > 0) {
-              console.log(`Auto-filling ${fieldKey} with selections from ${questionId}`);
-              handleFieldChange(activeSection.id, fieldKey, selectedOptions.join(', '));
-            }
-          }
         }
       });
     }

@@ -1,6 +1,6 @@
 
 import { questionnaireSections } from '../../questionnaire';
-import { fieldToQuestionMap, questionToFieldMap } from './fieldMapping';
+import { fieldToQuestionMap } from './fieldMapping';
 import { getAlwaysShowAddButtonFields } from './fieldConfig';
 import { getSpecialFields } from './optionsHandling';
 
@@ -50,18 +50,11 @@ export const getRelevantQuestionsForField = (
   console.log(`Is special field: ${isSpecialField}`);
   console.log(`Relevant question IDs: ${relevantQuestionIds.join(', ')}`);
   
-  // Check if this field directly maps to a question ID in the questionnaire
-  const directFieldMappingExists = Object.values(questionToFieldMap).includes(fieldKey);
-  
   for (const section of questionnaireSections) {
     for (const question of section.questions) {
-      // Check if this question directly maps to the field
-      const questionMapsToField = fieldKey === questionToFieldMap[question.id];
-      
-      if (relevantQuestionIds.includes(question.id) || questionMapsToField) {
+      if (relevantQuestionIds.includes(question.id)) {
         // For special fields, always include the question regardless of answers
-        if (isSpecialField || questionMapsToField) {
-          console.log(`Including question ${question.id} for special field ${fieldKey}`);
+        if (isSpecialField) {
           relevantQuestions.push({
             question,
             sectionId: section.id
@@ -116,8 +109,7 @@ export const getRelevantQuestionsForField = (
     if (relevantQuestions.length === 0) {
       for (const section of questionnaireSections) {
         for (const question of section.questions) {
-          if (question.id === fieldKey || questionToFieldMap[question.id] === fieldKey) {
-            console.log(`Found direct matching question ${question.id} for field ${fieldKey}`);
+          if (question.id === fieldKey) {
             relevantQuestions.push({
               question,
               sectionId: section.id
@@ -134,3 +126,4 @@ export const getRelevantQuestionsForField = (
   
   return relevantQuestions;
 };
+

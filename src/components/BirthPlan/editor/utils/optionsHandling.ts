@@ -1,6 +1,6 @@
 
 import { parseOptionsFromText } from '../../utils/birthPlanUtils';
-import { findQuestionById, questionToFieldMap } from './fieldMapping';
+import { findQuestionById } from './fieldMapping';
 import { getRelevantQuestionsForField } from './questionRelevance';
 
 /**
@@ -37,49 +37,8 @@ export const initializeOptionsFromCurrentField = (
   console.log(`Is special field: ${isSpecialField}`);
   console.log(`Questionnaire answers:`, questionnaireAnswers);
   
-  // First check if there's a direct matching question ID in the questionnaire
-  const directQuestionId = Object.entries(questionToFieldMap)
-    .find(([questionId, mappedFieldKey]) => mappedFieldKey === fieldKey)?.[0];
-    
-  if (directQuestionId && questionnaireAnswers[directQuestionId]) {
-    console.log(`Found direct questionnaire answer for ${fieldKey} via ${directQuestionId}`);
-    
-    // Get the question details
-    const questionInfo = findQuestionById(directQuestionId);
-    if (questionInfo) {
-      const { question } = questionInfo;
-      initialSelectedOptions[directQuestionId] = {};
-      
-      // For checkboxes, we need to process the object
-      if (question.type === 'checkbox' && 
-          typeof questionnaireAnswers[directQuestionId] === 'object' &&
-          !Array.isArray(questionnaireAnswers[directQuestionId])) {
-        
-        const checkboxAnswers = questionnaireAnswers[directQuestionId];
-        
-        // For each option in the question
-        if (question.options) {
-          question.options.forEach((option: string) => {
-            // Check if this option is selected in the questionnaire
-            initialSelectedOptions[directQuestionId][option] = !!checkboxAnswers[option];
-            
-            if (!!checkboxAnswers[option]) {
-              console.log(`Option ${option} is selected in questionnaire for ${directQuestionId}`);
-            }
-          });
-        }
-      }
-    }
-  }
-  
   relevantQuestions.forEach(({ question }) => {
     const questionId = question.id;
-    
-    // Skip if we already processed this question above
-    if (initialSelectedOptions[questionId]) {
-      return;
-    }
-    
     initialSelectedOptions[questionId] = {};
     
     console.log(`Processing question: ${questionId}, type: ${question.type}`);
@@ -108,7 +67,7 @@ export const initializeOptionsFromCurrentField = (
         // For radio questions (where the answer is a single string)
         if (question.type === 'radio' || question.type === 'select') {
           // For special fields or direct field-to-question mapping, check questionnaire answers
-          if (isSpecialField || fieldKey === questionId || fieldKey === questionToFieldMap[questionId]) {
+          if (isSpecialField || fieldKey === questionId) {
             if (questionnaireAnswers[questionId] === option) {
               isSelected = true;
               console.log(`Radio option ${option} selected from questionnaire for ${questionId}`);
@@ -163,51 +122,19 @@ export const prefillFieldFromQuestionnaire = (
   const specialFields = getSpecialFields();
   const isSpecialField = specialFields.includes(fieldKey);
   
-  console.log(`Prefilling field ${fieldKey} in section ${sectionId} from questionnaire`);
-  console.log(`Is special field: ${isSpecialField}`);
-  
   // Skip if this field already has content
   if (localBirthPlan[sectionId]?.[fieldKey]) {
     console.log(`Field ${fieldKey} already has content, skipping prefill`);
     return;
   }
   
-  // Check if there's a direct matching question ID
-  const directQuestionId = Object.entries(questionToFieldMap)
-    .find(([questionId, mappedFieldKey]) => mappedFieldKey === fieldKey)?.[0];
-    
-  if (directQuestionId && questionnaireAnswers[directQuestionId]) {
-    console.log(`Found direct questionnaire answer for ${fieldKey} via ${directQuestionId}:`, 
-      questionnaireAnswers[directQuestionId]);
-      
-    // Get the question details
-    const questionInfo = findQuestionById(directQuestionId);
-    if (questionInfo && questionInfo.question.type === 'checkbox') {
-      // For checkbox questions, we need to collect all selected options
-      const checkboxAnswers = questionnaireAnswers[directQuestionId];
-      if (typeof checkboxAnswers === 'object' && !Array.isArray(checkboxAnswers)) {
-        const selectedOptions = [];
-        
-        for (const [option, isSelected] of Object.entries(checkboxAnswers)) {
-          if (isSelected) {
-            selectedOptions.push(option);
-          }
-        }
-        
-        if (selectedOptions.length > 0) {
-          console.log(`Setting ${fieldKey} with ${selectedOptions.length} options from questionnaire`);
-          const updatedPlan = { ...localBirthPlan };
-          if (!updatedPlan[sectionId]) {
-            updatedPlan[sectionId] = {};
-          }
-          
-          updatedPlan[sectionId][fieldKey] = selectedOptions.join(', ');
-          setLocalBirthPlan(updatedPlan);
-          return;
-        }
-      }
-    }
+  const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
+  if (relevantQuestions.length === 0) {
+    console.log(`No relevant questions found for ${fieldKey}`);
+    return;
   }
+  
+  console.log(`Prefilling field ${fieldKey} from questionnaire`);
   
   // Special handling for textarea questions
   if (fieldKey === 'unexpectedScenarios' && questionnaireAnswers['unexpectedScenarios']) {
@@ -218,12 +145,6 @@ export const prefillFieldFromQuestionnaire = (
     }
     updatedPlan[sectionId][fieldKey] = questionnaireAnswers['unexpectedScenarios'] || '';
     setLocalBirthPlan(updatedPlan);
-    return;
-  }
-  
-  const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
-  if (relevantQuestions.length === 0) {
-    console.log(`No relevant questions found for ${fieldKey}`);
     return;
   }
   
@@ -306,3 +227,4 @@ export const prefillFieldFromQuestionnaire = (
     setLocalBirthPlan(updatedPlan);
   }
 };
+
