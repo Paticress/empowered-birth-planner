@@ -14,7 +14,8 @@ export const handleAddSelectedOptions = (
   completedSections: string[],
   setCompletedSections: React.Dispatch<React.SetStateAction<string[]>>,
   setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>,
-  setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>,
+  textareaValues?: Record<string, string>
 ) => {
   const updatedPlan = { ...localBirthPlan };
   
@@ -22,6 +23,7 @@ export const handleAddSelectedOptions = (
   const allSelectedOptions: Record<string, string[]> = {}; // questionType -> options
   const questionTypes: Record<string, string> = {}; // Keep track of each question's type
   
+  // Process checkbox and radio selections
   Object.entries(selectedOptions).forEach(([questionId, options]) => {
     if (Object.values(options).some(value => value)) {
       const selectedForQuestion = Object.entries(options)
@@ -51,6 +53,19 @@ export const handleAddSelectedOptions = (
     }
   });
   
+  // Process textarea values
+  if (textareaValues) {
+    Object.entries(textareaValues).forEach(([questionId, text]) => {
+      if (text.trim()) {
+        const questionInfo = findQuestionById(questionId);
+        if (questionInfo) {
+          questionTypes[questionId] = 'textarea';
+          allSelectedOptions[questionId] = [text.trim()];
+        }
+      }
+    });
+  }
+  
   // Special fields that need special handling
   const specialFields = [
     'emergencyScenarios', 
@@ -67,7 +82,8 @@ export const handleAddSelectedOptions = (
   // If we have selected options, update the birth plan
   if (Object.values(allSelectedOptions).some(options => options.length > 0) || specialFields.includes(activeFieldKey)) {
     // Get the mapped section ID for this field from the first question
-    const firstQuestionId = Object.keys(selectedOptions)[0];
+    const firstQuestionId = Object.keys(selectedOptions)[0] || 
+                           (textareaValues && Object.keys(textareaValues)[0]);
     const questionInfo = findQuestionById(firstQuestionId);
     
     const mappedSectionId = mapQuestionnaireToSectionId(
@@ -89,7 +105,12 @@ export const handleAddSelectedOptions = (
       // use a simple format: option1, option2, etc.
       const options = Object.values(allSelectedOptions).flat();
       if (options.length > 0) {
-        updatedPlan[mappedSectionId][activeFieldKey] = options.join(', ');
+        // For textarea type, don't join with commas
+        if (questionIds.length === 1 && questionTypes[questionIds[0]] === 'textarea') {
+          updatedPlan[mappedSectionId][activeFieldKey] = options[0];
+        } else {
+          updatedPlan[mappedSectionId][activeFieldKey] = options.join(', ');
+        }
       }
     } else {
       // For mixed question types, format with question prefixes:
@@ -99,6 +120,11 @@ export const handleAddSelectedOptions = (
           if (options.length === 0) return '';
           
           if (questionInfo) {
+            // For textarea, just use the text as is without a prefix
+            if (questionTypes[questionId] === 'textarea') {
+              return options[0];
+            }
+            
             // Create a prefix from the question text, shortened if needed
             const questionText = questionInfo.question.text;
             const prefix = questionText.length > 30 

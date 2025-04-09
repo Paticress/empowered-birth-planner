@@ -1,4 +1,5 @@
 
+import { useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -9,6 +10,7 @@ interface SelectableOptionsProps {
   selectedOptions: Record<string, Record<string, boolean>>;
   setSelectedOptions: (value: Record<string, Record<string, boolean>>) => void;
   isSpecialField?: boolean;
+  questionnaireAnswers?: Record<string, any>;
 }
 
 export function SelectableOptions({ 
@@ -16,11 +18,48 @@ export function SelectableOptions({
   questionId, 
   selectedOptions, 
   setSelectedOptions,
-  isSpecialField = false
+  isSpecialField = false,
+  questionnaireAnswers = {}
 }: SelectableOptionsProps) {
   if (!question.options || question.options.length === 0) {
     return null;
   }
+  
+  // Initialize options from questionnaire answers when component mounts
+  useEffect(() => {
+    if (questionnaireAnswers && Object.keys(questionnaireAnswers).length > 0) {
+      const newSelectedOptions = { ...selectedOptions };
+      
+      // Initialize the question entry if it doesn't exist
+      if (!newSelectedOptions[questionId]) {
+        newSelectedOptions[questionId] = {};
+      }
+      
+      if (question.type === 'checkbox') {
+        // For checkbox questions, each option might be selected separately
+        if (typeof questionnaireAnswers[questionId] === 'object' && 
+            !Array.isArray(questionnaireAnswers[questionId])) {
+          
+          question.options.forEach((option: string) => {
+            // Mark the option as selected if it's selected in the questionnaire
+            const isSelected = !!questionnaireAnswers[questionId]?.[option];
+            newSelectedOptions[questionId][option] = isSelected;
+          });
+        }
+      } else if (question.type === 'radio' || question.type === 'select') {
+        // For radio/select, only one option can be selected
+        const selectedValue = questionnaireAnswers[questionId];
+        
+        if (selectedValue) {
+          question.options.forEach((option: string) => {
+            newSelectedOptions[questionId][option] = option === selectedValue;
+          });
+        }
+      }
+      
+      setSelectedOptions(newSelectedOptions);
+    }
+  }, [questionId, questionnaireAnswers]);
   
   const handleCheckedChange = (option: string, checked: boolean) => {
     // Create a copy of the current state

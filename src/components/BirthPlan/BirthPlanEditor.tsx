@@ -8,7 +8,7 @@ import { BirthPlanSectionProgress } from './BirthPlanSectionProgress';
 import { useEditorState } from './hooks/useEditorState';
 import { handleAddSelectedOptions } from './editor/editorHelpers';
 import { BackToTopButton } from './common/BackToTopButton';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -45,6 +45,8 @@ export function BirthPlanEditor({
     isDirty
   } = useEditorState(birthPlan, onUpdate, questionnaireAnswers);
 
+  const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
+
   const processAddSelectedOptions = () => {
     handleAddSelectedOptions(
       activeFieldKey,
@@ -54,8 +56,11 @@ export function BirthPlanEditor({
       completedSections,
       setCompletedSections,
       setSelectedOptions,
-      setDialogOpen
+      setDialogOpen,
+      textareaValues
     );
+    // Reset textarea values after adding
+    setTextareaValues({});
   };
   
   // Auto-save functionality
@@ -82,6 +87,14 @@ export function BirthPlanEditor({
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
+  
+  // Set initial values for fields based on questionnaire answers
+  useEffect(() => {
+    if (Object.keys(questionnaireAnswers).length > 0 && 
+        Object.keys(localBirthPlan).length > 0) {
+      console.log("Initializing birth plan from questionnaire answers", questionnaireAnswers);
+    }
+  }, [questionnaireAnswers, localBirthPlan]);
   
   return (
     <div className="animate-fade-in">

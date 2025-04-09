@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,8 @@ import { Plus } from 'lucide-react';
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { OptionsDialog } from './OptionsDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getAlwaysShowAddButtonFields } from './utils/fieldConfig';
+import { formatFieldValueFromQuestionnaire } from './utils/optionsHandling';
 
 interface EditorFieldProps {
   field: { key: string; label: string };
@@ -23,6 +25,7 @@ interface EditorFieldProps {
   setSelectedOptions: (value: Record<string, Record<string, boolean>>) => void;
   getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
   handleAddSelectedOptions: () => void;
+  questionnaireAnswers: Record<string, any>;
 }
 
 export function EditorField({
@@ -39,7 +42,8 @@ export function EditorField({
   selectedOptions,
   setSelectedOptions,
   getRelevantQuestionsForField,
-  handleAddSelectedOptions
+  handleAddSelectedOptions,
+  questionnaireAnswers
 }: EditorFieldProps) {
   const fieldValue = sectionData[field.key] || '';
   const showAddButton = shouldShowAddButton(field.key);
@@ -49,27 +53,27 @@ export function EditorField({
   const isContactField = field.key.toLowerCase().includes('contact');
   const isRegistryField = field.key.toLowerCase().includes('registry');
   
-  // List of special fields that should always show the add button
-  const specialFields = [
-    'emergencyScenarios', 
-    'highRiskComplications', 
-    'lowRiskOccurrences', 
-    'cascadeInterventions',
-    'painRelief',
-    'interventionsRoutine',
-    'consentimentoInformado',
-    'specialWishes',
-    'unexpectedScenarios'
-  ];
+  // List of special fields
+  const specialFields = getAlwaysShowAddButtonFields();
   
   // Force single line input for contact and registry fields
   const useInputField = useSingleLineInput || isContactField || isRegistryField;
   
-  // Force show add button for special fields
+  // Always show add button for special fields
   const forceShowAddButton = specialFields.includes(field.key);
   
   // Always show the add button for certain fields regardless of whether there are responses
   const alwaysShowAddButton = showAddButton || forceShowAddButton;
+
+  // Initialize the field with questionnaire answers if it's a special field and empty
+  useEffect(() => {
+    if (specialFields.includes(field.key) && fieldValue === '' && !sectionData[field.key]) {
+      const formattedValue = formatFieldValueFromQuestionnaire(field.key, questionnaireAnswers);
+      if (formattedValue) {
+        handleFieldChange(activeSection.id, field.key, formattedValue);
+      }
+    }
+  }, [field.key, activeSection.id, questionnaireAnswers]);
   
   return (
     <div className="mb-4 md:mb-6 border border-maternal-100 rounded-lg p-3 md:p-4 bg-maternal-50/30">
@@ -107,6 +111,7 @@ export function EditorField({
               setSelectedOptions={setSelectedOptions}
               getRelevantQuestionsForField={getRelevantQuestionsForField}
               handleAddSelectedOptions={handleAddSelectedOptions}
+              questionnaireAnswers={questionnaireAnswers}
             />
           </Dialog>
         )}

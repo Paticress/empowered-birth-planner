@@ -34,18 +34,7 @@ export const getRelevantQuestionsForField = (
   const relevantQuestions: Array<{question: any, sectionId: string}> = [];
   
   // Special fields that should always show their related questions
-  const alwaysShowFields = [
-    'emergencyScenarios', 
-    'highRiskComplications', 
-    'lowRiskOccurrences', 
-    'cascadeInterventions',
-    'painRelief',
-    'interventionsRoutine',
-    'consentimentoInformado',
-    'specialWishes',
-    'unexpectedScenarios'
-  ];
-  
+  const alwaysShowFields = getAlwaysShowAddButtonFields();
   const isSpecialField = alwaysShowFields.includes(fieldKey);
   
   for (const section of questionnaireSections) {

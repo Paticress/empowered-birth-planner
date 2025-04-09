@@ -19,6 +19,7 @@ interface OptionsDialogProps {
   setSelectedOptions: (value: Record<string, Record<string, boolean>>) => void;
   getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
   handleAddSelectedOptions: () => void;
+  questionnaireAnswers: Record<string, any>;
 }
 
 export function OptionsDialog({
@@ -28,7 +29,8 @@ export function OptionsDialog({
   selectedOptions,
   setSelectedOptions,
   getRelevantQuestionsForField,
-  handleAddSelectedOptions
+  handleAddSelectedOptions,
+  questionnaireAnswers
 }: OptionsDialogProps) {
   const [relevantQuestions, setRelevantQuestions] = useState<Array<{question: any, sectionId: string}>>([]);
   const [hasRadioOnly, setHasRadioOnly] = useState(false);
@@ -45,24 +47,36 @@ export function OptionsDialog({
         questions.every(q => q.question.type === 'radio' || q.question.type === 'select');
       setHasRadioOnly(onlyRadioQuestions);
       
+      // Initialize textarea values from questionnaire answers
+      const initialTextareaValues: Record<string, string> = {};
+      questions.forEach(({ question }) => {
+        if (question.type === 'textarea' && questionnaireAnswers[question.id]) {
+          initialTextareaValues[question.id] = questionnaireAnswers[question.id];
+        }
+      });
+      setTextareaValues(initialTextareaValues);
+      
       // Log debugging information
       console.log(`Dialog opened for field: ${activeFieldKey}`);
       console.log(`Found ${questions.length} relevant questions`);
       console.log("Questions:", questions.map(q => q.question.id));
       console.log("Currently selected options:", selectedOptions);
+      console.log("Questionnaire answers in dialog:", questionnaireAnswers);
     }
-  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField]);
+  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers]);
   
   // Special case for emergency scenarios and complications fields
-  const isSpecialField = activeFieldKey === 'emergencyScenarios' ||
-                       activeFieldKey === 'highRiskComplications' ||
-                       activeFieldKey === 'lowRiskOccurrences' ||
-                       activeFieldKey === 'cascadeInterventions' ||
-                       activeFieldKey === 'unexpectedScenarios' ||
-                       activeFieldKey === 'specialWishes' ||
-                       activeFieldKey === 'painRelief' ||
-                       activeFieldKey === 'interventionsRoutine' ||
-                       activeFieldKey === 'consentimentoInformado';
+  const isSpecialField = [
+    'emergencyScenarios',
+    'highRiskComplications',
+    'lowRiskOccurrences',
+    'cascadeInterventions',
+    'unexpectedScenarios',
+    'specialWishes',
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado'
+  ].includes(activeFieldKey);
   
   const handleTextareaChange = (questionId: string, value: string) => {
     setTextareaValues(prev => ({
@@ -114,6 +128,7 @@ export function OptionsDialog({
                   selectedOptions={selectedOptions}
                   setSelectedOptions={setSelectedOptions}
                   isSpecialField={isSpecialField}
+                  questionnaireAnswers={questionnaireAnswers}
                 />
               </div>
             );
