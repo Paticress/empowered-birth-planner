@@ -26,9 +26,8 @@ export const initializeOptionsFromCurrentField = (
 ) => {
   // Log for debugging
   console.log(`Initializing options for field: ${fieldKey} in section: ${sectionId}`);
-  console.log("Questionnaire answers:", questionnaireAnswers);
   
-  const currentFieldOptions = parseCurrentFieldOptions(fieldKey, sectionId, birthPlan);
+  // Get relevant questions specific to this field
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
   
   const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
@@ -55,7 +54,7 @@ export const initializeOptionsFromCurrentField = (
     
     if (question.options) {
       question.options.forEach((option: string) => {
-        let isSelected = currentFieldOptions.includes(option);
+        let isSelected = false;
         
         // For checkbox questions (where answers are stored as objects)
         if (question.type === 'checkbox' && 

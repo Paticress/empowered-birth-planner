@@ -20,7 +20,7 @@ export const handleAddSelectedOptions = (
   const updatedPlan = { ...localBirthPlan };
   
   // Group selected options by question type to maintain consistent formatting
-  const allSelectedOptions: Record<string, string[]> = {}; // questionType -> options
+  const allSelectedOptions: Record<string, string[]> = {}; // questionId -> options
   const questionTypes: Record<string, string> = {}; // Keep track of each question's type
   
   // Process checkbox and radio selections
@@ -81,7 +81,7 @@ export const handleAddSelectedOptions = (
   
   // If we have selected options, update the birth plan
   if (Object.values(allSelectedOptions).some(options => options.length > 0) || specialFields.includes(activeFieldKey)) {
-    // Get the mapped section ID for this field from the first question
+    // Get the current active section
     const firstQuestionId = Object.keys(selectedOptions)[0] || 
                            (textareaValues && Object.keys(textareaValues)[0]);
     const questionInfo = findQuestionById(firstQuestionId);
@@ -95,52 +95,37 @@ export const handleAddSelectedOptions = (
       updatedPlan[mappedSectionId] = {};
     }
     
+    // Check if we're replacing or appending to existing content
+    const currentFieldValue = updatedPlan[mappedSectionId][activeFieldKey] || '';
+    
     // Determine how to format options based on the question types included
     const questionIds = Object.keys(allSelectedOptions);
-    const allSameType = questionIds.length === 1 || 
-                        questionIds.every(id => questionTypes[id] === questionTypes[questionIds[0]]);
     
-    if (allSameType && questionIds.length === 1) {
-      // If there's just one question or all questions are the same type, 
-      // use a simple format: option1, option2, etc.
-      const options = Object.values(allSelectedOptions).flat();
-      if (options.length > 0) {
-        // For textarea type, don't join with commas
-        if (questionIds.length === 1 && questionTypes[questionIds[0]] === 'textarea') {
-          updatedPlan[mappedSectionId][activeFieldKey] = options[0];
-        } else {
-          updatedPlan[mappedSectionId][activeFieldKey] = options.join(', ');
-        }
-      }
-    } else {
-      // For mixed question types, format with question prefixes:
-      const formattedOptions = Object.entries(allSelectedOptions)
-        .map(([questionId, options]) => {
-          const questionInfo = findQuestionById(questionId);
-          if (options.length === 0) return '';
-          
-          if (questionInfo) {
-            // For textarea, just use the text as is without a prefix
-            if (questionTypes[questionId] === 'textarea') {
-              return options[0];
-            }
-            
-            // Create a prefix from the question text, shortened if needed
-            const questionText = questionInfo.question.text;
-            const prefix = questionText.length > 30 
-              ? questionText.substring(0, 30) + '...'
-              : questionText;
-              
-            return `${prefix}: ${options.join(', ')}`;
-          }
-          return options.join(', ');
-        })
-        .filter(text => text.length > 0)
-        .join('\n\n');
+    // Format options for the selected questions only
+    const formattedOptions = questionIds.map(questionId => {
+      const options = allSelectedOptions[questionId];
+      if (!options || options.length === 0) return '';
       
-      if (formattedOptions.length > 0) {
-        updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
+      const questionInfo = findQuestionById(questionId);
+      if (!questionInfo) return '';
+      
+      // For textarea, just use the text as is
+      if (questionTypes[questionId] === 'textarea') {
+        return options[0];
       }
+      
+      // Create a prefix from the question text, shortened if needed
+      const questionText = questionInfo.question.text;
+      const prefix = questionText.length > 30 
+        ? questionText.substring(0, 30) + '...'
+        : questionText;
+        
+      return `${prefix}: ${options.join(', ')}`;
+    }).filter(text => text.length > 0);
+    
+    if (formattedOptions.length > 0) {
+      // Set the new value, completely replacing the old one
+      updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions.join('\n\n');
     }
     
     setLocalBirthPlan(updatedPlan);

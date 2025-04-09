@@ -77,9 +77,15 @@ export function useEditorState(
   }, [localBirthPlan, onUpdate]);
   
   const resetOptionsForField = useCallback((fieldKey: string) => {
+    // Set the active field key
     setActiveFieldKey(fieldKey);
     
+    // Get the current active section
     const activeSection = birthPlanSections[activeSectionIndex];
+    
+    console.log(`Initializing options for field: ${fieldKey} in section: ${activeSection.id}`);
+    
+    // Initialize selected options based on questionnaire answers
     const initialSelectedOptions = initializeOptionsFromCurrentField(
       fieldKey, 
       activeSection.id,
@@ -87,7 +93,10 @@ export function useEditorState(
       questionnaireAnswers
     );
     
+    // Update state with the initial options
     setSelectedOptions(initialSelectedOptions);
+    
+    // Open the dialog
     setDialogOpen(true);
   }, [activeSectionIndex, localBirthPlan, questionnaireAnswers]);
 

@@ -24,12 +24,19 @@ export const shouldShowAddButton = (fieldKey: string, questionnaireAnswers: Reco
 
 /**
  * Gets all relevant questions for a specific field
+ * This is a critical function that ensures each field only gets its own related questions
  */
 export const getRelevantQuestionsForField = (
   fieldKey: string, 
   questionnaireAnswers: Record<string, any> = {}
 ) => {
+  // Get the list of question IDs that are relevant for this specific field
   const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
+  
+  // If no relevant questions are mapped to this field, return empty array
+  if (relevantQuestionIds.length === 0) {
+    return [];
+  }
   
   const relevantQuestions: Array<{question: any, sectionId: string}> = [];
   
@@ -37,9 +44,14 @@ export const getRelevantQuestionsForField = (
   const alwaysShowFields = getAlwaysShowAddButtonFields();
   const isSpecialField = alwaysShowFields.includes(fieldKey);
   
+  // Find the relevant questions from all questionnaire sections
   for (const section of questionnaireSections) {
     for (const question of section.questions) {
+      // Only include questions that are specifically mapped to this field
       if (relevantQuestionIds.includes(question.id)) {
+        // Log for debugging
+        console.log(`Field ${fieldKey} is including question: ${question.id} (${question.text})`);
+        
         // For special fields, always include the question regardless of previous answer
         if (isSpecialField) {
           relevantQuestions.push({

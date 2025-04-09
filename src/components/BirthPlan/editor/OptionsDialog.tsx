@@ -56,16 +56,14 @@ export function OptionsDialog({
       });
       setTextareaValues(initialTextareaValues);
       
-      // Log debugging information
+      // Debug logging
       console.log(`Dialog opened for field: ${activeFieldKey}`);
-      console.log(`Found ${questions.length} relevant questions`);
-      console.log("Questions:", questions.map(q => q.question.id));
+      console.log(`Found ${questions.length} relevant questions:`, questions.map(q => q.question.id));
       console.log("Currently selected options:", selectedOptions);
-      console.log("Questionnaire answers in dialog:", questionnaireAnswers);
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers]);
   
-  // Special case for emergency scenarios and complications fields
+  // Special case for specific fields
   const isSpecialField = [
     'emergencyScenarios',
     'highRiskComplications',

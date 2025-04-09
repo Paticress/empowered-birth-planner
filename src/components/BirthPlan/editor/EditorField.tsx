@@ -75,6 +75,15 @@ export function EditorField({
     }
   }, [field.key, activeSection.id, questionnaireAnswers]);
   
+  // Handle opening the options dialog for this field
+  const handleOpenOptionsDialog = () => {
+    console.log(`Opening dialog for field: ${field.key}`);
+    // First, reset any previous selections to ensure we start fresh
+    setSelectedOptions({}); 
+    // Then initialize this field's options
+    resetOptionsForField(field.key);
+  };
+  
   return (
     <div className="mb-4 md:mb-6 border border-maternal-100 rounded-lg p-3 md:p-4 bg-maternal-50/30">
       <div className={`flex flex-col ${!isMobile ? 'sm:flex-row sm:justify-between sm:items-center' : ''} mb-2`}>
@@ -86,19 +95,20 @@ export function EditorField({
         </label>
         
         {alwaysShowAddButton && (
-          <Dialog open={dialogOpen && activeFieldKey === field.key} onOpenChange={(open) => {
-            if (open && activeFieldKey !== field.key) {
-              resetOptionsForField(field.key);
-            } else if (!open) {
-              setDialogOpen(false);
-            }
-          }}>
+          <Dialog 
+            open={dialogOpen && activeFieldKey === field.key} 
+            onOpenChange={(open) => {
+              if (!open) {
+                setDialogOpen(false);
+              }
+            }}
+          >
             <DialogTrigger asChild>
               <Button 
                 variant="outline" 
                 size="sm"
                 className="flex items-center gap-1 border-maternal-300 text-maternal-600 text-xs w-full sm:w-auto justify-center sm:justify-start mt-1 sm:mt-0"
-                onClick={() => resetOptionsForField(field.key)}
+                onClick={handleOpenOptionsDialog}
               >
                 <Plus className="h-3 w-3" /> Adicionar do Questionário
               </Button>
