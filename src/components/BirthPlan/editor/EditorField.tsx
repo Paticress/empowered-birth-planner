@@ -68,6 +68,9 @@ export function EditorField({
   // Force show add button for special fields
   const forceShowAddButton = specialFields.includes(field.key);
   
+  // Always show the add button for certain fields regardless of whether there are responses
+  const alwaysShowAddButton = showAddButton || forceShowAddButton;
+  
   return (
     <div className="mb-4 md:mb-6 border border-maternal-100 rounded-lg p-3 md:p-4 bg-maternal-50/30">
       <div className={`flex flex-col ${!isMobile ? 'sm:flex-row sm:justify-between sm:items-center' : ''} mb-2`}>
@@ -78,7 +81,7 @@ export function EditorField({
           {field.label}
         </label>
         
-        {(showAddButton || forceShowAddButton) && (
+        {alwaysShowAddButton && (
           <Dialog open={dialogOpen && activeFieldKey === field.key} onOpenChange={(open) => {
             if (open && activeFieldKey !== field.key) {
               resetOptionsForField(field.key);

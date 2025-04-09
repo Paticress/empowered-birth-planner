@@ -30,9 +30,9 @@ export const getSingleLineFields = (): string[] => {
  */
 export const getAlwaysShowAddButtonFields = (): string[] => {
   return [
-    'emergencyScenarios',
-    'highRiskComplications',
-    'lowRiskOccurrences',
+    'emergencyScenarios', 
+    'highRiskComplications', 
+    'lowRiskOccurrences', 
     'cascadeInterventions',
     'painRelief',
     'interventionsRoutine',

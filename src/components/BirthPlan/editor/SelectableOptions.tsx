@@ -64,7 +64,7 @@ export function SelectableOptions({
     setSelectedOptions(newSelectedOptions);
   };
   
-  // Special handling for emergency scenarios and complications fields
+  // Special handling for special fields
   // For these fields, we want to potentially select multiple radio options
   // across different questions
   if (isSpecialField && (question.type === 'radio' || question.type === 'select')) {

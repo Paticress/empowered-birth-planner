@@ -44,6 +44,12 @@ export function OptionsDialog({
       const onlyRadioQuestions = questions.length > 0 && 
         questions.every(q => q.question.type === 'radio' || q.question.type === 'select');
       setHasRadioOnly(onlyRadioQuestions);
+      
+      // Log debugging information
+      console.log(`Dialog opened for field: ${activeFieldKey}`);
+      console.log(`Found ${questions.length} relevant questions`);
+      console.log("Questions:", questions.map(q => q.question.id));
+      console.log("Currently selected options:", selectedOptions);
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField]);
   

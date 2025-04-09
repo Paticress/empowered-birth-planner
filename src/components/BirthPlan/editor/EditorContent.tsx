@@ -66,8 +66,9 @@ export function EditorContent({
         const sectionData = localBirthPlan[activeSection.id] || {};
         const useSingleLineInput = singleLineFields.includes(field.key);
         
-        // Override shouldShowAddButton for special fields
-        const showAddFromQuestionnaire = specialFields.includes(field.key) ||
+        // Calculate whether to show the add button - we always want it for special fields
+        // and for any field that might have questionnaire answers
+        const showAddFromQuestionnaire = specialFields.includes(field.key) || 
           shouldShowAddButton(field.key, questionnaireAnswers);
           
         return (

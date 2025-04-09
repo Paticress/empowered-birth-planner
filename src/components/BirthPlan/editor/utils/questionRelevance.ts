@@ -51,7 +51,7 @@ export const getRelevantQuestionsForField = (
   for (const section of questionnaireSections) {
     for (const question of section.questions) {
       if (relevantQuestionIds.includes(question.id)) {
-        // For special fields, always include the question
+        // For special fields, always include the question regardless of previous answer
         if (isSpecialField) {
           relevantQuestions.push({
             question,
@@ -60,31 +60,13 @@ export const getRelevantQuestionsForField = (
           continue;
         }
         
-        // Check if there are answers for this question
-        const hasAnswer = questionnaireAnswers[question.id] !== undefined;
-        
-        // For checkbox type questions, check if any option was selected
-        if (question.type === 'checkbox' && typeof questionnaireAnswers[question.id] === 'object') {
-          const checkboxAnswers = questionnaireAnswers[question.id];
-          const hasAnySelection = Object.values(checkboxAnswers).some(value => !!value);
-          
-          if (hasAnySelection || !hasAnswer) {
-            relevantQuestions.push({
-              question,
-              sectionId: section.id
-            });
-          }
-        } else if (hasAnswer || 
-                   getAlwaysShowAddButtonFields().includes(fieldKey) || 
-                   question.type === 'radio' || 
-                   question.type === 'select' ||
-                   question.type === 'textarea') {
-          // Always include radio/select/textarea type questions even without previous answers
-          relevantQuestions.push({
-            question,
-            sectionId: section.id
-          });
-        }
+        // For all other fields, always show the questions
+        // This addresses the non-functional requirement to always show the "Add from Questionnaire" button
+        // even when there's no answer yet
+        relevantQuestions.push({
+          question,
+          sectionId: section.id
+        });
       }
     }
   }
