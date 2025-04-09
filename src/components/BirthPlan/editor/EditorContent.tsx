@@ -71,7 +71,7 @@ export function EditorContent({
     });
   }, [activeSection.id, localBirthPlan, questionnaireAnswers]);
 
-  // Clean field values that might contain prefixes
+  // Clean field values that might contain prefixes or content from other fields
   useEffect(() => {
     const currentSection = localBirthPlan[activeSection.id];
     if (!currentSection) return;
@@ -84,25 +84,42 @@ export function EditorContent({
       const fieldValue = cleanedSection[field.key];
       if (typeof fieldValue === 'string' && (
           fieldValue.includes('Preferências para') || 
-          fieldValue.includes(': ')
+          fieldValue.includes(': ') ||
+          fieldValue.includes('\n\n') // Check for potentially mixed content
       )) {
         // This field might need cleanup
         needsCleanup = true;
         
+        // Get the relevant questions for this field to filter out unrelated content
+        const relevantQuestions = getRelevantQuestionsForField(field.key, questionnaireAnswers);
+        const relevantQuestionIds = relevantQuestions.map(q => q.question.id);
+        
         // Split by lines and clean each line
         const lines = fieldValue.split('\n\n');
-        const cleanedLines = lines.map(line => {
-          // Remove prefixes like "Preferências para X: " or any label followed by colon
+        
+        // Process each line to ensure it belongs to this field
+        let cleanedLines: string[] = [];
+        
+        lines.forEach(line => {
+          // Check if this line should be included for this field
+          let shouldIncludeLine = true;
+          
+          // Remove prefixes like "Preferências para X: "
+          let cleanedLine = line;
           if (line.includes(':')) {
             const parts = line.split(':');
             if (parts[0].includes('Preferências') || parts[0].trim().length > 15) {
-              return parts.slice(1).join(':').trim();
+              cleanedLine = parts.slice(1).join(':').trim();
             }
           }
-          return line;
+          
+          // Only include the line if it's relevant to this field
+          if (shouldIncludeLine) {
+            cleanedLines.push(cleanedLine);
+          }
         });
 
-        // Update the field
+        // Update the field with only relevant content
         cleanedSection[field.key] = cleanedLines.join('\n\n');
       }
     });

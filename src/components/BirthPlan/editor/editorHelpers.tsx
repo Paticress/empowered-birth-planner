@@ -95,9 +95,6 @@ export const handleAddSelectedOptions = (
       updatedPlan[mappedSectionId] = {};
     }
     
-    // Important: We're now replacing the entire field content, not appending to it
-    // This ensures we don't mix content from different questions
-    
     // Format options for the selected questions only
     const formattedOptions = Object.keys(allSelectedOptions).map(questionId => {
       const options = allSelectedOptions[questionId];
@@ -116,7 +113,7 @@ export const handleAddSelectedOptions = (
     }).filter(text => text.length > 0);
     
     if (formattedOptions.length > 0) {
-      // Set the new value, completely replacing the old one
+      // CRITICAL CHANGE: Completely replace existing field value instead of appending
       updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions.join('\n\n');
     }
     

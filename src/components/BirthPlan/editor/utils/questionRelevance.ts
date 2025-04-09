@@ -49,9 +49,6 @@ export const getRelevantQuestionsForField = (
     for (const question of section.questions) {
       // Only include questions that are specifically mapped to this field
       if (relevantQuestionIds.includes(question.id)) {
-        // Log for debugging
-        console.log(`Field ${fieldKey} is including question: ${question.id} (${question.text})`);
-        
         // For special fields, always include the question regardless of previous answer
         if (isSpecialField) {
           relevantQuestions.push({

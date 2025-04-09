@@ -93,6 +93,9 @@ export function useEditorState(
   }, [localBirthPlan, onUpdate]);
   
   const resetOptionsForField = useCallback((fieldKey: string) => {
+    // Reset any previous selections
+    setSelectedOptions({});
+    
     // Set the active field key
     setActiveFieldKey(fieldKey);
     
@@ -102,6 +105,7 @@ export function useEditorState(
     console.log(`Initializing options for field: ${fieldKey} in section: ${activeSection.id}`);
     
     // Initialize selected options based on questionnaire answers
+    // Make sure only relevant questions for this specific field are considered
     const initialSelectedOptions = initializeOptionsFromCurrentField(
       fieldKey, 
       activeSection.id,

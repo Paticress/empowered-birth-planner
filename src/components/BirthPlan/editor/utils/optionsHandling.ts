@@ -27,7 +27,7 @@ export const initializeOptionsFromCurrentField = (
   // Log for debugging
   console.log(`Initializing options for field: ${fieldKey} in section: ${sectionId}`);
   
-  // Get relevant questions specific to this field
+  // Get relevant questions specific to this field only
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
   
   const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
@@ -89,6 +89,7 @@ export const formatFieldValueFromQuestionnaire = (
   fieldKey: string,
   questionnaireAnswers: Record<string, any>
 ) => {
+  // Only get questions that are relevant to this specific field
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
   const specialFields = getAlwaysShowAddButtonFields();
   
