@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { EditorField } from './EditorField';
 import { birthPlanSections } from '../utils/birthPlanSections';
@@ -90,7 +89,7 @@ export function EditorContent({
           const currentValue = localBirthPlan[activeSection.id]?.[field.key] || '';
           if (currentValue === '') {
             // Get relevant questions for this field
-            const relevantQuestions = getRelevantQuestionsForField(field.key, questionnaireAnswers);
+            const relevantQuestions = getRelevantQuestionsForField(field.key);
             console.log(`Found ${relevantQuestions.length} relevant questions for ${field.key}`);
             
             // Print the question IDs for debugging

@@ -65,6 +65,7 @@ export const getRelevantQuestionsForField = (
   }
   
   // Get the list of question IDs that are relevant for this specific field
+  // This is the key to fixing the bug - we need a direct mapping from field key to question IDs
   const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
   
   // If no relevant questions are mapped to this field, return empty array
