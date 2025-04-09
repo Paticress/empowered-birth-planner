@@ -30,13 +30,18 @@ export const getRelevantQuestionsForField = (
   fieldKey: string, 
   questionnaireAnswers: Record<string, any> = {}
 ) => {
+  console.log(`Getting relevant questions for field: ${fieldKey}`);
+  
   // Get the list of question IDs that are relevant for this specific field
   const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
   
   // If no relevant questions are mapped to this field, return empty array
   if (relevantQuestionIds.length === 0) {
+    console.log(`No question IDs mapped to field ${fieldKey}`);
     return [];
   }
+  
+  console.log(`Found ${relevantQuestionIds.length} mapped question IDs for ${fieldKey}:`, relevantQuestionIds);
   
   const relevantQuestions: Array<{question: any, sectionId: string}> = [];
   
@@ -44,29 +49,23 @@ export const getRelevantQuestionsForField = (
   const alwaysShowFields = getAlwaysShowAddButtonFields();
   const isSpecialField = alwaysShowFields.includes(fieldKey);
   
-  // Debug log for special fields
-  if (isSpecialField) {
-    console.log(`Getting relevant questions for special field: ${fieldKey}`);
-    console.log(`Mapped questions IDs:`, relevantQuestionIds);
-  }
-  
   // Find the relevant questions from all questionnaire sections
   for (const section of questionnaireSections) {
     for (const question of section.questions) {
       // Only include questions that are specifically mapped to this field
       if (relevantQuestionIds.includes(question.id)) {
-        // For special fields, always include the question regardless of previous answer
-        if (isSpecialField) {
-          // Check if there's an answer for this question
-          const hasAnswer = 
-            questionnaireAnswers[question.id] !== undefined && 
-            questionnaireAnswers[question.id] !== null && 
-            questionnaireAnswers[question.id] !== "";
+        // Log for debugging
+        console.log(`Found question ${question.id} (${question.text}) for field ${fieldKey} in section ${section.id}`);
+        
+        // Special handling for emergency fields to ensure they get their questions
+        if (
+          (fieldKey === 'emergencyScenarios' && question.id === 'emergencyPreferences') ||
+          (fieldKey === 'highRiskComplications' && question.id === 'highRiskComplications') ||
+          (fieldKey === 'lowRiskOccurrences' && question.id === 'lowRiskOccurrences')
+        ) {
+          console.log(`Special field match: ${fieldKey} with question ${question.id}`);
           
-          if (isSpecialField && hasAnswer) {
-            console.log(`Found answer for special field ${fieldKey}, question ${question.id}:`, questionnaireAnswers[question.id]);
-          }
-          
+          // For these special cases, always include the question
           relevantQuestions.push({
             question,
             sectionId: section.id
@@ -74,7 +73,7 @@ export const getRelevantQuestionsForField = (
           continue;
         }
         
-        // For all other fields, always show the questions
+        // For all fields, always include the mapped questions
         relevantQuestions.push({
           question,
           sectionId: section.id
@@ -83,9 +82,6 @@ export const getRelevantQuestionsForField = (
     }
   }
   
-  if (isSpecialField) {
-    console.log(`Found ${relevantQuestions.length} relevant questions for ${fieldKey}`);
-  }
-  
+  console.log(`Found total ${relevantQuestions.length} relevant questions for ${fieldKey}`);
   return relevantQuestions;
 };

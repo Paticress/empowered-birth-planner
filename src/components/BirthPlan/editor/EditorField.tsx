@@ -59,20 +59,33 @@ export function EditorField({
   // Force single line input for contact and registry fields
   const useInputField = useSingleLineInput || isContactField || isRegistryField;
   
-  // Always show add button for special fields
-  const forceShowAddButton = specialFields.includes(field.key);
+  // Special debug for problematic fields
+  if (['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'].includes(field.key)) {
+    console.log(`Rendering special field: ${field.key}`);
+    console.log(`Current value: "${fieldValue}"`);
+    
+    // Check if this field has any answers in the questionnaire
+    const relevantQuestions = getRelevantQuestionsForField(field.key);
+    console.log(`Found ${relevantQuestions.length} relevant questions`);
+    
+    relevantQuestions.forEach(q => {
+      const questionId = q.question?.id;
+      if (questionId) {
+        console.log(`Question ${questionId} has answer:`, !!questionnaireAnswers[questionId]);
+      }
+    });
+  }
   
-  // Always show the add button for certain fields regardless of whether there are responses
-  const alwaysShowAddButton = showAddButton || forceShowAddButton;
-
   // Initialize the field with questionnaire answers if it's a special field and empty
   useEffect(() => {
-    if (specialFields.includes(field.key) && fieldValue === '' && !sectionData[field.key]) {
+    if (specialFields.includes(field.key) && fieldValue === '') {
       console.log(`Initializing special field ${field.key} from questionnaire`);
       const formattedValue = formatFieldValueFromQuestionnaire(field.key, questionnaireAnswers);
       if (formattedValue) {
         console.log(`Setting initial value for ${field.key}:`, formattedValue);
         handleFieldChange(activeSection.id, field.key, formattedValue);
+      } else {
+        console.log(`No formatted value for ${field.key}`);
       }
     }
   }, [field.key, activeSection.id, questionnaireAnswers]);
@@ -80,8 +93,10 @@ export function EditorField({
   // Handle opening the options dialog for this field
   const handleOpenOptionsDialog = () => {
     console.log(`Opening dialog for field: ${field.key}`);
+    
     // First, reset any previous selections to ensure we start fresh
     setSelectedOptions({}); 
+    
     // Then initialize this field's options
     resetOptionsForField(field.key);
   };
@@ -96,7 +111,7 @@ export function EditorField({
           {field.label}
         </label>
         
-        {alwaysShowAddButton && (
+        {showAddButton && (
           <Dialog 
             open={dialogOpen && activeFieldKey === field.key} 
             onOpenChange={(open) => {

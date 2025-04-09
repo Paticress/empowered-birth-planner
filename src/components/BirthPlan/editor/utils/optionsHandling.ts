@@ -26,7 +26,7 @@ export const initializeOptionsFromCurrentField = (
 ) => {
   // Log for debugging
   console.log(`Initializing options for field: ${fieldKey} in section: ${sectionId}`);
-  console.log(`Questionnaire answers:`, questionnaireAnswers);
+  console.log(`Questionnaire answers keys:`, Object.keys(questionnaireAnswers));
   
   // Get relevant questions specific to this field only
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
@@ -37,12 +37,32 @@ export const initializeOptionsFromCurrentField = (
   const specialFields = getAlwaysShowAddButtonFields();
   const isSpecialField = specialFields.includes(fieldKey);
   
-  // Log relevant questions for debugging
-  console.log(`Relevant questions for ${fieldKey}:`, relevantQuestions.map(q => q.question.id));
+  // Special debug for problematic fields
+  if (['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'].includes(fieldKey)) {
+    console.log(`Initializing special field: ${fieldKey}`);
+    console.log(`Found ${relevantQuestions.length} relevant questions:`);
+    
+    relevantQuestions.forEach(q => {
+      console.log(`- Question ${q.question?.id}: ${q.question?.text}`);
+    });
+  }
   
+  // Process each relevant question
   relevantQuestions.forEach(({ question }) => {
+    if (!question) {
+      console.error("Found undefined question during initialization");
+      return;
+    }
+    
     const questionId = question.id;
     initialSelectedOptions[questionId] = {};
+    
+    // Debug for special fields
+    if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+      console.log(`Processing special question: ${questionId}`);
+      console.log(`Question has answer:`, !!questionnaireAnswers[questionId]);
+      console.log(`Answer type:`, typeof questionnaireAnswers[questionId]);
+    }
     
     // Handle textarea type questions
     if (question.type === 'textarea') {
@@ -63,7 +83,11 @@ export const initializeOptionsFromCurrentField = (
             !Array.isArray(questionnaireAnswers[questionId])) {
           // Check if this specific option is selected in the questionnaire
           isSelected = !!questionnaireAnswers[questionId]?.[option];
-          console.log(`Checkbox option ${option} for ${questionId} selected:`, isSelected);
+          
+          // Debug for special fields
+          if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+            console.log(`Checkbox option "${option}" selected:`, isSelected);
+          }
         }
         
         // For radio questions (where the answer is a single string)
@@ -71,7 +95,6 @@ export const initializeOptionsFromCurrentField = (
             questionnaireAnswers[questionId] !== undefined) {
           // Check if this option matches the questionnaire answer
           isSelected = questionnaireAnswers[questionId] === option;
-          console.log(`Radio/select option ${option} for ${questionId} selected:`, isSelected);
         }
         
         initialSelectedOptions[questionId][option] = isSelected;
@@ -90,6 +113,27 @@ export const formatFieldValueFromQuestionnaire = (
   fieldKey: string,
   questionnaireAnswers: Record<string, any>
 ) => {
+  // Special field DEBUG
+  if (['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'].includes(fieldKey)) {
+    console.log(`Formatting special field: ${fieldKey}`);
+    console.log(`Questionnaire answers keys:`, Object.keys(questionnaireAnswers));
+    
+    // Check if we have the corresponding answer
+    const questionIds = {
+      'emergencyScenarios': 'emergencyPreferences',
+      'highRiskComplications': 'highRiskComplications',
+      'lowRiskOccurrences': 'lowRiskOccurrences'
+    };
+    
+    const correspondingQuestionId = questionIds[fieldKey as keyof typeof questionIds];
+    console.log(`Corresponding question ID: ${correspondingQuestionId}`);
+    console.log(`Has answer:`, !!questionnaireAnswers[correspondingQuestionId]);
+    if (questionnaireAnswers[correspondingQuestionId]) {
+      console.log(`Answer type:`, typeof questionnaireAnswers[correspondingQuestionId]);
+      console.log(`Answer value:`, questionnaireAnswers[correspondingQuestionId]);
+    }
+  }
+  
   // Only get questions that are relevant to this specific field
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
   const specialFields = getAlwaysShowAddButtonFields();
@@ -98,18 +142,22 @@ export const formatFieldValueFromQuestionnaire = (
     return null;
   }
   
-  // Debug logging for special fields
-  console.log(`Formatting values for special field: ${fieldKey}`);
+  console.log(`Formatting values for field: ${fieldKey}`);
   console.log(`Found ${relevantQuestions.length} relevant questions`);
   
   const formattedValues: string[] = [];
   
   // Debug each relevant question
   relevantQuestions.forEach(({ question }) => {
+    if (!question) {
+      console.error("Found undefined question during formatting");
+      return;
+    }
+    
     const questionId = question.id;
     const answer = questionnaireAnswers[questionId];
     
-    console.log(`Checking question ${questionId}, answer type:`, typeof answer, 'value:', answer);
+    console.log(`Checking question ${questionId}, answer type:`, typeof answer);
     
     if (answer === undefined || answer === null || answer === '') {
       console.log(`No answer for question ${questionId}`);
@@ -120,7 +168,6 @@ export const formatFieldValueFromQuestionnaire = (
       if (typeof answer === 'string' && answer.trim() !== '') {
         // For textarea, use the full text as is without prefixes
         formattedValues.push(answer.trim());
-        console.log(`Added textarea answer for ${questionId}`);
       }
     } else if (question.type === 'checkbox') {
       if (typeof answer === 'object' && !Array.isArray(answer)) {
@@ -132,18 +179,20 @@ export const formatFieldValueFromQuestionnaire = (
         if (selectedOptions.length > 0) {
           // Don't include the question text as prefix, just add the options
           formattedValues.push(selectedOptions.join(', '));
-          console.log(`Added checkbox answers for ${questionId}: ${selectedOptions.join(', ')}`);
         }
       }
     } else if (question.type === 'radio' || question.type === 'select') {
       if (typeof answer === 'string' && answer.trim() !== '') {
         // For radio/select, just add the selected option without prefixes
         formattedValues.push(answer);
-        console.log(`Added radio/select answer for ${questionId}: ${answer}`);
       }
     }
   });
   
-  console.log(`Formatted values for ${fieldKey}:`, formattedValues);
-  return formattedValues.length > 0 ? formattedValues.join('\n\n') : null;
+  if (formattedValues.length > 0) {
+    console.log(`Formatted values for ${fieldKey}:`, formattedValues);
+    return formattedValues.join('\n\n');
+  }
+  
+  return null;
 };

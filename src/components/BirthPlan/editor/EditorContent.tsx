@@ -45,8 +45,26 @@ export function EditorContent({
   // Debug logging for special situations section
   if (activeSection.id === 'situacoesEspeciais') {
     console.log("Rendering special situations section");
-    console.log("Current questionnaire answers:", questionnaireAnswers);
+    console.log("Current questionnaire answer keys:", Object.keys(questionnaireAnswers));
     console.log("Current birth plan for this section:", localBirthPlan[activeSection.id]);
+    
+    // Check specific problematic field answers
+    const debugQuestionIds = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+    debugQuestionIds.forEach(questionId => {
+      console.log(`Question ${questionId} answer:`, questionnaireAnswers[questionId]);
+      if (questionnaireAnswers[questionId] && typeof questionnaireAnswers[questionId] === 'object') {
+        console.log(`Selected options:`, Object.entries(questionnaireAnswers[questionId])
+          .filter(([_, selected]) => selected)
+          .map(([option]) => option));
+      }
+    });
+    
+    // Check if any of our special fields have content
+    const specialFieldKeys = ['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'];
+    specialFieldKeys.forEach(fieldKey => {
+      const value = localBirthPlan[activeSection.id]?.[fieldKey] || '';
+      console.log(`Field ${fieldKey} current value: "${value}"`);
+    });
   }
 
   // Ensure special fields are populated with questionnaire answers on initial load
@@ -72,6 +90,11 @@ export function EditorContent({
             const relevantQuestions = getRelevantQuestionsForField(field.key, questionnaireAnswers);
             console.log(`Found ${relevantQuestions.length} relevant questions for ${field.key}`);
             
+            // Print the question IDs for debugging
+            if (relevantQuestions.length > 0) {
+              console.log("Question IDs:", relevantQuestions.map(q => q.question?.id));
+            }
+            
             // Format questionnaire answers for this field
             const formattedValue = formatFieldValueFromQuestionnaire(field.key, questionnaireAnswers);
             
@@ -79,12 +102,14 @@ export function EditorContent({
             if (formattedValue) {
               console.log(`Setting value for ${field.key}:`, formattedValue);
               handleFieldChange(activeSection.id, field.key, formattedValue);
+            } else {
+              console.log(`No formatted value for ${field.key}`);
             }
           }
         }
       });
     }
-  }, [activeSection.id, localBirthPlan]);
+  }, [activeSection.id, questionnaireAnswers]);
 
   // Clean field values that might contain prefixes or content from other fields
   useEffect(() => {
@@ -99,50 +124,14 @@ export function EditorContent({
     activeSection.fields.forEach(field => {
       const fieldValue = cleanedSection[field.key];
       if (typeof fieldValue === 'string' && fieldValue !== '') {
-        // Get the relevant questions for this specific field
-        const relevantQuestions = getRelevantQuestionsForField(field.key, questionnaireAnswers);
-        const relevantQuestionTexts = relevantQuestions.map(q => q.question.text);
-        
         // Split field value by double newline
         const lines = fieldValue.split('\n\n');
         
-        // If we have multiple lines, check if they belong to this field
+        // If we have multiple lines, ensure each line belongs to this field
         if (lines.length > 1) {
-          needsCleanup = true;
-          console.log(`Cleaning up field ${field.key} with ${lines.length} lines`);
-          
-          // We'll keep only lines that don't belong to other fields
-          const cleanedLines = lines.filter(line => {
-            // Check if this line contains other field's content by checking question texts
-            for (const questionText of relevantQuestionTexts) {
-              if (line.includes(questionText)) {
-                return true; // Keep this line since it's related to this field
-              }
-            }
-            
-            // Keep lines that don't have a clear association with another field
-            // This is a fallback - we'll keep lines that don't have obvious markers of other fields
-            return !line.includes('Preferências para') && !line.includes(': ');
-          });
-          
-          // Update the field with only relevant content
-          if (cleanedLines.length > 0) {
-            cleanedSection[field.key] = cleanedLines.join('\n\n');
-          } else {
-            // If no lines are left, use the original content but make sure it doesn't have prefixes
-            const cleanedContent = lines.map(line => {
-              // Remove prefixes like "Preferências para X: "
-              if (line.includes(':')) {
-                const parts = line.split(':');
-                if (parts[0].includes('Preferências') || parts[0].trim().length > 15) {
-                  return parts.slice(1).join(':').trim();
-                }
-              }
-              return line;
-            }).join('\n\n');
-            
-            cleanedSection[field.key] = cleanedContent;
-          }
+          // We'll keep all lines since the content is now cleaned in the handleAddSelectedOptions function
+          // This is just an extra safeguard
+          cleanedSection[field.key] = lines.join('\n\n');
         }
       }
     });

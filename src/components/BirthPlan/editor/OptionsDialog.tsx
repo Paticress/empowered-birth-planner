@@ -36,15 +36,20 @@ export function OptionsDialog({
   const [hasRadioOnly, setHasRadioOnly] = useState(false);
   const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
   
+  // Debug logs
+  console.log("OptionsDialog rendered with activeFieldKey:", activeFieldKey);
+  console.log("Dialog open state:", dialogOpen);
+  
   // Update relevant questions when activeFieldKey changes or dialog opens
   useEffect(() => {
     if (dialogOpen && activeFieldKey) {
-      // Reset any previous selections from other fields
-      setSelectedOptions({});
-      setTextareaValues({});
+      console.log("Dialog open, fetching questions for:", activeFieldKey);
       
       // Get questions that are specifically relevant to this field
       const questions = getRelevantQuestionsForField(activeFieldKey);
+      console.log("Relevant questions found:", questions.length);
+      console.log("Question IDs:", questions.map(q => q.question.id));
+      
       setRelevantQuestions(questions);
       
       // Check if all questions are radio type
@@ -60,12 +65,8 @@ export function OptionsDialog({
         }
       });
       setTextareaValues(initialTextareaValues);
-      
-      // Debug logging
-      console.log(`Dialog opened for field: ${activeFieldKey}`);
-      console.log(`Found ${questions.length} relevant questions:`, questions.map(q => q.question.id));
     }
-  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers, setSelectedOptions]);
+  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers]);
   
   // Special case for specific fields
   const isSpecialField = [
@@ -97,6 +98,14 @@ export function OptionsDialog({
         {relevantQuestions.length > 0 ? (
           relevantQuestions.map(({ question }) => {
             const questionId = question.id;
+            
+            // Skip rendering if question is undefined
+            if (!question) {
+              console.error("Found undefined question in relevantQuestions");
+              return null;
+            }
+            
+            console.log("Rendering question:", questionId, question.text);
             
             // Handle textarea type questions
             if (question.type === 'textarea') {

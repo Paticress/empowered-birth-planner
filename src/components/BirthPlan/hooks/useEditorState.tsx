@@ -101,6 +101,8 @@ export function useEditorState(
   }, [localBirthPlan, onUpdate]);
   
   const resetOptionsForField = useCallback((fieldKey: string) => {
+    console.log(`Reset options for field: ${fieldKey}`);
+    
     // Reset any previous selections
     setSelectedOptions({});
     setTextareaValues({});
@@ -110,8 +112,6 @@ export function useEditorState(
     
     // Get the current active section
     const activeSection = birthPlanSections[activeSectionIndex];
-    
-    console.log(`Initializing options for field: ${fieldKey} in section: ${activeSection.id}`);
     
     // Initialize selected options based on questionnaire answers
     // Make sure only relevant questions for this specific field are considered
@@ -130,7 +130,7 @@ export function useEditorState(
     const initialTextareaValues: Record<string, string> = {};
     
     relevantQuestions.forEach(({ question }) => {
-      if (question.type === 'textarea' && questionnaireAnswers[question.id]) {
+      if (question?.type === 'textarea' && questionnaireAnswers[question.id]) {
         initialTextareaValues[question.id] = questionnaireAnswers[question.id];
       }
     });

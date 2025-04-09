@@ -22,7 +22,15 @@ export function SelectableOptions({
   questionnaireAnswers = {}
 }: SelectableOptionsProps) {
   if (!question.options || question.options.length === 0) {
+    console.warn(`No options found for question ${questionId}`);
     return null;
+  }
+  
+  // Debug log for special questions
+  if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+    console.log(`SelectableOptions for special question: ${questionId}`);
+    console.log(`Has answer:`, !!questionnaireAnswers[questionId]);
+    console.log(`Options:`, question.options);
   }
   
   // Initialize options from questionnaire answers when component mounts
@@ -44,6 +52,11 @@ export function SelectableOptions({
             // Mark the option as selected if it's selected in the questionnaire
             const isSelected = !!questionnaireAnswers[questionId]?.[option];
             newSelectedOptions[questionId][option] = isSelected;
+            
+            // Debug for special questions
+            if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+              console.log(`Option "${option}" selected:`, isSelected);
+            }
           });
         }
       } else if (question.type === 'radio' || question.type === 'select') {
@@ -57,7 +70,11 @@ export function SelectableOptions({
         }
       }
       
-      setSelectedOptions(newSelectedOptions);
+      // Only update if we have any selections
+      if (Object.values(newSelectedOptions[questionId]).some(val => val)) {
+        console.log(`Setting initial selections for ${questionId}:`, newSelectedOptions[questionId]);
+        setSelectedOptions(newSelectedOptions);
+      }
     }
   }, [questionId, questionnaireAnswers]);
   

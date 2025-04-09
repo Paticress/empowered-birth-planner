@@ -17,6 +17,10 @@ export const handleAddSelectedOptions = (
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>,
   textareaValues?: Record<string, string>
 ) => {
+  console.log('Handling add selected options for field:', activeFieldKey);
+  console.log('Current selected options:', selectedOptions);
+  console.log('Textarea values:', textareaValues);
+  
   const updatedPlan = { ...localBirthPlan };
   
   // Group selected options by question type to maintain consistent formatting
@@ -32,6 +36,11 @@ export const handleAddSelectedOptions = (
       
       if (selectedForQuestion.length > 0) {
         const questionInfo = findQuestionById(questionId);
+        if (!questionInfo) {
+          console.warn(`Question info not found for question ID: ${questionId}`);
+          return;
+        }
+        
         const questionType = questionInfo?.question?.type || 'checkbox';
         
         // Store the question type
@@ -71,7 +80,23 @@ export const handleAddSelectedOptions = (
     // Get the current active section
     const firstQuestionId = Object.keys(selectedOptions)[0] || 
                            (textareaValues && Object.keys(textareaValues)[0]);
+    
+    if (!firstQuestionId) {
+      console.warn('No question IDs found in selections or textareas');
+      toast("Nenhuma opção foi selecionada.");
+      setSelectedOptions({});
+      setDialogOpen(false);
+      return;
+    }
+    
     const questionInfo = findQuestionById(firstQuestionId);
+    if (!questionInfo) {
+      console.warn(`Question info not found for first question ID: ${firstQuestionId}`);
+      toast("Não foi possível encontrar informações da questão selecionada.");
+      setSelectedOptions({});
+      setDialogOpen(false);
+      return;
+    }
     
     const mappedSectionId = mapQuestionnaireToSectionId(
       questionInfo?.sectionId || 'specialSituations'
@@ -98,6 +123,7 @@ export const handleAddSelectedOptions = (
     
     if (formattedOptions.length > 0) {
       // CRITICAL: Completely replace existing field value with the new selections
+      // This ensures no mixing of previous content
       updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions.join('\n\n');
       
       setLocalBirthPlan(updatedPlan);
