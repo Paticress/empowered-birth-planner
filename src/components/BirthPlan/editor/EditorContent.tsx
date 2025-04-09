@@ -4,8 +4,7 @@ import { birthPlanSections } from '../utils/birthPlanSections';
 import { 
   getSingleLineFields, 
   shouldShowAddButton, 
-  getRelevantQuestionsForField,
-  getSpecialFields
+  getRelevantQuestionsForField 
 } from './utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -39,11 +38,23 @@ export function EditorContent({
   const activeSection = birthPlanSections[activeSectionIndex];
   const singleLineFields = getSingleLineFields();
   const isMobile = useIsMobile();
-  const specialFields = getSpecialFields();
 
   // Log the questionnaire answers for debugging
   console.log("Questionnaire answers for section:", activeSection.id, questionnaireAnswers);
   console.log("Local birth plan for section:", activeSection.id, localBirthPlan[activeSection.id]);
+
+  // Special fields that need to show the "Add from Questionnaire" button
+  const specialFields = [
+    'emergencyScenarios', 
+    'highRiskComplications', 
+    'lowRiskOccurrences', 
+    'cascadeInterventions',
+    'painRelief',
+    'interventionsRoutine',
+    'consentimentoInformado',
+    'specialWishes',
+    'unexpectedScenarios'
+  ];
 
   return (
     <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-4 md:p-6 mb-4 md:mb-6 shadow-md`}>

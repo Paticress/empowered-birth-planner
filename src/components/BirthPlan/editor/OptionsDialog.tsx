@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
-import { getSpecialFields } from './utils/optionsHandling';
 
 interface OptionsDialogProps {
   dialogOpen: boolean;
@@ -41,8 +40,6 @@ export function OptionsDialog({
       const questions = getRelevantQuestionsForField(activeFieldKey);
       setRelevantQuestions(questions);
       
-      console.log(`Relevant questions for ${activeFieldKey}:`, questions);
-      
       // Check if all questions are radio type
       const onlyRadioQuestions = questions.length > 0 && 
         questions.every(q => q.question.type === 'radio' || q.question.type === 'select');
@@ -50,11 +47,16 @@ export function OptionsDialog({
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField]);
   
-  // Get list of special fields
-  const specialFields = getSpecialFields();
-  
-  // Check if this is a special field
-  const isSpecialField = specialFields.includes(activeFieldKey);
+  // Special case for emergency scenarios and complications fields
+  const isSpecialField = activeFieldKey === 'emergencyScenarios' ||
+                       activeFieldKey === 'highRiskComplications' ||
+                       activeFieldKey === 'lowRiskOccurrences' ||
+                       activeFieldKey === 'cascadeInterventions' ||
+                       activeFieldKey === 'unexpectedScenarios' ||
+                       activeFieldKey === 'specialWishes' ||
+                       activeFieldKey === 'painRelief' ||
+                       activeFieldKey === 'interventionsRoutine' ||
+                       activeFieldKey === 'consentimentoInformado';
   
   const handleTextareaChange = (questionId: string, value: string) => {
     setTextareaValues(prev => ({
@@ -125,7 +127,7 @@ export function OptionsDialog({
           onClick={handleAddSelectedOptions}
           disabled={relevantQuestions.length === 0}
         >
-          {hasRadioOnly && !isSpecialField ? "Selecionar Opção" : "Adicionar Selecionadas"}
+          {hasRadioOnly ? "Selecionar Opção" : "Adicionar Selecionadas"}
         </Button>
       </DialogFooter>
     </DialogContent>

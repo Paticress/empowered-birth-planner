@@ -2,7 +2,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useEffect } from 'react';
 
 interface SelectableOptionsProps {
   question: any;
@@ -23,15 +22,6 @@ export function SelectableOptions({
     return null;
   }
   
-  // Log initial state for debugging
-  useEffect(() => {
-    console.log(`SelectableOptions for question ${questionId}:`, {
-      isSpecialField,
-      questionType: question.type,
-      selectedValues: selectedOptions[questionId]
-    });
-  }, [questionId, question.type, isSpecialField, selectedOptions]);
-  
   const handleCheckedChange = (option: string, checked: boolean) => {
     // Create a copy of the current state
     const newSelectedOptions = { ...selectedOptions };
@@ -41,8 +31,8 @@ export function SelectableOptions({
       newSelectedOptions[questionId] = {};
     }
     
-    // For regular radio buttons (single selection), unselect all other options first
-    if (!isSpecialField && (question.type === 'radio' || question.type === 'select')) {
+    // For radio buttons (single selection), unselect all other options first
+    if (question.type === 'radio' || question.type === 'select') {
       Object.keys(newSelectedOptions[questionId] || {}).forEach(opt => {
         newSelectedOptions[questionId][opt] = false;
       });
@@ -50,8 +40,6 @@ export function SelectableOptions({
     
     // Set the selected option
     newSelectedOptions[questionId][option] = checked;
-    
-    console.log(`Changed option ${option} to ${checked} for ${questionId}`);
     
     setSelectedOptions(newSelectedOptions);
   };
@@ -73,12 +61,10 @@ export function SelectableOptions({
     // Select only the chosen option
     newSelectedOptions[questionId][option] = true;
     
-    console.log(`Selected radio option ${option} for ${questionId}`);
-    
     setSelectedOptions(newSelectedOptions);
   };
   
-  // Special handling for fields that need checkbox-like behavior even for radio buttons
+  // Special handling for emergency scenarios and complications fields
   // For these fields, we want to potentially select multiple radio options
   // across different questions
   if (isSpecialField && (question.type === 'radio' || question.type === 'select')) {

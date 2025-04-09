@@ -16,9 +16,6 @@ export const handleAddSelectedOptions = (
   setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>,
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  console.log(`Adding selected options for field: ${activeFieldKey}`);
-  console.log(`Selected options:`, selectedOptions);
-  
   const updatedPlan = { ...localBirthPlan };
   
   // Group selected options by question type to maintain consistent formatting
@@ -54,7 +51,7 @@ export const handleAddSelectedOptions = (
     }
   });
   
-  // Special fields that need special handling (allow multiple radio selections)
+  // Special fields that need special handling
   const specialFields = [
     'emergencyScenarios', 
     'highRiskComplications', 
@@ -67,11 +64,8 @@ export const handleAddSelectedOptions = (
     'unexpectedScenarios'
   ];
   
-  // Log for debugging
-  console.log("All selected options:", allSelectedOptions);
-  
   // If we have selected options, update the birth plan
-  if (Object.values(allSelectedOptions).some(options => options.length > 0)) {
+  if (Object.values(allSelectedOptions).some(options => options.length > 0) || specialFields.includes(activeFieldKey)) {
     // Get the mapped section ID for this field from the first question
     const firstQuestionId = Object.keys(selectedOptions)[0];
     const questionInfo = findQuestionById(firstQuestionId);
@@ -79,8 +73,6 @@ export const handleAddSelectedOptions = (
     const mappedSectionId = mapQuestionnaireToSectionId(
       questionInfo?.sectionId || 'specialSituations'
     );
-    
-    console.log(`Mapped section ID: ${mappedSectionId} for field: ${activeFieldKey}`);
     
     // Initialize section if not exists
     if (!updatedPlan[mappedSectionId]) {
@@ -90,9 +82,9 @@ export const handleAddSelectedOptions = (
     // Determine how to format options based on the question types included
     const questionIds = Object.keys(allSelectedOptions);
     const allSameType = questionIds.length === 1 || 
-                      questionIds.every(id => questionTypes[id] === questionTypes[questionIds[0]]);
+                        questionIds.every(id => questionTypes[id] === questionTypes[questionIds[0]]);
     
-    if (allSameType && questionIds.length === 1 && !specialFields.includes(activeFieldKey)) {
+    if (allSameType && questionIds.length === 1) {
       // If there's just one question or all questions are the same type, 
       // use a simple format: option1, option2, etc.
       const options = Object.values(allSelectedOptions).flat();
@@ -100,18 +92,13 @@ export const handleAddSelectedOptions = (
         updatedPlan[mappedSectionId][activeFieldKey] = options.join(', ');
       }
     } else {
-      // For mixed question types or special fields, format with question prefixes:
+      // For mixed question types, format with question prefixes:
       const formattedOptions = Object.entries(allSelectedOptions)
         .map(([questionId, options]) => {
           const questionInfo = findQuestionById(questionId);
           if (options.length === 0) return '';
           
           if (questionInfo) {
-            // For special fields, just list the options without question text prefix
-            if (specialFields.includes(activeFieldKey)) {
-              return options.join(', ');
-            }
-            
             // Create a prefix from the question text, shortened if needed
             const questionText = questionInfo.question.text;
             const prefix = questionText.length > 30 
@@ -129,8 +116,6 @@ export const handleAddSelectedOptions = (
         updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions;
       }
     }
-    
-    console.log(`Updated plan for ${activeFieldKey}:`, updatedPlan[mappedSectionId][activeFieldKey]);
     
     setLocalBirthPlan(updatedPlan);
     
