@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, User, GraduationCap, BookOpen, FileText, LayoutDashboard } from 'lucide-react';
+import { Menu, X, User, GraduationCap, BookOpen, FileText } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -76,39 +75,27 @@ export function Header() {
               <FileText className="h-4 w-4 mr-1" />
               Construtor Virtual
             </Link>
-            <a 
-              href="https://www.energiamaterna.com.br/programas" 
+            <Link 
+              to="https://www.energiamaterna.com.br/programas" 
               className="text-maternal-800 hover:text-maternal-600 transition-colors flex items-center"
               target="_blank"
               rel="noopener noreferrer"
             >
               <GraduationCap className="h-4 w-4 mr-1" />
               Curso Gestando
-            </a>
+            </Link>
             
             {user && (
-              <>
-                <Link 
-                  to="/dashboard" 
-                  className={`transition-colors flex items-center ${isActive('/dashboard') 
-                    ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
-                    : 'text-maternal-800 hover:text-maternal-600'}`}
-                  onClick={(e) => handleLinkClick(e, '/dashboard')}
-                >
-                  <LayoutDashboard className="h-4 w-4 mr-1" />
-                  Dashboard
-                </Link>
-                <Link 
-                  to="/meus-acessos" 
-                  className={`transition-colors flex items-center ${isActive('/meus-acessos') 
-                    ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
-                    : 'text-maternal-800 hover:text-maternal-600'}`}
-                  onClick={(e) => handleLinkClick(e, '/meus-acessos')}
-                >
-                  <User className="h-4 w-4 mr-1" />
-                  Meus Acessos
-                </Link>
-              </>
+              <Link 
+                to="/meus-acessos" 
+                className={`transition-colors flex items-center ${isActive('/meus-acessos') 
+                  ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
+                  : 'text-maternal-800 hover:text-maternal-600'}`}
+                onClick={(e) => handleLinkClick(e, '/meus-acessos')}
+              >
+                <User className="h-4 w-4 mr-1" />
+                Meus Acessos
+              </Link>
             )}
           </nav>
           
@@ -176,32 +163,18 @@ export function Header() {
                   </a>
                   
                   {user && (
-                    <>
-                      <button 
-                        className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/dashboard') 
-                          ? 'bg-maternal-100 text-maternal-900 font-medium' 
-                          : 'text-maternal-800 hover:bg-maternal-50'}`}
-                        onClick={() => {
-                          navigateTo('/dashboard');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <LayoutDashboard className="h-4 w-4 mr-2" />
-                        Dashboard
-                      </button>
-                      <button 
-                        className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/meus-acessos') 
-                          ? 'bg-maternal-100 text-maternal-900 font-medium' 
-                          : 'text-maternal-800 hover:bg-maternal-50'}`}
-                        onClick={() => {
-                          navigateTo('/meus-acessos');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <User className="h-4 w-4 mr-2" />
-                        Meus Acessos
-                      </button>
-                    </>
+                    <button 
+                      className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/meus-acessos') 
+                        ? 'bg-maternal-100 text-maternal-900 font-medium' 
+                        : 'text-maternal-800 hover:bg-maternal-50'}`}
+                      onClick={() => {
+                        navigateTo('/meus-acessos');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Meus Acessos
+                    </button>
                   )}
                 </nav>
               </div>

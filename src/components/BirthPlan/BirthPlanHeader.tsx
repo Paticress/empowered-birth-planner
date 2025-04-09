@@ -11,7 +11,7 @@ interface BirthPlanHeaderProps {
 
 export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeaderProps) {
   return (
-    <header className="bg-maternal-500 text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden fixed top-20 left-0 right-0 z-40">
+    <header className="bg-maternal-500 text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md print:hidden fixed top-16 left-0 right-0 z-40">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center">
         <div className="flex items-center space-x-2">
           <FileText className="h-6 w-6 text-maternal-100" />

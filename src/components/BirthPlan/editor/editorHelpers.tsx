@@ -1,9 +1,9 @@
+
 import { toast } from 'sonner';
 import { 
   mapQuestionnaireToSectionId, 
   findQuestionById, 
-  checkSectionCompletion,
-  fieldToSectionMap
+  checkSectionCompletion 
 } from './utils';
 
 export const handleAddSelectedOptions = (
@@ -25,13 +25,8 @@ export const handleAddSelectedOptions = (
   const allSelectedOptions: Record<string, string[]> = {}; // questionType -> options
   const questionTypes: Record<string, string> = {}; // Keep track of each question's type
   
-  // Check if we have any selected options
-  let hasAnySelection = false;
-  
   Object.entries(selectedOptions).forEach(([questionId, options]) => {
     if (Object.values(options).some(value => value)) {
-      hasAnySelection = true;
-      
       const selectedForQuestion = Object.entries(options)
         .filter(([_, isSelected]) => isSelected)
         .map(([option]) => option);
@@ -76,22 +71,14 @@ export const handleAddSelectedOptions = (
   console.log("All selected options:", allSelectedOptions);
   
   // If we have selected options, update the birth plan
-  if (hasAnySelection) {
-    // Get the mapped section ID for this field
-    let mappedSectionId;
+  if (Object.values(allSelectedOptions).some(options => options.length > 0)) {
+    // Get the mapped section ID for this field from the first question
+    const firstQuestionId = Object.keys(selectedOptions)[0];
+    const questionInfo = findQuestionById(firstQuestionId);
     
-    // First check if we have a direct mapping for this field
-    if (fieldToSectionMap[activeFieldKey]) {
-      mappedSectionId = mapQuestionnaireToSectionId(fieldToSectionMap[activeFieldKey]);
-    } else {
-      // Otherwise try to get it from the first question
-      const firstQuestionId = Object.keys(selectedOptions)[0];
-      const questionInfo = findQuestionById(firstQuestionId);
-      
-      mappedSectionId = mapQuestionnaireToSectionId(
-        questionInfo?.sectionId || 'specialSituations'
-      );
-    }
+    const mappedSectionId = mapQuestionnaireToSectionId(
+      questionInfo?.sectionId || 'specialSituations'
+    );
     
     console.log(`Mapped section ID: ${mappedSectionId} for field: ${activeFieldKey}`);
     
@@ -157,37 +144,4 @@ export const handleAddSelectedOptions = (
   
   setSelectedOptions({});
   setDialogOpen(false);
-};
-
-/**
- * Updates textarea content directly from questionnaire answers
- */
-export const handleTextAreaContent = (
-  fieldKey: string,
-  questionId: string,
-  value: string,
-  localBirthPlan: Record<string, any>,
-  setLocalBirthPlan: React.Dispatch<React.SetStateAction<Record<string, any>>>,
-  completedSections: string[],
-  setCompletedSections: React.Dispatch<React.SetStateAction<string[]>>,
-  mappedSectionId: string
-) => {
-  if (!value.trim()) {
-    return;
-  }
-  
-  const updatedPlan = { ...localBirthPlan };
-  
-  // Initialize section if not exists
-  if (!updatedPlan[mappedSectionId]) {
-    updatedPlan[mappedSectionId] = {};
-  }
-  
-  // Set the field value directly
-  updatedPlan[mappedSectionId][fieldKey] = value;
-  
-  setLocalBirthPlan(updatedPlan);
-  
-  // Check if the section was completed after adding content
-  checkSectionCompletion(mappedSectionId, updatedPlan, completedSections, setCompletedSections);
 };

@@ -11,8 +11,6 @@ import {
 import { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { getSpecialFields } from './utils/optionsHandling';
-import { mapQuestionnaireToSectionId, fieldToSectionMap } from './utils/fieldMapping'; 
-import { handleTextAreaContent } from './editorHelpers';
 
 interface OptionsDialogProps {
   dialogOpen: boolean;

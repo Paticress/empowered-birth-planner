@@ -83,19 +83,3 @@ export const findQuestionById = (questionId: string) => {
   }
   return null;
 };
-
-/**
- * Direct mapping of field keys to questionnaire section IDs
- */
-export const fieldToSectionMap: Record<string, string> = {
-  'painRelief': 'laborPreferences',
-  'interventionsRoutine': 'laborPreferences',
-  'consentimentoInformado': 'laborPreferences',
-  'cascadeInterventions': 'specialSituations',
-  'emergencyScenarios': 'specialSituations',
-  'highRiskComplications': 'specialSituations',
-  'lowRiskOccurrences': 'specialSituations',
-  'unexpectedScenarios': 'specialSituations',
-  'specialWishes': 'specialSituations'
-};
-
