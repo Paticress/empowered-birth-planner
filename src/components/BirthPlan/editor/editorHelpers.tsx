@@ -122,6 +122,8 @@ export const handleAddSelectedOptions = (
     }).filter(text => text.length > 0);
     
     if (formattedOptions.length > 0) {
+      console.log(`REPLACING value for field ${activeFieldKey} with new content:`, formattedOptions.join('\n\n'));
+      
       // CRITICAL: Completely replace existing field value with the new selections
       // This ensures no mixing of previous content
       updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions.join('\n\n');
@@ -139,6 +141,7 @@ export const handleAddSelectedOptions = (
     toast("Nenhuma opção foi selecionada.");
   }
   
+  // Always clear selections when closing dialog
   setSelectedOptions({});
   setDialogOpen(false);
 };

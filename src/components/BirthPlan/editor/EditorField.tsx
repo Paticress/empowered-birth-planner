@@ -46,6 +46,7 @@ export function EditorField({
   questionnaireAnswers
 }: EditorFieldProps) {
   const fieldValue = sectionData[field.key] || '';
+  const [hasInitialized, setHasInitialized] = useState(false);
   const showAddButton = shouldShowAddButton(field.key);
   const isMobile = useIsMobile();
   
@@ -63,6 +64,7 @@ export function EditorField({
   if (['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'].includes(field.key)) {
     console.log(`Rendering special field: ${field.key}`);
     console.log(`Current value: "${fieldValue}"`);
+    console.log(`Has initialized: ${hasInitialized}`);
     
     // Check if this field has any answers in the questionnaire
     const relevantQuestions = getRelevantQuestionsForField(field.key);
@@ -72,23 +74,32 @@ export function EditorField({
       const questionId = q.question?.id;
       if (questionId) {
         console.log(`Question ${questionId} has answer:`, !!questionnaireAnswers[questionId]);
+        if (questionnaireAnswers[questionId]) {
+          console.log(`Answer:`, questionnaireAnswers[questionId]);
+        }
       }
     });
   }
   
   // Initialize the field with questionnaire answers if it's a special field and empty
   useEffect(() => {
-    if (specialFields.includes(field.key) && fieldValue === '') {
-      console.log(`Initializing special field ${field.key} from questionnaire`);
-      const formattedValue = formatFieldValueFromQuestionnaire(field.key, questionnaireAnswers);
-      if (formattedValue) {
-        console.log(`Setting initial value for ${field.key}:`, formattedValue);
-        handleFieldChange(activeSection.id, field.key, formattedValue);
-      } else {
-        console.log(`No formatted value for ${field.key}`);
+    if (specialFields.includes(field.key) && !hasInitialized) {
+      console.log(`Initializing special field ${field.key} from questionnaire (value: "${fieldValue}")`);
+      
+      // Only populate if the field is empty
+      if (!fieldValue) {
+        const formattedValue = formatFieldValueFromQuestionnaire(field.key, questionnaireAnswers);
+        if (formattedValue) {
+          console.log(`Setting initial value for ${field.key}:`, formattedValue);
+          handleFieldChange(activeSection.id, field.key, formattedValue);
+        } else {
+          console.log(`No formatted value for ${field.key}`);
+        }
       }
+      
+      setHasInitialized(true);
     }
-  }, [field.key, activeSection.id, questionnaireAnswers]);
+  }, [field.key, activeSection.id, questionnaireAnswers, fieldValue, hasInitialized]);
   
   // Handle opening the options dialog for this field
   const handleOpenOptionsDialog = () => {

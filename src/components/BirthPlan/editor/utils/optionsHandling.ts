@@ -44,6 +44,11 @@ export const initializeOptionsFromCurrentField = (
     
     relevantQuestions.forEach(q => {
       console.log(`- Question ${q.question?.id}: ${q.question?.text}`);
+      if (q.question?.id) {
+        console.log(`- Has answer:`, !!questionnaireAnswers[q.question.id]);
+        console.log(`- Answer type:`, typeof questionnaireAnswers[q.question.id]);
+        console.log(`- Answer:`, questionnaireAnswers[q.question.id]);
+      }
     });
   }
   
@@ -62,6 +67,14 @@ export const initializeOptionsFromCurrentField = (
       console.log(`Processing special question: ${questionId}`);
       console.log(`Question has answer:`, !!questionnaireAnswers[questionId]);
       console.log(`Answer type:`, typeof questionnaireAnswers[questionId]);
+      
+      // If this is a special field with a checkbox-style object answer
+      if (questionnaireAnswers[questionId] && typeof questionnaireAnswers[questionId] === 'object') {
+        console.log(`Object answer:`, questionnaireAnswers[questionId]);
+        Object.entries(questionnaireAnswers[questionId]).forEach(([key, value]) => {
+          console.log(`Option "${key}": ${value ? 'selected' : 'not selected'}`);
+        });
+      }
     }
     
     // Handle textarea type questions
@@ -95,6 +108,11 @@ export const initializeOptionsFromCurrentField = (
             questionnaireAnswers[questionId] !== undefined) {
           // Check if this option matches the questionnaire answer
           isSelected = questionnaireAnswers[questionId] === option;
+          
+          // Debug for special fields
+          if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+            console.log(`Radio option "${option}" selected:`, isSelected, `(answer: "${questionnaireAnswers[questionId]}")`);
+          }
         }
         
         initialSelectedOptions[questionId][option] = isSelected;

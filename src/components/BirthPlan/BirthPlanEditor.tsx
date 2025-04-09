@@ -9,6 +9,7 @@ import { useEditorState } from './hooks/useEditorState';
 import { handleAddSelectedOptions } from './editor/editorHelpers';
 import { BackToTopButton } from './common/BackToTopButton';
 import { useEffect } from 'react';
+import { getRelevantQuestionsForField } from './editor/utils/questionRelevance';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -63,6 +64,11 @@ export function BirthPlanEditor({
     setTextareaValues({});
   };
   
+  // Helper function to pass to children components
+  const getRelevantQuestionsForActiveField = (fieldKey: string) => {
+    return getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
+  };
+  
   // Auto-save functionality
   useEffect(() => {
     if (isDirty) {
@@ -88,75 +94,30 @@ export function BirthPlanEditor({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
   
-  // Clean up any field values that might have labels or prefixes
+  // Debug questionnaire answers - used to identify issues with special fields
   useEffect(() => {
-    if (Object.keys(localBirthPlan).length > 0) {
-      // Check for fields with prefixes that need to be cleaned
-      let needsCleanup = false;
-      const cleanedPlan = { ...localBirthPlan };
-      
-      Object.keys(cleanedPlan).forEach(sectionId => {
-        const section = cleanedPlan[sectionId];
-        if (!section) return;
-        
-        Object.keys(section).forEach(fieldKey => {
-          const fieldValue = section[fieldKey];
-          if (typeof fieldValue === 'string' && fieldValue.includes('Preferências para')) {
-            // This field might need cleanup - it contains a label prefix
-            needsCleanup = true;
-            
-            // Split the value into lines and clean each line
-            const lines = fieldValue.split('\n\n');
-            const cleanedLines = lines.map(line => {
-              // Remove the prefix pattern "Prefix: " if present
-              if (line.includes(':')) {
-                const parts = line.split(':');
-                // If the part before the colon looks like a label/prefix, remove it
-                if (parts[0].includes('Preferências')) {
-                  return parts.slice(1).join(':').trim();
-                }
-              }
-              return line;
-            });
-            
-            // Update the field with cleaned content
-            section[fieldKey] = cleanedLines.join('\n\n');
-          }
-        });
-      });
-      
-      // Only update if we actually cleaned something
-      if (needsCleanup) {
-        setLocalBirthPlan(cleanedPlan);
-      }
+    console.log("Questionnaire answers:", questionnaireAnswers);
+    console.log("Special field keys check:");
+    console.log("- emergencyPreferences exists:", !!questionnaireAnswers.emergencyPreferences);
+    console.log("- highRiskComplications exists:", !!questionnaireAnswers.highRiskComplications);
+    console.log("- lowRiskOccurrences exists:", !!questionnaireAnswers.lowRiskOccurrences);
+    
+    // Inspect the structure of special fields answers if they exist
+    if (questionnaireAnswers.emergencyPreferences) {
+      console.log("emergencyPreferences structure:", typeof questionnaireAnswers.emergencyPreferences);
+      console.log("emergencyPreferences value:", questionnaireAnswers.emergencyPreferences);
     }
-  }, []);
-  
-  // Special debug for emergency scenarios fields
-  useEffect(() => {
-    if (activeSectionIndex === 6) { // Situações Especiais section
-      console.log("Checking special situations loading:");
-      const sectionId = 'situacoesEspeciais';
-      const specialFields = ['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'];
-      
-      specialFields.forEach(fieldKey => {
-        console.log(`${fieldKey} value:`, localBirthPlan[sectionId]?.[fieldKey] || 'empty');
-        
-        // Log the relevant questions and answers for this field
-        const relevantQuestions = resetOptionsForField ? 
-          resetOptionsForField['getRelevantQuestionsForField'] ? 
-          resetOptionsForField['getRelevantQuestionsForField'](fieldKey) : [] : [];
-        
-        console.log(`${fieldKey} has ${relevantQuestions.length} relevant questions`);
-        
-        relevantQuestions.forEach(q => {
-          if (q && q.question) {
-            console.log(`Question ${q.question.id}: ${questionnaireAnswers[q.question.id] || 'no answer'}`);
-          }
-        });
-      });
+    
+    if (questionnaireAnswers.highRiskComplications) {
+      console.log("highRiskComplications structure:", typeof questionnaireAnswers.highRiskComplications);
+      console.log("highRiskComplications value:", questionnaireAnswers.highRiskComplications);
     }
-  }, [activeSectionIndex]);
+    
+    if (questionnaireAnswers.lowRiskOccurrences) {
+      console.log("lowRiskOccurrences structure:", typeof questionnaireAnswers.lowRiskOccurrences);
+      console.log("lowRiskOccurrences value:", questionnaireAnswers.lowRiskOccurrences);
+    }
+  }, [questionnaireAnswers]);
   
   return (
     <div className="animate-fade-in">
@@ -184,6 +145,7 @@ export function BirthPlanEditor({
         setSelectedOptions={setSelectedOptions}
         questionnaireAnswers={questionnaireAnswers}
         handleAddSelectedOptions={processAddSelectedOptions}
+        getRelevantQuestionsForField={getRelevantQuestionsForActiveField}
       />
       
       <EditorTip />

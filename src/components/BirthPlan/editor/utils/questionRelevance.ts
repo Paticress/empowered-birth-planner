@@ -32,6 +32,38 @@ export const getRelevantQuestionsForField = (
 ) => {
   console.log(`Getting relevant questions for field: ${fieldKey}`);
   
+  // Special field handling - hardcoded mappings for problematic fields
+  const specialFieldMappings: Record<string, string[]> = {
+    'emergencyScenarios': ['emergencyPreferences'],
+    'highRiskComplications': ['highRiskComplications'],
+    'lowRiskOccurrences': ['lowRiskOccurrences']
+  };
+  
+  // If this is a special field, use the hardcoded mapping
+  if (specialFieldMappings[fieldKey]) {
+    console.log(`Using special mapping for ${fieldKey}:`, specialFieldMappings[fieldKey]);
+    
+    const relevantQuestions: Array<{question: any, sectionId: string}> = [];
+    const specialQuestionIds = specialFieldMappings[fieldKey];
+    
+    // Find the questions from the questionnaire sections
+    for (const section of questionnaireSections) {
+      for (const question of section.questions) {
+        if (specialQuestionIds.includes(question.id)) {
+          console.log(`Found special question ${question.id} for field ${fieldKey}`);
+          relevantQuestions.push({
+            question,
+            sectionId: section.id
+          });
+        }
+      }
+    }
+    
+    if (relevantQuestions.length > 0) {
+      return relevantQuestions;
+    }
+  }
+  
   // Get the list of question IDs that are relevant for this specific field
   const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
   
@@ -57,23 +89,7 @@ export const getRelevantQuestionsForField = (
         // Log for debugging
         console.log(`Found question ${question.id} (${question.text}) for field ${fieldKey} in section ${section.id}`);
         
-        // Special handling for emergency fields to ensure they get their questions
-        if (
-          (fieldKey === 'emergencyScenarios' && question.id === 'emergencyPreferences') ||
-          (fieldKey === 'highRiskComplications' && question.id === 'highRiskComplications') ||
-          (fieldKey === 'lowRiskOccurrences' && question.id === 'lowRiskOccurrences')
-        ) {
-          console.log(`Special field match: ${fieldKey} with question ${question.id}`);
-          
-          // For these special cases, always include the question
-          relevantQuestions.push({
-            question,
-            sectionId: section.id
-          });
-          continue;
-        }
-        
-        // For all fields, always include the mapped questions
+        // Add the question to relevant questions
         relevantQuestions.push({
           question,
           sectionId: section.id

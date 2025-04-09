@@ -103,7 +103,7 @@ export function useEditorState(
   const resetOptionsForField = useCallback((fieldKey: string) => {
     console.log(`Reset options for field: ${fieldKey}`);
     
-    // Reset any previous selections
+    // Reset any previous selections - CRITICAL for avoiding data mixing between fields
     setSelectedOptions({});
     setTextareaValues({});
     

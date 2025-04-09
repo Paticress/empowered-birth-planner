@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -21,6 +21,8 @@ export function SelectableOptions({
   isSpecialField = false,
   questionnaireAnswers = {}
 }: SelectableOptionsProps) {
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   if (!question.options || question.options.length === 0) {
     console.warn(`No options found for question ${questionId}`);
     return null;
@@ -35,7 +37,7 @@ export function SelectableOptions({
   
   // Initialize options from questionnaire answers when component mounts
   useEffect(() => {
-    if (questionnaireAnswers && Object.keys(questionnaireAnswers).length > 0) {
+    if (!isInitialized && questionnaireAnswers && Object.keys(questionnaireAnswers).length > 0) {
       const newSelectedOptions = { ...selectedOptions };
       
       // Initialize the question entry if it doesn't exist
@@ -75,8 +77,10 @@ export function SelectableOptions({
         console.log(`Setting initial selections for ${questionId}:`, newSelectedOptions[questionId]);
         setSelectedOptions(newSelectedOptions);
       }
+      
+      setIsInitialized(true);
     }
-  }, [questionId, questionnaireAnswers]);
+  }, [questionId, questionnaireAnswers, isInitialized]);
   
   const handleCheckedChange = (option: string, checked: boolean) => {
     // Create a copy of the current state
@@ -88,7 +92,7 @@ export function SelectableOptions({
     }
     
     // For radio buttons (single selection), unselect all other options first
-    if (question.type === 'radio' || question.type === 'select') {
+    if ((question.type === 'radio' || question.type === 'select') && !isSpecialField) {
       Object.keys(newSelectedOptions[questionId] || {}).forEach(opt => {
         newSelectedOptions[questionId][opt] = false;
       });

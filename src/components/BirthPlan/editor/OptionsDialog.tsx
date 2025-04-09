@@ -35,10 +35,21 @@ export function OptionsDialog({
   const [relevantQuestions, setRelevantQuestions] = useState<Array<{question: any, sectionId: string}>>([]);
   const [hasRadioOnly, setHasRadioOnly] = useState(false);
   const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
+  const [currentFieldKey, setCurrentFieldKey] = useState<string>('');
   
   // Debug logs
   console.log("OptionsDialog rendered with activeFieldKey:", activeFieldKey);
   console.log("Dialog open state:", dialogOpen);
+  
+  // Reset everything when activeFieldKey changes
+  useEffect(() => {
+    if (activeFieldKey !== currentFieldKey) {
+      console.log(`Field changed from ${currentFieldKey} to ${activeFieldKey}, resetting selections`);
+      setSelectedOptions({}); // Clear all selections when field changes
+      setTextareaValues({}); // Clear all textarea values
+      setCurrentFieldKey(activeFieldKey);
+    }
+  }, [activeFieldKey, currentFieldKey, setSelectedOptions]);
   
   // Update relevant questions when activeFieldKey changes or dialog opens
   useEffect(() => {
