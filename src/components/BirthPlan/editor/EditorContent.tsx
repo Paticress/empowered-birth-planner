@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { EditorField } from './EditorField';
 import { birthPlanSections } from '../utils/birthPlanSections';
@@ -22,6 +23,7 @@ interface EditorContentProps {
   setSelectedOptions: (value: Record<string, Record<string, boolean>>) => void;
   questionnaireAnswers: Record<string, any>;
   handleAddSelectedOptions: () => void;
+  getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
 }
 
 export function EditorContent({
@@ -35,7 +37,8 @@ export function EditorContent({
   selectedOptions,
   setSelectedOptions,
   questionnaireAnswers,
-  handleAddSelectedOptions
+  handleAddSelectedOptions,
+  getRelevantQuestionsForField
 }: EditorContentProps) {
   const activeSection = birthPlanSections[activeSectionIndex];
   const singleLineFields = getSingleLineFields();
@@ -170,7 +173,7 @@ export function EditorContent({
             setDialogOpen={setDialogOpen}
             selectedOptions={selectedOptions}
             setSelectedOptions={setSelectedOptions}
-            getRelevantQuestionsForField={(fieldKey) => getRelevantQuestionsForField(fieldKey, questionnaireAnswers)}
+            getRelevantQuestionsForField={getRelevantQuestionsForField}
             handleAddSelectedOptions={handleAddSelectedOptions}
             questionnaireAnswers={questionnaireAnswers}
           />
