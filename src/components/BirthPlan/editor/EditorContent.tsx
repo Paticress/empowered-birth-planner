@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { EditorField } from './EditorField';
 import { birthPlanSections } from '../utils/birthPlanSections';
@@ -43,84 +42,108 @@ export function EditorContent({
   const isMobile = useIsMobile();
   const specialFields = getAlwaysShowAddButtonFields();
 
-  // Log the questionnaire answers for debugging
-  console.log("Questionnaire answers for section:", activeSection.id, questionnaireAnswers);
-  console.log("Local birth plan for section:", activeSection.id, localBirthPlan[activeSection.id]);
+  // Debug logging for special situations section
+  if (activeSection.id === 'situacoesEspeciais') {
+    console.log("Rendering special situations section");
+    console.log("Current questionnaire answers:", questionnaireAnswers);
+    console.log("Current birth plan for this section:", localBirthPlan[activeSection.id]);
+  }
 
   // Ensure special fields are populated with questionnaire answers on initial load
   useEffect(() => {
+    // Initialize section if it doesn't exist
     if (!localBirthPlan[activeSection.id]) {
       return;
     }
-
-    // Check each field in the current section
-    activeSection.fields.forEach(field => {
-      // Only process special fields that don't already have content
-      if (specialFields.includes(field.key) && 
-          (!localBirthPlan[activeSection.id]?.[field.key] || 
-           localBirthPlan[activeSection.id][field.key] === '')) {
-        
-        // Get formatted value from questionnaire answers
-        const formattedValue = formatFieldValueFromQuestionnaire(field.key, questionnaireAnswers);
-        
-        // If we have a formatted value, update the field
-        if (formattedValue) {
-          handleFieldChange(activeSection.id, field.key, formattedValue);
+    
+    // Check for special situations section specifically
+    if (activeSection.id === 'situacoesEspeciais') {
+      console.log("Initializing special situations fields");
+      
+      // Look at each special field and initialize if empty
+      activeSection.fields.forEach(field => {
+        if (specialFields.includes(field.key)) {
+          console.log(`Checking special field ${field.key}`);
+          
+          // Only initialize if the field is empty
+          const currentValue = localBirthPlan[activeSection.id]?.[field.key] || '';
+          if (currentValue === '') {
+            // Get relevant questions for this field
+            const relevantQuestions = getRelevantQuestionsForField(field.key, questionnaireAnswers);
+            console.log(`Found ${relevantQuestions.length} relevant questions for ${field.key}`);
+            
+            // Format questionnaire answers for this field
+            const formattedValue = formatFieldValueFromQuestionnaire(field.key, questionnaireAnswers);
+            
+            // If we have a value, update the field
+            if (formattedValue) {
+              console.log(`Setting value for ${field.key}:`, formattedValue);
+              handleFieldChange(activeSection.id, field.key, formattedValue);
+            }
+          }
         }
-      }
-    });
-  }, [activeSection.id, localBirthPlan, questionnaireAnswers]);
+      });
+    }
+  }, [activeSection.id, localBirthPlan]);
 
   // Clean field values that might contain prefixes or content from other fields
   useEffect(() => {
     const currentSection = localBirthPlan[activeSection.id];
     if (!currentSection) return;
 
-    // Check if any field contains prefixes that need to be cleaned
+    // Check if any field contains mixed content that needs to be separated
     let needsCleanup = false;
     const cleanedSection = { ...currentSection };
 
+    // For each field in this section
     activeSection.fields.forEach(field => {
       const fieldValue = cleanedSection[field.key];
-      if (typeof fieldValue === 'string' && (
-          fieldValue.includes('Preferências para') || 
-          fieldValue.includes(': ') ||
-          fieldValue.includes('\n\n') // Check for potentially mixed content
-      )) {
-        // This field might need cleanup
-        needsCleanup = true;
-        
-        // Get the relevant questions for this field to filter out unrelated content
+      if (typeof fieldValue === 'string' && fieldValue !== '') {
+        // Get the relevant questions for this specific field
         const relevantQuestions = getRelevantQuestionsForField(field.key, questionnaireAnswers);
-        const relevantQuestionIds = relevantQuestions.map(q => q.question.id);
+        const relevantQuestionTexts = relevantQuestions.map(q => q.question.text);
         
-        // Split by lines and clean each line
+        // Split field value by double newline
         const lines = fieldValue.split('\n\n');
         
-        // Process each line to ensure it belongs to this field
-        let cleanedLines: string[] = [];
-        
-        lines.forEach(line => {
-          // Check if this line should be included for this field
-          let shouldIncludeLine = true;
+        // If we have multiple lines, check if they belong to this field
+        if (lines.length > 1) {
+          needsCleanup = true;
+          console.log(`Cleaning up field ${field.key} with ${lines.length} lines`);
           
-          // Remove prefixes like "Preferências para X: "
-          let cleanedLine = line;
-          if (line.includes(':')) {
-            const parts = line.split(':');
-            if (parts[0].includes('Preferências') || parts[0].trim().length > 15) {
-              cleanedLine = parts.slice(1).join(':').trim();
+          // We'll keep only lines that don't belong to other fields
+          const cleanedLines = lines.filter(line => {
+            // Check if this line contains other field's content by checking question texts
+            for (const questionText of relevantQuestionTexts) {
+              if (line.includes(questionText)) {
+                return true; // Keep this line since it's related to this field
+              }
             }
-          }
+            
+            // Keep lines that don't have a clear association with another field
+            // This is a fallback - we'll keep lines that don't have obvious markers of other fields
+            return !line.includes('Preferências para') && !line.includes(': ');
+          });
           
-          // Only include the line if it's relevant to this field
-          if (shouldIncludeLine) {
-            cleanedLines.push(cleanedLine);
+          // Update the field with only relevant content
+          if (cleanedLines.length > 0) {
+            cleanedSection[field.key] = cleanedLines.join('\n\n');
+          } else {
+            // If no lines are left, use the original content but make sure it doesn't have prefixes
+            const cleanedContent = lines.map(line => {
+              // Remove prefixes like "Preferências para X: "
+              if (line.includes(':')) {
+                const parts = line.split(':');
+                if (parts[0].includes('Preferências') || parts[0].trim().length > 15) {
+                  return parts.slice(1).join(':').trim();
+                }
+              }
+              return line;
+            }).join('\n\n');
+            
+            cleanedSection[field.key] = cleanedContent;
           }
-        });
-
-        // Update the field with only relevant content
-        cleanedSection[field.key] = cleanedLines.join('\n\n');
+        }
       }
     });
 
@@ -128,7 +151,7 @@ export function EditorContent({
     if (needsCleanup) {
       handleFieldChange(activeSection.id, '__sectionUpdate', cleanedSection);
     }
-  }, [activeSection.id]);
+  }, [activeSection.id, activeSectionIndex]);
 
   return (
     <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-4 md:p-6 mb-4 md:mb-6 shadow-md`}>
@@ -140,7 +163,7 @@ export function EditorContent({
         const sectionData = localBirthPlan[activeSection.id] || {};
         const useSingleLineInput = singleLineFields.includes(field.key);
         
-        // Calculate whether to show the add button - should be shown for all fields now
+        // Calculate whether to show the add button
         const showAddFromQuestionnaire = shouldShowAddButton(field.key, questionnaireAnswers);
           
         return (

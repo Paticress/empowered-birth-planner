@@ -8,7 +8,7 @@ import { BirthPlanSectionProgress } from './BirthPlanSectionProgress';
 import { useEditorState } from './hooks/useEditorState';
 import { handleAddSelectedOptions } from './editor/editorHelpers';
 import { BackToTopButton } from './common/BackToTopButton';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -42,10 +42,10 @@ export function BirthPlanEditor({
     goToNextSection,
     handleSave,
     resetOptionsForField,
-    isDirty
+    isDirty,
+    textareaValues,
+    setTextareaValues
   } = useEditorState(birthPlan, onUpdate, questionnaireAnswers);
-
-  const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
 
   const processAddSelectedOptions = () => {
     handleAddSelectedOptions(
@@ -131,6 +131,32 @@ export function BirthPlanEditor({
       }
     }
   }, []);
+  
+  // Special debug for emergency scenarios fields
+  useEffect(() => {
+    if (activeSectionIndex === 6) { // Situações Especiais section
+      console.log("Checking special situations loading:");
+      const sectionId = 'situacoesEspeciais';
+      const specialFields = ['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'];
+      
+      specialFields.forEach(fieldKey => {
+        console.log(`${fieldKey} value:`, localBirthPlan[sectionId]?.[fieldKey] || 'empty');
+        
+        // Log the relevant questions and answers for this field
+        const relevantQuestions = resetOptionsForField ? 
+          resetOptionsForField['getRelevantQuestionsForField'] ? 
+          resetOptionsForField['getRelevantQuestionsForField'](fieldKey) : [] : [];
+        
+        console.log(`${fieldKey} has ${relevantQuestions.length} relevant questions`);
+        
+        relevantQuestions.forEach(q => {
+          if (q && q.question) {
+            console.log(`Question ${q.question.id}: ${questionnaireAnswers[q.question.id] || 'no answer'}`);
+          }
+        });
+      });
+    }
+  }, [activeSectionIndex]);
   
   return (
     <div className="animate-fade-in">

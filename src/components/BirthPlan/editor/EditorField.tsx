@@ -68,8 +68,10 @@ export function EditorField({
   // Initialize the field with questionnaire answers if it's a special field and empty
   useEffect(() => {
     if (specialFields.includes(field.key) && fieldValue === '' && !sectionData[field.key]) {
+      console.log(`Initializing special field ${field.key} from questionnaire`);
       const formattedValue = formatFieldValueFromQuestionnaire(field.key, questionnaireAnswers);
       if (formattedValue) {
+        console.log(`Setting initial value for ${field.key}:`, formattedValue);
         handleFieldChange(activeSection.id, field.key, formattedValue);
       }
     }

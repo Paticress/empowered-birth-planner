@@ -5,7 +5,8 @@ import { birthPlanSections } from '../utils/birthPlanSections';
 import {
   initializeOptionsFromCurrentField,
   shouldShowAddButton,
-  checkSectionCompletion
+  checkSectionCompletion,
+  getRelevantQuestionsForField
 } from '../editor/utils';
 
 export function useEditorState(
@@ -21,6 +22,7 @@ export function useEditorState(
   const [completedSections, setCompletedSections] = useState<string[]>([]);
   const [isDirty, setIsDirty] = useState(false);
   const [lastSaved, setLastSaved] = useState(new Date());
+  const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
 
   const handleFieldChange = useCallback((sectionId: string, fieldKey: string, value: any) => {
     setLocalBirthPlan(prevPlan => {
@@ -80,6 +82,12 @@ export function useEditorState(
   // Scroll to top when changing sections
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Reset selections when changing sections
+    setSelectedOptions({});
+    setActiveFieldKey('');
+    setDialogOpen(false);
+    setTextareaValues({});
   }, [activeSectionIndex]);
 
   const handleSave = useCallback((showToast = true) => {
@@ -95,6 +103,7 @@ export function useEditorState(
   const resetOptionsForField = useCallback((fieldKey: string) => {
     // Reset any previous selections
     setSelectedOptions({});
+    setTextareaValues({});
     
     // Set the active field key
     setActiveFieldKey(fieldKey);
@@ -115,6 +124,18 @@ export function useEditorState(
     
     // Update state with the initial options
     setSelectedOptions(initialSelectedOptions);
+    
+    // Initialize textarea values for this field if needed
+    const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
+    const initialTextareaValues: Record<string, string> = {};
+    
+    relevantQuestions.forEach(({ question }) => {
+      if (question.type === 'textarea' && questionnaireAnswers[question.id]) {
+        initialTextareaValues[question.id] = questionnaireAnswers[question.id];
+      }
+    });
+    
+    setTextareaValues(initialTextareaValues);
     
     // Open the dialog
     setDialogOpen(true);
@@ -139,6 +160,8 @@ export function useEditorState(
     handleSave,
     resetOptionsForField,
     isDirty,
-    lastSaved
+    lastSaved,
+    textareaValues,
+    setTextareaValues
   };
 }

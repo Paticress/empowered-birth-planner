@@ -44,6 +44,12 @@ export const getRelevantQuestionsForField = (
   const alwaysShowFields = getAlwaysShowAddButtonFields();
   const isSpecialField = alwaysShowFields.includes(fieldKey);
   
+  // Debug log for special fields
+  if (isSpecialField) {
+    console.log(`Getting relevant questions for special field: ${fieldKey}`);
+    console.log(`Mapped questions IDs:`, relevantQuestionIds);
+  }
+  
   // Find the relevant questions from all questionnaire sections
   for (const section of questionnaireSections) {
     for (const question of section.questions) {
@@ -51,6 +57,16 @@ export const getRelevantQuestionsForField = (
       if (relevantQuestionIds.includes(question.id)) {
         // For special fields, always include the question regardless of previous answer
         if (isSpecialField) {
+          // Check if there's an answer for this question
+          const hasAnswer = 
+            questionnaireAnswers[question.id] !== undefined && 
+            questionnaireAnswers[question.id] !== null && 
+            questionnaireAnswers[question.id] !== "";
+          
+          if (isSpecialField && hasAnswer) {
+            console.log(`Found answer for special field ${fieldKey}, question ${question.id}:`, questionnaireAnswers[question.id]);
+          }
+          
           relevantQuestions.push({
             question,
             sectionId: section.id
@@ -59,14 +75,16 @@ export const getRelevantQuestionsForField = (
         }
         
         // For all other fields, always show the questions
-        // This addresses the non-functional requirement to always show the "Add from Questionnaire" button
-        // even when there's no answer yet
         relevantQuestions.push({
           question,
           sectionId: section.id
         });
       }
     }
+  }
+  
+  if (isSpecialField) {
+    console.log(`Found ${relevantQuestions.length} relevant questions for ${fieldKey}`);
   }
   
   return relevantQuestions;

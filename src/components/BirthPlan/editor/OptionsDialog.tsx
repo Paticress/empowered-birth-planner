@@ -36,9 +36,14 @@ export function OptionsDialog({
   const [hasRadioOnly, setHasRadioOnly] = useState(false);
   const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
   
-  // Update relevant questions when activeFieldKey changes
+  // Update relevant questions when activeFieldKey changes or dialog opens
   useEffect(() => {
     if (dialogOpen && activeFieldKey) {
+      // Reset any previous selections from other fields
+      setSelectedOptions({});
+      setTextareaValues({});
+      
+      // Get questions that are specifically relevant to this field
       const questions = getRelevantQuestionsForField(activeFieldKey);
       setRelevantQuestions(questions);
       
@@ -59,9 +64,8 @@ export function OptionsDialog({
       // Debug logging
       console.log(`Dialog opened for field: ${activeFieldKey}`);
       console.log(`Found ${questions.length} relevant questions:`, questions.map(q => q.question.id));
-      console.log("Currently selected options:", selectedOptions);
     }
-  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers]);
+  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers, setSelectedOptions]);
   
   // Special case for specific fields
   const isSpecialField = [

@@ -66,21 +66,8 @@ export const handleAddSelectedOptions = (
     });
   }
   
-  // Special fields that need special handling
-  const specialFields = [
-    'emergencyScenarios', 
-    'highRiskComplications', 
-    'lowRiskOccurrences', 
-    'cascadeInterventions',
-    'painRelief',
-    'interventionsRoutine',
-    'consentimentoInformado',
-    'specialWishes',
-    'unexpectedScenarios'
-  ];
-  
   // If we have selected options, update the birth plan
-  if (Object.values(allSelectedOptions).some(options => options.length > 0) || specialFields.includes(activeFieldKey)) {
+  if (Object.values(allSelectedOptions).some(options => options.length > 0)) {
     // Get the current active section
     const firstQuestionId = Object.keys(selectedOptions)[0] || 
                            (textareaValues && Object.keys(textareaValues)[0]);
@@ -100,9 +87,6 @@ export const handleAddSelectedOptions = (
       const options = allSelectedOptions[questionId];
       if (!options || options.length === 0) return '';
       
-      const questionInfo = findQuestionById(questionId);
-      if (!questionInfo) return '';
-      
       // For textarea, just use the text as is without any prefixes
       if (questionTypes[questionId] === 'textarea') {
         return options[0];
@@ -113,16 +97,18 @@ export const handleAddSelectedOptions = (
     }).filter(text => text.length > 0);
     
     if (formattedOptions.length > 0) {
-      // CRITICAL CHANGE: Completely replace existing field value instead of appending
+      // CRITICAL: Completely replace existing field value with the new selections
       updatedPlan[mappedSectionId][activeFieldKey] = formattedOptions.join('\n\n');
+      
+      setLocalBirthPlan(updatedPlan);
+      
+      // Check if the section was completed after adding options
+      checkSectionCompletion(mappedSectionId, updatedPlan, completedSections, setCompletedSections);
+      
+      toast("As opções selecionadas foram adicionadas ao seu plano de parto.");
+    } else {
+      toast("Nenhuma opção foi selecionada.");
     }
-    
-    setLocalBirthPlan(updatedPlan);
-    
-    // Check if the section was completed after adding options
-    checkSectionCompletion(mappedSectionId, updatedPlan, completedSections, setCompletedSections);
-    
-    toast("As opções selecionadas foram adicionadas ao seu plano de parto.");
   } else {
     toast("Nenhuma opção foi selecionada.");
   }
