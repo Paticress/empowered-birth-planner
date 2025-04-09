@@ -88,13 +88,49 @@ export function BirthPlanEditor({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
   
-  // Set initial values for fields based on questionnaire answers
+  // Clean up any field values that might have labels or prefixes
   useEffect(() => {
-    if (Object.keys(questionnaireAnswers).length > 0 && 
-        Object.keys(localBirthPlan).length > 0) {
-      console.log("Initializing birth plan from questionnaire answers", questionnaireAnswers);
+    if (Object.keys(localBirthPlan).length > 0) {
+      // Check for fields with prefixes that need to be cleaned
+      let needsCleanup = false;
+      const cleanedPlan = { ...localBirthPlan };
+      
+      Object.keys(cleanedPlan).forEach(sectionId => {
+        const section = cleanedPlan[sectionId];
+        if (!section) return;
+        
+        Object.keys(section).forEach(fieldKey => {
+          const fieldValue = section[fieldKey];
+          if (typeof fieldValue === 'string' && fieldValue.includes('Preferências para')) {
+            // This field might need cleanup - it contains a label prefix
+            needsCleanup = true;
+            
+            // Split the value into lines and clean each line
+            const lines = fieldValue.split('\n\n');
+            const cleanedLines = lines.map(line => {
+              // Remove the prefix pattern "Prefix: " if present
+              if (line.includes(':')) {
+                const parts = line.split(':');
+                // If the part before the colon looks like a label/prefix, remove it
+                if (parts[0].includes('Preferências')) {
+                  return parts.slice(1).join(':').trim();
+                }
+              }
+              return line;
+            });
+            
+            // Update the field with cleaned content
+            section[fieldKey] = cleanedLines.join('\n\n');
+          }
+        });
+      });
+      
+      // Only update if we actually cleaned something
+      if (needsCleanup) {
+        setLocalBirthPlan(cleanedPlan);
+      }
     }
-  }, [questionnaireAnswers, localBirthPlan]);
+  }, []);
   
   return (
     <div className="animate-fade-in">

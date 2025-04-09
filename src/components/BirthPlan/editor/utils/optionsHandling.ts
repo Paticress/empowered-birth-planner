@@ -108,7 +108,7 @@ export const formatFieldValueFromQuestionnaire = (
     
     if (question.type === 'textarea') {
       if (typeof answer === 'string' && answer.trim() !== '') {
-        // For textarea, use the full text as is
+        // For textarea, use the full text as is without prefixes
         formattedValues.push(answer.trim());
       }
     } else if (question.type === 'checkbox') {
@@ -119,22 +119,14 @@ export const formatFieldValueFromQuestionnaire = (
           .map(([option]) => option);
           
         if (selectedOptions.length > 0) {
-          // Format with the question text as a prefix
-          const prefix = question.text.length > 30 
-            ? question.text.substring(0, 30) + '...'
-            : question.text;
-            
-          formattedValues.push(`${prefix}: ${selectedOptions.join(', ')}`);
+          // Don't include the question text as prefix, just add the options
+          formattedValues.push(selectedOptions.join(', '));
         }
       }
     } else if (question.type === 'radio' || question.type === 'select') {
       if (typeof answer === 'string' && answer.trim() !== '') {
-        // For radio/select, format with question text as prefix
-        const prefix = question.text.length > 30 
-          ? question.text.substring(0, 30) + '...'
-          : question.text;
-          
-        formattedValues.push(`${prefix}: ${answer}`);
+        // For radio/select, just add the selected option without prefixes
+        formattedValues.push(answer);
       }
     }
   });

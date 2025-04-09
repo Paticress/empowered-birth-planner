@@ -24,6 +24,22 @@ export function useEditorState(
 
   const handleFieldChange = useCallback((sectionId: string, fieldKey: string, value: any) => {
     setLocalBirthPlan(prevPlan => {
+      // Special case for updating an entire section at once
+      if (fieldKey === '__sectionUpdate' && typeof value === 'object') {
+        const updatedPlan = {
+          ...prevPlan,
+          [sectionId]: {
+            ...value
+          }
+        };
+        
+        // Mark section as completed if all required fields are filled
+        checkSectionCompletion(sectionId, updatedPlan, completedSections, setCompletedSections);
+        
+        return updatedPlan;
+      }
+      
+      // Regular field update
       const updatedPlan = {
         ...prevPlan,
         [sectionId]: {

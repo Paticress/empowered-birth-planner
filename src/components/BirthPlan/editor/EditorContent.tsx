@@ -71,6 +71,48 @@ export function EditorContent({
     });
   }, [activeSection.id, localBirthPlan, questionnaireAnswers]);
 
+  // Clean field values that might contain prefixes
+  useEffect(() => {
+    const currentSection = localBirthPlan[activeSection.id];
+    if (!currentSection) return;
+
+    // Check if any field contains prefixes that need to be cleaned
+    let needsCleanup = false;
+    const cleanedSection = { ...currentSection };
+
+    activeSection.fields.forEach(field => {
+      const fieldValue = cleanedSection[field.key];
+      if (typeof fieldValue === 'string' && (
+          fieldValue.includes('Preferências para') || 
+          fieldValue.includes(': ')
+      )) {
+        // This field might need cleanup
+        needsCleanup = true;
+        
+        // Split by lines and clean each line
+        const lines = fieldValue.split('\n\n');
+        const cleanedLines = lines.map(line => {
+          // Remove prefixes like "Preferências para X: " or any label followed by colon
+          if (line.includes(':')) {
+            const parts = line.split(':');
+            if (parts[0].includes('Preferências') || parts[0].trim().length > 15) {
+              return parts.slice(1).join(':').trim();
+            }
+          }
+          return line;
+        });
+
+        // Update the field
+        cleanedSection[field.key] = cleanedLines.join('\n\n');
+      }
+    });
+
+    // Update the local birth plan if we cleaned anything
+    if (needsCleanup) {
+      handleFieldChange(activeSection.id, '__sectionUpdate', cleanedSection);
+    }
+  }, [activeSection.id]);
+
   return (
     <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-4 md:p-6 mb-4 md:mb-6 shadow-md`}>
       <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-semibold text-maternal-700 mb-3 md:mb-4`}>

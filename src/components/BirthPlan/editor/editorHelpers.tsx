@@ -95,32 +95,24 @@ export const handleAddSelectedOptions = (
       updatedPlan[mappedSectionId] = {};
     }
     
-    // Check if we're replacing or appending to existing content
-    const currentFieldValue = updatedPlan[mappedSectionId][activeFieldKey] || '';
-    
-    // Determine how to format options based on the question types included
-    const questionIds = Object.keys(allSelectedOptions);
+    // Important: We're now replacing the entire field content, not appending to it
+    // This ensures we don't mix content from different questions
     
     // Format options for the selected questions only
-    const formattedOptions = questionIds.map(questionId => {
+    const formattedOptions = Object.keys(allSelectedOptions).map(questionId => {
       const options = allSelectedOptions[questionId];
       if (!options || options.length === 0) return '';
       
       const questionInfo = findQuestionById(questionId);
       if (!questionInfo) return '';
       
-      // For textarea, just use the text as is
+      // For textarea, just use the text as is without any prefixes
       if (questionTypes[questionId] === 'textarea') {
         return options[0];
       }
       
-      // Create a prefix from the question text, shortened if needed
-      const questionText = questionInfo.question.text;
-      const prefix = questionText.length > 30 
-        ? questionText.substring(0, 30) + '...'
-        : questionText;
-        
-      return `${prefix}: ${options.join(', ')}`;
+      // For radio/select/checkbox, just return the selected options without prefixes
+      return options.join(', ');
     }).filter(text => text.length > 0);
     
     if (formattedOptions.length > 0) {
