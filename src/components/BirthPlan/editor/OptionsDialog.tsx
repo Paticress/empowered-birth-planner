@@ -1,8 +1,7 @@
-
+import { useAddSelectedOptions } from "@/hooks/useAddSelectedOptions";
 import { Button } from '@/components/ui/button';
 import { SelectableOptions } from './SelectableOptions';
 import {
-  Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -18,7 +17,6 @@ interface OptionsDialogProps {
   selectedOptions: Record<string, Record<string, boolean>>;
   setSelectedOptions: (value: Record<string, Record<string, boolean>>) => void;
   getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
-  handleAddSelectedOptions: () => void;
   questionnaireAnswers: Record<string, any>;
 }
 
@@ -29,46 +27,59 @@ export function OptionsDialog({
   selectedOptions,
   setSelectedOptions,
   getRelevantQuestionsForField,
-  handleAddSelectedOptions,
   questionnaireAnswers
 }: OptionsDialogProps) {
+  // Estados locais para armazenar perguntas relevantes, textos e opções selecionadas
   const [relevantQuestions, setRelevantQuestions] = useState<Array<{question: any, sectionId: string}>>([]);
   const [hasRadioOnly, setHasRadioOnly] = useState(false);
   const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
   const [currentFieldKey, setCurrentFieldKey] = useState<string>('');
-  
-  // Debug logs
-  console.log("OptionsDialog rendered with activeFieldKey:", activeFieldKey);
-  console.log("Dialog open state:", dialogOpen);
-  
-  // Reset everything when activeFieldKey changes
+  const [localBirthPlan, setLocalBirthPlan] = useState({});
+  const [completedSections, setCompletedSections] = useState<string[]>([]);
+
+  // Transforma o formato do selectedOptions para o formato esperado pelo hook
+  const selectedOptionValues = Object.entries(selectedOptions).reduce((acc, [qId, opts]) => {
+    acc[qId] = Object.entries(opts)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([opt]) => opt);
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  // Usa o hook com os dados transformados e atualizados
+  const { handleAddSelectedOptions } = useAddSelectedOptions({
+    activeFieldKey,
+    selectedOptions: selectedOptionValues,
+    localBirthPlan,
+    setLocalBirthPlan,
+    completedSections,
+    setCompletedSections,
+    setSelectedOptions,
+    setDialogOpen,
+    textareaValues,
+    setTextareaValues,
+  });
+
+  // Quando o campo ativo muda, reseta os dados internos
   useEffect(() => {
     if (activeFieldKey !== currentFieldKey) {
-      console.log(`Field changed from ${currentFieldKey} to ${activeFieldKey}, resetting selections`);
-      setSelectedOptions({}); // Clear all selections when field changes
-      setTextareaValues({}); // Clear all textarea values
+      setSelectedOptions({});
+      setTextareaValues({});
       setCurrentFieldKey(activeFieldKey);
     }
   }, [activeFieldKey, currentFieldKey, setSelectedOptions]);
-  
-  // Update relevant questions when activeFieldKey changes or dialog opens
+
+  // Quando o diálogo abre, carrega as perguntas relevantes para o campo atual
   useEffect(() => {
     if (dialogOpen && activeFieldKey) {
-      console.log("Dialog open, fetching questions for:", activeFieldKey);
-      
-      // Get questions that are specifically relevant to this field
       const questions = getRelevantQuestionsForField(activeFieldKey);
-      console.log("Relevant questions found:", questions.length);
-      console.log("Question IDs:", questions.map(q => q.question.id));
-      
       setRelevantQuestions(questions);
-      
-      // Check if all questions are radio type
-      const onlyRadioQuestions = questions.length > 0 && 
+
+      // Detecta se são apenas perguntas de seleção única (radio/select)
+      const onlyRadioQuestions = questions.length > 0 &&
         questions.every(q => q.question.type === 'radio' || q.question.type === 'select');
       setHasRadioOnly(onlyRadioQuestions);
-      
-      // Initialize textarea values from questionnaire answers
+
+      // Inicializa os valores de textarea com base nas respostas anteriores
       const initialTextareaValues: Record<string, string> = {};
       questions.forEach(({ question }) => {
         if (question.type === 'textarea' && questionnaireAnswers[question.id]) {
@@ -78,8 +89,8 @@ export function OptionsDialog({
       setTextareaValues(initialTextareaValues);
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers]);
-  
-  // Special case for specific fields
+
+  // Detecta campos especiais (com lógica específica)
   const isSpecialField = [
     'emergencyScenarios',
     'highRiskComplications',
@@ -91,42 +102,34 @@ export function OptionsDialog({
     'interventionsRoutine',
     'consentimentoInformado'
   ].includes(activeFieldKey);
-  
+
+  // Atualiza valor de textarea
   const handleTextareaChange = (questionId: string, value: string) => {
     setTextareaValues(prev => ({
       ...prev,
       [questionId]: value
     }));
   };
-  
+
   return (
     <DialogContent className="max-w-md">
       <DialogHeader>
         <DialogTitle>Adicionar Respostas do Questionário</DialogTitle>
       </DialogHeader>
-      
+
       <div className="max-h-[60vh] overflow-y-auto py-4">
         {relevantQuestions.length > 0 ? (
           relevantQuestions.map(({ question }) => {
             const questionId = question.id;
-            
-            // Skip rendering if question is undefined
-            if (!question) {
-              console.error("Found undefined question in relevantQuestions");
-              return null;
-            }
-            
-            console.log("Rendering question:", questionId, question.text);
-            
-            // Handle textarea type questions
+            if (!question) return null;
+
+            // Renderiza textarea
             if (question.type === 'textarea') {
               return (
                 <div key={questionId} className="py-3 border-b border-gray-100">
-                  <div className="font-medium text-maternal-900">
-                    {question.text}
-                  </div>
+                  <div className="font-medium text-maternal-900">{question.text}</div>
                   <div className="mt-2">
-                    <Textarea 
+                    <Textarea
                       value={textareaValues[questionId] || ''}
                       onChange={(e) => handleTextareaChange(questionId, e.target.value)}
                       placeholder="Digite sua resposta aqui..."
@@ -137,16 +140,14 @@ export function OptionsDialog({
                 </div>
               );
             }
-            
+
+            // Renderiza opções selecionáveis (radio, checkbox, etc.)
             return (
               <div key={questionId} className="py-3 border-b border-gray-100">
-                <div className="font-medium text-maternal-900">
-                  {question.text}
-                </div>
-                
-                <SelectableOptions 
-                  question={question} 
-                  questionId={questionId} 
+                <div className="font-medium text-maternal-900">{question.text}</div>
+                <SelectableOptions
+                  question={question}
+                  questionId={questionId}
                   selectedOptions={selectedOptions}
                   setSelectedOptions={setSelectedOptions}
                   isSpecialField={isSpecialField}
@@ -161,12 +162,12 @@ export function OptionsDialog({
           </p>
         )}
       </div>
-      
+
       <DialogFooter>
         <Button variant="outline" onClick={() => setDialogOpen(false)}>
           Cancelar
         </Button>
-        <Button 
+        <Button
           onClick={handleAddSelectedOptions}
           disabled={relevantQuestions.length === 0}
         >
