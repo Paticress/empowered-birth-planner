@@ -55,17 +55,17 @@ export function BirthPlanEditor({
     console.log("📄 Conteúdo atual do birthPlan:", localBirthPlan);
 
     // Verificar a estrutura atual da seção ativa
-    const activeSection = birthPlanSections[activeSectionIndex];
-    if (activeSection) {
-      console.log("🔍 Seção ativa:", activeSection.id);
+    const currentActiveSection = birthPlanSections[activeSectionIndex];
+    if (currentActiveSection) {
+      console.log("🔍 Seção ativa:", currentActiveSection.id);
       console.log("🔍 Campo ativo:", activeFieldKey);
       
       // Verificar se o localBirthPlan tem a estrutura correta
-      if (!localBirthPlan[activeSection.id]) {
+      if (!localBirthPlan[currentActiveSection.id]) {
         console.log("⚠️ Seção não existe no localBirthPlan, criando...");
         setLocalBirthPlan({
           ...localBirthPlan,
-          [activeSection.id]: {}
+          [currentActiveSection.id]: {}
         });
       }
     }
@@ -81,19 +81,19 @@ export function BirthPlanEditor({
     }
 
     // Usar o hook personalizado para processar as opções
-    const activeSection = birthPlanSections[activeSectionIndex];
-    if (!localBirthPlan[activeSection.id]) {
+    const currentSection = birthPlanSections[activeSectionIndex];
+    if (!localBirthPlan[currentSection.id]) {
       // Certifique-se de que a seção existe antes de adicionar opções
       const updatedPlan = {
         ...localBirthPlan,
-        [activeSection.id]: {}
+        [currentSection.id]: {}
       };
       setLocalBirthPlan(updatedPlan);
     }
 
     // Processar as opções selecionadas e atualizar o plano
     // Importante: activeFieldKey é o campo do momento, não a seção
-    const currentFieldValue = localBirthPlan[activeSection.id]?.[activeFieldKey] || '';
+    const currentFieldValue = localBirthPlan[currentSection.id]?.[activeFieldKey] || '';
     console.log("🔍 Valor atual do campo:", currentFieldValue);
 
     // Processar as opções selecionadas e textareas
@@ -113,16 +113,16 @@ export function BirthPlanEditor({
     // Atualizar o plano
     if (combinedItems.length > 0) {
       const updatedSection = {
-        ...localBirthPlan[activeSection.id],
+        ...localBirthPlan[currentSection.id],
         [activeFieldKey]: combinedItems.join('\n\n')
       };
       
       const updatedPlan = {
         ...localBirthPlan,
-        [activeSection.id]: updatedSection
+        [currentSection.id]: updatedSection
       };
       
-      console.log("🔍 Atualizando plano com:", updatedPlan[activeSection.id][activeFieldKey]);
+      console.log("🔍 Atualizando plano com:", updatedPlan[currentSection.id][activeFieldKey]);
       setLocalBirthPlan(updatedPlan);
       
       // Marcar a seção como concluída se ainda não estiver
@@ -215,3 +215,4 @@ export function BirthPlanEditor({
     </div>
   );
 }
+
