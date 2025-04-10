@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { birthPlanSections } from '../utils/birthPlanSections';
@@ -22,16 +23,6 @@ export function useEditorState(
   const [isDirty, setIsDirty] = useState(false);
   const [lastSaved, setLastSaved] = useState(new Date());
   const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
-
-  // Reset selected options whenever activeFieldKey changes
-  useEffect(() => {
-    if (activeFieldKey) {
-      console.log(`Active field changed to ${activeFieldKey}, resetting all selections`);
-      // Completely reset selections when changing fields
-      setSelectedOptions({});
-      setTextareaValues({});
-    }
-  }, [activeFieldKey]);
 
   const handleFieldChange = useCallback((sectionId: string, fieldKey: string, value: any) => {
     setLocalBirthPlan(prevPlan => {
