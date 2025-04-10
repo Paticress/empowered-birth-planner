@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { birthPlanSections } from '../utils/birthPlanSections';
 
@@ -102,9 +101,8 @@ export function useProcessSelectedOptions({
     if (selectedItems.length > 0) {
       console.log("🔍 Opções selecionadas finais:", selectedItems);
       
-      // CORREÇÃO: Sempre usar formato de lista com quebras de linha duplas
-      // Formatar cada item em sua própria linha
-      const formattedText = selectedItems.join('\n\n');
+      // CORREÇÃO: Formatar com vírgula e espaço, sem quebras de linha
+      const formattedText = selectedItems.join(', ');
       
       // Atualizar o plano de parto com o texto formatado
       const updatedSection = {
