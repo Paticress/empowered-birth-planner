@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { EditorField } from './EditorField';
 import { birthPlanSections } from '../utils/birthPlanSections';
@@ -19,7 +20,7 @@ interface EditorContentProps {
   dialogOpen: boolean;
   setDialogOpen: (value: boolean) => void;
   selectedOptions: Record<string, Record<string, boolean>>;
-  setSelectedOptions: (value: Record<string, Record<string, boolean>>) => void;
+  setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>;
   questionnaireAnswers: Record<string, any>;
   handleAddSelectedOptions: () => void;
   getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
@@ -111,7 +112,7 @@ export function EditorContent({
         }
       });
     }
-  }, [activeSection.id, questionnaireAnswers]);
+  }, [activeSection.id, activeSection.fields, questionnaireAnswers, specialFields, localBirthPlan, handleFieldChange, getRelevantQuestionsForField]);
 
   // Clean field values that might contain prefixes or content from other fields
   useEffect(() => {
@@ -142,7 +143,7 @@ export function EditorContent({
     if (needsCleanup) {
       handleFieldChange(activeSection.id, '__sectionUpdate', cleanedSection);
     }
-  }, [activeSection.id, activeSectionIndex]);
+  }, [activeSection.id, activeSection.fields, activeSectionIndex, localBirthPlan, handleFieldChange]);
 
   return (
     <div className={`bg-white border-l-4 border-maternal-${activeSection.color || '400'} rounded-lg p-4 md:p-6 mb-4 md:mb-6 shadow-md`}>

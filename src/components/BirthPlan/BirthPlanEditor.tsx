@@ -6,7 +6,6 @@ import { EditorHeader } from './editor/EditorHeader';
 import { EditorTip } from './editor/EditorTip';
 import { BirthPlanSectionProgress } from './BirthPlanSectionProgress';
 import { useEditorState } from './hooks/useEditorState';
-import { handleAddSelectedOptions } from './editor/editorHelpers';
 import { BackToTopButton } from './common/BackToTopButton';
 import { useEffect } from 'react';
 import { getRelevantQuestionsForField } from './editor/utils/questionRelevance';
@@ -55,19 +54,91 @@ export function BirthPlanEditor({
     console.log("🧠 Textareas preenchidos:", textareaValues);
     console.log("📄 Conteúdo atual do birthPlan:", localBirthPlan);
 
-    handleAddSelectedOptions(
-      activeFieldKey,
-      selectedOptions,
-      localBirthPlan,
-      setLocalBirthPlan,
-      completedSections,
-      setCompletedSections,
-      setSelectedOptions,
-      setDialogOpen,
-      textareaValues
-    );
-    // Reset textarea values after adding
+    // Verificar a estrutura atual da seção ativa
+    const activeSection = birthPlanSections[activeSectionIndex];
+    if (activeSection) {
+      console.log("🔍 Seção ativa:", activeSection.id);
+      console.log("🔍 Campo ativo:", activeFieldKey);
+      
+      // Verificar se o localBirthPlan tem a estrutura correta
+      if (!localBirthPlan[activeSection.id]) {
+        console.log("⚠️ Seção não existe no localBirthPlan, criando...");
+        setLocalBirthPlan({
+          ...localBirthPlan,
+          [activeSection.id]: {}
+        });
+      }
+    }
+
+    // Verificar as opções selecionadas para o campo atual
+    if (selectedOptions[activeFieldKey]) {
+      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
+        .filter(([_, isSelected]) => isSelected)
+        .map(([option]) => option);
+      console.log("🔍 Opções selecionadas para este campo:", selectedForField);
+    } else {
+      console.log("⚠️ Nenhuma opção selecionada para este campo");
+    }
+
+    // Usar o hook personalizado para processar as opções
+    const activeSection = birthPlanSections[activeSectionIndex];
+    if (!localBirthPlan[activeSection.id]) {
+      // Certifique-se de que a seção existe antes de adicionar opções
+      const updatedPlan = {
+        ...localBirthPlan,
+        [activeSection.id]: {}
+      };
+      setLocalBirthPlan(updatedPlan);
+    }
+
+    // Processar as opções selecionadas e atualizar o plano
+    // Importante: activeFieldKey é o campo do momento, não a seção
+    const currentFieldValue = localBirthPlan[activeSection.id]?.[activeFieldKey] || '';
+    console.log("🔍 Valor atual do campo:", currentFieldValue);
+
+    // Processar as opções selecionadas e textareas
+    const selectedItems = Object.entries(selectedOptions[activeFieldKey] || {})
+      .filter(([_, isSelected]) => isSelected)
+      .map(([option]) => option.trim());
+    
+    const manualItems = Object.values(textareaValues)
+      .map(text => text.trim())
+      .filter(Boolean);
+    
+    // Combinar os itens existentes com os novos
+    const existingItems = currentFieldValue ? currentFieldValue.split('\n\n').map(item => item.trim()) : [];
+    const newItems = [...selectedItems, ...manualItems];
+    const combinedItems = Array.from(new Set([...existingItems, ...newItems])).filter(Boolean);
+    
+    // Atualizar o plano
+    if (combinedItems.length > 0) {
+      const updatedSection = {
+        ...localBirthPlan[activeSection.id],
+        [activeFieldKey]: combinedItems.join('\n\n')
+      };
+      
+      const updatedPlan = {
+        ...localBirthPlan,
+        [activeSection.id]: updatedSection
+      };
+      
+      console.log("🔍 Atualizando plano com:", updatedPlan[activeSection.id][activeFieldKey]);
+      setLocalBirthPlan(updatedPlan);
+      
+      // Marcar a seção como concluída se ainda não estiver
+      if (!completedSections.includes(activeFieldKey)) {
+        setCompletedSections([...completedSections, activeFieldKey]);
+      }
+    }
+    
+    // Limpar seleções e fechar diálogo
+    setSelectedOptions(prev => ({
+      ...prev,
+      [activeFieldKey]: {}
+    }));
+    
     setTextareaValues({});
+    setDialogOpen(false);
   };
   
   // Helper function to pass to children components
@@ -84,7 +155,7 @@ export function BirthPlanEditor({
       
       return () => clearTimeout(autoSaveTimer);
     }
-  }, [localBirthPlan, isDirty]);
+  }, [localBirthPlan, isDirty, handleSave]);
   
   // Save before navigating away
   useEffect(() => {
@@ -99,31 +170,6 @@ export function BirthPlanEditor({
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
-  
-  // Debug questionnaire answers - used to identify issues with special fields
-  useEffect(() => {
-    console.log("Questionnaire answers:", questionnaireAnswers);
-    console.log("Special field keys check:");
-    console.log("- emergencyPreferences exists:", !!questionnaireAnswers.emergencyPreferences);
-    console.log("- highRiskComplications exists:", !!questionnaireAnswers.highRiskComplications);
-    console.log("- lowRiskOccurrences exists:", !!questionnaireAnswers.lowRiskOccurrences);
-    
-    // Inspect the structure of special fields answers if they exist
-    if (questionnaireAnswers.emergencyPreferences) {
-      console.log("emergencyPreferences structure:", typeof questionnaireAnswers.emergencyPreferences);
-      console.log("emergencyPreferences value:", questionnaireAnswers.emergencyPreferences);
-    }
-    
-    if (questionnaireAnswers.highRiskComplications) {
-      console.log("highRiskComplications structure:", typeof questionnaireAnswers.highRiskComplications);
-      console.log("highRiskComplications value:", questionnaireAnswers.highRiskComplications);
-    }
-    
-    if (questionnaireAnswers.lowRiskOccurrences) {
-      console.log("lowRiskOccurrences structure:", typeof questionnaireAnswers.lowRiskOccurrences);
-      console.log("lowRiskOccurrences value:", questionnaireAnswers.lowRiskOccurrences);
-    }
-  }, [questionnaireAnswers]);
   
   return (
     <div className="animate-fade-in">

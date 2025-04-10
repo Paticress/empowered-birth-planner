@@ -1,3 +1,4 @@
+
 import { useAddSelectedOptions } from "@/hooks/useAddSelectedOptions";
 import { Button } from '@/components/ui/button';
 import { SelectableOptions } from './SelectableOptions';
@@ -18,6 +19,7 @@ interface OptionsDialogProps {
   setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>;
   getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
   questionnaireAnswers: Record<string, any>;
+  handleAddSelectedOptions: () => void;
 }
 
 // Componente principal do dialog
@@ -28,40 +30,25 @@ export function OptionsDialog({
   selectedOptions,
   setSelectedOptions,
   getRelevantQuestionsForField,
-  questionnaireAnswers
+  questionnaireAnswers,
+  handleAddSelectedOptions
 }: OptionsDialogProps) {
   const [relevantQuestions, setRelevantQuestions] = useState<Array<{question: any, sectionId: string}>>([]);
   const [hasRadioOnly, setHasRadioOnly] = useState(false);
   const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
   const [currentFieldKey, setCurrentFieldKey] = useState<string>('');
-  const [localBirthPlan, setLocalBirthPlan] = useState({});
-  const [completedSections, setCompletedSections] = useState<string[]>([]);
-
-  // Verifica se o componente já montou no cliente para evitar erro de portal (ownerDocument)
   const [hasMounted, setHasMounted] = useState(false);
+  
+  // Verifica se o componente já montou no cliente para evitar erro de portal (ownerDocument)
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
-  // Hook customizado para lidar com a adição de opções selecionadas
-  const { handleAddSelectedOptions } = useAddSelectedOptions({
-    activeFieldKey,
-    selectedOptions,
-    localBirthPlan,
-    setLocalBirthPlan,
-    completedSections,
-    setCompletedSections,
-    setSelectedOptions,
-    setDialogOpen,
-    textareaValues,
-    setTextareaValues,
-  });
 
   // Reseta seleções e campos ao mudar o campo ativo
   useEffect(() => {
     if (activeFieldKey !== currentFieldKey) {
       console.log(`Field changed from ${currentFieldKey} to ${activeFieldKey}, resetting selections`);
-      setSelectedOptions(() => ({})); // limpa seleções antigas
+      setSelectedOptions({}); // limpa seleções antigas
       setTextareaValues({}); // limpa textarea
       setCurrentFieldKey(activeFieldKey);
     }
@@ -88,19 +75,6 @@ export function OptionsDialog({
       setTextareaValues(initialTextareaValues);
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers]);
-
-  // Lista de campos especiais que sempre exibem textarea
-  const isSpecialField = [
-    'emergencyScenarios',
-    'highRiskComplications',
-    'lowRiskOccurrences',
-    'cascadeInterventions',
-    'unexpectedScenarios',
-    'specialWishes',
-    'painRelief',
-    'interventionsRoutine',
-    'consentimentoInformado'
-  ].includes(activeFieldKey);
 
   // Atualiza valores do textarea conforme o usuário digita
   const handleTextareaChange = (questionId: string, value: string) => {
@@ -153,7 +127,6 @@ export function OptionsDialog({
                   questionId={questionId} 
                   selectedOptions={selectedOptions}
                   setSelectedOptions={setSelectedOptions}
-                  isSpecialField={isSpecialField}
                   questionnaireAnswers={questionnaireAnswers}
                 />
               </div>

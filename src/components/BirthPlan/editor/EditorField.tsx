@@ -22,7 +22,7 @@ interface EditorFieldProps {
   dialogOpen: boolean;
   setDialogOpen: (value: boolean) => void;
   selectedOptions: Record<string, Record<string, boolean>>;
-  setSelectedOptions: (value: Record<string, Record<string, boolean>>) => void;
+  setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>;
   getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
   handleAddSelectedOptions: () => void;
   questionnaireAnswers: Record<string, any>;
@@ -99,7 +99,7 @@ export function EditorField({
       
       setHasInitialized(true);
     }
-  }, [field.key, activeSection.id, questionnaireAnswers, fieldValue, hasInitialized]);
+  }, [field.key, activeSection.id, questionnaireAnswers, fieldValue, hasInitialized, specialFields, handleFieldChange]);
   
   // Handle opening the options dialog for this field
   const handleOpenOptionsDialog = () => {
