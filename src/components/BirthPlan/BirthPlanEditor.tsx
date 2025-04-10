@@ -48,6 +48,13 @@ export function BirthPlanEditor({
     setTextareaValues
   } = useEditorState(birthPlan, onUpdate, questionnaireAnswers);
 
+  // Additional safeguard - Reset selectedOptions whenever activeFieldKey changes
+  useEffect(() => {
+    console.log(`BirthPlanEditor: Active field changed to ${activeFieldKey}, ensuring selections are reset`);
+    setSelectedOptions({});
+    setTextareaValues({});
+  }, [activeFieldKey, setSelectedOptions, setTextareaValues]);
+
   const processAddSelectedOptions = () => {
     handleAddSelectedOptions(
       activeFieldKey,

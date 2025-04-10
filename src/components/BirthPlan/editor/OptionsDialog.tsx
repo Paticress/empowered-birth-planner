@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { SelectableOptions } from './SelectableOptions';
 import {
@@ -56,6 +55,9 @@ export function OptionsDialog({
     if (dialogOpen && activeFieldKey) {
       console.log("Dialog open, fetching questions for:", activeFieldKey);
       
+      // CRITICAL FIX: Reset selections BEFORE fetching new questions
+      setSelectedOptions({});
+      
       // Get questions that are specifically relevant to this field
       const questions = getRelevantQuestionsForField(activeFieldKey);
       console.log("Relevant questions found:", questions.length);
@@ -77,9 +79,8 @@ export function OptionsDialog({
       });
       setTextareaValues(initialTextareaValues);
     }
-  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers]);
+  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers, setSelectedOptions]);
   
-  // Special case for specific fields
   const isSpecialField = [
     'emergencyScenarios',
     'highRiskComplications',

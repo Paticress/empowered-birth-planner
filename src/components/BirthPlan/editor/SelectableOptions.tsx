@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -38,7 +37,8 @@ export function SelectableOptions({
   // Initialize options from questionnaire answers when component mounts
   useEffect(() => {
     if (!isInitialized && questionnaireAnswers && Object.keys(questionnaireAnswers).length > 0) {
-      const newSelectedOptions = { ...selectedOptions };
+      // CRITICAL FIX: We need to create a new object to avoid shared references
+      const newSelectedOptions = JSON.parse(JSON.stringify(selectedOptions || {}));
       
       // Initialize the question entry if it doesn't exist
       if (!newSelectedOptions[questionId]) {
@@ -50,9 +50,12 @@ export function SelectableOptions({
         if (typeof questionnaireAnswers[questionId] === 'object' && 
             !Array.isArray(questionnaireAnswers[questionId])) {
           
+          // Get fresh options for this question from the questionnaire
+          const questionAnswers = questionnaireAnswers[questionId] || {};
+          
           question.options.forEach((option: string) => {
             // Mark the option as selected if it's selected in the questionnaire
-            const isSelected = !!questionnaireAnswers[questionId]?.[option];
+            const isSelected = !!questionAnswers[option];
             newSelectedOptions[questionId][option] = isSelected;
             
             // Debug for special questions
@@ -80,7 +83,7 @@ export function SelectableOptions({
       
       setIsInitialized(true);
     }
-  }, [questionId, questionnaireAnswers, isInitialized]);
+  }, [questionId, questionnaireAnswers, isInitialized, selectedOptions, setSelectedOptions, question.options, question.type]);
   
   const handleCheckedChange = (option: string, checked: boolean) => {
     // Create a copy of the current state
