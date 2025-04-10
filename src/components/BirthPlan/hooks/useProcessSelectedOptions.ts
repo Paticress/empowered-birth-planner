@@ -74,30 +74,42 @@ export function useProcessSelectedOptions({
       setLocalBirthPlan(updatedPlan);
     }
 
-    // Processar as opções selecionadas e atualizar o plano
-    // Importante: activeFieldKey é o campo do momento, não a seção
-    const currentFieldValue = localBirthPlan[currentSection.id]?.[activeFieldKey] || '';
-    console.log("🔍 Valor atual do campo:", currentFieldValue);
-
+    // CORREÇÃO: Modificação na forma como processamos as opções e atualizamos o campo
+    
     // Processar as opções selecionadas e textareas
-    const selectedItems = Object.entries(selectedOptions[activeFieldKey] || {})
-      .filter(([_, isSelected]) => isSelected)
-      .map(([option]) => option.trim());
+    const selectedItems = [];
     
-    const manualItems = Object.values(textareaValues)
+    // Capturar todas as opções selecionadas para o campo ativo
+    if (selectedOptions[activeFieldKey]) {
+      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
+        .filter(([_, isSelected]) => isSelected)
+        .map(([option]) => option.trim());
+      
+      if (selectedForField.length > 0) {
+        selectedItems.push(...selectedForField);
+      }
+    }
+    
+    // Capturar qualquer texto de textareas
+    Object.values(textareaValues)
       .map(text => text.trim())
-      .filter(Boolean);
+      .filter(Boolean)
+      .forEach(text => {
+        selectedItems.push(text);
+      });
     
-    // Combinar os itens existentes com os novos
-    const existingItems = currentFieldValue ? currentFieldValue.split('\n\n').map(item => item.trim()) : [];
-    const newItems = [...selectedItems, ...manualItems];
-    const combinedItems = Array.from(new Set([...existingItems, ...newItems])).filter(Boolean);
-    
-    // Atualizar o plano
-    if (combinedItems.length > 0) {
+    // Se temos opções selecionadas, vamos atualizar o campo
+    if (selectedItems.length > 0) {
+      console.log("🔍 Opções selecionadas finais:", selectedItems);
+      
+      // CORREÇÃO: Sempre usar formato de lista com quebras de linha duplas
+      // Formatar cada item em sua própria linha
+      const formattedText = selectedItems.join('\n\n');
+      
+      // Atualizar o plano de parto com o texto formatado
       const updatedSection = {
         ...localBirthPlan[currentSection.id],
-        [activeFieldKey]: combinedItems.join('\n\n')
+        [activeFieldKey]: formattedText
       };
       
       const updatedPlan = {
@@ -105,7 +117,7 @@ export function useProcessSelectedOptions({
         [currentSection.id]: updatedSection
       };
       
-      console.log("🔍 Atualizando plano com:", updatedPlan[currentSection.id][activeFieldKey]);
+      console.log("🔍 Atualizando plano com:", formattedText);
       setLocalBirthPlan(updatedPlan);
       
       // Marcar a seção como concluída se ainda não estiver

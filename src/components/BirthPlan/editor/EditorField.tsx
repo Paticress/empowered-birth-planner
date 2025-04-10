@@ -45,6 +45,7 @@ export function EditorField({
   handleAddSelectedOptions,
   questionnaireAnswers
 }: EditorFieldProps) {
+  // Obtém o valor atual do campo
   const fieldValue = sectionData[field.key] || '';
   const [hasInitialized, setHasInitialized] = useState(false);
   const showAddButton = shouldShowAddButton(field.key);
@@ -170,7 +171,7 @@ export function EditorField({
       ) : (
         <Textarea
           id={`${activeSection.id}-${field.key}`}
-          value={Array.isArray(fieldValue) ? fieldValue.join('\n') : fieldValue}
+          value={fieldValue}
           onChange={(e) => handleFieldChange(
             activeSection.id, 
             field.key, 
