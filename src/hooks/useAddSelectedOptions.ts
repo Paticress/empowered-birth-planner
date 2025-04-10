@@ -1,13 +1,11 @@
 
-// src/hooks/useAddSelectedOptions.ts
-
 import { useCallback } from "react";
 
 type Params = {
   activeFieldKey: string;
   selectedOptions: Record<string, Record<string, boolean>>;
-  localBirthPlan: any;
-  setLocalBirthPlan: (plan: any) => void;
+  localBirthPlan: Record<string, any>;
+  setLocalBirthPlan: (plan: Record<string, any>) => void;
   completedSections: string[];
   setCompletedSections: (sections: string[]) => void;
   setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>;
@@ -29,70 +27,65 @@ export function useAddSelectedOptions({
   setTextareaValues,
 }: Params) {
   
-  // Função principal que processa as opções selecionadas e textarea
+  // Main function that processes selected options and textarea values
   const handleAddSelectedOptions = useCallback(() => {
-    // Log para depuração
-    console.log(`🔍 handleAddSelectedOptions para campo: ${activeFieldKey}`);
-    console.log(`🔍 Opções selecionadas:`, selectedOptions);
-    console.log(`🔍 Valores de textarea:`, textareaValues);
+    // Detailed logging for debugging
+    console.log(`🔍 Processing options for field: ${activeFieldKey}`);
+    console.log(`🔍 Current options:`, selectedOptions[activeFieldKey] || {});
+    console.log(`🔍 Current textarea values:`, textareaValues);
     
-    // Extrai as opções selecionadas (checkboxes ou similares)
+    // Extract selected options (from checkboxes or similar UI elements)
     const selectedStrings = Object.entries(selectedOptions[activeFieldKey] || {})
       .filter(([_, isSelected]) => isSelected)
       .map(([option]) => option.trim());
     
-    console.log(`🔍 Opções extraídas: ${selectedStrings.join(', ')}`);
+    console.log(`🔍 Selected options extracted: ${selectedStrings.length} items`);
 
-    // Extrai o texto do textarea (se houver)
+    // Extract manual text entries from textareas
     const manualTexts = Object.values(textareaValues)
       .map(text => text.trim())
-      .filter(Boolean); // remove textos vazios
+      .filter(Boolean); // remove empty texts
     
-    console.log(`🔍 Textos manuais: ${manualTexts.join(', ')}`);
+    console.log(`🔍 Manual texts extracted: ${manualTexts.length} items`);
 
-    // Separa os valores já existentes no plano local
+    // Get existing value in the birth plan
     const currentValue = (localBirthPlan?.[activeFieldKey] || '')
       .split('\n\n')
-      .map(s => s.trim());
+      .map(s => s.trim())
+      .filter(Boolean);
     
-    console.log(`🔍 Valor atual: ${currentValue.join(', ')}`);
+    console.log(`🔍 Current field value has: ${currentValue.length} items`);
 
-    // Combina selecionadas + textarea (se houver)
+    // Combine all values: existing + selected + manual
     const allNewValues = [...selectedStrings, ...manualTexts];
     
-    console.log(`🔍 Todos os novos valores: ${allNewValues.join(', ')}`);
-
-    // Junta tudo e remove duplicatas
-    const mergedValues = Array.from(new Set([...currentValue, ...allNewValues])).filter(v => v);
+    // Create final value by merging everything and removing duplicates
+    const mergedValues = Array.from(new Set([...currentValue, ...allNewValues])).filter(Boolean);
     
-    console.log(`🔍 Valores após merge: ${mergedValues.join(', ')}`);
+    console.log(`🔍 Final merged values: ${mergedValues.length} items`);
 
-    // Atualiza o plano local com os novos valores
+    // Update the birth plan with new values
     const updatedPlan = {
       ...localBirthPlan,
       [activeFieldKey]: mergedValues.join('\n\n')
     };
     
-    console.log(`🔍 Plano atualizado para campo ${activeFieldKey}:`, updatedPlan[activeFieldKey]);
-
     setLocalBirthPlan(updatedPlan);
 
-    // Marca a seção como concluída, se ainda não estiver
+    // Mark section as completed if not already done
     if (!completedSections.includes(activeFieldKey)) {
       setCompletedSections([...completedSections, activeFieldKey]);
     }
 
-    // Limpa as opções selecionadas para este campo
+    // Reset state
     setSelectedOptions(prev => ({
       ...prev,
       [activeFieldKey]: {}
     }));
-
-    // Limpa as textareas
     setTextareaValues({});
-
-    // Fecha o diálogo
     setDialogOpen(false);
+    
+    console.log(`✅ Options processing complete for ${activeFieldKey}`);
   }, [
     activeFieldKey,
     selectedOptions,

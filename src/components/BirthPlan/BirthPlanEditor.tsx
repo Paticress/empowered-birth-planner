@@ -1,15 +1,13 @@
 
 import { birthPlanSections } from './utils/birthPlanSections';
 import { EditorContent } from './editor/EditorContent';
-import { EditorFooter } from './editor/EditorFooter';
-import { EditorHeader } from './editor/EditorHeader';
-import { EditorTip } from './editor/EditorTip';
-import { BirthPlanSectionProgress } from './BirthPlanSectionProgress';
 import { useEditorState } from './hooks/useEditorState';
-import { BackToTopButton } from './common/BackToTopButton';
 import { useEffect } from 'react';
 import { getRelevantQuestionsForField } from './editor/utils/questionRelevance';
 import { useProcessSelectedOptions } from './hooks/useProcessSelectedOptions';
+import { useAutoSave } from './hooks/useAutoSave';
+import { useBeforeUnloadWarning } from './hooks/useBeforeUnloadWarning';
+import { EditorLayout } from './editor/EditorLayout';
 
 interface BirthPlanEditorProps {
   birthPlan: Record<string, any>;
@@ -48,7 +46,7 @@ export function BirthPlanEditor({
     setTextareaValues
   } = useEditorState(birthPlan, onUpdate, questionnaireAnswers);
 
-  // Use our new custom hook for processing selected options
+  // Use our custom hook for processing selected options
   const { processAddSelectedOptions } = useProcessSelectedOptions({
     activeSectionIndex,
     activeFieldKey,
@@ -68,45 +66,21 @@ export function BirthPlanEditor({
     return getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
   };
   
-  // Auto-save functionality
-  useEffect(() => {
-    if (isDirty) {
-      const autoSaveTimer = setTimeout(() => {
-        handleSave(false); // Pass false to avoid showing toast on auto-save
-      }, 30000); // Auto-save after 30 seconds of inactivity
-      
-      return () => clearTimeout(autoSaveTimer);
-    }
-  }, [localBirthPlan, isDirty, handleSave]);
-  
-  // Save before navigating away
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
-        const message = "Você tem alterações não salvas. Tem certeza que deseja sair?";
-        e.returnValue = message;
-        return message;
-      }
-    };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [isDirty]);
+  // Use our custom hooks for auto-save and beforeunload warning
+  useAutoSave({ isDirty, handleSave });
+  useBeforeUnloadWarning({ isDirty });
   
   return (
-    <div className="animate-fade-in">
-      <EditorHeader />
-      
-      <BirthPlanSectionProgress 
-        sections={birthPlanSections}
-        currentSectionIndex={activeSectionIndex}
-        onSectionClick={setActiveSectionIndex}
-        stageType="editor"
-        completedSections={completedSections}
-        onPrevious={goToPreviousSection}
-        onNext={goToNextSection}
-      />
-      
+    <EditorLayout
+      activeSectionIndex={activeSectionIndex}
+      setActiveSectionIndex={setActiveSectionIndex}
+      completedSections={completedSections}
+      goToPreviousSection={goToPreviousSection}
+      goToNextSection={goToNextSection}
+      handleSave={() => handleSave()}
+      onNext={onNext}
+      isDirty={isDirty}
+    >
       <EditorContent 
         activeSectionIndex={activeSectionIndex}
         localBirthPlan={localBirthPlan}
@@ -121,19 +95,6 @@ export function BirthPlanEditor({
         handleAddSelectedOptions={processAddSelectedOptions}
         getRelevantQuestionsForField={getRelevantQuestionsForActiveField}
       />
-      
-      <EditorTip />
-      
-      <EditorFooter 
-        activeSectionIndex={activeSectionIndex}
-        birthPlanSectionLength={birthPlanSections.length}
-        handleSave={() => handleSave()}
-        onNext={onNext}
-        setActiveSectionIndex={setActiveSectionIndex}
-        isDirty={isDirty}
-      />
-      
-      <BackToTopButton />
-    </div>
+    </EditorLayout>
   );
 }
