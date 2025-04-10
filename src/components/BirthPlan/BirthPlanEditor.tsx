@@ -49,6 +49,12 @@ export function BirthPlanEditor({
   } = useEditorState(birthPlan, onUpdate, questionnaireAnswers);
 
   const processAddSelectedOptions = () => {
+    // Strategic logging for debugging option selection
+    console.log("➕ Adicionando opções ao campo:", activeFieldKey);
+    console.log("📋 Opções atualmente selecionadas:", selectedOptions);
+    console.log("🧠 Textareas preenchidos:", textareaValues);
+    console.log("📄 Conteúdo atual do birthPlan:", localBirthPlan);
+
     handleAddSelectedOptions(
       activeFieldKey,
       selectedOptions,
