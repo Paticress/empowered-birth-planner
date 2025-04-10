@@ -20,6 +20,7 @@ interface OptionsDialogProps {
   questionnaireAnswers: Record<string, any>;
 }
 
+// Componente principal do dialog
 export function OptionsDialog({
   dialogOpen,
   setDialogOpen,
@@ -29,7 +30,6 @@ export function OptionsDialog({
   getRelevantQuestionsForField,
   questionnaireAnswers
 }: OptionsDialogProps) {
-  // Estados locais para armazenar perguntas relevantes, textos e opções selecionadas
   const [relevantQuestions, setRelevantQuestions] = useState<Array<{question: any, sectionId: string}>>([]);
   const [hasRadioOnly, setHasRadioOnly] = useState(false);
   const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
@@ -37,18 +37,15 @@ export function OptionsDialog({
   const [localBirthPlan, setLocalBirthPlan] = useState({});
   const [completedSections, setCompletedSections] = useState<string[]>([]);
 
-  // Transforma o formato do selectedOptions para o formato esperado pelo hook
-  const selectedOptionValues = Object.entries(selectedOptions).reduce((acc, [qId, opts]) => {
-    acc[qId] = Object.entries(opts)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([opt]) => opt);
-    return acc;
-  }, {} as Record<string, string[]>);
-
-  // Usa o hook com os dados transformados e atualizados
+  // Cria a função handleAddSelectedOptions com dados sempre atualizados
   const { handleAddSelectedOptions } = useAddSelectedOptions({
     activeFieldKey,
-    selectedOptions: selectedOptionValues,
+    selectedOptions: Object.entries(selectedOptions).reduce((acc, [qId, opts]) => {
+      acc[qId] = Object.entries(opts)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([opt]) => opt);
+      return acc;
+    }, {} as Record<string, string[]>),
     localBirthPlan,
     setLocalBirthPlan,
     completedSections,
@@ -59,27 +56,28 @@ export function OptionsDialog({
     setTextareaValues,
   });
 
-  // Quando o campo ativo muda, reseta os dados internos
+  // Reset de seleções ao mudar de campo ativo
   useEffect(() => {
     if (activeFieldKey !== currentFieldKey) {
-      setSelectedOptions({});
-      setTextareaValues({});
+      console.log(`Field changed from ${currentFieldKey} to ${activeFieldKey}, resetting selections`);
+      setSelectedOptions({}); // limpa seleções antigas
+      setTextareaValues({}); // limpa textarea
       setCurrentFieldKey(activeFieldKey);
     }
   }, [activeFieldKey, currentFieldKey, setSelectedOptions]);
 
-  // Quando o diálogo abre, carrega as perguntas relevantes para o campo atual
+  // Atualiza perguntas relevantes quando abrir o diálogo
   useEffect(() => {
     if (dialogOpen && activeFieldKey) {
       const questions = getRelevantQuestionsForField(activeFieldKey);
       setRelevantQuestions(questions);
 
-      // Detecta se são apenas perguntas de seleção única (radio/select)
-      const onlyRadioQuestions = questions.length > 0 &&
+      // Verifica se todas são do tipo radio/select
+      const onlyRadioQuestions = questions.length > 0 && 
         questions.every(q => q.question.type === 'radio' || q.question.type === 'select');
       setHasRadioOnly(onlyRadioQuestions);
 
-      // Inicializa os valores de textarea com base nas respostas anteriores
+      // Preenche campos de textarea com as respostas existentes
       const initialTextareaValues: Record<string, string> = {};
       questions.forEach(({ question }) => {
         if (question.type === 'textarea' && questionnaireAnswers[question.id]) {
@@ -90,7 +88,7 @@ export function OptionsDialog({
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers]);
 
-  // Detecta campos especiais (com lógica específica)
+  // Lista de campos especiais (exibe textarea mesmo com perguntas padrão)
   const isSpecialField = [
     'emergencyScenarios',
     'highRiskComplications',
@@ -103,7 +101,7 @@ export function OptionsDialog({
     'consentimentoInformado'
   ].includes(activeFieldKey);
 
-  // Atualiza valor de textarea
+  // Atualiza respostas digitadas nas textareas
   const handleTextareaChange = (questionId: string, value: string) => {
     setTextareaValues(prev => ({
       ...prev,
@@ -121,6 +119,7 @@ export function OptionsDialog({
         {relevantQuestions.length > 0 ? (
           relevantQuestions.map(({ question }) => {
             const questionId = question.id;
+
             if (!question) return null;
 
             // Renderiza textarea
@@ -129,7 +128,7 @@ export function OptionsDialog({
                 <div key={questionId} className="py-3 border-b border-gray-100">
                   <div className="font-medium text-maternal-900">{question.text}</div>
                   <div className="mt-2">
-                    <Textarea
+                    <Textarea 
                       value={textareaValues[questionId] || ''}
                       onChange={(e) => handleTextareaChange(questionId, e.target.value)}
                       placeholder="Digite sua resposta aqui..."
@@ -141,13 +140,13 @@ export function OptionsDialog({
               );
             }
 
-            // Renderiza opções selecionáveis (radio, checkbox, etc.)
+            // Renderiza opções selecionáveis
             return (
               <div key={questionId} className="py-3 border-b border-gray-100">
                 <div className="font-medium text-maternal-900">{question.text}</div>
-                <SelectableOptions
-                  question={question}
-                  questionId={questionId}
+                <SelectableOptions 
+                  question={question} 
+                  questionId={questionId} 
                   selectedOptions={selectedOptions}
                   setSelectedOptions={setSelectedOptions}
                   isSpecialField={isSpecialField}
@@ -167,7 +166,7 @@ export function OptionsDialog({
         <Button variant="outline" onClick={() => setDialogOpen(false)}>
           Cancelar
         </Button>
-        <Button
+        <Button 
           onClick={handleAddSelectedOptions}
           disabled={relevantQuestions.length === 0}
         >
