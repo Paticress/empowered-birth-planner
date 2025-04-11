@@ -6,7 +6,7 @@ import { Footer } from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigation } from '@/hooks/useNavigation';
 import { Button } from '@/components/ui/button';
-import { FileText } from 'lucide-react';
+import { FileText, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -87,7 +87,7 @@ export function GuiaOnline() {
   const handleLogin = () => {
     // Adiciona parâmetro indicando redirecionamento do guia
     navigateTo('/acesso-plano?from=guide');
-    toast.info('Faça login para acessar o guia completo');
+    toast.info('Enviaremos um link de acesso ao guia completo');
   };
 
   // Show loading state while checking auth
@@ -116,15 +116,15 @@ export function GuiaOnline() {
             <div className="max-w-xl mx-auto bg-white rounded-lg shadow-md p-8 text-center">
               <h1 className="text-3xl font-bold mb-6 text-maternal-900">Guia Online</h1>
               <p className="text-lg mb-8 text-maternal-700">
-                Para acessar o guia completo, por favor faça login ou cadastre-se com o email utilizado na compra do plano.
+                Para acessar o guia completo, digite seu email e receba um link de acesso exclusivo.
               </p>
               <Button 
                 onClick={handleLogin}
                 variant="birth-plan-builder"
                 className="font-semibold"
               >
-                <FileText className="mr-2 h-5 w-5" />
-                Cadastrar ou Fazer Login
+                <Mail className="mr-2 h-5 w-5" />
+                Receber Link de Acesso
               </Button>
             </div>
           </div>

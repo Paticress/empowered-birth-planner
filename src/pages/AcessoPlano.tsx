@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export function AcessoPlano() {
   const { user, isLoading, session, refreshSession, isAuthenticated } = useAuth();
@@ -23,6 +24,79 @@ export function AcessoPlano() {
     console.log("User status:", user ? "Logged in" : "Not logged in");
     console.log("Authentication status:", isAuthenticated ? "Authenticated" : "Not authenticated");
   }, [session, user, isAuthenticated]);
+
+  // Verifica se há um token de magic link na URL
+  useEffect(() => {
+    const checkForMagicLink = async () => {
+      // Check for magic link token in URL (hash or query parameter)
+      const hasAuthParams = 
+        window.location.hash.includes('access_token=') || 
+        window.location.search.includes('type=magiclink') ||
+        window.location.search.includes('code=');
+      
+      if (hasAuthParams) {
+        console.log("AcessoPlano: Detected magic link token in URL");
+        setIsProcessingAuth(true);
+        
+        try {
+          // Let Supabase process the token
+          const { data, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error("Error processing magic link:", error);
+            toast.error("Erro ao processar link de acesso");
+            setIsProcessingAuth(false);
+            return;
+          }
+          
+          if (data.session) {
+            console.log("Magic link successfully processed:", data.session.user?.email);
+            toast.success("Login realizado com sucesso!");
+            
+            // Store login information
+            localStorage.setItem('birthPlanLoggedIn', 'true');
+            localStorage.setItem('birthPlanEmail', data.session.user?.email || '');
+            
+            // Remove pending email from localStorage
+            localStorage.removeItem('birthPlanEmailPending');
+            
+            // Check if user exists in database
+            const email = data.session.user?.email;
+            if (email) {
+              const { data: userData, error: userError } = await supabase
+                .from('users_db_birthplanbuilder')
+                .select('email')
+                .eq('email', email)
+                .maybeSingle();
+                
+              if (userError) {
+                console.error("Error checking user in database:", userError);
+              } else if (!userData) {
+                console.log("Adding user to database after magic link login");
+                await supabase
+                  .from('users_db_birthplanbuilder')
+                  .insert({ email });
+              }
+            }
+            
+            // Clean URL
+            window.history.replaceState({}, document.title, '/acesso-plano');
+            
+            // Redirect to dashboard or birth plan page
+            setTimeout(() => {
+              navigate('/criar-plano', { replace: true });
+            }, 800);
+          }
+        } catch (error) {
+          console.error("Exception processing magic link:", error);
+          toast.error("Erro ao processar o link de acesso");
+          setIsProcessingAuth(false);
+        }
+      }
+    };
+    
+    checkForMagicLink();
+  }, [navigate]);
 
   // Verifica a sessão ativamente quando a página carrega
   useEffect(() => {

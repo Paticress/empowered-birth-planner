@@ -81,9 +81,9 @@ export const useNavigation = () => {
       
       // Regras para Visitantes
       if (path === '/guia-online') {
-        // Redireciona para a página de captura do Lead no Wix
-        console.log("Redirecting visitor to Wix lead capture page for Guide");
-        window.location.href = "https://www.energiamaterna.com.br/seu-guia-gratuito-do-plano-de-parto";
+        // Agora direciona para a página de login com magic link
+        console.log("Redirecting visitor to magic link login for Guide");
+        navigate('/acesso-plano?from=guide', { replace: true });
         return;
       } 
       

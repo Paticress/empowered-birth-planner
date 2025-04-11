@@ -1,19 +1,86 @@
 
-// This file is kept for reference but not currently used in the application
-// Magic link functionality has been temporarily disabled
-
 import { MagicLinkForm } from '../forms/MagicLinkForm';
 import { useState } from 'react';
+import { useNavigation } from '@/hooks/useNavigation';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export function MagicLinkTab() {
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMagicLinkSent, setIsMagicLinkSent] = useState(false);
+  const { navigateTo } = useNavigation();
 
-  // Placeholder function - magic link functionality is disabled
   const handleMagicLinkSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Magic link functionality is currently disabled');
+    
+    if (!magicLinkEmail || !magicLinkEmail.includes('@')) {
+      toast.error('Por favor, insira um email válido');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const email = magicLinkEmail.toLowerCase().trim();
+      console.log("Sending magic link to:", email);
+      
+      // Get the current URL and create a redirect URL for the magic link
+      const origin = window.location.origin;
+      const redirectTo = `${origin}/acesso-plano`;
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectTo,
+        }
+      });
+      
+      if (error) {
+        console.error('Magic link error:', error);
+        toast.error('Erro ao enviar o link de acesso: ' + error.message);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Store the email in localStorage for later recovery if needed
+      localStorage.setItem('birthPlanEmailPending', email);
+      
+      toast.success('Link de acesso enviado!');
+      setIsMagicLinkSent(true);
+      
+      // Check for user existence in the database and add if not present
+      try {
+        const { data: userData, error: userError } = await supabase
+          .from('users_db_birthplanbuilder')
+          .select('email')
+          .eq('email', email)
+          .maybeSingle();
+        
+        if (userError) {
+          console.error('Error checking user in database:', userError);
+        } else if (!userData) {
+          console.log("User not found in database, adding user");
+          const { error: insertError } = await supabase
+            .from('users_db_birthplanbuilder')
+            .insert({ email });
+            
+          if (insertError) {
+            console.error('Error adding user to database:', insertError);
+          } else {
+            console.log("User added to database");
+          }
+        }
+      } catch (dbError) {
+        console.error('Database operation error:', dbError);
+      }
+      
+    } catch (error) {
+      console.error('Exception in magic link flow:', error);
+      toast.error('Ocorreu um erro inesperado. Por favor, tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

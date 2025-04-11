@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -71,6 +70,47 @@ export function useAuthMethods() {
     }
   };
 
+  const sendMagicLink = async (email: string) => {
+    try {
+      console.log("Magic link request for email:", email);
+      logAuthDebugInfo('Magic Link Request');
+      
+      const origin = window.location.origin;
+      const redirectTo = `${origin}/acesso-plano`;
+      
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectTo,
+        }
+      });
+      
+      if (error) {
+        console.error("Magic link error:", error.message);
+        setAuthDebugInfo({
+          type: 'magic_link_error',
+          email: email,
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        console.log("Magic link sent successfully");
+        setAuthDebugInfo({
+          type: 'magic_link_sent',
+          email: email,
+          timestamp: new Date().toISOString()
+        });
+        
+        localStorage.setItem('birthPlanEmailPending', email);
+      }
+      
+      return { data, error };
+    } catch (error) {
+      console.error('Error sending magic link:', error);
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     try {
       console.log("Signing out user");
@@ -79,6 +119,7 @@ export function useAuthMethods() {
       
       localStorage.removeItem('birthPlanLoggedIn');
       localStorage.removeItem('birthPlanEmail');
+      localStorage.removeItem('birthPlanEmailPending');
       
       toast.success('Logout realizado com sucesso');
       
@@ -92,6 +133,7 @@ export function useAuthMethods() {
     signIn,
     signUp,
     signOut,
+    sendMagicLink,
     authDebugInfo
   };
 }

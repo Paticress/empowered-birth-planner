@@ -24,7 +24,7 @@ export function LoginPage() {
           <Alert className="mb-6 bg-maternal-100 border-maternal-200 text-maternal-800">
             <InfoIcon className="h-4 w-4 text-maternal-600 mr-2" />
             <AlertDescription>
-              Falta pouco para você acessar o Guia do Parto Respeitoso! Crie sua conta ou faça login para continuar.
+              Falta pouco para você acessar o Guia do Parto Respeitoso! Digite seu email e acesse o link que enviaremos.
             </AlertDescription>
           </Alert>
         )}
