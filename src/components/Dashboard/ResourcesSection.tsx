@@ -2,9 +2,11 @@
 import { BookOpen, FileText, Award } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useNavigation } from "@/hooks/useNavigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function ResourcesSection() {
   const { navigateTo } = useNavigation();
+  const { isAuthenticated } = useAuth();
   
   return (
     <>
@@ -20,7 +22,9 @@ export function ResourcesSection() {
             <h3 className="font-semibold text-maternal-900">Guia Online</h3>
           </div>
           <p className="text-sm text-maternal-700">
-            Informações completas sobre seus direitos e opções para um parto respeitoso.
+            {isAuthenticated 
+              ? "Acesse nosso guia completo sobre seus direitos e opções para um parto respeitoso."
+              : "Informações completas sobre seus direitos e opções para um parto respeitoso."}
           </p>
         </Card>
         
@@ -33,7 +37,9 @@ export function ResourcesSection() {
             <h3 className="font-semibold text-maternal-900">Construtor de Plano</h3>
           </div>
           <p className="text-sm text-maternal-700">
-            Crie seu plano de parto personalizado para compartilhar com sua equipe médica.
+            {isAuthenticated
+              ? "Crie e edite seu plano de parto personalizado para compartilhar com sua equipe médica."
+              : "Crie seu plano de parto personalizado para compartilhar com sua equipe médica."}
           </p>
         </Card>
         
