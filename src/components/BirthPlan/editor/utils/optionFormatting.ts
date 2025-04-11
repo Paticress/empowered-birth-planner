@@ -76,8 +76,10 @@ export const formatFieldValueFromQuestionnaire = (
           .map(([option]) => option);
           
         if (selectedOptions.length > 0) {
-          // Don't include the question text as prefix, just add the options
-          formattedValues.push(selectedOptions.join(', '));
+          // Add each option separately for better user experience
+          selectedOptions.forEach(option => {
+            formattedValues.push(option);
+          });
         }
       }
     } else if (question.type === 'radio' || question.type === 'select') {

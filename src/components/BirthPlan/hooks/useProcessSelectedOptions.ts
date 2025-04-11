@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { birthPlanSections } from '../utils/birthPlanSections';
 
@@ -53,25 +54,24 @@ export function useProcessSelectedOptions({
     }
 
     // Verificar as opções selecionadas para o campo atual
-    if (selectedOptions[activeFieldKey]) {
-      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
+    const allSelectedOptions = [];
+    
+    // Verificar todas as chaves de questão e suas opções selecionadas
+    Object.entries(selectedOptions).forEach(([questionId, options]) => {
+      console.log(`Processando questão: ${questionId}`);
+      
+      const selectedForQuestion = Object.entries(options)
         .filter(([_, isSelected]) => isSelected)
         .map(([option]) => option);
-      console.log("🔍 Opções selecionadas para este campo:", selectedForField);
-    } else {
-      console.log("⚠️ Nenhuma opção selecionada para este campo");
-    }
-
-    // Usar o hook personalizado para processar as opções
-    const currentSection = birthPlanSections[activeSectionIndex];
-    if (!localBirthPlan[currentSection.id]) {
-      // Certifique-se de que a seção existe antes de adicionar opções
-      const updatedPlan = {
-        ...localBirthPlan,
-        [currentSection.id]: {}
-      };
-      setLocalBirthPlan(updatedPlan);
-    }
+      
+      console.log(`Opções selecionadas para ${questionId}:`, selectedForQuestion);
+      
+      if (selectedForQuestion.length > 0) {
+        allSelectedOptions.push(...selectedForQuestion);
+      }
+    });
+    
+    console.log("🔍 Todas as opções selecionadas:", allSelectedOptions);
 
     // CORREÇÃO: Modificação na forma como processamos as opções e atualizamos o campo
     
@@ -79,14 +79,16 @@ export function useProcessSelectedOptions({
     const selectedItems = [];
     
     // Capturar todas as opções selecionadas para o campo ativo
-    if (selectedOptions[activeFieldKey]) {
-      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
-        .filter(([_, isSelected]) => isSelected)
-        .map(([option]) => option.trim());
-      
-      if (selectedForField.length > 0) {
-        selectedItems.push(...selectedForField);
-      }
+    if (Object.keys(selectedOptions).length > 0) {
+      Object.values(selectedOptions).forEach(optionMap => {
+        const options = Object.entries(optionMap)
+          .filter(([_, isSelected]) => isSelected)
+          .map(([option]) => option.trim());
+        
+        if (options.length > 0) {
+          selectedItems.push(...options);
+        }
+      });
     }
     
     // Capturar qualquer texto de textareas
@@ -101,8 +103,16 @@ export function useProcessSelectedOptions({
     if (selectedItems.length > 0) {
       console.log("🔍 Opções selecionadas finais:", selectedItems);
       
-      // CORREÇÃO: Formatar com vírgula e espaço, sem quebras de linha
-      const formattedText = selectedItems.join(', ');
+      const currentSection = birthPlanSections[activeSectionIndex];
+      
+      // Formatação especial para campos da seção de situações especiais
+      const specialFields = ['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'];
+      const useParagraphFormat = specialFields.includes(activeFieldKey);
+      
+      // Utilizar formato de parágrafos para os campos especiais
+      const formattedText = useParagraphFormat 
+        ? selectedItems.join('\n\n') 
+        : selectedItems.join(', ');
       
       // Atualizar o plano de parto com o texto formatado
       const updatedSection = {
@@ -125,11 +135,7 @@ export function useProcessSelectedOptions({
     }
     
     // Limpar seleções e fechar diálogo
-    setSelectedOptions(prev => ({
-      ...prev,
-      [activeFieldKey]: {}
-    }));
-    
+    setSelectedOptions({});
     setTextareaValues({});
     setDialogOpen(false);
   }, [
