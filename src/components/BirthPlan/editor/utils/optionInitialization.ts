@@ -52,30 +52,27 @@ export const initializeOptionsFromCurrentField = (
       return;
     }
     
-    // Initialize from current field value + questionnaire
+    // MODIFICAÇÃO IMPORTANTE: Inicializar apenas com base no valor do campo atual,
+    // não usando as respostas do questionário, a menos que o campo esteja vazio
     question.options.forEach((option: string) => {
-      let isSelected = false;
+      // Verifica se a opção está presente no valor atual do campo
+      const isSelectedInField = currentFieldOptions.includes(option);
       
-      // First check if the option is already selected in the current field
-      if (currentFieldOptions.includes(option)) {
-        isSelected = true;
-        console.log(`Option "${option}" found in current field value`);
-      } 
-      // If not in current field, check questionnaire answers
-      else if (question.type === 'checkbox' && 
-          typeof questionnaireAnswers[questionId] === 'object' && 
-          !Array.isArray(questionnaireAnswers[questionId])) {
-        isSelected = !!questionnaireAnswers[questionId]?.[option];
-        if (isSelected) {
-          console.log(`Option "${option}" found in questionnaire answers`);
-        }
-      } 
-      // For radio/select questions
-      else if ((question.type === 'radio' || question.type === 'select') && 
-          questionnaireAnswers[questionId] !== undefined) {
-        isSelected = questionnaireAnswers[questionId] === option;
-        if (isSelected) {
-          console.log(`Option "${option}" found in questionnaire answers as radio/select option`);
+      // Se o campo estiver vazio, podemos usar as respostas do questionário
+      const shouldUseQuestionnaireAnswer = currentFieldOptions.length === 0;
+      
+      let isSelected = isSelectedInField;
+      
+      // Apenas use respostas do questionário se o campo estiver vazio
+      if (!isSelected && shouldUseQuestionnaireAnswer) {
+        if (question.type === 'checkbox' && 
+            typeof questionnaireAnswers[questionId] === 'object' && 
+            !Array.isArray(questionnaireAnswers[questionId])) {
+          isSelected = !!questionnaireAnswers[questionId]?.[option];
+        } 
+        else if ((question.type === 'radio' || question.type === 'select') && 
+            questionnaireAnswers[questionId] !== undefined) {
+          isSelected = questionnaireAnswers[questionId] === option;
         }
       }
       

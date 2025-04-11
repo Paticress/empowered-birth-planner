@@ -100,6 +100,11 @@ export function useEditorState(
     // Get the active section
     const activeSection = birthPlanSections[activeSectionIndex];
     
+    // IMPORTANTE: Limpar completamente as seleções anteriores antes de inicializar novas
+    // Isso evita a acumulação de seleções
+    setSelectedOptions({});
+    setTextareaValues({});
+    
     // Log the current field value for debugging
     const currentFieldValue = localBirthPlan[activeSection.id]?.[fieldKey] || '';
     console.log(`Current field value for initialization: "${currentFieldValue}"`);
