@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
@@ -63,13 +64,20 @@ serve(async (req) => {
       });
     }
 
-    // Extract email from the Wix webhook payload structure
+    // Extract email and plan from the Wix webhook payload structure
     let purchaserEmail = null;
+    let planType = 'free'; // Default to free plan
     
-    // IMPORTANT: The format is confirmed to be {"data": {"email": "example@email.com"}}
+    // IMPORTANT: The format is confirmed to be {"data": {"email": "example@email.com", "plan": "free|paid"}}
     if (webhookData?.data?.email) {
       purchaserEmail = webhookData.data.email.trim();
       console.log(`📣 Found email in data.email: "${purchaserEmail}"`);
+      
+      // If plan is provided, use it
+      if (webhookData.data.plan) {
+        planType = webhookData.data.plan.trim();
+        console.log(`📣 Found plan in data.plan: "${planType}"`);
+      }
     } else {
       console.error('❌ Email not found in expected format. Payload structure:', JSON.stringify(webhookData));
       return new Response(JSON.stringify({ 
@@ -99,13 +107,14 @@ serve(async (req) => {
     console.log(`📣 Initializing Supabase client`);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log(`📣 Attempting to insert email "${purchaserEmail}" into users_db_birthplanbuilder table`);
+    console.log(`📣 Attempting to insert or update email "${purchaserEmail}" with plan "${planType}" into users_db_birthplanbuilder table`);
     
-    // Insert the email into the users_db_birthplanbuilder table - using correct lowercase table name
+    // Insert or update the email and plan in the users_db_birthplanbuilder table
     const { data, error } = await supabase
       .from('users_db_birthplanbuilder')
       .upsert({ 
-        email: purchaserEmail 
+        email: purchaserEmail,
+        plan: planType 
       }, { 
         onConflict: 'email' 
       });
@@ -165,11 +174,12 @@ serve(async (req) => {
       }
     }
 
-    console.log('✅ Purchase processed successfully for email:', purchaserEmail);
+    console.log('✅ Purchase processed successfully for email:', purchaserEmail, 'with plan:', planType);
     return new Response(JSON.stringify({ 
       success: true,
       message: 'Purchase processed successfully',
-      email: purchaserEmail
+      email: purchaserEmail,
+      plan: planType
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

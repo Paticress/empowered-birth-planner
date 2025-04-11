@@ -52,7 +52,7 @@ export function GuiaOnline() {
         // Check if the user is in the authorized users table
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('email')
+          .select('email, plan')
           .eq('email', userEmail)
           .maybeSingle();
           
@@ -64,9 +64,12 @@ export function GuiaOnline() {
         }
         
         if (data) {
-          console.log("GuiaOnline: User authorized for guide:", userEmail);
+          console.log("GuiaOnline: User authorized for guide:", userEmail, "with plan:", data.plan);
           setIsAuthorized(true);
           setShowAuthPrompt(false);
+          
+          // Store the user plan in localStorage for easy access
+          localStorage.setItem('user_plan', data.plan);
         } else {
           console.log("GuiaOnline: User not found in database, showing auth prompt");
           setShowAuthPrompt(true);

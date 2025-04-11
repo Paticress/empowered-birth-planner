@@ -21,12 +21,12 @@ export const useNavigation = () => {
     try {
       const { data, error } = await supabase
         .from('users_db_birthplanbuilder')
-        .select('has_birth_plan_access')
+        .select('plan')
         .eq('email', email)
         .maybeSingle();
         
-      // If the user has the has_birth_plan_access flag set to true, they have access
-      return !error && !!data && data.has_birth_plan_access === true;
+      // If the user has the plan set to 'paid', they have access to the birth plan builder
+      return !error && !!data && data.plan === 'paid';
     } catch (error) {
       console.error("Error checking birth plan access:", error);
       return false;

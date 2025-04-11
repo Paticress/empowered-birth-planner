@@ -86,9 +86,20 @@ export function CriarPlano() {
       try {
         console.log("Verificando acesso ao plano de parto para:", userEmail);
         
+        // First check if we have the plan in localStorage
+        const cachedPlan = localStorage.getItem('user_plan');
+        
+        if (cachedPlan === 'paid') {
+          console.log("Acesso ao plano encontrado no localStorage");
+          setHasBirthPlanAccess(true);
+          setIsCheckingAccess(false);
+          return;
+        }
+        
+        // If not in localStorage or not 'paid', check the database
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('has_birth_plan_access')
+          .select('plan')
           .eq('email', userEmail)
           .maybeSingle();
           
@@ -99,9 +110,14 @@ export function CriarPlano() {
           return;
         }
         
-        if (!data || data.has_birth_plan_access !== true) {
+        if (!data || data.plan !== 'paid') {
           console.log("Usuário não tem acesso ao plano de parto, redirecionando para site Wix");
           toast.error("Você não tem acesso ao construtor de plano de parto");
+          
+          // Store the plan in localStorage
+          if (data?.plan) {
+            localStorage.setItem('user_plan', data.plan);
+          }
           
           // Redirect to Wix conversion page after a short delay
           setTimeout(() => {
@@ -112,6 +128,8 @@ export function CriarPlano() {
         }
         
         console.log("Usuário tem acesso ao plano de parto");
+        // Store the plan in localStorage
+        localStorage.setItem('user_plan', data.plan);
         setHasBirthPlanAccess(true);
         setIsCheckingAccess(false);
         

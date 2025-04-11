@@ -42,14 +42,29 @@ export function Dashboard() {
         return;
       }
       
+      // First check localStorage for cached plan value
+      const cachedPlan = localStorage.getItem('user_plan');
+      if (cachedPlan === 'paid') {
+        setHasBirthPlanAccess(true);
+        return;
+      } else if (cachedPlan === 'free') {
+        setHasBirthPlanAccess(false);
+        return;
+      }
+      
+      // If not in localStorage, check the database
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('has_birth_plan_access')
+          .select('plan')
           .eq('email', user.email)
           .maybeSingle();
           
-        setHasBirthPlanAccess(!error && !!data && data.has_birth_plan_access === true);
+        const isPaidUser = !error && !!data && data.plan === 'paid';
+        setHasBirthPlanAccess(isPaidUser);
+        
+        // Cache the result in localStorage
+        localStorage.setItem('user_plan', isPaidUser ? 'paid' : 'free');
       } catch (error) {
         console.error("Error checking user access level:", error);
         setHasBirthPlanAccess(false);

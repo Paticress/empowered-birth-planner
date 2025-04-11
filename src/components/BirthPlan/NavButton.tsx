@@ -27,11 +27,11 @@ export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('has_birth_plan_access')
+          .select('plan')
           .eq('email', user.email)
           .maybeSingle();
           
-        setHasBirthPlanAccess(!error && !!data && data.has_birth_plan_access === true);
+        setHasBirthPlanAccess(!error && !!data && data.plan === 'paid');
       } catch (error) {
         console.error("Error checking user access level:", error);
         setHasBirthPlanAccess(false);

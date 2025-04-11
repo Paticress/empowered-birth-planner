@@ -57,7 +57,7 @@ export function MagicLinkTab() {
       try {
         const { data: userData, error: userError } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('email, has_birth_plan_access')
+          .select('email, plan')
           .eq('email', email)
           .maybeSingle();
         
@@ -71,17 +71,20 @@ export function MagicLinkTab() {
             .from('users_db_birthplanbuilder')
             .insert({ 
               email,
-              has_birth_plan_access: false // By default, new users are LEADs with guide access only
+              plan: 'free' // By default, new users are LEADs with guide access only
             });
             
           if (insertError) {
             console.error('Error adding user to database:', insertError);
           } else {
             console.log("User added to database as LEAD");
+            // Store the user plan in localStorage
+            localStorage.setItem('user_plan', 'free');
           }
         } else {
-          console.log("User already exists in database with access level:", 
-            userData.has_birth_plan_access ? "CLIENT" : "LEAD");
+          console.log("User already exists in database with plan:", userData.plan);
+          // Store the user plan in localStorage
+          localStorage.setItem('user_plan', userData.plan);
         }
       } catch (dbError) {
         console.error('Database operation error:', dbError);
