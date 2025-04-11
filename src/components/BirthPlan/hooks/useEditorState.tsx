@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { birthPlanSections } from '../utils/birthPlanSections';
@@ -26,7 +25,6 @@ export function useEditorState(
 
   const handleFieldChange = useCallback((sectionId: string, fieldKey: string, value: any) => {
     setLocalBirthPlan(prevPlan => {
-      // Special case for updating an entire section at once
       if (fieldKey === '__sectionUpdate' && typeof value === 'object') {
         const updatedPlan = {
           ...prevPlan,
@@ -35,13 +33,11 @@ export function useEditorState(
           }
         };
         
-        // Mark section as completed if all required fields are filled
         checkSectionCompletion(sectionId, updatedPlan, completedSections, setCompletedSections);
         
         return updatedPlan;
       }
       
-      // Regular field update
       const updatedPlan = {
         ...prevPlan,
         [sectionId]: {
@@ -50,7 +46,6 @@ export function useEditorState(
         },
       };
       
-      // Mark section as completed if all required fields are filled
       checkSectionCompletion(sectionId, updatedPlan, completedSections, setCompletedSections);
       
       return updatedPlan;
@@ -58,32 +53,27 @@ export function useEditorState(
     setIsDirty(true);
   }, [completedSections]);
   
-  // Navigate to previous section
   const goToPreviousSection = useCallback(() => {
     if (activeSectionIndex > 0) {
       setActiveSectionIndex(activeSectionIndex - 1);
     }
   }, [activeSectionIndex]);
   
-  // Navigate to next section
   const goToNextSection = useCallback(() => {
     if (activeSectionIndex < birthPlanSections.length - 1) {
       setActiveSectionIndex(activeSectionIndex + 1);
     }
   }, [activeSectionIndex]);
   
-  // Initialize completed sections when component mounts
   useEffect(() => {
     birthPlanSections.forEach(section => {
       checkSectionCompletion(section.id, localBirthPlan, completedSections, setCompletedSections);
     });
   }, []);
   
-  // Scroll to top when changing sections
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    // Reset selections when changing sections
     setSelectedOptions({});
     setActiveFieldKey('');
     setDialogOpen(false);
@@ -103,18 +93,16 @@ export function useEditorState(
   const resetOptionsForField = useCallback((fieldKey: string) => {
     console.log(`Reset options for field: ${fieldKey}`);
     
-    // Reset any previous selections - CRITICAL for avoiding data mixing between fields
     setSelectedOptions({});
     setTextareaValues({});
     
-    // Set the active field key
     setActiveFieldKey(fieldKey);
     
-    // Get the current active section
     const activeSection = birthPlanSections[activeSectionIndex];
     
-    // Initialize selected options based on questionnaire answers
-    // Make sure only relevant questions for this specific field are considered
+    const currentFieldValue = localBirthPlan[activeSection.id]?.[fieldKey] || '';
+    console.log(`Valor atual do campo para inicialização: "${currentFieldValue}"`);
+    
     const initialSelectedOptions = initializeOptionsFromCurrentField(
       fieldKey, 
       activeSection.id,
@@ -122,10 +110,8 @@ export function useEditorState(
       questionnaireAnswers
     );
     
-    // Update state with the initial options
     setSelectedOptions(initialSelectedOptions);
     
-    // Initialize textarea values for this field if needed
     const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
     const initialTextareaValues: Record<string, string> = {};
     
@@ -137,7 +123,6 @@ export function useEditorState(
     
     setTextareaValues(initialTextareaValues);
     
-    // Open the dialog
     setDialogOpen(true);
   }, [activeSectionIndex, localBirthPlan, questionnaireAnswers]);
 

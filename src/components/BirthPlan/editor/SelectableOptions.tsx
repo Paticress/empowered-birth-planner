@@ -28,105 +28,59 @@ export function SelectableOptions({
     return null;
   }
   
-  // Debug log for special questions
+  // Debug para questões especiais
   if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
-    console.log(`SelectableOptions for special question: ${questionId}`);
-    console.log(`Has answer:`, !!questionnaireAnswers[questionId]);
-    console.log(`Options:`, question.options);
+    console.log(`SelectableOptions para questão especial: ${questionId}`);
+    console.log(`Tem resposta:`, !!questionnaireAnswers[questionId]);
+    console.log(`Opções:`, question.options);
   }
   
-  // Initialize options from questionnaire answers when component mounts
-  useEffect(() => {
-    if (!isInitialized && questionnaireAnswers && Object.keys(questionnaireAnswers).length > 0) {
-      const newSelectedOptions = { ...selectedOptions };
-      
-      // Initialize the question entry if it doesn't exist
-      if (!newSelectedOptions[questionId]) {
-        newSelectedOptions[questionId] = {};
-      }
-      
-      if (question.type === 'checkbox') {
-        // For checkbox questions, each option might be selected separately
-        if (typeof questionnaireAnswers[questionId] === 'object' && 
-            !Array.isArray(questionnaireAnswers[questionId])) {
-          
-          question.options.forEach((option: string) => {
-            // Mark the option as selected if it's selected in the questionnaire
-            const isSelected = !!questionnaireAnswers[questionId]?.[option];
-            newSelectedOptions[questionId][option] = isSelected;
-            
-            // Debug for special questions
-            if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
-              console.log(`Option "${option}" selected:`, isSelected);
-            }
-          });
-        }
-      } else if (question.type === 'radio' || question.type === 'select') {
-        // For radio/select, only one option can be selected
-        const selectedValue = questionnaireAnswers[questionId];
-        
-        if (selectedValue) {
-          question.options.forEach((option: string) => {
-            newSelectedOptions[questionId][option] = option === selectedValue;
-          });
-        }
-      }
-      
-      // Only update if we have any selections
-      if (Object.values(newSelectedOptions[questionId]).some(val => val)) {
-        console.log(`Setting initial selections for ${questionId}:`, newSelectedOptions[questionId]);
-        setSelectedOptions(newSelectedOptions);
-      }
-      
-      setIsInitialized(true);
-    }
-  }, [questionId, questionnaireAnswers, isInitialized]);
+  // BUGFIX: Remover a inicialização automática baseada apenas no questionário
+  // Agora a inicialização é feita no hook useEditorState e passada como prop
   
   const handleCheckedChange = (option: string, checked: boolean) => {
-    // Create a copy of the current state
+    // Criar uma cópia do estado atual
     const newSelectedOptions = { ...selectedOptions };
     
-    // Initialize the question entry if it doesn't exist
+    // Inicializar a entrada da questão se não existir
     if (!newSelectedOptions[questionId]) {
       newSelectedOptions[questionId] = {};
     }
     
-    // For radio buttons (single selection), unselect all other options first
+    // Para radio buttons (seleção única), desmarcar todas as outras opções primeiro
     if ((question.type === 'radio' || question.type === 'select') && !isSpecialField) {
       Object.keys(newSelectedOptions[questionId] || {}).forEach(opt => {
         newSelectedOptions[questionId][opt] = false;
       });
     }
     
-    // Set the selected option
+    // Definir a opção selecionada
     newSelectedOptions[questionId][option] = checked;
     
     setSelectedOptions(newSelectedOptions);
   };
   
-  // Handle radio selection (single selection)
+  // Lidar com seleção de radio (seleção única)
   const handleRadioSelection = (option: string) => {
     const newSelectedOptions = { ...selectedOptions };
     
-    // Initialize the question entry if it doesn't exist
+    // Inicializar a entrada da questão se não existir
     if (!newSelectedOptions[questionId]) {
       newSelectedOptions[questionId] = {};
     }
     
-    // Unselect all options
+    // Desmarcar todas as opções
     Object.keys(newSelectedOptions[questionId] || {}).forEach(opt => {
       newSelectedOptions[questionId][opt] = false;
     });
     
-    // Select only the chosen option
+    // Selecionar apenas a opção escolhida
     newSelectedOptions[questionId][option] = true;
     
     setSelectedOptions(newSelectedOptions);
   };
   
-  // Special handling for special fields
-  // For these fields, we want to potentially select multiple radio options
-  // across different questions
+  // Tratamento especial para campos especiais
   if (isSpecialField && (question.type === 'radio' || question.type === 'select')) {
     return (
       <div className="space-y-2 ml-8 mt-2">
@@ -154,9 +108,9 @@ export function SelectableOptions({
     );
   }
   
-  // If it's a radio or select question, we should only allow one option to be selected
+  // Se for uma questão do tipo radio ou select, devemos permitir apenas uma opção selecionada
   if (question.type === 'radio' || question.type === 'select') {
-    // Find the selected option (if any) or leave empty
+    // Encontrar a opção selecionada (se houver) ou deixar vazia
     const selectedOption = Object.entries(selectedOptions[questionId] || {})
       .find(([_, isSelected]) => isSelected)?.[0] || '';
       
@@ -183,7 +137,7 @@ export function SelectableOptions({
     );
   }
   
-  // Default to checkbox for multiple selection
+  // Padrão para checkbox (seleção múltipla)
   return (
     <div className="space-y-2 ml-8 mt-2">
       {question.options.map((option: string) => {

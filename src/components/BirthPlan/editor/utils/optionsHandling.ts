@@ -1,4 +1,3 @@
-
 import { parseOptionsFromText } from '../../utils/birthPlanUtils';
 import { findQuestionById } from './fieldMapping';
 import { getRelevantQuestionsForField } from './questionRelevance';
@@ -12,11 +11,22 @@ export const parseCurrentFieldOptions = (fieldKey: string, sectionId: string, bi
     return [];
   }
   const currentValue = birthPlan[sectionId][fieldKey] || '';
-  return parseOptionsFromText(currentValue);
+  
+  // Verifica se o valor é uma string simples ou array
+  if (typeof currentValue === 'string') {
+    // Divide por virgulas se for separado por virgulas
+    if (currentValue.includes(', ')) {
+      return currentValue.split(', ').map(item => item.trim()).filter(Boolean);
+    }
+    // Ou por quebras de linha
+    return parseOptionsFromText(currentValue);
+  }
+  
+  return [];
 };
 
 /**
- * Initializes the options selection state from the current field value and questionnaire answers
+ * Inicializa o estado de seleção com base no valor atual do campo e nas respostas do questionário
  */
 export const initializeOptionsFromCurrentField = (
   fieldKey: string, 
@@ -24,103 +34,68 @@ export const initializeOptionsFromCurrentField = (
   birthPlan: Record<string, any>,
   questionnaireAnswers: Record<string, any>
 ) => {
-  // Log for debugging
-  console.log(`Initializing options for field: ${fieldKey} in section: ${sectionId}`);
-  console.log(`Questionnaire answers keys:`, Object.keys(questionnaireAnswers));
+  // Log para depuração
+  console.log(`Inicializando opções para o campo: ${fieldKey} na seção: ${sectionId}`);
   
-  // Get relevant questions specific to this field only
+  // Obter questões relevantes específicas para este campo
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
+  
+  // BUGFIX: Obter opções já selecionadas no campo atual
+  const currentFieldOptions = parseCurrentFieldOptions(fieldKey, sectionId, birthPlan);
+  console.log(`Opções do campo atual: `, currentFieldOptions);
   
   const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
   
-  // Special fields that need special handling
+  // Campos especiais que precisam de tratamento especial
   const specialFields = getAlwaysShowAddButtonFields();
   const isSpecialField = specialFields.includes(fieldKey);
   
-  // Special debug for problematic fields
-  if (['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'].includes(fieldKey)) {
-    console.log(`Initializing special field: ${fieldKey}`);
-    console.log(`Found ${relevantQuestions.length} relevant questions:`);
-    
-    relevantQuestions.forEach(q => {
-      console.log(`- Question ${q.question?.id}: ${q.question?.text}`);
-      if (q.question?.id) {
-        console.log(`- Has answer:`, !!questionnaireAnswers[q.question.id]);
-        console.log(`- Answer type:`, typeof questionnaireAnswers[q.question.id]);
-        console.log(`- Answer:`, questionnaireAnswers[q.question.id]);
-      }
-    });
-  }
-  
-  // Process each relevant question
+  // Processar cada questão relevante
   relevantQuestions.forEach(({ question }) => {
     if (!question) {
-      console.error("Found undefined question during initialization");
+      console.error("Questão indefinida encontrada durante inicialização");
       return;
     }
     
     const questionId = question.id;
     initialSelectedOptions[questionId] = {};
     
-    // Debug for special fields
-    if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
-      console.log(`Processing special question: ${questionId}`);
-      console.log(`Question has answer:`, !!questionnaireAnswers[questionId]);
-      console.log(`Answer type:`, typeof questionnaireAnswers[questionId]);
-      
-      // If this is a special field with a checkbox-style object answer
-      if (questionnaireAnswers[questionId] && typeof questionnaireAnswers[questionId] === 'object') {
-        console.log(`Object answer:`, questionnaireAnswers[questionId]);
-        Object.entries(questionnaireAnswers[questionId]).forEach(([key, value]) => {
-          console.log(`Option "${key}": ${value ? 'selected' : 'not selected'}`);
-        });
-      }
-    }
-    
-    // Handle textarea type questions
+    // Pular inicialização de textarea
     if (question.type === 'textarea') {
-      // For textarea, if we have a value in the questionnaire answers, we should use it
-      if (questionnaireAnswers[questionId]) {
-        console.log(`Found textarea answer for ${questionId}:`, questionnaireAnswers[questionId]);
-      }
-      return; // Skip option selection for textarea
+      return;
     }
     
-    if (question.options) {
-      question.options.forEach((option: string) => {
-        let isSelected = false;
-        
-        // For checkbox questions (where answers are stored as objects)
-        if (question.type === 'checkbox' && 
-            typeof questionnaireAnswers[questionId] === 'object' && 
-            !Array.isArray(questionnaireAnswers[questionId])) {
-          // Check if this specific option is selected in the questionnaire
-          isSelected = !!questionnaireAnswers[questionId]?.[option];
-          
-          // Debug for special fields
-          if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
-            console.log(`Checkbox option "${option}" selected:`, isSelected);
-          }
-        }
-        
-        // For radio questions (where the answer is a single string)
-        if ((question.type === 'radio' || question.type === 'select') && 
-            questionnaireAnswers[questionId] !== undefined) {
-          // Check if this option matches the questionnaire answer
-          isSelected = questionnaireAnswers[questionId] === option;
-          
-          // Debug for special fields
-          if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
-            console.log(`Radio option "${option}" selected:`, isSelected, `(answer: "${questionnaireAnswers[questionId]}")`);
-          }
-        }
-        
-        initialSelectedOptions[questionId][option] = isSelected;
-      });
+    if (!question.options) {
+      console.error(`Questão ${questionId} não tem opções definidas`);
+      return;
     }
+    
+    // BUGFIX: Inicializar a partir do valor atual do campo + questionário
+    question.options.forEach((option: string) => {
+      let isSelected = false;
+      
+      // Verificar primeiro se a opção já está selecionada no campo atual
+      if (currentFieldOptions.includes(option)) {
+        isSelected = true;
+        console.log(`Opção "${option}" encontrada no valor atual do campo`);
+      } 
+      // Se não estiver no campo atual, verificar nas respostas do questionário
+      else if (question.type === 'checkbox' && 
+          typeof questionnaireAnswers[questionId] === 'object' && 
+          !Array.isArray(questionnaireAnswers[questionId])) {
+        isSelected = !!questionnaireAnswers[questionId]?.[option];
+      } 
+      // Para questões radio/select
+      else if ((question.type === 'radio' || question.type === 'select') && 
+          questionnaireAnswers[questionId] !== undefined) {
+        isSelected = questionnaireAnswers[questionId] === option;
+      }
+      
+      initialSelectedOptions[questionId][option] = isSelected;
+    });
   });
   
-  console.log(`Initialized options for ${fieldKey}:`, initialSelectedOptions);
+  console.log(`Opções inicializadas para ${fieldKey}:`, initialSelectedOptions);
   return initialSelectedOptions;
 };
 
