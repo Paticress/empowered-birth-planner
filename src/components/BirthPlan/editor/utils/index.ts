@@ -7,3 +7,5 @@ export * from './optionParsing';
 export * from './optionInitialization';
 export * from './optionFormatting';
 export * from './sectionCompletion';
+export * from './optionSelectionUtils';
+

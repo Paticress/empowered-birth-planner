@@ -1,8 +1,8 @@
 
 import { useEffect, useState } from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { CheckboxOptions } from './CheckboxOptions';
+import { RadioOptions } from './RadioOptions';
+import { initializeQuestionOptions, updateSelectionState } from './utils/optionSelectionUtils';
 
 interface SelectableOptionsProps {
   question: any;
@@ -32,28 +32,9 @@ export function SelectableOptions({
       
       // Only initialize if we have options to work with
       if (question.options && question.options.length > 0) {
-        const newOptions: Record<string, boolean> = {};
+        const newOptions = initializeQuestionOptions(question, questionId, questionnaireAnswers);
         
-        // Initialize options from questionnaire answers
-        question.options.forEach((option: string) => {
-          let isSelected = false;
-          
-          // For checkbox questions
-          if (question.type === 'checkbox' && 
-              typeof questionnaireAnswers[questionId] === 'object' && 
-              !Array.isArray(questionnaireAnswers[questionId])) {
-            isSelected = !!questionnaireAnswers[questionId]?.[option];
-          } 
-          // For radio/select questions
-          else if ((question.type === 'radio' || question.type === 'select') && 
-              questionnaireAnswers[questionId] !== undefined) {
-            isSelected = questionnaireAnswers[questionId] === option;
-          }
-          
-          newOptions[option] = isSelected;
-        });
-        
-        // Fixed: properly type the function parameter in setSelectedOptions
+        // Properly type the function parameter in setSelectedOptions
         setSelectedOptions((prev) => {
           return {
             ...prev,
@@ -82,72 +63,33 @@ export function SelectableOptions({
   }
   
   const handleCheckedChange = (option: string, checked: boolean) => {
-    // Create a copy of the current state
-    const newSelectedOptions = { ...selectedOptions };
+    const newSelections = updateSelectionState(
+      questionId,
+      option,
+      checked,
+      selectedOptions,
+      (question.type === 'radio' || question.type === 'select'),
+      isSpecialField
+    );
     
-    // Initialize the question entry if it doesn't exist
-    if (!newSelectedOptions[questionId]) {
-      newSelectedOptions[questionId] = {};
-    }
-    
-    // For radio buttons (single selection), uncheck all other options first
-    if ((question.type === 'radio' || question.type === 'select') && !isSpecialField) {
-      Object.keys(newSelectedOptions[questionId] || {}).forEach(opt => {
-        newSelectedOptions[questionId][opt] = false;
-      });
-    }
-    
-    // Set the selected option
-    newSelectedOptions[questionId][option] = checked;
-    
-    setSelectedOptions(newSelectedOptions);
+    setSelectedOptions(newSelections);
   };
   
   // Handle radio selection (single selection)
   const handleRadioSelection = (option: string) => {
-    const newSelectedOptions = { ...selectedOptions };
-    
-    // Initialize the question entry if it doesn't exist
-    if (!newSelectedOptions[questionId]) {
-      newSelectedOptions[questionId] = {};
-    }
-    
-    // Uncheck all options
-    Object.keys(newSelectedOptions[questionId] || {}).forEach(opt => {
-      newSelectedOptions[questionId][opt] = false;
-    });
-    
-    // Select only the chosen option
-    newSelectedOptions[questionId][option] = true;
-    
-    setSelectedOptions(newSelectedOptions);
+    // For radio selection, we always set the selected option to true
+    handleCheckedChange(option, true);
   };
   
-  // Special treatment for special fields
+  // Special treatment for special fields with radio/select types
   if (isSpecialField && (question.type === 'radio' || question.type === 'select')) {
     return (
-      <div className="space-y-2 ml-8 mt-2">
-        {question.options.map((option: string) => {
-          const isSelected = selectedOptions[questionId]?.[option] || false;
-          return (
-            <div key={option} className="flex items-center space-x-2">
-              <Checkbox
-                id={`option-${questionId}-${option}`}
-                checked={isSelected}
-                onCheckedChange={(checked) => {
-                  handleCheckedChange(option, !!checked);
-                }}
-              />
-              <Label 
-                htmlFor={`option-${questionId}-${option}`}
-                className={`text-sm ${isSelected ? 'font-medium' : 'text-gray-600'}`}
-              >
-                {option}
-              </Label>
-            </div>
-          );
-        })}
-      </div>
+      <CheckboxOptions
+        options={question.options}
+        questionId={questionId}
+        selectedOptions={selectedOptions[questionId] || {}}
+        onCheckedChange={handleCheckedChange}
+      />
     );
   }
   
@@ -158,51 +100,22 @@ export function SelectableOptions({
       .find(([_, isSelected]) => isSelected)?.[0] || '';
       
     return (
-      <div className="space-y-2 ml-8 mt-2">
-        <RadioGroup 
-          value={selectedOption}
-          onValueChange={handleRadioSelection}
-          className="space-y-2"
-        >
-          {question.options.map((option: string) => (
-            <div key={option} className="flex items-center space-x-2">
-              <RadioGroupItem value={option} id={`option-${questionId}-${option}`} />
-              <Label 
-                htmlFor={`option-${questionId}-${option}`}
-                className={`text-sm ${selectedOption === option ? 'font-medium' : 'text-gray-600'}`}
-              >
-                {option}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      </div>
+      <RadioOptions
+        options={question.options}
+        questionId={questionId}
+        selectedOption={selectedOption}
+        onValueChange={handleRadioSelection}
+      />
     );
   }
   
   // Default for checkbox (multiple selection)
   return (
-    <div className="space-y-2 ml-8 mt-2">
-      {question.options.map((option: string) => {
-        const isSelected = selectedOptions[questionId]?.[option] || false;
-        return (
-          <div key={option} className="flex items-center space-x-2">
-            <Checkbox
-              id={`option-${questionId}-${option}`}
-              checked={isSelected}
-              onCheckedChange={(checked) => {
-                handleCheckedChange(option, !!checked);
-              }}
-            />
-            <Label 
-              htmlFor={`option-${questionId}-${option}`}
-              className={`text-sm ${isSelected ? 'font-medium' : 'text-gray-600'}`}
-            >
-              {option}
-            </Label>
-          </div>
-        );
-      })}
-    </div>
+    <CheckboxOptions
+      options={question.options}
+      questionId={questionId}
+      selectedOptions={selectedOptions[questionId] || {}}
+      onCheckedChange={handleCheckedChange}
+    />
   );
 }
