@@ -32,6 +32,25 @@ export const initializeOptionsFromCurrentField = (
   const specialFields = getAlwaysShowAddButtonFields();
   const isSpecialField = specialFields.includes(fieldKey);
   
+  // Debug logging para campos específicos
+  if (['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'].includes(fieldKey)) {
+    console.log(`Special field initialization for: ${fieldKey}`);
+    
+    // Verificar respostas do questionário para este campo
+    const specialQuestionMap = {
+      'emergencyScenarios': 'emergencyPreferences',
+      'highRiskComplications': 'highRiskComplications', 
+      'lowRiskOccurrences': 'lowRiskOccurrences'
+    };
+    
+    const questionId = specialQuestionMap[fieldKey as keyof typeof specialQuestionMap];
+    if (questionnaireAnswers[questionId]) {
+      console.log(`Answer for ${questionId}:`, questionnaireAnswers[questionId]);
+    } else {
+      console.log(`No answers for ${questionId}`);
+    }
+  }
+  
   // Process each relevant question
   relevantQuestions.forEach(({ question }) => {
     if (!question) {
@@ -52,8 +71,7 @@ export const initializeOptionsFromCurrentField = (
       return;
     }
     
-    // MODIFICAÇÃO IMPORTANTE: Inicializar apenas com base no valor do campo atual,
-    // não usando as respostas do questionário, a menos que o campo esteja vazio
+    // Inicializar com base no valor do campo atual
     question.options.forEach((option: string) => {
       // Verifica se a opção está presente no valor atual do campo
       const isSelectedInField = currentFieldOptions.includes(option);
@@ -68,7 +86,8 @@ export const initializeOptionsFromCurrentField = (
         if (question.type === 'checkbox' && 
             typeof questionnaireAnswers[questionId] === 'object' && 
             !Array.isArray(questionnaireAnswers[questionId])) {
-          isSelected = !!questionnaireAnswers[questionId]?.[option];
+          // Tratar explicitamente valores undefined como false
+          isSelected = questionnaireAnswers[questionId]?.[option] === true;
         } 
         else if ((question.type === 'radio' || question.type === 'select') && 
             questionnaireAnswers[questionId] !== undefined) {

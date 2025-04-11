@@ -70,9 +70,9 @@ export const formatFieldValueFromQuestionnaire = (
       }
     } else if (question.type === 'checkbox') {
       if (typeof answer === 'object' && !Array.isArray(answer)) {
-        // For checkboxes, get all selected options
+        // Para checkboxes, obter opções selecionadas, tratando valores undefined como falsos
         const selectedOptions = Object.entries(answer)
-          .filter(([_, isSelected]) => isSelected)
+          .filter(([_, isSelected]) => isSelected === true) // Verificar explicitamente se é true
           .map(([option]) => option);
           
         if (selectedOptions.length > 0) {

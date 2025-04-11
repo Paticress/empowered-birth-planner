@@ -18,6 +18,17 @@ export function initializeQuestionOptions(
     return newOptions;
   }
   
+  // Debug para questões específicas
+  if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+    console.log(`initializeQuestionOptions para: ${questionId}`);
+    console.log(`Questionário tem resposta:`, !!questionnaireAnswers[questionId]);
+    
+    if (questionnaireAnswers[questionId]) {
+      console.log(`Tipo da resposta:`, typeof questionnaireAnswers[questionId]);
+      console.log(`Valor da resposta:`, questionnaireAnswers[questionId]);
+    }
+  }
+  
   // Initialize options from questionnaire answers
   question.options.forEach((option: string) => {
     let isSelected = false;
@@ -26,7 +37,13 @@ export function initializeQuestionOptions(
     if (question.type === 'checkbox' && 
         typeof questionnaireAnswers[questionId] === 'object' && 
         !Array.isArray(questionnaireAnswers[questionId])) {
-      isSelected = !!questionnaireAnswers[questionId]?.[option];
+      // Tratar explicitamente undefined como false
+      isSelected = questionnaireAnswers[questionId]?.[option] === true;
+      
+      // Debug para campos específicos
+      if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+        console.log(`Opção ${option}: ${isSelected} (valor original: ${questionnaireAnswers[questionId]?.[option]})`);
+      }
     } 
     // For radio/select questions
     else if ((question.type === 'radio' || question.type === 'select') && 
@@ -68,6 +85,12 @@ export function updateSelectionState(
   
   // Set the selected option
   newSelectedOptions[questionId][option] = checked;
+  
+  // Debug para campos especiais
+  if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+    console.log(`Atualização final para ${questionId}/${option}:`, checked);
+    console.log(`Estado atualizado:`, newSelectedOptions[questionId]);
+  }
   
   return newSelectedOptions;
 }

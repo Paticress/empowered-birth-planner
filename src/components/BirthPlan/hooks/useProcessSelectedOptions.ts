@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { birthPlanSections } from '../utils/birthPlanSections';
 
@@ -52,14 +53,19 @@ export function useProcessSelectedOptions({
       }
     }
 
-    // Verificar as opções selecionadas para o campo atual
-    if (selectedOptions[activeFieldKey]) {
-      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
-        .filter(([_, isSelected]) => isSelected)
-        .map(([option]) => option);
-      console.log("🔍 Opções selecionadas para este campo:", selectedForField);
-    } else {
-      console.log("⚠️ Nenhuma opção selecionada para este campo");
+    // Debug para campos especiais
+    if (['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'].includes(activeFieldKey)) {
+      console.log(`Processando campo especial: ${activeFieldKey}`);
+      
+      // Verificar todas as opções disponíveis para este campo
+      if (selectedOptions[activeFieldKey]) {
+        console.log(`Verificando opções disponíveis:`, selectedOptions[activeFieldKey]);
+        Object.entries(selectedOptions[activeFieldKey]).forEach(([option, isSelected]) => {
+          console.log(`${option}: ${isSelected}`);
+        });
+      } else {
+        console.log(`Nenhuma opção disponível para ${activeFieldKey}`);
+      }
     }
 
     // Usar o hook personalizado para processar as opções
@@ -73,35 +79,42 @@ export function useProcessSelectedOptions({
       setLocalBirthPlan(updatedPlan);
     }
 
-    // CORREÇÃO: Modificação na forma como processamos as opções e atualizamos o campo
-    
     // Processar as opções selecionadas e textareas
-    const selectedItems = [];
+    const selectedItems: string[] = [];
+    let hasSelections = false;
     
-    // Capturar todas as opções selecionadas para o campo ativo
-    if (selectedOptions[activeFieldKey]) {
-      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
-        .filter(([_, isSelected]) => isSelected)
+    // Capturar todas as opções selecionadas (para todos os questionIds relacionados ao campo)
+    Object.entries(selectedOptions).forEach(([questionId, options]) => {
+      const selectedForQuestion = Object.entries(options)
+        .filter(([_, isSelected]) => isSelected === true) // Verificar explicitamente se é true
         .map(([option]) => option.trim());
       
-      if (selectedForField.length > 0) {
-        selectedItems.push(...selectedForField);
+      if (selectedForQuestion.length > 0) {
+        hasSelections = true;
+        selectedItems.push(...selectedForQuestion);
       }
-    }
+    });
     
     // Capturar qualquer texto de textareas
     Object.values(textareaValues)
       .map(text => text.trim())
       .filter(Boolean)
       .forEach(text => {
+        hasSelections = true;
         selectedItems.push(text);
       });
     
+    // Debug para campos específicos
+    if (['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'].includes(activeFieldKey)) {
+      console.log(`Opções finais para ${activeFieldKey}:`, selectedItems);
+      console.log(`Tem seleções: ${hasSelections}`);
+    }
+    
     // Se temos opções selecionadas, vamos atualizar o campo
-    if (selectedItems.length > 0) {
+    if (hasSelections && selectedItems.length > 0) {
       console.log("🔍 Opções selecionadas finais:", selectedItems);
       
-      // CORREÇÃO: Formatar com vírgula e espaço, sem quebras de linha
+      // Formatar com vírgula e espaço para melhor legibilidade
       const formattedText = selectedItems.join(', ');
       
       // Atualizar o plano de parto com o texto formatado
@@ -122,14 +135,12 @@ export function useProcessSelectedOptions({
       if (!completedSections.includes(activeFieldKey)) {
         setCompletedSections([...completedSections, activeFieldKey]);
       }
+    } else {
+      console.log("⚠️ Nenhuma opção selecionada, pulando atualização do plano");
     }
     
     // Limpar seleções e fechar diálogo
-    setSelectedOptions(prev => ({
-      ...prev,
-      [activeFieldKey]: {}
-    }));
-    
+    setSelectedOptions({});
     setTextareaValues({});
     setDialogOpen(false);
   }, [
