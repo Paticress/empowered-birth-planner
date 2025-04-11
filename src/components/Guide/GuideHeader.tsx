@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X, LayoutDashboard } from 'lucide-react';
 import { GuideSearch } from './Search/GuideSearch';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
+import { useAuth } from '@/contexts/AuthContext';
 
 type GuideHeaderProps = {
   onNavigate?: (value: string) => void;
@@ -15,6 +16,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { navigateTo } = useNavigation();
+  const { isAuthenticated } = useAuth();
 
   // Close mobile menu on window resize
   useEffect(() => {
@@ -70,7 +72,17 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
               Guia Online
             </Button>
             
-            {/* ADDED BIRTH PLAN NAVIGATION BUTTON */}
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                onClick={() => navigateTo('/dashboard')}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
+            )}
+            
             <BirthPlanNavButton />
             
             <Button
@@ -124,7 +136,20 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
               Guia Online
             </Button>
             
-            {/* ADDED BIRTH PLAN NAVIGATION BUTTON FOR MOBILE */}
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  navigateTo('/dashboard');
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full justify-start text-gray-600 hover:text-gray-900"
+              >
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
+            )}
+            
             <BirthPlanNavButton className="w-full justify-start" />
           </div>
         </div>

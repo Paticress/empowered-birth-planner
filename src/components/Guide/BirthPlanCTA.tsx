@@ -4,13 +4,41 @@ import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export function BirthPlanCTA() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { navigateTo } = useNavigation();
+  const [isFullAccessUser, setIsFullAccessUser] = useState<boolean | null>(null);
+  
+  // Check if the authenticated user has full access (is a Client, not just a Lead)
+  useEffect(() => {
+    const checkAccessLevel = async () => {
+      if (!isAuthenticated || !user?.email) {
+        setIsFullAccessUser(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('users_db_birthplanbuilder')
+          .select('email')
+          .eq('email', user.email)
+          .maybeSingle();
+          
+        setIsFullAccessUser(!error && !!data);
+      } catch (error) {
+        console.error("Error checking user access level:", error);
+        setIsFullAccessUser(false);
+      }
+    };
+    
+    checkAccessLevel();
+  }, [isAuthenticated, user]);
 
-  // Se o usuário já está logado, mostrar interface diferente
-  if (isAuthenticated) {
+  // Se o usuário já é um Cliente (tem acesso completo), mostrar interface diferente
+  if (isAuthenticated && isFullAccessUser) {
     return (
       <div className="bg-gradient-to-r from-green-50 to-maternal-50 p-6 rounded-xl border border-green-200 mb-8 shadow-md">
         <div className="flex flex-col md:flex-row items-center justify-between">
@@ -50,7 +78,7 @@ export function BirthPlanCTA() {
     );
   }
 
-  // Versão original para visitantes não autenticados
+  // Versão para LEADs (usuários autenticados mas sem acesso completo) e Visitantes (não autenticados)
   return (
     <div className="bg-gradient-to-r from-maternal-100 to-maternal-50 p-6 rounded-xl border border-maternal-200 mb-8 shadow-md">
       <div className="flex flex-col md:flex-row items-center justify-between">

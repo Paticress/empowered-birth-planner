@@ -1,119 +1,109 @@
 
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, FileText, GraduationCap, User, Home } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Menu, X, LogOut, LayoutDashboard } from 'lucide-react';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export function MobileNavigation() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
   const { navigateTo } = useNavigation();
-  const { user } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  const isActive = (path: string) => {
-    return location.pathname === path;
+  const handleNavigation = (path: string) => {
+    navigateTo(path);
+    setIsOpen(false);
   };
-
+  
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      toast.success("Logout realizado com sucesso!");
+      window.location.href = '/'; // Force full page reload
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Erro ao realizar logout");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+  
   return (
-    <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-      <SheetTrigger asChild className="md:hidden">
-        <button 
-          className="text-maternal-900 p-2 rounded-md"
-          aria-label="Menu principal"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-      </SheetTrigger>
-      <SheetContent side="right" className="w-[250px] sm:w-[300px] bg-white">
-        <div className="flex flex-col h-full py-6">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center">
-              <img 
-                src="/lovable-uploads/6f452e84-0922-495e-bad9-57a66fa763f6.png" 
-                alt="Energia Materna Logo" 
-                className="h-8 w-auto"
-              />
-            </div>
-            <button 
-              className="text-maternal-900 p-1 rounded-md"
-              onClick={() => setMobileMenuOpen(false)}
-              aria-label="Fechar menu"
+    <div className="md:hidden flex items-center">
+      <Button 
+        variant="ghost" 
+        size="icon"
+        onClick={() => setIsOpen(!isOpen)} 
+        aria-label="Toggle menu"
+        className="text-maternal-600"
+      >
+        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </Button>
+      
+      {isOpen && (
+        <div className="absolute top-16 inset-x-0 bg-white shadow-lg z-50 rounded-b-lg border-t border-maternal-100">
+          <div className="p-4 flex flex-col space-y-2">
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/')}
+              className="w-full justify-start text-maternal-600"
             >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <nav className="flex flex-col space-y-4">
-            {user && (
-              <button 
-                className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/dashboard') 
-                  ? 'bg-maternal-100 text-maternal-900 font-medium' 
-                  : 'text-maternal-800 hover:bg-maternal-50'}`}
-                onClick={() => {
-                  navigateTo('/dashboard');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Dashboard
-              </button>
-            )}
+              Início
+            </Button>
             
-            <button 
-              className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/guia-online') 
-                ? 'bg-maternal-100 text-maternal-900 font-medium' 
-                : 'text-maternal-800 hover:bg-maternal-50'}`}
-              onClick={() => {
-                navigateTo('/guia-online');
-                setMobileMenuOpen(false);
-              }}
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/guia-online')}
+              className="w-full justify-start text-maternal-600"
             >
-              <BookOpen className="h-4 w-4 mr-2" />
               Guia Online
-            </button>
+            </Button>
             
-            <button 
-              className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/plano-de-parto') 
-                ? 'bg-maternal-100 text-maternal-900 font-medium' 
-                : 'text-maternal-800 hover:bg-maternal-50'}`}
-              onClick={() => {
-                navigateTo('/plano-de-parto');
-                setMobileMenuOpen(false);
-              }}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Construtor Virtual
-            </button>
-            
-            <a 
-              href="https://www.energiamaterna.com.br/programas"
-              className="py-2 px-3 rounded-md transition-colors text-left flex items-center text-maternal-800 hover:bg-maternal-50"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <GraduationCap className="h-4 w-4 mr-2" />
-              Curso Gestando
-            </a>
-            
-            {user && (
-              <button 
-                className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/meus-acessos') 
-                  ? 'bg-maternal-100 text-maternal-900 font-medium' 
-                  : 'text-maternal-800 hover:bg-maternal-50'}`}
-                onClick={() => {
-                  navigateTo('/meus-acessos');
-                  setMobileMenuOpen(false);
-                }}
+            {isAuthenticated && (
+              <Button 
+                variant="ghost" 
+                onClick={() => handleNavigation('/dashboard')}
+                className="w-full justify-start text-maternal-600"
               >
-                <User className="h-4 w-4 mr-2" />
-                Meus Acessos
-              </button>
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
             )}
-          </nav>
+            
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/faq')}
+              className="w-full justify-start text-maternal-600"
+            >
+              FAQ
+            </Button>
+            
+            {isAuthenticated ? (
+              <Button 
+                variant="outline"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="w-full justify-start text-maternal-600"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                {isLoggingOut ? "Saindo..." : "Sair"}
+              </Button>
+            ) : (
+              <Button 
+                variant="birth-plan-builder"
+                onClick={() => handleNavigation('/acesso-plano')}
+                className="w-full"
+              >
+                Acessar
+              </Button>
+            )}
+          </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      )}
+    </div>
   );
 }

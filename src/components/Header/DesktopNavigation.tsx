@@ -1,82 +1,85 @@
 
-import { Link } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import { BookOpen, FileText, GraduationCap, User, Home } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { LogOut, LayoutDashboard } from 'lucide-react';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export function DesktopNavigation() {
-  const location = useLocation();
   const { navigateTo } = useNavigation();
-  const { user } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  const isActive = (path: string) => {
-    return location.pathname === path;
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      toast.success("Logout realizado com sucesso!");
+      window.location.href = '/'; // Force full page reload
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Erro ao realizar logout");
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
-
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
-    e.preventDefault();
-    navigateTo(path);
-  };
-
+  
   return (
-    <nav className="hidden md:flex space-x-8">
-      {user && (
-        <Link 
-          to="/dashboard" 
-          className={`transition-colors flex items-center ${isActive('/dashboard') 
-            ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
-            : 'text-maternal-800 hover:text-maternal-600'}`}
-          onClick={(e) => handleLinkClick(e, '/dashboard')}
+    <nav className="hidden md:flex md:items-center md:space-x-4">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigateTo('/')}
+        className="text-maternal-600 hover:text-maternal-900"
+      >
+        Início
+      </Button>
+      
+      <Button 
+        variant="ghost" 
+        onClick={() => navigateTo('/guia-online')}
+        className="text-maternal-600 hover:text-maternal-900"
+      >
+        Guia Online
+      </Button>
+      
+      {isAuthenticated && (
+        <Button 
+          variant="ghost" 
+          onClick={() => navigateTo('/dashboard')}
+          className="text-maternal-600 hover:text-maternal-900"
         >
-          <Home className="h-4 w-4 mr-1" />
+          <LayoutDashboard className="h-4 w-4 mr-2" />
           Dashboard
-        </Link>
+        </Button>
       )}
       
-      <Link 
-        to="/guia-online" 
-        className={`transition-colors flex items-center ${isActive('/guia-online') 
-          ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
-          : 'text-maternal-800 hover:text-maternal-600'}`}
-        onClick={(e) => handleLinkClick(e, '/guia-online')}
+      <Button 
+        variant="ghost" 
+        onClick={() => navigateTo('/faq')}
+        className="text-maternal-600 hover:text-maternal-900"
       >
-        <BookOpen className="h-4 w-4 mr-1" />
-        Guia Online
-      </Link>
+        FAQ
+      </Button>
       
-      <Link 
-        to="/plano-de-parto" 
-        className={`transition-colors flex items-center ${isActive('/plano-de-parto') 
-          ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
-          : 'text-maternal-800 hover:text-maternal-600'}`}
-        onClick={(e) => handleLinkClick(e, '/plano-de-parto')}
-      >
-        <FileText className="h-4 w-4 mr-1" />
-        Construtor Virtual
-      </Link>
-      
-      <a 
-        href="https://www.energiamaterna.com.br/programas" 
-        className="text-maternal-800 hover:text-maternal-600 transition-colors flex items-center"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <GraduationCap className="h-4 w-4 mr-1" />
-        Curso Gestando
-      </a>
-      
-      {user && (
-        <Link 
-          to="/meus-acessos" 
-          className={`transition-colors flex items-center ${isActive('/meus-acessos') 
-            ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
-            : 'text-maternal-800 hover:text-maternal-600'}`}
-          onClick={(e) => handleLinkClick(e, '/meus-acessos')}
+      {isAuthenticated ? (
+        <Button 
+          variant="outline"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="text-maternal-600 hover:text-maternal-900"
         >
-          <User className="h-4 w-4 mr-1" />
-          Meus Acessos
-        </Link>
+          <LogOut className="h-4 w-4 mr-2" />
+          {isLoggingOut ? "Saindo..." : "Sair"}
+        </Button>
+      ) : (
+        <Button 
+          variant="birth-plan-builder"
+          onClick={() => navigateTo('/acesso-plano')}
+          className="text-white"
+        >
+          Acessar
+        </Button>
       )}
     </nav>
   );

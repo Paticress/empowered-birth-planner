@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
 import { FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 
 interface NavButtonProps {
   className?: string;
@@ -10,10 +12,36 @@ interface NavButtonProps {
 
 export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
   const { navigateTo } = useNavigation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const [isFullAccessUser, setIsFullAccessUser] = useState<boolean | null>(null);
+  
+  // Check if the authenticated user has full access (is a Client, not just a Lead)
+  useEffect(() => {
+    const checkAccessLevel = async () => {
+      if (!isAuthenticated || !user?.email) {
+        setIsFullAccessUser(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('users_db_birthplanbuilder')
+          .select('email')
+          .eq('email', user.email)
+          .maybeSingle();
+          
+        setIsFullAccessUser(!error && !!data);
+      } catch (error) {
+        console.error("Error checking user access level:", error);
+        setIsFullAccessUser(false);
+      }
+    };
+    
+    checkAccessLevel();
+  }, [isAuthenticated, user]);
   
   const goToBirthPlanAccess = () => {
-    console.log("Birth Plan Nav button clicked, authentication state:", isAuthenticated);
+    console.log("Birth Plan Nav button clicked, authentication state:", isAuthenticated, "Full access:", isFullAccessUser);
     navigateTo('/criar-plano');
   };
   

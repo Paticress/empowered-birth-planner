@@ -85,10 +85,17 @@ export const useNavigation = () => {
         return;
       } 
       
-      if (path === '/criar-plano') {
+      if (path === '/criar-plano' || path.includes('/criar-plano')) {
         // Redireciona para a landing page de conversão no Wix
         console.log("Redirecting visitor to Wix conversion page for Birth Plan");
         window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+        return;
+      }
+      
+      if (path === '/dashboard') {
+        // Visitantes não podem acessar o dashboard, direcionando para login
+        console.log("Redirecting visitor to login page (attempted dashboard access)");
+        navigate('/acesso-plano');
         return;
       }
       
@@ -110,6 +117,14 @@ export const useNavigation = () => {
       return;
     }
     
+    // Redireciona LEADs diretamente para o dashboard após login bem-sucedido
+    if (path === '/guia-online' && isAuthenticated && !localStorage.getItem('dashboard-visited')) {
+      console.log("First login for LEAD, redirecting to dashboard");
+      localStorage.setItem('dashboard-visited', 'true');
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+    
     // Para Clientes ou navegação normal, usa o navegador padrão
     console.log("Standard navigation to:", path);
     
@@ -125,4 +140,3 @@ export const useNavigation = () => {
   
   return { navigateTo };
 };
-
