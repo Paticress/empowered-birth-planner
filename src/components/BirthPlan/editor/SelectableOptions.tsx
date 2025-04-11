@@ -8,7 +8,7 @@ interface SelectableOptionsProps {
   question: any;
   questionId: string;
   selectedOptions: Record<string, Record<string, boolean>>;
-  setSelectedOptions: (value: Record<string, Record<string, boolean>>) => void;
+  setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>;
   isSpecialField?: boolean;
   questionnaireAnswers?: Record<string, any>;
 }
@@ -53,11 +53,13 @@ export function SelectableOptions({
           newOptions[option] = isSelected;
         });
         
-        // Update options with initializations
-        setSelectedOptions(prev => ({
-          ...prev,
-          [questionId]: newOptions
-        }));
+        // Fixed: properly type the function parameter in setSelectedOptions
+        setSelectedOptions((prev) => {
+          return {
+            ...prev,
+            [questionId]: newOptions
+          };
+        });
         
         console.log(`SelectableOptions: Initialized options for ${questionId}:`, newOptions);
       }
