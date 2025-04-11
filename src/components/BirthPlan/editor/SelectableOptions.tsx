@@ -54,26 +54,15 @@ export function SelectableOptions({
     return null;
   }
   
-  // Debug para questões especiais
+  // Debug for special questions
   if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
-    console.log(`SelectableOptions para questão especial: ${questionId}`);
-    console.log(`Tem resposta:`, !!questionnaireAnswers[questionId]);
-    
-    if (questionnaireAnswers[questionId]) {
-      console.log(`Tipo da resposta:`, typeof questionnaireAnswers[questionId]);
-      console.log(`Valor da resposta:`, questionnaireAnswers[questionId]);
-    }
-    
-    console.log(`Opções disponíveis:`, question.options);
-    console.log(`Opções selecionadas atualmente:`, selectedOptions[questionId]);
+    console.log(`SelectableOptions for special question: ${questionId}`);
+    console.log(`Has answer:`, !!questionnaireAnswers[questionId]);
+    console.log(`Options:`, question.options);
+    console.log(`Current selected options:`, selectedOptions[questionId]);
   }
   
   const handleCheckedChange = (option: string, checked: boolean) => {
-    // Debug específico para opções especiais
-    if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
-      console.log(`Seleção alterada para ${option}: ${checked}`);
-    }
-    
     const newSelections = updateSelectionState(
       questionId,
       option,
