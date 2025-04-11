@@ -1,6 +1,5 @@
 
 import { Button } from '@/components/ui/button';
-import { SelectableOptions } from './SelectableOptions';
 import {
   DialogContent,
   DialogHeader,
@@ -8,7 +7,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useState, useEffect } from 'react';
-import { Textarea } from '@/components/ui/textarea';
+import { DialogQuestion } from './DialogQuestion';
 
 interface OptionsDialogProps {
   dialogOpen: boolean;
@@ -81,43 +80,18 @@ export function OptionsDialog({
 
       <div className="max-h-[60vh] overflow-y-auto py-4">
         {relevantQuestions.length > 0 ? (
-          relevantQuestions.map(({ question }) => {
-            const questionId = question.id;
-
-            if (!question) return null;
-
-            // Render textarea when question is textarea type
-            if (question.type === 'textarea') {
-              return (
-                <div key={questionId} className="py-3 border-b border-gray-100">
-                  <div className="font-medium text-maternal-900">{question.text}</div>
-                  <div className="mt-2">
-                    <Textarea 
-                      value={textareaValues[questionId] || ''}
-                      onChange={(e) => handleTextareaChange(questionId, e.target.value)}
-                      placeholder="Digite sua resposta aqui..."
-                      className="w-full"
-                      rows={4}
-                    />
-                  </div>
-                </div>
-              );
-            }
-
-            // Render selectable options (radio/select)
-            return (
-              <div key={questionId} className="py-3 border-b border-gray-100">
-                <div className="font-medium text-maternal-900">{question.text}</div>
-                <SelectableOptions 
-                  question={question} 
-                  questionId={questionId} 
-                  selectedOptions={selectedOptions}
-                  setSelectedOptions={setSelectedOptions}
-                  questionnaireAnswers={questionnaireAnswers}
-                />
-              </div>
-            );
-          })
+          relevantQuestions.map(({ question }) => (
+            <DialogQuestion 
+              key={question.id}
+              question={question}
+              questionId={question.id}
+              selectedOptions={selectedOptions}
+              setSelectedOptions={setSelectedOptions}
+              questionnaireAnswers={questionnaireAnswers}
+              textareaValues={textareaValues}
+              onTextareaChange={handleTextareaChange}
+            />
+          ))
         ) : (
           <p className="text-center py-4 text-gray-500">
             Não há respostas disponíveis do questionário para este campo.
