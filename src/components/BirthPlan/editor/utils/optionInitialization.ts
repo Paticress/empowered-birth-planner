@@ -20,8 +20,9 @@ export const initializeOptionsFromCurrentField = (
   
   // Obter questões relevantes específicas para este campo
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
+  console.log(`Encontradas ${relevantQuestions.length} questões relevantes`);
   
-  // BUGFIX: Obter opções já selecionadas no campo atual
+  // Obter opções já selecionadas no campo atual
   const currentFieldOptions = parseCurrentFieldOptions(fieldKey, sectionId, birthPlan);
   console.log(`Opções do campo atual: `, currentFieldOptions);
   
@@ -51,7 +52,7 @@ export const initializeOptionsFromCurrentField = (
       return;
     }
     
-    // BUGFIX: Inicializar a partir do valor atual do campo + questionário
+    // Inicializar a partir do valor atual do campo + questionário
     question.options.forEach((option: string) => {
       let isSelected = false;
       

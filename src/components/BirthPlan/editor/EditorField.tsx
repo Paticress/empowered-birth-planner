@@ -8,7 +8,7 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { OptionsDialog } from './OptionsDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getAlwaysShowAddButtonFields } from './utils/fieldConfig';
-import { formatFieldValueFromQuestionnaire } from './utils/optionsHandling';
+import { formatFieldValueFromQuestionnaire } from './utils/optionFormatting';
 
 interface EditorFieldProps {
   field: { key: string; label: string };
@@ -107,9 +107,10 @@ export function EditorField({
     console.log(`Opening dialog for field: ${field.key}`);
     
     // First, reset any previous selections to ensure we start fresh
-    setSelectedOptions({}); 
+    setSelectedOptions({});
     
-    // Then initialize this field's options
+    // Then initialize this field's options by calling resetOptionsForField
+    // This will properly set activeFieldKey and initialize options from current field value
     resetOptionsForField(field.key);
   };
   

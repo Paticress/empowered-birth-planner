@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { birthPlanSections } from '../utils/birthPlanSections';
@@ -93,16 +94,21 @@ export function useEditorState(
   const resetOptionsForField = useCallback((fieldKey: string) => {
     console.log(`Reset options for field: ${fieldKey}`);
     
+    // First set the active field key so the dialog shows for this field
+    setActiveFieldKey(fieldKey);
+    
+    // Clean up previous selections and textarea values
     setSelectedOptions({});
     setTextareaValues({});
     
-    setActiveFieldKey(fieldKey);
-    
+    // Get the active section
     const activeSection = birthPlanSections[activeSectionIndex];
     
+    // Log the current field value for debugging
     const currentFieldValue = localBirthPlan[activeSection.id]?.[fieldKey] || '';
-    console.log(`Valor atual do campo para inicialização: "${currentFieldValue}"`);
+    console.log(`Current field value for initialization: "${currentFieldValue}"`);
     
+    // Initialize selected options from the current field value and questionnaire
     const initialSelectedOptions = initializeOptionsFromCurrentField(
       fieldKey, 
       activeSection.id,
@@ -110,8 +116,10 @@ export function useEditorState(
       questionnaireAnswers
     );
     
+    // Set the selected options
     setSelectedOptions(initialSelectedOptions);
     
+    // Get relevant questions for populating textarea values
     const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
     const initialTextareaValues: Record<string, string> = {};
     
@@ -123,6 +131,7 @@ export function useEditorState(
     
     setTextareaValues(initialTextareaValues);
     
+    // Now open the dialog
     setDialogOpen(true);
   }, [activeSectionIndex, localBirthPlan, questionnaireAnswers]);
 
