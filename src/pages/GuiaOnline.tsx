@@ -85,7 +85,8 @@ export function GuiaOnline() {
   }, [isAuthenticated, user, isLoading]);
 
   const handleLogin = () => {
-    navigateTo('/acesso-plano');
+    // Adiciona parâmetro indicando redirecionamento do guia
+    navigateTo('/acesso-plano?from=guide');
     toast.info('Faça login para acessar o guia completo');
   };
 
@@ -115,7 +116,7 @@ export function GuiaOnline() {
             <div className="max-w-xl mx-auto bg-white rounded-lg shadow-md p-8 text-center">
               <h1 className="text-3xl font-bold mb-6 text-maternal-900">Guia Online</h1>
               <p className="text-lg mb-8 text-maternal-700">
-                Para acessar o guia completo, por favor faça login com o email utilizado na compra do plano.
+                Para acessar o guia completo, por favor faça login ou cadastre-se com o email utilizado na compra do plano.
               </p>
               <Button 
                 onClick={handleLogin}
@@ -123,7 +124,7 @@ export function GuiaOnline() {
                 className="font-semibold"
               >
                 <FileText className="mr-2 h-5 w-5" />
-                Fazer Login para Acessar
+                Cadastrar ou Fazer Login
               </Button>
             </div>
           </div>

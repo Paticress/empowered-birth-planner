@@ -8,9 +8,10 @@ import { useState, useEffect } from 'react';
 
 interface NavButtonProps {
   className?: string;
+  source?: 'guide' | 'purchase';
 }
 
-export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
+export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
   const { navigateTo } = useNavigation();
   const { isAuthenticated, user } = useAuth();
   const [isFullAccessUser, setIsFullAccessUser] = useState<boolean | null>(null);
@@ -42,7 +43,18 @@ export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
   
   const goToBirthPlanAccess = () => {
     console.log("Birth Plan Nav button clicked, authentication state:", isAuthenticated, "Full access:", isFullAccessUser);
-    navigateTo('/criar-plano');
+    
+    if (!isAuthenticated) {
+      // Se não estiver autenticado, direciona para login com o parâmetro source
+      if (source) {
+        navigateTo(`/acesso-plano?from=${source}`);
+      } else {
+        navigateTo('/acesso-plano');
+      }
+    } else {
+      // Se estiver autenticado, segue o fluxo normal
+      navigateTo('/criar-plano');
+    }
   };
   
   return (

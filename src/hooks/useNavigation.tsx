@@ -68,6 +68,8 @@ export const useNavigation = () => {
       if (path === '/acesso-plano') {
         navigate(path, { replace: true });
       } else {
+        // For all other routes, use normal navigation
+        // This preserves the route in the browser history
         navigate(path);
       }
       return;
@@ -95,13 +97,18 @@ export const useNavigation = () => {
       if (path === '/dashboard') {
         // Visitantes não podem acessar o dashboard, direcionando para login
         console.log("Redirecting visitor to login page (attempted dashboard access)");
-        navigate('/acesso-plano');
+        // Adiciona parâmetro indicando redirecionamento do dashboard
+        navigate('/acesso-plano?from=dashboard');
         return;
       }
       
-      // Para outras rotas protegidas, redireciona para login
+      // Para outras rotas protegidas, redireciona para login com indicação da origem
       console.log("Redirecting visitor to login page");
-      navigate('/acesso-plano');
+      if (path === '/guia-online') {
+        navigate('/acesso-plano?from=guide');
+      } else {
+        navigate('/acesso-plano');
+      }
       return;
     }
     
