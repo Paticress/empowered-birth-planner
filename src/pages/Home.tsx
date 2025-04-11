@@ -107,7 +107,7 @@ export function Home() {
                   </ul>
                   
                   <Button 
-                    onClick={() => navigateTo('/plano-de-parto')}
+                    onClick={() => navigateTo('/criar-plano')}
                     variant="birth-plan-builder"
                     className="w-full"
                   >

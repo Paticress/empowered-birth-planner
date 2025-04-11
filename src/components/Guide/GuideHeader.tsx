@@ -137,6 +137,6 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
           onNavigate={onNavigate}
         />
       )}
-    </header>
+  </header>
   );
 }

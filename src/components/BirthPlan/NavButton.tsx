@@ -13,16 +13,8 @@ export function BirthPlanNavButton({ className = '' }: NavButtonProps) {
   const { isAuthenticated } = useAuth();
   
   const goToBirthPlanAccess = () => {
-    console.log("Nav button clicked, authentication state:", isAuthenticated);
-    
-    // Check if user is authenticated
-    if (isAuthenticated) {
-      console.log("User is authenticated, navigating to birth plan builder");
-      navigateTo('/criar-plano');
-    } else {
-      console.log("User is not authenticated, navigating to login page");
-      navigateTo('/acesso-plano');
-    }
+    console.log("Birth Plan Nav button clicked, authentication state:", isAuthenticated);
+    navigateTo('/criar-plano');
   };
   
   return (
