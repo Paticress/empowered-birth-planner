@@ -22,7 +22,7 @@ interface OptionsDialogProps {
   handleAddSelectedOptions: () => void;
 }
 
-// Componente principal do dialog
+// Main dialog component
 export function OptionsDialog({
   dialogOpen,
   setDialogOpen,
@@ -38,34 +38,42 @@ export function OptionsDialog({
   const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
   const [currentFieldKey, setCurrentFieldKey] = useState<string>('');
   const [hasMounted, setHasMounted] = useState(false);
+  const [isFirstRender, setIsFirstRender] = useState(true);
   
-  // Verifica se o componente já montou no cliente para evitar erro de portal (ownerDocument)
+  // Check if component has mounted on client to avoid portal error (ownerDocument)
   useEffect(() => {
     setHasMounted(true);
   }, []);
 
-  // Reseta seleções e campos ao mudar o campo ativo
+  // Reset selections and fields when active field changes
   useEffect(() => {
     if (activeFieldKey !== currentFieldKey) {
       console.log(`Field changed from ${currentFieldKey} to ${activeFieldKey}, resetting selections`);
-      setSelectedOptions({}); // limpa seleções antigas
-      setTextareaValues({}); // limpa textarea
+      // Don't clear selections on first render, they should be initialized by resetOptionsForField
+      if (!isFirstRender) {
+        setSelectedOptions({}); // clear old selections
+      }
+      setTextareaValues({}); // clear textarea
       setCurrentFieldKey(activeFieldKey);
+      setIsFirstRender(false);
     }
-  }, [activeFieldKey, currentFieldKey, setSelectedOptions]);
+  }, [activeFieldKey, currentFieldKey, setSelectedOptions, isFirstRender]);
 
-  // Atualiza perguntas relevantes ao abrir o diálogo
+  // Update relevant questions when dialog opens
   useEffect(() => {
     if (dialogOpen && activeFieldKey) {
+      console.log(`Dialog opened for field ${activeFieldKey}, getting relevant questions`);
       const questions = getRelevantQuestionsForField(activeFieldKey);
       setRelevantQuestions(questions);
 
-      // Verifica se todas as perguntas são do tipo radio ou select
+      // Check if all questions are radio or select type
       const onlyRadioQuestions = questions.length > 0 && 
         questions.every(q => q.question.type === 'radio' || q.question.type === 'select');
       setHasRadioOnly(onlyRadioQuestions);
 
-      // Preenche os valores iniciais do textarea com base nas respostas já fornecidas
+      console.log(`Selected options on dialog open:`, selectedOptions);
+      
+      // Fill initial textarea values based on already provided answers
       const initialTextareaValues: Record<string, string> = {};
       questions.forEach(({ question }) => {
         if (question.type === 'textarea' && questionnaireAnswers[question.id]) {
@@ -74,9 +82,9 @@ export function OptionsDialog({
       });
       setTextareaValues(initialTextareaValues);
     }
-  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers]);
+  }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers, selectedOptions]);
 
-  // Atualiza valores do textarea conforme o usuário digita
+  // Update textarea values as user types
   const handleTextareaChange = (questionId: string, value: string) => {
     setTextareaValues(prev => ({
       ...prev,
@@ -84,7 +92,7 @@ export function OptionsDialog({
     }));
   };
 
-  // Se ainda não montou no cliente, não renderiza o dialog (previne erro do portal)
+  // If not mounted on client, don't render dialog (prevents portal error)
   if (!hasMounted || !dialogOpen) return null;
 
   return (
@@ -100,7 +108,7 @@ export function OptionsDialog({
 
             if (!question) return null;
 
-            // Renderiza textarea quando a pergunta for do tipo textarea
+            // Render textarea when question is textarea type
             if (question.type === 'textarea') {
               return (
                 <div key={questionId} className="py-3 border-b border-gray-100">
@@ -118,7 +126,7 @@ export function OptionsDialog({
               );
             }
 
-            // Renderiza opções selecionáveis (radio/select)
+            // Render selectable options (radio/select)
             return (
               <div key={questionId} className="py-3 border-b border-gray-100">
                 <div className="font-medium text-maternal-900">{question.text}</div>

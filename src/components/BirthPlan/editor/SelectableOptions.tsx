@@ -21,66 +21,63 @@ export function SelectableOptions({
   isSpecialField = false,
   questionnaireAnswers = {}
 }: SelectableOptionsProps) {
-  const [isInitialized, setIsInitialized] = useState(false);
   
   if (!question.options || question.options.length === 0) {
     console.warn(`No options found for question ${questionId}`);
     return null;
   }
   
-  // Debug para questões especiais
+  // Debug for special questions
   if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
-    console.log(`SelectableOptions para questão especial: ${questionId}`);
-    console.log(`Tem resposta:`, !!questionnaireAnswers[questionId]);
-    console.log(`Opções:`, question.options);
+    console.log(`SelectableOptions for special question: ${questionId}`);
+    console.log(`Has answer:`, !!questionnaireAnswers[questionId]);
+    console.log(`Options:`, question.options);
+    console.log(`Current selected options:`, selectedOptions[questionId]);
   }
   
-  // BUGFIX: Remover a inicialização automática baseada apenas no questionário
-  // Agora a inicialização é feita no hook useEditorState e passada como prop
-  
   const handleCheckedChange = (option: string, checked: boolean) => {
-    // Criar uma cópia do estado atual
+    // Create a copy of the current state
     const newSelectedOptions = { ...selectedOptions };
     
-    // Inicializar a entrada da questão se não existir
+    // Initialize the question entry if it doesn't exist
     if (!newSelectedOptions[questionId]) {
       newSelectedOptions[questionId] = {};
     }
     
-    // Para radio buttons (seleção única), desmarcar todas as outras opções primeiro
+    // For radio buttons (single selection), uncheck all other options first
     if ((question.type === 'radio' || question.type === 'select') && !isSpecialField) {
       Object.keys(newSelectedOptions[questionId] || {}).forEach(opt => {
         newSelectedOptions[questionId][opt] = false;
       });
     }
     
-    // Definir a opção selecionada
+    // Set the selected option
     newSelectedOptions[questionId][option] = checked;
     
     setSelectedOptions(newSelectedOptions);
   };
   
-  // Lidar com seleção de radio (seleção única)
+  // Handle radio selection (single selection)
   const handleRadioSelection = (option: string) => {
     const newSelectedOptions = { ...selectedOptions };
     
-    // Inicializar a entrada da questão se não existir
+    // Initialize the question entry if it doesn't exist
     if (!newSelectedOptions[questionId]) {
       newSelectedOptions[questionId] = {};
     }
     
-    // Desmarcar todas as opções
+    // Uncheck all options
     Object.keys(newSelectedOptions[questionId] || {}).forEach(opt => {
       newSelectedOptions[questionId][opt] = false;
     });
     
-    // Selecionar apenas a opção escolhida
+    // Select only the chosen option
     newSelectedOptions[questionId][option] = true;
     
     setSelectedOptions(newSelectedOptions);
   };
   
-  // Tratamento especial para campos especiais
+  // Special treatment for special fields
   if (isSpecialField && (question.type === 'radio' || question.type === 'select')) {
     return (
       <div className="space-y-2 ml-8 mt-2">
@@ -108,9 +105,9 @@ export function SelectableOptions({
     );
   }
   
-  // Se for uma questão do tipo radio ou select, devemos permitir apenas uma opção selecionada
+  // If it's a radio or select question, we should only allow one selected option
   if (question.type === 'radio' || question.type === 'select') {
-    // Encontrar a opção selecionada (se houver) ou deixar vazia
+    // Find the selected option (if any) or leave empty
     const selectedOption = Object.entries(selectedOptions[questionId] || {})
       .find(([_, isSelected]) => isSelected)?.[0] || '';
       
@@ -137,7 +134,7 @@ export function SelectableOptions({
     );
   }
   
-  // Padrão para checkbox (seleção múltipla)
+  // Default for checkbox (multiple selection)
   return (
     <div className="space-y-2 ml-8 mt-2">
       {question.options.map((option: string) => {

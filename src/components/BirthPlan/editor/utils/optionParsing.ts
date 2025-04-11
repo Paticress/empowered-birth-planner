@@ -18,15 +18,15 @@ export const parseCurrentFieldOptions = (fieldKey: string, sectionId: string, bi
   const currentValue = birthPlan[sectionId][fieldKey] || '';
   console.log(`Current value: "${currentValue}"`);
   
-  // Verifica se o valor é uma string simples ou array
+  // Check if the value is a simple string or array
   if (typeof currentValue === 'string') {
-    // Divide por virgulas se for separado por virgulas
+    // Split by commas if comma-separated
     if (currentValue.includes(', ')) {
       const options = currentValue.split(', ').map(item => item.trim()).filter(Boolean);
       console.log(`Parsed comma-separated options:`, options);
       return options;
     }
-    // Ou por quebras de linha
+    // Or by line breaks
     const options = parseOptionsFromText(currentValue);
     console.log(`Parsed line-break options:`, options);
     return options;

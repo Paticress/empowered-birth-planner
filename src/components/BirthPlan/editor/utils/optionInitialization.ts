@@ -7,7 +7,7 @@ import { parseCurrentFieldOptions } from './optionParsing';
 import { getAlwaysShowAddButtonFields } from './fieldConfig';
 
 /**
- * Inicializa o estado de seleção com base no valor atual do campo e nas respostas do questionário
+ * Initializes the selection state based on the current field value and questionnaire answers
  */
 export const initializeOptionsFromCurrentField = (
   fieldKey: string, 
@@ -15,59 +15,59 @@ export const initializeOptionsFromCurrentField = (
   birthPlan: Record<string, any>,
   questionnaireAnswers: Record<string, any>
 ) => {
-  // Log para depuração
-  console.log(`Inicializando opções para o campo: ${fieldKey} na seção: ${sectionId}`);
+  // Debug logging
+  console.log(`Initializing options for field: ${fieldKey} in section: ${sectionId}`);
   
-  // Obter questões relevantes específicas para este campo
+  // Get relevant questions specific to this field
   const relevantQuestions = getRelevantQuestionsForField(fieldKey, questionnaireAnswers);
-  console.log(`Encontradas ${relevantQuestions.length} questões relevantes`);
+  console.log(`Found ${relevantQuestions.length} relevant questions`);
   
-  // Obter opções já selecionadas no campo atual
+  // Get options already selected in the current field
   const currentFieldOptions = parseCurrentFieldOptions(fieldKey, sectionId, birthPlan);
-  console.log(`Opções do campo atual: `, currentFieldOptions);
+  console.log(`Current field options: `, currentFieldOptions);
   
   const initialSelectedOptions: Record<string, Record<string, boolean>> = {};
   
-  // Campos especiais que precisam de tratamento especial
+  // Special fields that need special handling
   const specialFields = getAlwaysShowAddButtonFields();
   const isSpecialField = specialFields.includes(fieldKey);
   
-  // Processar cada questão relevante
+  // Process each relevant question
   relevantQuestions.forEach(({ question }) => {
     if (!question) {
-      console.error("Questão indefinida encontrada durante inicialização");
+      console.error("Undefined question found during initialization");
       return;
     }
     
     const questionId = question.id;
     initialSelectedOptions[questionId] = {};
     
-    // Pular inicialização de textarea
+    // Skip textarea initialization
     if (question.type === 'textarea') {
       return;
     }
     
     if (!question.options) {
-      console.error(`Questão ${questionId} não tem opções definidas`);
+      console.error(`Question ${questionId} doesn't have defined options`);
       return;
     }
     
-    // Inicializar a partir do valor atual do campo + questionário
+    // Initialize from current field value + questionnaire
     question.options.forEach((option: string) => {
       let isSelected = false;
       
-      // Verificar primeiro se a opção já está selecionada no campo atual
+      // First check if the option is already selected in the current field
       if (currentFieldOptions.includes(option)) {
         isSelected = true;
-        console.log(`Opção "${option}" encontrada no valor atual do campo`);
+        console.log(`Option "${option}" found in current field value`);
       } 
-      // Se não estiver no campo atual, verificar nas respostas do questionário
+      // If not in current field, check questionnaire answers
       else if (question.type === 'checkbox' && 
           typeof questionnaireAnswers[questionId] === 'object' && 
           !Array.isArray(questionnaireAnswers[questionId])) {
         isSelected = !!questionnaireAnswers[questionId]?.[option];
       } 
-      // Para questões radio/select
+      // For radio/select questions
       else if ((question.type === 'radio' || question.type === 'select') && 
           questionnaireAnswers[questionId] !== undefined) {
         isSelected = questionnaireAnswers[questionId] === option;
@@ -77,6 +77,6 @@ export const initializeOptionsFromCurrentField = (
     });
   });
   
-  console.log(`Opções inicializadas para ${fieldKey}:`, initialSelectedOptions);
+  console.log(`Initialized options for ${fieldKey}:`, initialSelectedOptions);
   return initialSelectedOptions;
 };

@@ -97,10 +97,6 @@ export function useEditorState(
     // First set the active field key so the dialog shows for this field
     setActiveFieldKey(fieldKey);
     
-    // Clean up previous selections and textarea values
-    setSelectedOptions({});
-    setTextareaValues({});
-    
     // Get the active section
     const activeSection = birthPlanSections[activeSectionIndex];
     
@@ -115,6 +111,8 @@ export function useEditorState(
       localBirthPlan,
       questionnaireAnswers
     );
+    
+    console.log("Initialized options:", initialSelectedOptions);
     
     // Set the selected options
     setSelectedOptions(initialSelectedOptions);

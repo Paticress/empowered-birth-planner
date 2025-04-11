@@ -45,7 +45,7 @@ export function EditorField({
   handleAddSelectedOptions,
   questionnaireAnswers
 }: EditorFieldProps) {
-  // Obtém o valor atual do campo
+  // Get current field value
   const fieldValue = sectionData[field.key] || '';
   const [hasInitialized, setHasInitialized] = useState(false);
   const showAddButton = shouldShowAddButton(field.key);
@@ -106,11 +106,8 @@ export function EditorField({
   const handleOpenOptionsDialog = () => {
     console.log(`Opening dialog for field: ${field.key}`);
     
-    // First, reset any previous selections to ensure we start fresh
-    setSelectedOptions({});
-    
-    // Then initialize this field's options by calling resetOptionsForField
-    // This will properly set activeFieldKey and initialize options from current field value
+    // Call resetOptionsForField to initialize options for this field
+    // This will properly initialize options from current field value and questionnaire
     resetOptionsForField(field.key);
   };
   
