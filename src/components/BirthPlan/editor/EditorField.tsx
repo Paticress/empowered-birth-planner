@@ -26,6 +26,8 @@ interface EditorFieldProps {
   getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
   handleAddSelectedOptions: () => void;
   questionnaireAnswers: Record<string, any>;
+  textareaValues: Record<string, string>;
+  setTextareaValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
 export function EditorField({
@@ -43,7 +45,9 @@ export function EditorField({
   setSelectedOptions,
   getRelevantQuestionsForField,
   handleAddSelectedOptions,
-  questionnaireAnswers
+  questionnaireAnswers,
+  textareaValues,
+  setTextareaValues
 }: EditorFieldProps) {
   // Get current field value
   const fieldValue = sectionData[field.key] || '';
@@ -149,6 +153,8 @@ export function EditorField({
               getRelevantQuestionsForField={getRelevantQuestionsForField}
               handleAddSelectedOptions={handleAddSelectedOptions}
               questionnaireAnswers={questionnaireAnswers}
+              textareaValues={textareaValues}
+              setTextareaValues={setTextareaValues}
             />
           </Dialog>
         )}

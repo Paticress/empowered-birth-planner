@@ -94,6 +94,8 @@ export function BirthPlanEditor({
         questionnaireAnswers={questionnaireAnswers}
         handleAddSelectedOptions={processAddSelectedOptions}
         getRelevantQuestionsForField={getRelevantQuestionsForActiveField}
+        textareaValues={textareaValues}
+        setTextareaValues={setTextareaValues}
       />
     </EditorLayout>
   );

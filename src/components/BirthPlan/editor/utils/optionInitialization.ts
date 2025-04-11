@@ -66,11 +66,17 @@ export const initializeOptionsFromCurrentField = (
           typeof questionnaireAnswers[questionId] === 'object' && 
           !Array.isArray(questionnaireAnswers[questionId])) {
         isSelected = !!questionnaireAnswers[questionId]?.[option];
+        if (isSelected) {
+          console.log(`Option "${option}" found in questionnaire answers`);
+        }
       } 
       // For radio/select questions
       else if ((question.type === 'radio' || question.type === 'select') && 
           questionnaireAnswers[questionId] !== undefined) {
         isSelected = questionnaireAnswers[questionId] === option;
+        if (isSelected) {
+          console.log(`Option "${option}" found in questionnaire answers as radio/select option`);
+        }
       }
       
       initialSelectedOptions[questionId][option] = isSelected;

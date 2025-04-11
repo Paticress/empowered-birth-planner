@@ -22,6 +22,50 @@ export function SelectableOptions({
   questionnaireAnswers = {}
 }: SelectableOptionsProps) {
   
+  // Add state to track initialization
+  const [initialized, setInitialized] = useState(false);
+  
+  // Initialize on first render if options are empty
+  useEffect(() => {
+    if (!initialized && (!selectedOptions[questionId] || Object.keys(selectedOptions[questionId]).length === 0)) {
+      console.log(`SelectableOptions: Initializing options for ${questionId}`);
+      
+      // Only initialize if we have options to work with
+      if (question.options && question.options.length > 0) {
+        const newOptions: Record<string, boolean> = {};
+        
+        // Initialize options from questionnaire answers
+        question.options.forEach((option: string) => {
+          let isSelected = false;
+          
+          // For checkbox questions
+          if (question.type === 'checkbox' && 
+              typeof questionnaireAnswers[questionId] === 'object' && 
+              !Array.isArray(questionnaireAnswers[questionId])) {
+            isSelected = !!questionnaireAnswers[questionId]?.[option];
+          } 
+          // For radio/select questions
+          else if ((question.type === 'radio' || question.type === 'select') && 
+              questionnaireAnswers[questionId] !== undefined) {
+            isSelected = questionnaireAnswers[questionId] === option;
+          }
+          
+          newOptions[option] = isSelected;
+        });
+        
+        // Update options with initializations
+        setSelectedOptions(prev => ({
+          ...prev,
+          [questionId]: newOptions
+        }));
+        
+        console.log(`SelectableOptions: Initialized options for ${questionId}:`, newOptions);
+      }
+      
+      setInitialized(true);
+    }
+  }, [questionId, questionnaireAnswers, question, selectedOptions, setSelectedOptions, initialized]);
+  
   if (!question.options || question.options.length === 0) {
     console.warn(`No options found for question ${questionId}`);
     return null;

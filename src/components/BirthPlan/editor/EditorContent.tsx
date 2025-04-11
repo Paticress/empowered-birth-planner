@@ -24,6 +24,8 @@ interface EditorContentProps {
   questionnaireAnswers: Record<string, any>;
   handleAddSelectedOptions: () => void;
   getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
+  textareaValues: Record<string, string>;
+  setTextareaValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
 export function EditorContent({
@@ -38,7 +40,9 @@ export function EditorContent({
   setSelectedOptions,
   questionnaireAnswers,
   handleAddSelectedOptions,
-  getRelevantQuestionsForField
+  getRelevantQuestionsForField,
+  textareaValues,
+  setTextareaValues
 }: EditorContentProps) {
   const activeSection = birthPlanSections[activeSectionIndex];
   const singleLineFields = getSingleLineFields();
@@ -176,6 +180,8 @@ export function EditorContent({
             getRelevantQuestionsForField={getRelevantQuestionsForField}
             handleAddSelectedOptions={handleAddSelectedOptions}
             questionnaireAnswers={questionnaireAnswers}
+            textareaValues={textareaValues}
+            setTextareaValues={setTextareaValues}
           />
         );
       })}

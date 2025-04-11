@@ -1,5 +1,4 @@
 
-import { useAddSelectedOptions } from "@/hooks/useAddSelectedOptions";
 import { Button } from '@/components/ui/button';
 import { SelectableOptions } from './SelectableOptions';
 import {
@@ -20,6 +19,8 @@ interface OptionsDialogProps {
   getRelevantQuestionsForField: (fieldKey: string) => Array<{question: any, sectionId: string}>;
   questionnaireAnswers: Record<string, any>;
   handleAddSelectedOptions: () => void;
+  textareaValues: Record<string, string>;
+  setTextareaValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
 // Main dialog component
@@ -31,33 +32,18 @@ export function OptionsDialog({
   setSelectedOptions,
   getRelevantQuestionsForField,
   questionnaireAnswers,
-  handleAddSelectedOptions
+  handleAddSelectedOptions,
+  textareaValues,
+  setTextareaValues
 }: OptionsDialogProps) {
   const [relevantQuestions, setRelevantQuestions] = useState<Array<{question: any, sectionId: string}>>([]);
   const [hasRadioOnly, setHasRadioOnly] = useState(false);
-  const [textareaValues, setTextareaValues] = useState<Record<string, string>>({});
-  const [currentFieldKey, setCurrentFieldKey] = useState<string>('');
   const [hasMounted, setHasMounted] = useState(false);
-  const [isFirstRender, setIsFirstRender] = useState(true);
   
   // Check if component has mounted on client to avoid portal error (ownerDocument)
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
-  // Reset selections and fields when active field changes
-  useEffect(() => {
-    if (activeFieldKey !== currentFieldKey) {
-      console.log(`Field changed from ${currentFieldKey} to ${activeFieldKey}, resetting selections`);
-      // Don't clear selections on first render, they should be initialized by resetOptionsForField
-      if (!isFirstRender) {
-        setSelectedOptions({}); // clear old selections
-      }
-      setTextareaValues({}); // clear textarea
-      setCurrentFieldKey(activeFieldKey);
-      setIsFirstRender(false);
-    }
-  }, [activeFieldKey, currentFieldKey, setSelectedOptions, isFirstRender]);
 
   // Update relevant questions when dialog opens
   useEffect(() => {
@@ -72,15 +58,7 @@ export function OptionsDialog({
       setHasRadioOnly(onlyRadioQuestions);
 
       console.log(`Selected options on dialog open:`, selectedOptions);
-      
-      // Fill initial textarea values based on already provided answers
-      const initialTextareaValues: Record<string, string> = {};
-      questions.forEach(({ question }) => {
-        if (question.type === 'textarea' && questionnaireAnswers[question.id]) {
-          initialTextareaValues[question.id] = questionnaireAnswers[question.id];
-        }
-      });
-      setTextareaValues(initialTextareaValues);
+      console.log(`Textarea values on dialog open:`, textareaValues);
     }
   }, [dialogOpen, activeFieldKey, getRelevantQuestionsForField, questionnaireAnswers, selectedOptions]);
 
