@@ -32,29 +32,6 @@ export const initializeOptionsFromCurrentField = (
   const specialFields = getAlwaysShowAddButtonFields();
   const isSpecialField = specialFields.includes(fieldKey);
   
-  // Special cases for problematic fields
-  const problematicFields = ['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'];
-  const isProblematicField = problematicFields.includes(fieldKey);
-  
-  if (isProblematicField) {
-    console.log(`🔍 Inicializando campo problemático: ${fieldKey}`);
-    console.log(`🔍 Opções atuais: ${currentFieldOptions.length}`);
-    
-    // Debug the questionnaire answers for this field
-    const questionIds = {
-      'emergencyScenarios': 'emergencyPreferences',
-      'highRiskComplications': 'highRiskComplications',
-      'lowRiskOccurrences': 'lowRiskOccurrences'
-    };
-    
-    const questionId = questionIds[fieldKey as keyof typeof questionIds];
-    console.log(`🔍 ID da questão correspondente: ${questionId}`);
-    console.log(`🔍 Tem resposta: ${!!questionnaireAnswers[questionId]}`);
-    if (questionnaireAnswers[questionId]) {
-      console.log(`🔍 Resposta: `, questionnaireAnswers[questionId]);
-    }
-  }
-  
   // Process each relevant question
   relevantQuestions.forEach(({ question }) => {
     if (!question) {
@@ -97,11 +74,6 @@ export const initializeOptionsFromCurrentField = (
             questionnaireAnswers[questionId] !== undefined) {
           isSelected = questionnaireAnswers[questionId] === option;
         }
-      }
-      
-      // Debug para campos problemáticos
-      if (isProblematicField && isSelected) {
-        console.log(`🔍 Opção selecionada: "${option}"`);
       }
       
       initialSelectedOptions[questionId][option] = isSelected;

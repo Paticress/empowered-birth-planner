@@ -48,7 +48,6 @@ export const fieldToQuestionMap: Record<string, string[]> = {
   'complications': ['complications'],
   'cascadeInterventions': ['cascadeInterventions'],
   'nicu': ['nicu'],
-  // Mapeamento explícito para os campos problemáticos
   'emergencyScenarios': ['emergencyPreferences'],
   'highRiskComplications': ['highRiskComplications'],
   'lowRiskOccurrences': ['lowRiskOccurrences'],
