@@ -49,27 +49,39 @@ export function MagicLinkTab() {
       toast.success('Link de acesso enviado!');
       setIsMagicLinkSent(true);
       
+      // Check if this is from the guide access flow
+      const searchParams = new URLSearchParams(window.location.search);
+      const isFromGuide = searchParams.get('from') === 'guide';
+      
       // Check for user existence in the database and add if not present
       try {
         const { data: userData, error: userError } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('email')
+          .select('email, has_birth_plan_access')
           .eq('email', email)
           .maybeSingle();
         
         if (userError) {
           console.error('Error checking user in database:', userError);
         } else if (!userData) {
-          console.log("User not found in database, adding user");
+          console.log("User not found in database, adding user as LEAD");
+          
+          // If the user doesn't exist, add them with guide access only (LEAD user)
           const { error: insertError } = await supabase
             .from('users_db_birthplanbuilder')
-            .insert({ email });
+            .insert({ 
+              email,
+              has_birth_plan_access: false // By default, new users are LEADs with guide access only
+            });
             
           if (insertError) {
             console.error('Error adding user to database:', insertError);
           } else {
-            console.log("User added to database");
+            console.log("User added to database as LEAD");
           }
+        } else {
+          console.log("User already exists in database with access level:", 
+            userData.has_birth_plan_access ? "CLIENT" : "LEAD");
         }
       } catch (dbError) {
         console.error('Database operation error:', dbError);

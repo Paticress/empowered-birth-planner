@@ -64,7 +64,7 @@ export function GuiaOnline() {
         }
         
         if (data) {
-          console.log("GuiaOnline: User authorized:", userEmail);
+          console.log("GuiaOnline: User authorized for guide:", userEmail);
           setIsAuthorized(true);
           setShowAuthPrompt(false);
         } else {
@@ -85,7 +85,7 @@ export function GuiaOnline() {
   }, [isAuthenticated, user, isLoading]);
 
   const handleLogin = () => {
-    // Adiciona parâmetro indicando redirecionamento do guia
+    // Add parameter indicating redirection from guide
     navigateTo('/acesso-plano?from=guide');
     toast.info('Enviaremos um link de acesso ao guia completo');
   };

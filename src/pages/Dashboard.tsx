@@ -32,27 +32,27 @@ export function Dashboard() {
     isBirthPlanCompleted
   } = useDashboardData();
   
-  const [isFullAccessUser, setIsFullAccessUser] = useState<boolean | null>(null);
+  const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState<boolean | null>(null);
   
-  // Check if the authenticated user has full access (is a Client, not just a Lead)
+  // Check if the authenticated user has birth plan access
   useEffect(() => {
     const checkAccessLevel = async () => {
       if (!user?.email) {
-        setIsFullAccessUser(false);
+        setHasBirthPlanAccess(false);
         return;
       }
       
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('email')
+          .select('has_birth_plan_access')
           .eq('email', user.email)
           .maybeSingle();
           
-        setIsFullAccessUser(!error && !!data);
+        setHasBirthPlanAccess(!error && !!data && data.has_birth_plan_access === true);
       } catch (error) {
         console.error("Error checking user access level:", error);
-        setIsFullAccessUser(false);
+        setHasBirthPlanAccess(false);
       }
     };
     
@@ -73,14 +73,14 @@ export function Dashboard() {
   
   const getRecommendedNextStep = () => {
     // For LEAD users who haven't completed the guide yet
-    if (!currentGuideTab && !isFullAccessUser) {
+    if (!currentGuideTab && !hasBirthPlanAccess) {
       return {
         title: "Conheça o Guia do Parto Respeitoso",
         description: "Leia nosso guia completo com informações importantes sobre o parto.",
         path: "/guia-online",
         icon: BookOpen
       };
-    } else if (guideProgress < 100 && !isFullAccessUser) {
+    } else if (guideProgress < 100 && !hasBirthPlanAccess) {
       const currentIndex = guideSections.findIndex(section => section.id === currentGuideTab);
       const nextSectionName = currentIndex < guideSections.length - 1 
         ? guideSections[currentIndex + 1].name 
@@ -92,7 +92,7 @@ export function Dashboard() {
         path: "/guia-online",
         icon: BookOpen
       };
-    } else if (isGuideCompleted && !isFullAccessUser) {
+    } else if (isGuideCompleted && !hasBirthPlanAccess) {
       // Lead completed the guide, encourage buying the birth plan
       return {
         title: "Crie seu Plano de Parto",
@@ -100,7 +100,7 @@ export function Dashboard() {
         path: "/criar-plano",
         icon: FileText
       };
-    } else if (!hasStartedBirthPlan && isFullAccessUser) {
+    } else if (!hasStartedBirthPlan && hasBirthPlanAccess) {
       // Client who hasn't started the birth plan
       return {
         title: "Crie seu Plano de Parto",
@@ -108,7 +108,7 @@ export function Dashboard() {
         path: "/criar-plano",
         icon: FileText
       };
-    } else if (isFullAccessUser) {
+    } else if (hasBirthPlanAccess) {
       // Client who has started the birth plan
       return {
         title: "Continue seu Plano de Parto",
@@ -144,7 +144,7 @@ export function Dashboard() {
   const birthPlanTimelineSteps = birthPlanStages.map((stage, index) => ({
     id: stage.id,
     name: stage.name,
-    isCompleted: hasStartedBirthPlan && isFullAccessUser && 
+    isCompleted: hasStartedBirthPlan && hasBirthPlanAccess && 
       (birthPlanProgress > (index * (100 / birthPlanStages.length))),
     onClick: () => navigateTo(`/criar-plano?stage=${stage.id}`),
   }));
@@ -157,23 +157,23 @@ export function Dashboard() {
           <DashboardHeader 
             greeting={getWelcomeMessage()} 
             guideProgress={guideProgress}
-            birthPlanProgress={isFullAccessUser ? birthPlanProgress : 0}
+            birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
             lastVisited={lastVisited}
             isGuideCompleted={isGuideCompleted}
-            isBirthPlanCompleted={isFullAccessUser ? isBirthPlanCompleted : false}
+            isBirthPlanCompleted={hasBirthPlanAccess ? isBirthPlanCompleted : false}
           />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <RecommendedStepCard 
               recommendedStep={recommendedStep}
               isGuideCompleted={isGuideCompleted}
-              isBirthPlanCompleted={isFullAccessUser ? isBirthPlanCompleted : false}
+              isBirthPlanCompleted={hasBirthPlanAccess ? isBirthPlanCompleted : false}
             />
             
             <ProgressCard 
               guideProgress={guideProgress}
-              birthPlanProgress={isFullAccessUser ? birthPlanProgress : 0}
-              isFullAccessUser={isFullAccessUser}
+              birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
+              isFullAccessUser={hasBirthPlanAccess}
             />
           </div>
           
@@ -188,8 +188,8 @@ export function Dashboard() {
               title="Plano de Parto"
               steps={birthPlanTimelineSteps}
               icon={<FileText className="h-5 w-5 mr-2 text-maternal-600" />}
-              isDisabled={!isFullAccessUser}
-              disabledMessage={!isFullAccessUser ? "Adquira o Construtor de Plano de Parto para desbloquear" : undefined}
+              isDisabled={!hasBirthPlanAccess}
+              disabledMessage={!hasBirthPlanAccess ? "Adquira o Construtor de Plano de Parto para desbloquear" : undefined}
             />
           </div>
           

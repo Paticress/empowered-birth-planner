@@ -12,8 +12,30 @@ export const useNavigation = () => {
   const { isAuthenticated, user } = useAuth();
   
   /**
-   * Verifica se o usuário tem permissão para acessar o guia online
-   * Os leads e clientes têm acesso ao guia online
+   * Verifies if the user has permission to access the birth plan builder
+   * Only clients with full access should be able to access the birth plan builder
+   */
+  const checkBirthPlanAccess = async (email: string | undefined) => {
+    if (!email) return false;
+    
+    try {
+      const { data, error } = await supabase
+        .from('users_db_birthplanbuilder')
+        .select('has_birth_plan_access')
+        .eq('email', email)
+        .maybeSingle();
+        
+      // If the user has the has_birth_plan_access flag set to true, they have access
+      return !error && !!data && data.has_birth_plan_access === true;
+    } catch (error) {
+      console.error("Error checking birth plan access:", error);
+      return false;
+    }
+  };
+  
+  /**
+   * Verifies if the user has permission to access the guide online
+   * Both leads and clients have access to the guide online
    */
   const checkGuideAccess = async (email: string | undefined) => {
     if (!email) return false;
@@ -25,17 +47,17 @@ export const useNavigation = () => {
         .eq('email', email)
         .maybeSingle();
         
-      // Se o usuário estiver autenticado, ele tem acesso ao guia
+      // If the user exists in the database, they have access to the guide
       return !error && !!data;
     } catch (error) {
-      console.error("Erro ao verificar acesso ao guia:", error);
+      console.error("Error checking guide access:", error);
       return false;
     }
   };
   
   /**
-   * Navega para um caminho específico, aplicando regras de redirecionamento
-   * baseado no tipo de usuário (Visitante, Lead ou Cliente)
+   * Navigates to a specific path, applying redirection rules
+   * based on the type of user (Visitor, Lead or Client)
    */
   const navigateTo = async (path: string) => {
     console.log("Navigation requested to:", path);
@@ -57,10 +79,10 @@ export const useNavigation = () => {
       return;
     }
     
-    // Rotas públicas que todos os usuários podem acessar
+    // Public routes that all users can access
     const publicRoutes = ['/', '/faq', '/login', '/auth/callback', '/acesso-plano'];
     
-    // Se estiver navegando para uma rota pública, permite a navegação direta
+    // If navigating to a public route, allow direct navigation
     if (publicRoutes.includes(path)) {
       console.log("Navigating to public route:", path);
       
@@ -75,34 +97,34 @@ export const useNavigation = () => {
       return;
     }
     
-    // === FLUXO PARA VISITANTES (não autenticados) ===
+    // === FLOW FOR VISITORS (not authenticated) ===
     if (!isAuthenticated) {
       console.log("User not authenticated, applying visitor navigation rules");
       
-      // Regras para Visitantes
+      // Rules for Visitors
       if (path === '/guia-online') {
-        // Agora direciona para a página de login com magic link
+        // Now redirect to the magic link login page
         console.log("Redirecting visitor to magic link login for Guide");
         navigate('/acesso-plano?from=guide', { replace: true });
         return;
       } 
       
       if (path === '/criar-plano' || path.includes('/criar-plano')) {
-        // Redireciona para a landing page de conversão no Wix
+        // Redirect to the Wix conversion page
         console.log("Redirecting visitor to Wix conversion page for Birth Plan");
         window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
         return;
       }
       
       if (path === '/dashboard') {
-        // Visitantes não podem acessar o dashboard, direcionando para login
+        // Visitors cannot access the dashboard, redirect to login
         console.log("Redirecting visitor to login page (attempted dashboard access)");
-        // Adiciona parâmetro indicando redirecionamento do dashboard
+        // Add parameter indicating redirection from dashboard
         navigate('/acesso-plano?from=dashboard');
         return;
       }
       
-      // Para outras rotas protegidas, redireciona para login com indicação da origem
+      // For other protected routes, redirect to login with indication of origin
       console.log("Redirecting visitor to login page");
       if (path === '/guia-online') {
         navigate('/acesso-plano?from=guide');
@@ -112,27 +134,31 @@ export const useNavigation = () => {
       return;
     }
     
-    // === FLUXO PARA USUÁRIOS AUTENTICADOS (Lead ou Cliente) ===
-    // Verificamos o acesso do usuário para determinar se é Lead ou Cliente
+    // === FLOW FOR AUTHENTICATED USERS (Lead or Client) ===
+    // Check the user's access level to determine if they are Lead or Client
     const userEmail = user?.email || localStorage.getItem('birthPlanEmail');
-    const hasAccess = await checkGuideAccess(userEmail);
     
-    if (path === '/criar-plano' && !hasAccess) {
-      // Usuário é um Lead (tem acesso apenas ao guia)
-      console.log("User is a Lead, redirecting to Wix conversion page");
-      window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
-      return;
+    if (path === '/criar-plano' || path.includes('/criar-plano')) {
+      // Check if the user has access to the birth plan builder
+      const hasBirthPlanAccess = await checkBirthPlanAccess(userEmail);
+      
+      if (!hasBirthPlanAccess) {
+        // User is a Lead (only has access to the guide)
+        console.log("User is a Lead, redirecting to Wix conversion page for birth plan");
+        window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+        return;
+      }
     }
     
-    // Redireciona LEADs diretamente para o dashboard após login bem-sucedido
+    // Redirect LEADs directly to the dashboard after login
     if (path === '/guia-online' && isAuthenticated && !localStorage.getItem('dashboard-visited')) {
-      console.log("First login for LEAD, redirecting to dashboard");
+      console.log("First login for user, redirecting to dashboard");
       localStorage.setItem('dashboard-visited', 'true');
       navigate('/dashboard', { replace: true });
       return;
     }
     
-    // Para Clientes ou navegação normal, usa o navegador padrão
+    // For Clients or normal navigation, use standard navigation
     console.log("Standard navigation to:", path);
     
     // Use replace instead of push for auth-related redirects to avoid history issues

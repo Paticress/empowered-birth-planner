@@ -14,27 +14,27 @@ interface NavButtonProps {
 export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
   const { navigateTo } = useNavigation();
   const { isAuthenticated, user } = useAuth();
-  const [isFullAccessUser, setIsFullAccessUser] = useState<boolean | null>(null);
+  const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState<boolean | null>(null);
   
-  // Check if the authenticated user has full access (is a Client, not just a Lead)
+  // Check if the authenticated user has birth plan access
   useEffect(() => {
     const checkAccessLevel = async () => {
       if (!isAuthenticated || !user?.email) {
-        setIsFullAccessUser(false);
+        setHasBirthPlanAccess(false);
         return;
       }
       
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('email')
+          .select('has_birth_plan_access')
           .eq('email', user.email)
           .maybeSingle();
           
-        setIsFullAccessUser(!error && !!data);
+        setHasBirthPlanAccess(!error && !!data && data.has_birth_plan_access === true);
       } catch (error) {
         console.error("Error checking user access level:", error);
-        setIsFullAccessUser(false);
+        setHasBirthPlanAccess(false);
       }
     };
     
@@ -42,17 +42,20 @@ export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
   }, [isAuthenticated, user]);
   
   const goToBirthPlanAccess = () => {
-    console.log("Birth Plan Nav button clicked, authentication state:", isAuthenticated, "Full access:", isFullAccessUser);
+    console.log("Birth Plan Nav button clicked, authentication state:", isAuthenticated, "Birth plan access:", hasBirthPlanAccess);
     
     if (!isAuthenticated) {
-      // Se não estiver autenticado, direciona para login com o parâmetro source
+      // If not authenticated, direct to login with the source parameter
       if (source) {
         navigateTo(`/acesso-plano?from=${source}`);
       } else {
         navigateTo('/acesso-plano');
       }
+    } else if (!hasBirthPlanAccess) {
+      // If authenticated but doesn't have birth plan access, direct to Wix conversion page
+      window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
     } else {
-      // Se estiver autenticado, segue o fluxo normal
+      // If authenticated and has birth plan access, follow normal flow
       navigateTo('/criar-plano');
     }
   };

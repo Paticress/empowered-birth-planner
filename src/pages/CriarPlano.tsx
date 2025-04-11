@@ -7,13 +7,16 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export function CriarPlano() {
   const { user, isLoading, session, refreshSession, isAuthenticated } = useAuth();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+  const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState(false);
   const navigate = useNavigate();
 
-  // Verifica autenticação quando a página carrega
+  // Check authentication when the page loads
   useEffect(() => {
     const checkAuth = async () => {
       console.log("CriarPlano: Verificando autenticação");
@@ -24,35 +27,37 @@ export function CriarPlano() {
         isAuthenticated 
       });
       
-      // Se ainda estiver carregando, aguardar
+      // If still loading, wait
       if (isLoading) {
         console.log("Aguardando carregamento da autenticação...");
         return;
       }
       
-      // Se o usuário já está autenticado, podemos mostrar o conteúdo
+      // If the user is already authenticated, we can proceed to check access
       if (isAuthenticated) {
-        console.log("Usuário já autenticado, mostrando conteúdo");
+        console.log("Usuário já autenticado, verificando acesso");
         setIsCheckingAuth(false);
+        checkUserAccess();
         return;
       }
       
-      // Tentativa final de recuperar a sessão se ainda não estiver autenticado
+      // Final attempt to recover the session if not yet authenticated
       if (!isAuthenticated) {
         console.log("Tentando recuperar sessão diretamente...");
         
         try {
-          // Verificar explicitamente a sessão com o Supabase
+          // Explicitly check the session with Supabase
           const { data } = await supabase.auth.getSession();
           
           if (data.session) {
             console.log("Sessão encontrada no Supabase:", data.session.user?.email);
-            // Atualizar o contexto de autenticação com a sessão encontrada
+            // Update the authentication context with the found session
             const success = await refreshSession();
             
             if (success) {
               console.log("Sessão recuperada com sucesso");
               setIsCheckingAuth(false);
+              checkUserAccess();
               return;
             }
           }
@@ -68,8 +73,57 @@ export function CriarPlano() {
       setIsCheckingAuth(false);
     };
     
-    // Adicionar um pequeno atraso para garantir que o AuthContext tenha tempo de inicializar
-    // Isso evita redirecionamentos incorretos quando há uma sessão válida
+    // Check if the authenticated user has access to the birth plan builder
+    const checkUserAccess = async () => {
+      const userEmail = user?.email || localStorage.getItem('birthPlanEmail');
+      
+      if (!userEmail) {
+        console.log("Nenhum email de usuário encontrado, redirecionando para login");
+        navigate("/acesso-plano", { replace: true });
+        return;
+      }
+      
+      try {
+        console.log("Verificando acesso ao plano de parto para:", userEmail);
+        
+        const { data, error } = await supabase
+          .from('users_db_birthplanbuilder')
+          .select('has_birth_plan_access')
+          .eq('email', userEmail)
+          .maybeSingle();
+          
+        if (error) {
+          console.error("Erro ao verificar acesso ao plano:", error);
+          toast.error("Erro ao verificar seu acesso");
+          navigate("/acesso-plano", { replace: true });
+          return;
+        }
+        
+        if (!data || data.has_birth_plan_access !== true) {
+          console.log("Usuário não tem acesso ao plano de parto, redirecionando para site Wix");
+          toast.error("Você não tem acesso ao construtor de plano de parto");
+          
+          // Redirect to Wix conversion page after a short delay
+          setTimeout(() => {
+            window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+          }, 1500);
+          
+          return;
+        }
+        
+        console.log("Usuário tem acesso ao plano de parto");
+        setHasBirthPlanAccess(true);
+        setIsCheckingAccess(false);
+        
+      } catch (error) {
+        console.error("Erro inesperado ao verificar acesso:", error);
+        toast.error("Erro ao verificar seu acesso");
+        navigate("/acesso-plano", { replace: true });
+      }
+    };
+    
+    // Add a small delay to ensure the AuthContext has time to initialize
+    // This prevents incorrect redirects when there's a valid session
     const timer = setTimeout(() => {
       checkAuth();
     }, 300);
@@ -77,7 +131,7 @@ export function CriarPlano() {
     return () => clearTimeout(timer);
   }, [user, isLoading, session, navigate, refreshSession, isAuthenticated]);
 
-  if (isLoading || isCheckingAuth) {
+  if (isLoading || isCheckingAuth || isCheckingAccess) {
     return (
       <div className="min-h-screen flex flex-col bg-maternal-50">
         <Header />
@@ -97,7 +151,7 @@ export function CriarPlano() {
     );
   }
 
-  // Se chegou até aqui, o usuário está autenticado
+  // If we got here, the user is authenticated and has access
   return (
     <div className="min-h-screen flex flex-col bg-maternal-100">
       <Header />
