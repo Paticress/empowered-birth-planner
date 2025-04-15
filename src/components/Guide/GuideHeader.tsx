@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
@@ -6,6 +5,7 @@ import { Search, Menu, X, LayoutDashboard } from 'lucide-react';
 import { GuideSearch } from './Search/GuideSearch';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 type GuideHeaderProps = {
   onNavigate?: (value: string) => void;
@@ -16,9 +16,9 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { navigateTo } = useNavigation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState<boolean | null>(null);
 
-  // Close mobile menu on window resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -30,10 +30,32 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const checkAccessLevel = async () => {
+      if (!isAuthenticated || !user?.email) {
+        setHasBirthPlanAccess(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('users_db_birthplanbuilder')
+          .select('plan')
+          .eq('email', user.email)
+          .maybeSingle();
+          
+        setHasBirthPlanAccess(!error && !!data && data.plan === 'paid');
+      } catch (error) {
+        console.error("Error checking user access level:", error);
+        setHasBirthPlanAccess(false);
+      }
+    };
+    
+    checkAccessLevel();
+  }, [isAuthenticated, user]);
+
   const handleNavigation = (path: string) => {
     if (onNavigate) {
-      // Se estamos dentro do OnlineGuide e queremos ir para 'guia-online',
-      // vamos apenas definir a tab como 'introduction'
       if (path === '/guia-online' && currentTab) {
         onNavigate('introduction');
         return;
@@ -44,11 +66,18 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
     }
   };
 
+  const handleBirthPlanClick = () => {
+    if (hasBirthPlanAccess) {
+      navigateTo('/criar-plano');
+    } else {
+      window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+    }
+  };
+
   return (
     <header className="bg-white sticky top-0 z-50 border-b border-gray-200 shadow-sm print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <img
               className="h-8 w-auto"
@@ -62,7 +91,6 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
             </span>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-4 items-center">
             <Button
               variant="ghost"
@@ -95,7 +123,6 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
             </Button>
           </nav>
 
-          {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
             <Button
               variant="ghost"
@@ -121,7 +148,6 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50">
@@ -155,13 +181,12 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
         </div>
       )}
 
-      {/* Search overlay */}
       {searchOpen && (
         <GuideSearch 
           onClose={() => setSearchOpen(false)} 
           onNavigate={onNavigate}
         />
       )}
-  </header>
+    </header>
   );
 }

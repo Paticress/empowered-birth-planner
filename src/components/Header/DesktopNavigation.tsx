@@ -1,6 +1,5 @@
-
 import { Button } from '@/components/ui/button';
-import { LogOut, LayoutDashboard, FileText } from 'lucide-react';
+import { LogOut, FileText } from 'lucide-react';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
