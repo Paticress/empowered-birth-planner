@@ -12,6 +12,8 @@ import { useNavigation } from "@/hooks/useNavigation";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 export function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -151,49 +153,53 @@ export function Dashboard() {
   }));
   
   return (
-    <div className="flex-grow bg-maternal-50">
-      <div className="container max-w-5xl mx-auto px-4 py-8">
-        <DashboardHeader 
-          greeting={getWelcomeMessage()} 
-          guideProgress={guideProgress}
-          birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
-          lastVisited={lastVisited}
-          isGuideCompleted={isGuideCompleted}
-          isBirthPlanCompleted={hasBirthPlanAccess ? isBirthPlanCompleted : false}
-        />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-          <RecommendedStepCard 
-            recommendedStep={recommendedStep}
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div className="flex-grow bg-maternal-50 pt-24">
+        <div className="container max-w-5xl mx-auto px-4 py-8">
+          <DashboardHeader 
+            greeting={getWelcomeMessage()} 
+            guideProgress={guideProgress}
+            birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
+            lastVisited={lastVisited}
             isGuideCompleted={isGuideCompleted}
             isBirthPlanCompleted={hasBirthPlanAccess ? isBirthPlanCompleted : false}
           />
           
-          <ProgressCard 
-            guideProgress={guideProgress}
-            birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
-            isFullAccessUser={hasBirthPlanAccess}
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-          <TimelineProgress
-            title="Guia do Parto Respeitoso"
-            steps={guideTimelineSteps}
-            icon={<BookOpen className="h-5 w-5 mr-2 text-maternal-600" />}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <RecommendedStepCard 
+              recommendedStep={recommendedStep}
+              isGuideCompleted={isGuideCompleted}
+              isBirthPlanCompleted={hasBirthPlanAccess ? isBirthPlanCompleted : false}
+            />
+            
+            <ProgressCard 
+              guideProgress={guideProgress}
+              birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
+              isFullAccessUser={hasBirthPlanAccess}
+            />
+          </div>
           
-          <TimelineProgress
-            title="Plano de Parto"
-            steps={birthPlanTimelineSteps}
-            icon={<FileText className="h-5 w-5 mr-2 text-maternal-600" />}
-            isDisabled={!hasBirthPlanAccess}
-            disabledMessage={!hasBirthPlanAccess ? "Adquira o Construtor de Plano de Parto para desbloquear" : undefined}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+            <TimelineProgress
+              title="Guia do Parto Respeitoso"
+              steps={guideTimelineSteps}
+              icon={<BookOpen className="h-5 w-5 mr-2 text-maternal-600" />}
+            />
+            
+            <TimelineProgress
+              title="Plano de Parto"
+              steps={birthPlanTimelineSteps}
+              icon={<FileText className="h-5 w-5 mr-2 text-maternal-600" />}
+              isDisabled={!hasBirthPlanAccess}
+              disabledMessage={!hasBirthPlanAccess ? "Adquira o Construtor de Plano de Parto para desbloquear" : undefined}
+            />
+          </div>
+          
+          <ResourcesSection />
         </div>
-        
-        <ResourcesSection />
       </div>
+      <Footer />
     </div>
   );
 }

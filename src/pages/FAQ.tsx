@@ -31,7 +31,7 @@ export function FAQ() {
     guia: [
       {
         question: "O que é o Guia do Parto Respeitoso?",
-        answer: "O Guia do Parto Respeitoso é um recurso digital completo que fornece informações baseadas em evidências sobre gestação, trabalho de parto, direitos da gestante, procedimentos médicos e muito mais. É um guia educacional para ajudar gestantes a tomarem decisões informadas."
+        answer: "O Guia do Parto Respeitoso é um recurso digital completo que fornece informações baseadas em evidências sobre gestação, trabalho de parto, direitos da gestante, procedimentos médicos e muito mais. É um guia educacional para ajudar gestantes a tomar decisões informadas."
       },
       {
         question: "Como posso acessar o Guia Online?",
