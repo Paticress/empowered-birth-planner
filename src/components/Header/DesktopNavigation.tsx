@@ -1,15 +1,51 @@
 
 import { Button } from '@/components/ui/button';
-import { LogOut, LayoutDashboard } from 'lucide-react';
+import { LogOut, LayoutDashboard, FileText } from 'lucide-react';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export function DesktopNavigation() {
   const { navigateTo } = useNavigation();
-  const { isAuthenticated, signOut } = useAuth();
+  const { isAuthenticated, user, signOut } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState<boolean | null>(null);
+  
+  // Check if the user has birth plan access
+  useEffect(() => {
+    const checkAccessLevel = async () => {
+      if (!isAuthenticated || !user?.email) {
+        setHasBirthPlanAccess(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('users_db_birthplanbuilder')
+          .select('plan')
+          .eq('email', user.email)
+          .maybeSingle();
+          
+        setHasBirthPlanAccess(!error && !!data && data.plan === 'paid');
+      } catch (error) {
+        console.error("Error checking user access level:", error);
+        setHasBirthPlanAccess(false);
+      }
+    };
+    
+    checkAccessLevel();
+  }, [isAuthenticated, user]);
+  
+  const handleBirthPlanClick = () => {
+    if (hasBirthPlanAccess) {
+      navigateTo('/criar-plano');
+    } else {
+      // Redirect LEADs to the Wix landing page
+      window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+    }
+  };
   
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -46,11 +82,11 @@ export function DesktopNavigation() {
       {isAuthenticated && (
         <Button 
           variant="ghost" 
-          onClick={() => navigateTo('/dashboard')}
+          onClick={handleBirthPlanClick}
           className="text-maternal-600 hover:text-maternal-900"
         >
-          <LayoutDashboard className="h-4 w-4 mr-2" />
-          Dashboard
+          <FileText className="h-4 w-4 mr-2" />
+          Construtor Virtual
         </Button>
       )}
       
