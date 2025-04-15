@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
 import { BookOpen, FileText, Check, ArrowRight } from 'lucide-react';
@@ -11,8 +9,6 @@ export function Home() {
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      
       {/* Hero Section */}
       <main className="flex-grow pt-24">
         <section className="bg-gradient-to-b from-maternal-50 to-white py-16 md:py-24">
@@ -180,8 +176,6 @@ export function Home() {
           </div>
         </section>
       </main>
-      
-      <Footer />
     </div>
   );
 }
