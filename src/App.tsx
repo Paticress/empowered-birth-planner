@@ -25,6 +25,7 @@ import { WebhookTest } from './pages/WebhookTest';
 import NotFound from './pages/NotFound';
 import { Loader2 } from 'lucide-react';
 import { useEffect } from "react";
+import { Footer } from './components/Footer';
 
 function AppContent() {
   const location = useLocation();
@@ -54,7 +55,7 @@ function AppContent() {
     );
   }
 
-  // Each page now handles its own header, so we only need the routes here
+  // Apply consistent footer to all pages, but let each page handle its own header
   return (
     <div className={`min-h-screen flex flex-col ${backgroundClass}`}>
       <main className="flex-grow pt-0">
