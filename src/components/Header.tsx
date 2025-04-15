@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User, GraduationCap, BookOpen, FileText } from 'lucide-react';
@@ -66,11 +67,11 @@ export function Header() {
               Guia Online
             </Link>
             <Link 
-              to="/plano-de-parto" 
-              className={`transition-colors flex items-center ${isActive('/plano-de-parto') 
+              to="/plano-personalizado" 
+              className={`transition-colors flex items-center ${isActive('/plano-personalizado') 
                 ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                 : 'text-maternal-800 hover:text-maternal-600'}`}
-              onClick={(e) => handleLinkClick(e, '/plano-de-parto')}
+              onClick={(e) => handleLinkClick(e, '/plano-personalizado')}
             >
               <FileText className="h-4 w-4 mr-1" />
               Construtor Virtual
@@ -87,14 +88,14 @@ export function Header() {
             
             {user && (
               <Link 
-                to="/meus-acessos" 
-                className={`transition-colors flex items-center ${isActive('/meus-acessos') 
+                to="/dashboard" 
+                className={`transition-colors flex items-center ${isActive('/dashboard') 
                   ? 'text-maternal-900 font-semibold border-b-2 border-maternal-100' 
                   : 'text-maternal-800 hover:text-maternal-600'}`}
-                onClick={(e) => handleLinkClick(e, '/meus-acessos')}
+                onClick={(e) => handleLinkClick(e, '/dashboard')}
               >
                 <User className="h-4 w-4 mr-1" />
-                Meus Acessos
+                Dashboard
               </Link>
             )}
           </nav>
@@ -140,11 +141,11 @@ export function Header() {
                     Guia Online
                   </button>
                   <button 
-                    className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/plano-de-parto') 
+                    className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/plano-personalizado') 
                       ? 'bg-maternal-100 text-maternal-900 font-medium' 
                       : 'text-maternal-800 hover:bg-maternal-50'}`}
                     onClick={() => {
-                      navigateTo('/plano-de-parto');
+                      navigateTo('/plano-personalizado');
                       setMobileMenuOpen(false);
                     }}
                   >
@@ -164,16 +165,16 @@ export function Header() {
                   
                   {user && (
                     <button 
-                      className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/meus-acessos') 
+                      className={`py-2 px-3 rounded-md transition-colors text-left flex items-center ${isActive('/dashboard') 
                         ? 'bg-maternal-100 text-maternal-900 font-medium' 
                         : 'text-maternal-800 hover:bg-maternal-50'}`}
                       onClick={() => {
-                        navigateTo('/meus-acessos');
+                        navigateTo('/dashboard');
                         setMobileMenuOpen(false);
                       }}
                     >
                       <User className="h-4 w-4 mr-2" />
-                      Meus Acessos
+                      Dashboard
                     </button>
                   )}
                 </nav>

@@ -83,7 +83,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
               </Button>
             )}
             
-            <BirthPlanNavButton />
+            <BirthPlanNavButton source="guide" />
             
             <Button
               variant="outline"
@@ -150,7 +150,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
               </Button>
             )}
             
-            <BirthPlanNavButton className="w-full justify-start" />
+            <BirthPlanNavButton className="w-full justify-start" source="guide" />
           </div>
         </div>
       )}

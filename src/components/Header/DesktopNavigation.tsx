@@ -43,6 +43,14 @@ export function DesktopNavigation() {
         Guia Online
       </Button>
       
+      <Button 
+        variant="ghost" 
+        onClick={() => navigateTo('/plano-personalizado')}
+        className="text-maternal-600 hover:text-maternal-900"
+      >
+        Construtor Virtual
+      </Button>
+      
       {isAuthenticated && (
         <Button 
           variant="ghost" 
