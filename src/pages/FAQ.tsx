@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -18,11 +17,11 @@ export function FAQ() {
     geral: [
       {
         question: "O que é a Energia Materna?",
-        answer: "A Energia Materna é uma plataforma dedicada a apoiar gestantes em sua jornada para terem experiências de parto mais conscientes, respeitosas e transformadoras. Oferecemos recursos educacionais, guias e ferramentas para ajudar no planejamento do parto."
+        answer: "A Energia Materna é uma plataforma dedicada a apoiar gestantes em sua jornada para terem experiências de parto mais conscientes, respeitosas e transformadoras. Oferecemos recursos educacionais, guias, ferramentas entre outros recursos para ajudar no planejamento do parto e na reconexão com seu corpo, sua potência feminina, sua habilidade natural de dar a vida."
       },
       {
         question: "Como posso entrar em contato com a equipe da Energia Materna?",
-        answer: "Você pode entrar em contato conosco através do e-mail contato@energiamaterna.com.br ou através de nossas redes sociais (Instagram e Facebook)."
+        answer: "Você pode entrar em contato conosco através do e-mail juntas@energiamaterna.com.br ou através de nossas redes sociais (Instagram e Facebook)."
       },
       {
         question: "Os conteúdos da Energia Materna substituem orientações médicas?",
@@ -36,7 +35,7 @@ export function FAQ() {
       },
       {
         question: "Como posso acessar o Guia Online?",
-        answer: "Após a compra, você pode acessar o Guia Online através da página 'Meus Acessos' no nosso site. O acesso é permanente e você pode consultar o conteúdo quantas vezes desejar."
+        answer: "Após a compra, você pode acessar o Guia Online através da página https://www.energiamaterna.com.br/acesse-guia-online-do-plano-de-parto no nosso site. O acesso é permanente e você pode consultar o conteúdo quantas vezes desejar."
       },
       {
         question: "O Guia Online é atualizado com frequência?",
@@ -50,7 +49,7 @@ export function FAQ() {
       },
       {
         question: "Como funciona o Construtor de Plano de Parto?",
-        answer: "Nosso Construtor de Plano de Parto é uma ferramenta interativa que, através de um questionário guiado, ajuda você a criar um documento personalizado com suas preferências para o parto. O processo é dividido em seções temáticas e você pode editar livremente o conteúdo."
+        answer: "Nosso Construtor de Plano de Parto é uma ferramenta interativa que, através de um questionário guiado com respostas prontas para você selecionar, ajuda você a criar um documento personalizado com suas preferências para o parto. O processo é dividido em seções temáticas e você pode editar livremente o conteúdo final."
       },
       {
         question: "Posso modificar meu Plano de Parto depois de criá-lo?",
@@ -63,12 +62,12 @@ export function FAQ() {
     ],
     acessos: [
       {
-        question: "Esqueci minha senha. Como recupero o acesso?",
-        answer: "Na página de login, clique em 'Esqueci minha senha' e siga as instruções enviadas ao seu e-mail para criar uma nova senha."
+        question: "Como faço para acessar a plataforma?",
+        answer: "Na página de login, clique em 'Receber Link de Acesso' e siga as instruções enviadas ao seu e-mail para entrar na plataforma."
       },
       {
-        question: "Por quanto tempo tenho acesso aos produtos que comprei?",
-        answer: "O acesso aos nossos produtos digitais é permanente. Uma vez adquiridos, você pode acessá-los indefinidamente através da sua conta na Energia Materna."
+        question: "Por quanto tempo tenho acesso ao Construtor Virtual de Plano de Parto?",
+        answer: "O acesso ao Construtor Virtual é válido por 9 meses, a partir da sua compra. Ao pagar por este acesso, você tem acesso vitalício ao Guia Online e ao Curso Gestando."
       },
       {
         question: "Posso acessar os produtos em diferentes dispositivos?",
