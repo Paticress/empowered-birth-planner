@@ -18,14 +18,6 @@ export const useNavigation = () => {
   const checkBirthPlanAccess = async (email: string | undefined) => {
     if (!email) return false;
     
-    // First check localStorage for cached plan value
-    const cachedPlan = localStorage.getItem('user_plan');
-    if (cachedPlan === 'paid') {
-      return true;
-    } else if (cachedPlan === 'free') {
-      return false;
-    }
-    
     try {
       const { data, error } = await supabase
         .from('users_db_birthplanbuilder')
@@ -34,12 +26,7 @@ export const useNavigation = () => {
         .maybeSingle();
         
       // If the user has the plan set to 'paid', they have access to the birth plan builder
-      const isPaidUser = !error && !!data && data.plan === 'paid';
-      
-      // Cache the result in localStorage
-      localStorage.setItem('user_plan', isPaidUser ? 'paid' : 'free');
-      
-      return isPaidUser;
+      return !error && !!data && data.plan === 'paid';
     } catch (error) {
       console.error("Error checking birth plan access:", error);
       return false;
@@ -93,7 +80,7 @@ export const useNavigation = () => {
     }
     
     // Public routes that all users can access
-    const publicRoutes = ['/', '/faq', '/login', '/auth/callback', '/acesso-plano', '/plano-personalizado'];
+    const publicRoutes = ['/', '/faq', '/login', '/auth/callback', '/acesso-plano'];
     
     // If navigating to a public route, allow direct navigation
     if (publicRoutes.includes(path)) {
@@ -123,9 +110,9 @@ export const useNavigation = () => {
       } 
       
       if (path === '/criar-plano' || path.includes('/criar-plano')) {
-        // Redirect to the landing page
-        console.log("Redirecting visitor to landing page for Birth Plan");
-        navigate('/plano-personalizado');
+        // Redirect to the Wix conversion page
+        console.log("Redirecting visitor to Wix conversion page for Birth Plan");
+        window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
         return;
       }
       
@@ -157,8 +144,8 @@ export const useNavigation = () => {
       
       if (!hasBirthPlanAccess) {
         // User is a Lead (only has access to the guide)
-        console.log("User is a Lead, redirecting to landing page for birth plan");
-        navigate('/plano-personalizado');
+        console.log("User is a Lead, redirecting to Wix conversion page for birth plan");
+        window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
         return;
       }
     }

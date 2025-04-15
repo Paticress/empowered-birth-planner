@@ -63,14 +63,6 @@ export function MobileNavigation() {
               Guia Online
             </Button>
             
-            <Button 
-              variant="ghost" 
-              onClick={() => handleNavigation('/plano-personalizado')}
-              className="w-full justify-start text-maternal-600"
-            >
-              Construtor Virtual
-            </Button>
-            
             {isAuthenticated && (
               <Button 
                 variant="ghost" 

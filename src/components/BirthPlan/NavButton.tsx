@@ -24,16 +24,6 @@ export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
         return;
       }
       
-      // First check localStorage for cached plan value
-      const cachedPlan = localStorage.getItem('user_plan');
-      if (cachedPlan === 'paid') {
-        setHasBirthPlanAccess(true);
-        return;
-      } else if (cachedPlan === 'free') {
-        setHasBirthPlanAccess(false);
-        return;
-      }
-      
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
@@ -41,11 +31,7 @@ export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
           .eq('email', user.email)
           .maybeSingle();
           
-        const isPaidUser = !error && !!data && data.plan === 'paid';
-        setHasBirthPlanAccess(isPaidUser);
-        
-        // Cache the result in localStorage
-        localStorage.setItem('user_plan', isPaidUser ? 'paid' : 'free');
+        setHasBirthPlanAccess(!error && !!data && data.plan === 'paid');
       } catch (error) {
         console.error("Error checking user access level:", error);
         setHasBirthPlanAccess(false);
@@ -66,10 +52,10 @@ export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
         navigateTo('/acesso-plano');
       }
     } else if (!hasBirthPlanAccess) {
-      // If authenticated but doesn't have birth plan access, direct to landing page
-      navigateTo('/plano-personalizado');
+      // If authenticated but doesn't have birth plan access, direct to Wix conversion page
+      window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
     } else {
-      // If authenticated and has birth plan access, go directly to birth plan builder
+      // If authenticated and has birth plan access, follow normal flow
       navigateTo('/criar-plano');
     }
   };
