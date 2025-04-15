@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
 import { FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
+import { useBirthPlanAccess } from '@/hooks/useBirthPlanAccess';
 
 interface NavButtonProps {
   className?: string;
@@ -13,33 +12,8 @@ interface NavButtonProps {
 
 export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
   const { navigateTo } = useNavigation();
-  const { isAuthenticated, user } = useAuth();
-  const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState<boolean | null>(null);
-  
-  // Check if the authenticated user has birth plan access
-  useEffect(() => {
-    const checkAccessLevel = async () => {
-      if (!isAuthenticated || !user?.email) {
-        setHasBirthPlanAccess(false);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('users_db_birthplanbuilder')
-          .select('plan')
-          .eq('email', user.email)
-          .maybeSingle();
-          
-        setHasBirthPlanAccess(!error && !!data && data.plan === 'paid');
-      } catch (error) {
-        console.error("Error checking user access level:", error);
-        setHasBirthPlanAccess(false);
-      }
-    };
-    
-    checkAccessLevel();
-  }, [isAuthenticated, user]);
+  const { isAuthenticated } = useAuth();
+  const hasBirthPlanAccess = useBirthPlanAccess();
   
   const goToBirthPlanAccess = () => {
     console.log("Birth Plan Nav button clicked, authentication state:", isAuthenticated, "Birth plan access:", hasBirthPlanAccess);

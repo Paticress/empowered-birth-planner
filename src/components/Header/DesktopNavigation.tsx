@@ -1,41 +1,17 @@
+
 import { Button } from '@/components/ui/button';
 import { LogOut, FileText } from 'lucide-react';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { useBirthPlanAccess } from '@/hooks/useBirthPlanAccess';
 
 export function DesktopNavigation() {
   const { navigateTo } = useNavigation();
   const { isAuthenticated, user, signOut } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState<boolean | null>(null);
-  
-  // Check if the user has birth plan access
-  useEffect(() => {
-    const checkAccessLevel = async () => {
-      if (!isAuthenticated || !user?.email) {
-        setHasBirthPlanAccess(false);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('users_db_birthplanbuilder')
-          .select('plan')
-          .eq('email', user.email)
-          .maybeSingle();
-          
-        setHasBirthPlanAccess(!error && !!data && data.plan === 'paid');
-      } catch (error) {
-        console.error("Error checking user access level:", error);
-        setHasBirthPlanAccess(false);
-      }
-    };
-    
-    checkAccessLevel();
-  }, [isAuthenticated, user]);
+  const hasBirthPlanAccess = useBirthPlanAccess();
   
   const handleBirthPlanClick = () => {
     if (hasBirthPlanAccess) {

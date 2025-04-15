@@ -1,40 +1,13 @@
-
 import { BookOpen, FileText, Award, ShoppingBag } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useNavigation } from "@/hooks/useNavigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useBirthPlanAccess } from "@/hooks/useBirthPlanAccess";
 
 export function ResourcesSection() {
   const { navigateTo } = useNavigation();
-  const { isAuthenticated, user } = useAuth();
-  const [isFullAccessUser, setIsFullAccessUser] = useState<boolean | null>(null);
-  
-  // Check if the authenticated user has full access (is a Client, not just a Lead)
-  useEffect(() => {
-    const checkAccessLevel = async () => {
-      if (!isAuthenticated || !user?.email) {
-        setIsFullAccessUser(false);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('users_db_birthplanbuilder')
-          .select('plan')
-          .eq('email', user.email)
-          .maybeSingle();
-          
-        setIsFullAccessUser(!error && !!data && data.plan === 'paid');
-      } catch (error) {
-        console.error("Error checking user access level:", error);
-        setIsFullAccessUser(false);
-      }
-    };
-    
-    checkAccessLevel();
-  }, [isAuthenticated, user]);
+  const { isAuthenticated } = useAuth();
+  const isFullAccessUser = useBirthPlanAccess();
   
   const handleBirthPlanClick = () => {
     if (isAuthenticated && isFullAccessUser) {

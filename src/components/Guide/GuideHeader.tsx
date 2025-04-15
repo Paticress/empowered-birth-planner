@@ -5,7 +5,7 @@ import { Search, Menu, X, LayoutDashboard } from 'lucide-react';
 import { GuideSearch } from './Search/GuideSearch';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useBirthPlanAccess } from '@/hooks/useBirthPlanAccess';
 
 type GuideHeaderProps = {
   onNavigate?: (value: string) => void;
@@ -17,7 +17,7 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { navigateTo } = useNavigation();
   const { isAuthenticated, user } = useAuth();
-  const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState<boolean | null>(null);
+  const hasBirthPlanAccess = useBirthPlanAccess();
 
   useEffect(() => {
     const handleResize = () => {
@@ -29,30 +29,6 @@ export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  useEffect(() => {
-    const checkAccessLevel = async () => {
-      if (!isAuthenticated || !user?.email) {
-        setHasBirthPlanAccess(false);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('users_db_birthplanbuilder')
-          .select('plan')
-          .eq('email', user.email)
-          .maybeSingle();
-          
-        setHasBirthPlanAccess(!error && !!data && data.plan === 'paid');
-      } catch (error) {
-        console.error("Error checking user access level:", error);
-        setHasBirthPlanAccess(false);
-      }
-    };
-    
-    checkAccessLevel();
-  }, [isAuthenticated, user]);
 
   const handleNavigation = (path: string) => {
     if (onNavigate) {
