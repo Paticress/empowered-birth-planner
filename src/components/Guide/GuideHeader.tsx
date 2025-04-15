@@ -1,6 +1,11 @@
 
 import { UnifiedHeader } from '../Header/UnifiedHeader';
 
-export function GuideHeader() {
+interface GuideHeaderProps {
+  onNavigate: (value: string) => void;
+  currentTab: string;
+}
+
+export function GuideHeader({ onNavigate, currentTab }: GuideHeaderProps) {
   return <UnifiedHeader />;
 }

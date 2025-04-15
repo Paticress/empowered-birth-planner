@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'react-router-dom';
@@ -8,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBirthPlanAccess } from '@/hooks/useBirthPlanAccess';
 import { UserMenu } from './UserMenu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { LogoutButton } from '@/components/ui/LogoutButton';
 
 export function UnifiedHeader() {
   const [scrolled, setScrolled] = useState(false);
