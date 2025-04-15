@@ -1,6 +1,4 @@
 
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { BookOpen, FileText, Award, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -165,53 +163,49 @@ export function Dashboard() {
   }));
   
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-grow pt-20 bg-maternal-50">
-        <div className="container max-w-5xl mx-auto px-4 py-8">
-          <DashboardHeader 
-            greeting={getWelcomeMessage()} 
-            guideProgress={guideProgress}
-            birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
-            lastVisited={lastVisited}
+    <div className="flex-grow pt-20 bg-maternal-50">
+      <div className="container max-w-5xl mx-auto px-4 py-8">
+        <DashboardHeader 
+          greeting={getWelcomeMessage()} 
+          guideProgress={guideProgress}
+          birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
+          lastVisited={lastVisited}
+          isGuideCompleted={isGuideCompleted}
+          isBirthPlanCompleted={hasBirthPlanAccess ? isBirthPlanCompleted : false}
+        />
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <RecommendedStepCard 
+            recommendedStep={recommendedStep}
             isGuideCompleted={isGuideCompleted}
             isBirthPlanCompleted={hasBirthPlanAccess ? isBirthPlanCompleted : false}
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <RecommendedStepCard 
-              recommendedStep={recommendedStep}
-              isGuideCompleted={isGuideCompleted}
-              isBirthPlanCompleted={hasBirthPlanAccess ? isBirthPlanCompleted : false}
-            />
-            
-            <ProgressCard 
-              guideProgress={guideProgress}
-              birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
-              isFullAccessUser={hasBirthPlanAccess}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-            <TimelineProgress
-              title="Guia do Parto Respeitoso"
-              steps={guideTimelineSteps}
-              icon={<BookOpen className="h-5 w-5 mr-2 text-maternal-600" />}
-            />
-            
-            <TimelineProgress
-              title="Plano de Parto"
-              steps={birthPlanTimelineSteps}
-              icon={<FileText className="h-5 w-5 mr-2 text-maternal-600" />}
-              isDisabled={!hasBirthPlanAccess}
-              disabledMessage={!hasBirthPlanAccess ? "Adquira o Construtor de Plano de Parto para desbloquear" : undefined}
-            />
-          </div>
-          
-          <ResourcesSection />
+          <ProgressCard 
+            guideProgress={guideProgress}
+            birthPlanProgress={hasBirthPlanAccess ? birthPlanProgress : 0}
+            isFullAccessUser={hasBirthPlanAccess}
+          />
         </div>
-      </main>
-      <Footer />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+          <TimelineProgress
+            title="Guia do Parto Respeitoso"
+            steps={guideTimelineSteps}
+            icon={<BookOpen className="h-5 w-5 mr-2 text-maternal-600" />}
+          />
+          
+          <TimelineProgress
+            title="Plano de Parto"
+            steps={birthPlanTimelineSteps}
+            icon={<FileText className="h-5 w-5 mr-2 text-maternal-600" />}
+            isDisabled={!hasBirthPlanAccess}
+            disabledMessage={!hasBirthPlanAccess ? "Adquira o Construtor de Plano de Parto para desbloquear" : undefined}
+          />
+        </div>
+        
+        <ResourcesSection />
+      </div>
     </div>
   );
 }

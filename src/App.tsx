@@ -25,6 +25,8 @@ import { WebhookTest } from './pages/WebhookTest';
 import NotFound from './pages/NotFound';
 import { Loader2 } from 'lucide-react';
 import { useEffect } from "react";
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 
 function AppContent() {
   const location = useLocation();
@@ -54,25 +56,30 @@ function AppContent() {
     );
   }
 
+  // Apply consistent header and footer to all pages
   return (
-    <div className={`min-h-screen ${backgroundClass}`}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/guia-online" element={<GuiaOnline />} />
-        <Route path="/plano-de-parto" element={<BirthPlan />} />
-        <Route path="/acesso-plano" element={<AcessoPlano />} />
-        <Route path="/criar-plano" element={<CriarPlano />} />
-        <Route path="/payment-success" element={<PaymentSuccess />} />
-        <Route path="/payment-cancel" element={<PaymentCancel />} />
-        <Route path="/meus-acessos" element={<MyAccess />} />
-        <Route path="/faq" element={<FAQ />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/test-supabase" element={<SupabaseTest />} />
-        <Route path="/webhook-test" element={<WebhookTest />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+    <div className={`min-h-screen flex flex-col ${backgroundClass}`}>
+      <Header />
+      <main className="flex-grow pt-20">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/guia-online" element={<GuiaOnline />} />
+          <Route path="/plano-de-parto" element={<BirthPlan />} />
+          <Route path="/acesso-plano" element={<AcessoPlano />} />
+          <Route path="/criar-plano" element={<CriarPlano />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/payment-cancel" element={<PaymentCancel />} />
+          <Route path="/meus-acessos" element={<MyAccess />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/test-supabase" element={<SupabaseTest />} />
+          <Route path="/webhook-test" element={<WebhookTest />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      <Footer />
       <Toaster />
       <Analytics />
     </div>
