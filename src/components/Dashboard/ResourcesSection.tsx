@@ -22,11 +22,11 @@ export function ResourcesSection() {
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('email')
+          .select('plan')
           .eq('email', user.email)
           .maybeSingle();
           
-        setIsFullAccessUser(!error && !!data);
+        setIsFullAccessUser(!error && !!data && data.plan === 'paid');
       } catch (error) {
         console.error("Error checking user access level:", error);
         setIsFullAccessUser(false);
@@ -35,6 +35,15 @@ export function ResourcesSection() {
     
     checkAccessLevel();
   }, [isAuthenticated, user]);
+  
+  const handleBirthPlanClick = () => {
+    if (isAuthenticated && isFullAccessUser) {
+      navigateTo('/criar-plano');
+    } else {
+      // Redirect LEADs to the Wix landing page
+      window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+    }
+  };
   
   return (
     <>
@@ -58,7 +67,7 @@ export function ResourcesSection() {
         
         <Card 
           className="p-5 border border-maternal-100 cursor-pointer transition-all hover:shadow-md"
-          onClick={() => navigateTo('/criar-plano')}
+          onClick={handleBirthPlanClick}
         >
           <div className="flex items-center mb-3">
             <FileText className="h-5 w-5 text-maternal-600 mr-2" />
