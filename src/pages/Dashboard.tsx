@@ -11,6 +11,7 @@ import { TimelineProgress } from "@/components/Dashboard/TimelineProgress";
 import { useNavigation } from "@/hooks/useNavigation";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 
 export function Dashboard() {
   const { user, isLoading } = useAuth();
