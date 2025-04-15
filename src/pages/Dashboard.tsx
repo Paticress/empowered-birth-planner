@@ -1,8 +1,6 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { BookOpen, FileText, Award, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 import { RecommendedStepCard } from "@/components/Dashboard/RecommendedStepCard";
 import { ProgressCard } from "@/components/Dashboard/ProgressCard";
 import { GuideProgressCard } from "@/components/Dashboard/GuideProgressCard";
@@ -32,7 +30,6 @@ export function Dashboard() {
   
   const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState<boolean | null>(null);
   
-  // Check if the authenticated user has birth plan access
   useEffect(() => {
     const checkAccessLevel = async () => {
       if (!user?.email) {
@@ -40,7 +37,6 @@ export function Dashboard() {
         return;
       }
       
-      // First check localStorage for cached plan value
       const cachedPlan = localStorage.getItem('user_plan');
       if (cachedPlan === 'paid') {
         setHasBirthPlanAccess(true);
@@ -50,7 +46,6 @@ export function Dashboard() {
         return;
       }
       
-      // If not in localStorage, check the database
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
@@ -61,7 +56,6 @@ export function Dashboard() {
         const isPaidUser = !error && !!data && data.plan === 'paid';
         setHasBirthPlanAccess(isPaidUser);
         
-        // Cache the result in localStorage
         localStorage.setItem('user_plan', isPaidUser ? 'paid' : 'free');
       } catch (error) {
         console.error("Error checking user access level:", error);
@@ -85,7 +79,6 @@ export function Dashboard() {
   };
   
   const getRecommendedNextStep = () => {
-    // For LEAD users who haven't completed the guide yet
     if (!currentGuideTab && !hasBirthPlanAccess) {
       return {
         title: "Conheça o Guia do Parto Respeitoso",
@@ -106,7 +99,6 @@ export function Dashboard() {
         icon: BookOpen
       };
     } else if (isGuideCompleted && !hasBirthPlanAccess) {
-      // Lead completed the guide, encourage buying the birth plan
       return {
         title: "Crie seu Plano de Parto",
         description: "Agora que você conhece o guia, crie seu plano de parto personalizado.",
@@ -114,7 +106,6 @@ export function Dashboard() {
         icon: FileText
       };
     } else if (!hasStartedBirthPlan && hasBirthPlanAccess) {
-      // Client who hasn't started the birth plan
       return {
         title: "Crie seu Plano de Parto",
         description: "Comece a criar seu plano de parto personalizado com nosso construtor.",
@@ -122,7 +113,6 @@ export function Dashboard() {
         icon: FileText
       };
     } else if (hasBirthPlanAccess) {
-      // Client who has started the birth plan
       return {
         title: "Continue seu Plano de Parto",
         description: "Retome de onde parou na criação do seu plano de parto.",
@@ -130,7 +120,6 @@ export function Dashboard() {
         icon: ChevronRight
       };
     } else {
-      // Default fallback
       return {
         title: "Explore o Guia Online",
         description: "Conheça nosso guia completo com informações importantes sobre o parto.",
@@ -142,7 +131,6 @@ export function Dashboard() {
   
   const recommendedStep = getRecommendedNextStep();
   
-  // Format guide sections as timeline steps
   const guideTimelineSteps = guideSections.map(section => ({
     id: section.id,
     name: section.name,
@@ -153,7 +141,6 @@ export function Dashboard() {
     onClick: () => navigateTo(`/guia-online?tab=${section.id}`),
   }));
   
-  // Format birth plan stages as timeline steps
   const birthPlanTimelineSteps = birthPlanStages.map((stage, index) => ({
     id: stage.id,
     name: stage.name,
@@ -163,7 +150,7 @@ export function Dashboard() {
   }));
   
   return (
-    <div className="flex-grow pt-20 bg-maternal-50">
+    <div className="flex-grow bg-maternal-50">
       <div className="container max-w-5xl mx-auto px-4 py-8">
         <DashboardHeader 
           greeting={getWelcomeMessage()} 
