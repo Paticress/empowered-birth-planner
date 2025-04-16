@@ -48,13 +48,9 @@ export const fieldToQuestionMap: Record<string, string[]> = {
   'complications': ['complications'],
   'cascadeInterventions': ['cascadeInterventions'],
   'nicu': ['nicu'],
-  
-  // CORREÇÃO IMPORTANTE: Garantir que cada campo tenha um mapeamento único e correto
-  // para as questões do questionário, sem nenhum compartilhamento entre campos
   'emergencyScenarios': ['emergencyPreferences'],
   'highRiskComplications': ['highRiskComplications'],
   'lowRiskOccurrences': ['lowRiskOccurrences'],
-  
   'specialWishes': ['specialWishes'],
   'unexpectedScenarios': ['unexpectedScenarios']
 };

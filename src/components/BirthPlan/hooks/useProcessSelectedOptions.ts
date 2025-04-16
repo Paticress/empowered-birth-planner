@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { birthPlanSections } from '../utils/birthPlanSections';
 
@@ -54,27 +53,13 @@ export function useProcessSelectedOptions({
     }
 
     // Verificar as opções selecionadas para o campo atual
-    if (activeFieldKey === 'emergencyScenarios' || 
-        activeFieldKey === 'highRiskComplications' || 
-        activeFieldKey === 'lowRiskOccurrences') {
-      console.log(`🔍 ANÁLISE ESPECIAL para campo especial: ${activeFieldKey}`);
-      
-      // Verificar se temos a questão correspondente no selectedOptions
-      const questionMap = {
-        'emergencyScenarios': 'emergencyPreferences',
-        'highRiskComplications': 'highRiskComplications',
-        'lowRiskOccurrences': 'lowRiskOccurrences'
-      };
-      
-      const questionId = questionMap[activeFieldKey as keyof typeof questionMap];
-      if (selectedOptions[questionId]) {
-        console.log(`🔍 Verificando questão específica ${questionId} para campo ${activeFieldKey}`);
-        const selectedForQuestion = Object.entries(selectedOptions[questionId])
-          .filter(([_, isSelected]) => isSelected)
-          .map(([option]) => option);
-        
-        console.log(`🔍 Opções selecionadas para ${questionId}:`, selectedForQuestion);
-      }
+    if (selectedOptions[activeFieldKey]) {
+      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
+        .filter(([_, isSelected]) => isSelected)
+        .map(([option]) => option);
+      console.log("🔍 Opções selecionadas para este campo:", selectedForField);
+    } else {
+      console.log("⚠️ Nenhuma opção selecionada para este campo");
     }
 
     // Usar o hook personalizado para processar as opções
@@ -88,40 +73,20 @@ export function useProcessSelectedOptions({
       setLocalBirthPlan(updatedPlan);
     }
 
+    // CORREÇÃO: Modificação na forma como processamos as opções e atualizamos o campo
+    
     // Processar as opções selecionadas e textareas
     const selectedItems = [];
     
     // Capturar todas as opções selecionadas para o campo ativo
-    if (activeFieldKey && Object.keys(selectedOptions).length > 0) {
-      // Combinar opções de todas as questões relevantes para este campo
-      Object.entries(selectedOptions).forEach(([questionId, options]) => {
-        // Para os campos especiais específicos, verificamos se o questionId corresponde
-        // às questões específicas mapeadas para esses campos
-        const specialFields = {
-          'emergencyScenarios': ['emergencyPreferences'],
-          'highRiskComplications': ['highRiskComplications'],
-          'lowRiskOccurrences': ['lowRiskOccurrences']
-        };
-        
-        // Verificar se este questionId é relevante para o campo ativo
-        const relevantQuestionIds = specialFields[activeFieldKey as keyof typeof specialFields] || [];
-        const isRelevantQuestion = relevantQuestionIds.includes(questionId) || 
-                                  questionId === activeFieldKey;
-        
-        if (isRelevantQuestion || Object.keys(relevantQuestionIds).length === 0) {
-          console.log(`Processando opções para questão ${questionId} relevante para campo ${activeFieldKey}`);
-          
-          const selectedForQuestion = Object.entries(options)
-            .filter(([_, isSelected]) => isSelected)
-            .map(([option]) => option.trim());
-          
-          console.log(`Opções selecionadas para ${questionId}:`, selectedForQuestion);
-          
-          if (selectedForQuestion.length > 0) {
-            selectedItems.push(...selectedForQuestion);
-          }
-        }
-      });
+    if (selectedOptions[activeFieldKey]) {
+      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
+        .filter(([_, isSelected]) => isSelected)
+        .map(([option]) => option.trim());
+      
+      if (selectedForField.length > 0) {
+        selectedItems.push(...selectedForField);
+      }
     }
     
     // Capturar qualquer texto de textareas

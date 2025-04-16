@@ -1,3 +1,4 @@
+
 import { birthPlanSections } from './birthPlanSections';
 
 /**
@@ -180,24 +181,15 @@ const updateSpecialSituations = (birthPlan: Record<string, any>, answers: Record
   }
   
   if (answers.emergencyPreferences) {
-    console.log("Processando emergencyPreferences:", answers.emergencyPreferences);
-    const formattedOptions = formatCheckboxAnswers(answers.emergencyPreferences);
-    console.log("emergencyPreferences formatadas:", formattedOptions);
-    birthPlan.situacoesEspeciais.emergencyScenarios = formattedOptions;
+    birthPlan.situacoesEspeciais.emergencyScenarios = formatCheckboxAnswers(answers.emergencyPreferences);
   }
   
   if (answers.highRiskComplications) {
-    console.log("Processando highRiskComplications:", answers.highRiskComplications);
-    const formattedOptions = formatCheckboxAnswers(answers.highRiskComplications);
-    console.log("highRiskComplications formatadas:", formattedOptions);
-    birthPlan.situacoesEspeciais.highRiskComplications = formattedOptions;
+    birthPlan.situacoesEspeciais.highRiskComplications = formatCheckboxAnswers(answers.highRiskComplications);
   }
   
   if (answers.lowRiskOccurrences) {
-    console.log("Processando lowRiskOccurrences:", answers.lowRiskOccurrences);
-    const formattedOptions = formatCheckboxAnswers(answers.lowRiskOccurrences);
-    console.log("lowRiskOccurrences formatadas:", formattedOptions);
-    birthPlan.situacoesEspeciais.lowRiskOccurrences = formattedOptions;
+    birthPlan.situacoesEspeciais.lowRiskOccurrences = formatCheckboxAnswers(answers.lowRiskOccurrences);
   }
   
   if (answers.cascadeInterventions) {
@@ -206,10 +198,6 @@ const updateSpecialSituations = (birthPlan: Record<string, any>, answers: Record
   
   if (answers.specialWishes) {
     birthPlan.situacoesEspeciais.specialWishes = answers.specialWishes;
-  }
-  
-  if (answers.unexpectedScenarios) {
-    birthPlan.situacoesEspeciais.unexpectedScenarios = answers.unexpectedScenarios;
   }
 };
 
