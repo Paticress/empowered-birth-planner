@@ -16,8 +16,6 @@ export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
   const hasBirthPlanAccess = useBirthPlanAccess();
   
   const goToBirthPlanAccess = () => {
-    console.log("Birth Plan Nav button clicked, authentication state:", isAuthenticated, "Birth plan access:", hasBirthPlanAccess);
-    
     if (!isAuthenticated) {
       // If not authenticated, direct to login with the source parameter
       if (source) {
@@ -26,8 +24,8 @@ export function BirthPlanNavButton({ className = '', source }: NavButtonProps) {
         navigateTo('/acesso-plano');
       }
     } else if (!hasBirthPlanAccess) {
-      // If authenticated but doesn't have birth plan access, direct to Wix conversion page
-      window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+      // Open Wix landing page in a new tab
+      window.open("https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos", '_blank');
     } else {
       // If authenticated and has birth plan access, follow normal flow
       navigateTo('/criar-plano');

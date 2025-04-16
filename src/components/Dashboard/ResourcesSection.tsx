@@ -1,4 +1,3 @@
-
 import { BookOpen, FileText, Award, ShoppingBag } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useNavigation } from "@/hooks/useNavigation";
@@ -14,8 +13,8 @@ export function ResourcesSection() {
     if (isAuthenticated && isFullAccessUser) {
       navigateTo('/criar-plano');
     } else {
-      // Redirect LEADs to the Wix landing page
-      window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+      // Open Wix landing page in a new tab
+      window.open("https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos", '_blank');
     }
   };
   

@@ -1,4 +1,3 @@
-
 import { CheckCircle, Shield, FileText } from 'lucide-react';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 import { useAuth } from '@/contexts/AuthContext';

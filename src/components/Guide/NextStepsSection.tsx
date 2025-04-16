@@ -1,4 +1,3 @@
-
 import { Edit, Share2, MessageCircle, FileEdit, Printer } from 'lucide-react';
 import { StepCard } from './StepCard';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
