@@ -179,7 +179,7 @@ export function OnlineGuide() {
         </main>
         
         <BackToTopButton />
-        {/* Removemos o Footer daqui pois ele já está sendo incluído na página GuiaOnline */}
+        {/* Footer is now completely removed from here */}
       </div>
     </div>
   );
