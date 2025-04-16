@@ -25,7 +25,7 @@ import { WebhookTest } from './pages/WebhookTest';
 import NotFound from './pages/NotFound';
 import { Loader2 } from 'lucide-react';
 import { useEffect } from "react";
-import { Footer } from './components/Footer';
+import MainLayout from './layouts/MainLayout';
 
 function AppContent() {
   const location = useLocation();
@@ -55,28 +55,30 @@ function AppContent() {
     );
   }
 
-  // Apply consistent footer to all pages, but let each page handle its own header
   return (
     <div className={`min-h-screen flex flex-col ${backgroundClass}`}>
-      <main className="flex-grow pt-0">
-        <Routes>
+      <Routes>
+        {/* Main routes with unified header */}
+        <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/guia-online" element={<GuiaOnline />} />
           <Route path="/plano-de-parto" element={<BirthPlan />} />
           <Route path="/acesso-plano" element={<AcessoPlano />} />
           <Route path="/criar-plano" element={<CriarPlano />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/payment-cancel" element={<PaymentCancel />} />
           <Route path="/meus-acessos" element={<MyAccess />} />
           <Route path="/faq" element={<FAQ />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/login" element={<Login />} />
           <Route path="/test-supabase" element={<SupabaseTest />} />
           <Route path="/webhook-test" element={<WebhookTest />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
+        </Route>
+        
+        {/* Standalone routes without the layout */}
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancel" element={<PaymentCancel />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
       <Toaster />
       <Analytics />
     </div>

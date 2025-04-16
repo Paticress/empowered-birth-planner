@@ -1,6 +1,5 @@
+
 import { useState } from 'react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import {
   Accordion,
   AccordionContent,
@@ -77,63 +76,55 @@ export function FAQ() {
   };
   
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <div className="container mx-auto px-4 max-w-4xl pb-12">
+      <h1 className="text-3xl md:text-4xl font-bold text-maternal-900 mb-8 text-center">
+        Perguntas Frequentes
+      </h1>
       
-      <main className="flex-grow pt-24 pb-12">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-maternal-900 mb-8 text-center">
-            Perguntas Frequentes
-          </h1>
-          
-          <p className="text-lg text-maternal-700 mb-10 text-center">
-            Encontre respostas para as dúvidas mais comuns sobre nossos produtos e serviços.
-          </p>
-          
-          <Tabs defaultValue="geral" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-8">
-              <TabsTrigger value="geral" className="text-sm md:text-base">Geral</TabsTrigger>
-              <TabsTrigger value="guia" className="text-sm md:text-base">Guia Online</TabsTrigger>
-              <TabsTrigger value="plano" className="text-sm md:text-base">Plano de Parto</TabsTrigger>
-              <TabsTrigger value="acessos" className="text-sm md:text-base">Acessos</TabsTrigger>
-            </TabsList>
-            
-            {Object.entries(faqData).map(([category, questions]) => (
-              <TabsContent key={category} value={category} className="mt-6">
-                <Accordion type="single" collapsible className="w-full">
-                  {questions.map((faq, index) => (
-                    <AccordionItem key={index} value={`item-${index}`}>
-                      <AccordionTrigger className="text-left font-medium text-maternal-900">
-                        {faq.question}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-maternal-700">
-                        {faq.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </TabsContent>
-            ))}
-          </Tabs>
-          
-          <div className="mt-16 p-6 bg-maternal-50 rounded-lg border border-maternal-100">
-            <h2 className="text-xl font-semibold text-maternal-900 mb-4">
-              Não encontrou sua pergunta?
-            </h2>
-            <p className="text-maternal-700 mb-4">
-              Entre em contato conosco e ficaremos felizes em ajudar.
-            </p>
-            <a 
-              href="mailto:contato@energiamaterna.com.br" 
-              className="inline-flex items-center text-maternal-600 hover:text-maternal-800 font-medium"
-            >
-              contato@energiamaterna.com.br
-            </a>
-          </div>
-        </div>
-      </main>
+      <p className="text-lg text-maternal-700 mb-10 text-center">
+        Encontre respostas para as dúvidas mais comuns sobre nossos produtos e serviços.
+      </p>
       
-      <Footer />
+      <Tabs defaultValue="geral" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-8">
+          <TabsTrigger value="geral" className="text-sm md:text-base">Geral</TabsTrigger>
+          <TabsTrigger value="guia" className="text-sm md:text-base">Guia Online</TabsTrigger>
+          <TabsTrigger value="plano" className="text-sm md:text-base">Plano de Parto</TabsTrigger>
+          <TabsTrigger value="acessos" className="text-sm md:text-base">Acessos</TabsTrigger>
+        </TabsList>
+        
+        {Object.entries(faqData).map(([category, questions]) => (
+          <TabsContent key={category} value={category} className="mt-6">
+            <Accordion type="single" collapsible className="w-full">
+              {questions.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`}>
+                  <AccordionTrigger className="text-left font-medium text-maternal-900">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-maternal-700">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </TabsContent>
+        ))}
+      </Tabs>
+      
+      <div className="mt-16 p-6 bg-maternal-50 rounded-lg border border-maternal-100">
+        <h2 className="text-xl font-semibold text-maternal-900 mb-4">
+          Não encontrou sua pergunta?
+        </h2>
+        <p className="text-maternal-700 mb-4">
+          Entre em contato conosco e ficaremos felizes em ajudar.
+        </p>
+        <a 
+          href="mailto:contato@energiamaterna.com.br" 
+          className="inline-flex items-center text-maternal-600 hover:text-maternal-800 font-medium"
+        >
+          contato@energiamaterna.com.br
+        </a>
+      </div>
     </div>
   );
 }
