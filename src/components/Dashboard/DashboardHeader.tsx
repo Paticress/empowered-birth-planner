@@ -1,4 +1,7 @@
 
+// Este arquivo não está mais sendo usado, mas o mantemos por enquanto
+// em caso de necessidade futura de referência.
+
 import React from 'react';
 
 interface DashboardHeaderProps {
