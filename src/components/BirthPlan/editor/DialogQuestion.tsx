@@ -23,11 +23,14 @@ export function DialogQuestion({
 }: DialogQuestionProps) {
   if (!question) return null;
 
+  // List of special fields that should always be treated as checkboxes
+  const specialQuestionIds = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+  
   // Enhanced debugging for special fields
-  if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+  if (specialQuestionIds.includes(questionId)) {
     console.log(`DialogQuestion rendering special question: ${questionId}`);
     console.log(`Question data:`, question);
-    console.log(`Question type:`, question.type);
+    console.log(`Question type (should be checkbox):`, question.type);
     console.log(`Selected options:`, selectedOptions[questionId]);
     
     // Check what's in questionnaire answers for this ID
@@ -65,8 +68,16 @@ export function DialogQuestion({
   }
 
   // Special treatment for known special situation questions - ALWAYS treat these as checkbox type
-  // even if they're marked as radio or select in the data
-  const isSpecialField = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId);
+  const isSpecialField = specialQuestionIds.includes(questionId);
+  
+  // If this is a special field, ensure it's treated as a checkbox regardless of its type
+  if (isSpecialField && question.type !== 'checkbox') {
+    console.log(`Forcing checkbox treatment for special field ${questionId} with original type ${question.type}`);
+    question = {
+      ...question,
+      type: 'checkbox'  // Force checkbox type
+    };
+  }
 
   // Render selectable options (radio/select/checkbox)
   return (

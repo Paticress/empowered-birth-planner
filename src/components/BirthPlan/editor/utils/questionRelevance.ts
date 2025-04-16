@@ -52,8 +52,16 @@ export const getRelevantQuestionsForField = (
       for (const question of section.questions) {
         if (specialQuestionIds.includes(question.id)) {
           console.log(`Found special question ${question.id} for field ${fieldKey} in section ${section.id}`);
+          
+          // CRITICAL FIX: Ensure the question is treated as a checkbox type
+          // This ensures consistent handling across the application
+          const enhancedQuestion = {
+            ...question,
+            type: 'checkbox'  // Force checkbox type for special fields
+          };
+          
           relevantQuestions.push({
-            question,
+            question: enhancedQuestion,
             sectionId: section.id
           });
         }
@@ -61,12 +69,12 @@ export const getRelevantQuestionsForField = (
     }
     
     if (relevantQuestions.length > 0) {
+      console.log(`Returning ${relevantQuestions.length} special questions for ${fieldKey}`);
       return relevantQuestions;
     }
   }
   
   // Get the list of question IDs that are relevant for this specific field
-  // This is the key to fixing the bug - we need a direct mapping from field key to question IDs
   const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
   
   // If no relevant questions are mapped to this field, return empty array
@@ -91,9 +99,19 @@ export const getRelevantQuestionsForField = (
         // Log for debugging
         console.log(`Found question ${question.id} (${question.text}) for field ${fieldKey} in section ${section.id}`);
         
+        // For special question IDs, always ensure they're treated as checkboxes
+        let processedQuestion = question;
+        if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(question.id)) {
+          processedQuestion = {
+            ...question,
+            type: 'checkbox'  // Force checkbox type
+          };
+          console.log(`Forcing checkbox type for special question ${question.id}`);
+        }
+        
         // Add the question to relevant questions
         relevantQuestions.push({
-          question,
+          question: processedQuestion,
           sectionId: section.id
         });
       }

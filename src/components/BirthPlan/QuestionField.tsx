@@ -22,16 +22,18 @@ interface QuestionFieldProps {
 }
 
 export function QuestionField({ question, errors, control }: QuestionFieldProps) {
-  // Special debug for problematic fields
+  // List of question IDs that must be treated as checkboxes regardless of their type
   const specialQuestionIds = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+  const isSpecialQuestion = specialQuestionIds.includes(question.id);
   
   useEffect(() => {
-    if (specialQuestionIds.includes(question.id)) {
+    if (isSpecialQuestion) {
       console.log(`QuestionField rendering special question: ${question.id}`);
-      console.log(`Question type: ${question.type}`);
+      console.log(`Original question type: ${question.type}`);
+      console.log(`Will be rendered as checkbox regardless of type`);
       console.log(`Question options:`, question.options);
     }
-  }, [question.id, question.type, question.options]);
+  }, [question.id, question.type, question.options, isSpecialQuestion]);
 
   return (
     <FormItem key={question.id} className="space-y-2">
@@ -47,24 +49,24 @@ export function QuestionField({ question, errors, control }: QuestionFieldProps)
         </div>
       )}
       
-      {question.type === 'text' && (
+      {question.type === 'text' && !isSpecialQuestion && (
         <TextQuestion question={question} control={control} />
       )}
       
-      {question.type === 'textarea' && (
+      {question.type === 'textarea' && !isSpecialQuestion && (
         <TextareaQuestion question={question} control={control} />
       )}
       
-      {question.type === 'radio' && question.options && (
+      {question.type === 'radio' && question.options && !isSpecialQuestion && (
         <RadioQuestion question={question} control={control} />
       )}
       
-      {/* Always treat special field IDs as checkbox type questions */}
-      {(question.type === 'checkbox' || specialQuestionIds.includes(question.id)) && question.options && (
+      {/* Always treat special question IDs as checkbox type questions regardless of their defined type */}
+      {(question.type === 'checkbox' || isSpecialQuestion) && question.options && (
         <CheckboxQuestion question={question} control={control} />
       )}
       
-      {question.type === 'select' && question.options && !specialQuestionIds.includes(question.id) && (
+      {question.type === 'select' && question.options && !isSpecialQuestion && (
         <SelectQuestion question={question} control={control} />
       )}
       
