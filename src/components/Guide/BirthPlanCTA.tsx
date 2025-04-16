@@ -1,5 +1,5 @@
 
-import { CheckCircle, Shield, FileText, Clock, Star, Book, Award, Percent, Copy } from 'lucide-react';
+import { CheckCircle, Shield, FileText, Clock, Star, Book, Award, Percent, Copy, RefreshCw } from 'lucide-react';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -7,39 +7,14 @@ import { useNavigation } from '@/hooks/useNavigation';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useBirthPlanAccess } from '@/hooks/useBirthPlanAccess';
 
 export function BirthPlanCTA() {
   const { isAuthenticated, user } = useAuth();
   const { navigateTo } = useNavigation();
-  const [isFullAccessUser, setIsFullAccessUser] = useState<boolean | null>(null);
+  const { hasBirthPlanAccess, refreshPlanStatus, isRefreshing } = useBirthPlanAccess();
   const [copiedCode, setCopiedCode] = useState(false);
   const discountCode = "OFFGUIA40";
-  
-  // Check if the authenticated user has full access (is a Client, not just a Lead)
-  useEffect(() => {
-    const checkAccessLevel = async () => {
-      if (!isAuthenticated || !user?.email) {
-        setIsFullAccessUser(false);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('users_db_birthplanbuilder')
-          .select('email, plan')
-          .eq('email', user.email)
-          .maybeSingle();
-          
-        // User is a full access user if they have the plan set to 'paid'
-        setIsFullAccessUser(!error && !!data && data.plan === 'paid');
-      } catch (error) {
-        console.error("Error checking user access level:", error);
-        setIsFullAccessUser(false);
-      }
-    };
-    
-    checkAccessLevel();
-  }, [isAuthenticated, user]);
 
   const copyDiscountCode = () => {
     navigator.clipboard.writeText(discountCode)
@@ -56,8 +31,20 @@ export function BirthPlanCTA() {
       });
   };
 
+  const handleRefreshAccess = () => {
+    refreshPlanStatus().then(() => {
+      const currentPlan = localStorage.getItem('user_plan');
+      if (currentPlan === 'paid') {
+        toast.success("Acesso ao plano premium atualizado! Atualizando página...");
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        toast.info("Você ainda não tem acesso ao plano premium");
+      }
+    });
+  };
+
   // Se o usuário já é um Cliente (tem acesso completo), mostrar interface diferente
-  if (isAuthenticated && isFullAccessUser) {
+  if (isAuthenticated && hasBirthPlanAccess) {
     return (
       <div className="bg-gradient-to-r from-green-50 to-maternal-50 p-6 rounded-xl border border-green-200 mb-8 shadow-md">
         <div className="flex flex-col md:flex-row items-center justify-between">
@@ -146,6 +133,24 @@ export function BirthPlanCTA() {
               <span>Formato respeitado por profissionais de saúde e maternidades</span>
             </li>
           </ul>
+          
+          {/* Button to check access again */}
+          <div className="mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isRefreshing}
+              onClick={handleRefreshAccess}
+              className="text-maternal-600 flex items-center gap-1"
+            >
+              {isRefreshing ? (
+                <RefreshCw className="h-3 w-3 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3 w-3" />
+              )}
+              {isRefreshing ? "Verificando..." : "Comprou recentemente? Verificar acesso"}
+            </Button>
+          </div>
         </div>
         <div className="md:w-1/3 flex flex-col items-center bg-white p-4 rounded-lg shadow-sm border border-maternal-200">
           <div className="text-center mb-4 w-full">

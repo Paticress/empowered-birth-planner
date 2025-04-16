@@ -6,15 +6,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useBirthPlanAccess } from "@/hooks/useBirthPlanAccess";
 
 export function CriarPlano() {
   const { user, isLoading, session, refreshSession, isAuthenticated } = useAuth();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
-  const [hasBirthPlanAccess, setHasBirthPlanAccess] = useState(false);
   const navigate = useNavigate();
+  const { hasBirthPlanAccess, refreshPlanStatus, isRefreshing } = useBirthPlanAccess();
 
   // Check authentication when the page loads
   useEffect(() => {
@@ -37,7 +38,6 @@ export function CriarPlano() {
       if (isAuthenticated) {
         console.log("Usuário já autenticado, verificando acesso");
         setIsCheckingAuth(false);
-        checkUserAccess();
         return;
       }
       
@@ -57,7 +57,6 @@ export function CriarPlano() {
             if (success) {
               console.log("Sessão recuperada com sucesso");
               setIsCheckingAuth(false);
-              checkUserAccess();
               return;
             }
           }
@@ -73,73 +72,6 @@ export function CriarPlano() {
       setIsCheckingAuth(false);
     };
     
-    // Check if the authenticated user has access to the birth plan builder
-    const checkUserAccess = async () => {
-      const userEmail = user?.email || localStorage.getItem('birthPlanEmail');
-      
-      if (!userEmail) {
-        console.log("Nenhum email de usuário encontrado, redirecionando para login");
-        navigate("/acesso-plano", { replace: true });
-        return;
-      }
-      
-      try {
-        console.log("Verificando acesso ao plano de parto para:", userEmail);
-        
-        // First check if we have the plan in localStorage
-        const cachedPlan = localStorage.getItem('user_plan');
-        
-        if (cachedPlan === 'paid') {
-          console.log("Acesso ao plano encontrado no localStorage");
-          setHasBirthPlanAccess(true);
-          setIsCheckingAccess(false);
-          return;
-        }
-        
-        // If not in localStorage or not 'paid', check the database
-        const { data, error } = await supabase
-          .from('users_db_birthplanbuilder')
-          .select('plan')
-          .eq('email', userEmail)
-          .maybeSingle();
-          
-        if (error) {
-          console.error("Erro ao verificar acesso ao plano:", error);
-          toast.error("Erro ao verificar seu acesso");
-          navigate("/acesso-plano", { replace: true });
-          return;
-        }
-        
-        if (!data || data.plan !== 'paid') {
-          console.log("Usuário não tem acesso ao plano de parto, redirecionando para site Wix");
-          toast.error("Você não tem acesso ao construtor de plano de parto");
-          
-          // Store the plan in localStorage
-          if (data?.plan) {
-            localStorage.setItem('user_plan', data.plan);
-          }
-          
-          // Redirect to Wix conversion page after a short delay
-          setTimeout(() => {
-            window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
-          }, 1500);
-          
-          return;
-        }
-        
-        console.log("Usuário tem acesso ao plano de parto");
-        // Store the plan in localStorage
-        localStorage.setItem('user_plan', data.plan);
-        setHasBirthPlanAccess(true);
-        setIsCheckingAccess(false);
-        
-      } catch (error) {
-        console.error("Erro inesperado ao verificar acesso:", error);
-        toast.error("Erro ao verificar seu acesso");
-        navigate("/acesso-plano", { replace: true });
-      }
-    };
-    
     // Add a small delay to ensure the AuthContext has time to initialize
     // This prevents incorrect redirects when there's a valid session
     const timer = setTimeout(() => {
@@ -149,7 +81,39 @@ export function CriarPlano() {
     return () => clearTimeout(timer);
   }, [user, isLoading, session, navigate, refreshSession, isAuthenticated]);
 
-  if (isLoading || isCheckingAuth || isCheckingAccess) {
+  // Effect to redirect if user doesn't have birth plan access
+  useEffect(() => {
+    // Only run this check after auth check is complete and we're not still loading access status
+    if (!isCheckingAuth && hasBirthPlanAccess === false) {
+      console.log("Usuário não tem acesso ao plano de parto, redirecionando para site Wix");
+      toast.error("Você não tem acesso ao construtor de plano de parto");
+      
+      // Redirect to Wix conversion page after a short delay
+      const timer = setTimeout(() => {
+        window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [hasBirthPlanAccess, isCheckingAuth, navigate]);
+
+  const handleRefreshAccess = () => {
+    refreshPlanStatus().then(() => {
+      const currentPlan = localStorage.getItem('user_plan');
+      if (currentPlan === 'paid') {
+        toast.success("Acesso verificado com sucesso! Recarregando página...");
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        toast.error("Você ainda não tem acesso ao construtor de plano de parto");
+        // Redirect to Wix conversion page after a short delay
+        setTimeout(() => {
+          window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+        }, 1500);
+      }
+    });
+  };
+
+  if (isLoading || isCheckingAuth || hasBirthPlanAccess === null) {
     return (
       <div className="min-h-screen flex flex-col bg-maternal-50">
         <Header />
@@ -162,6 +126,60 @@ export function CriarPlano() {
             <p className="mt-2 text-sm text-maternal-600">
               Aguarde um momento, estamos preparando tudo para você.
             </p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // If access is denied (hasBirthPlanAccess is false), show access denied screen with refresh option
+  if (hasBirthPlanAccess === false) {
+    return (
+      <div className="min-h-screen flex flex-col bg-maternal-50">
+        <Header />
+        <main className="flex-grow flex items-center justify-center pt-20">
+          <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-md">
+            <div className="h-16 w-16 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-maternal-900 mb-2">Acesso Restrito</h2>
+            <p className="text-maternal-700 mb-6">
+              Você não tem acesso ao construtor de plano de parto. Para acessar, adquira o plano premium.
+            </p>
+            <p className="text-maternal-600 text-sm mb-4">
+              Já comprou o acesso e está vendo esta mensagem? Clique no botão abaixo para verificar seu status.
+            </p>
+            <div className="flex flex-col space-y-3">
+              <Button
+                onClick={handleRefreshAccess}
+                disabled={isRefreshing}
+                className="w-full"
+              >
+                {isRefreshing ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                {isRefreshing ? "Verificando..." : "Verificar Meu Acesso"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos"}
+                className="w-full"
+              >
+                Adquirir Acesso Premium
+              </Button>
+              <Button
+                variant="link"
+                onClick={() => navigate("/dashboard")}
+                className="w-full"
+              >
+                Voltar para o Dashboard
+              </Button>
+            </div>
           </div>
         </main>
         <Footer />

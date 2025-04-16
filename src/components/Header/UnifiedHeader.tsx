@@ -1,13 +1,15 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, FileText, LayoutDashboard } from 'lucide-react';
+import { Menu, X, BookOpen, FileText, LayoutDashboard, RefreshCw } from 'lucide-react';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBirthPlanAccess } from '@/hooks/useBirthPlanAccess';
 import { UserMenu } from './UserMenu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LogoutButton } from '@/components/ui/LogoutButton';
+import { toast } from 'sonner';
 
 export function UnifiedHeader() {
   const [scrolled, setScrolled] = useState(false);
@@ -15,7 +17,7 @@ export function UnifiedHeader() {
   const location = useLocation();
   const { navigateTo } = useNavigation();
   const { isAuthenticated, user } = useAuth();
-  const hasBirthPlanAccess = useBirthPlanAccess();
+  const { hasBirthPlanAccess, refreshPlanStatus, isRefreshing } = useBirthPlanAccess();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -42,9 +44,21 @@ export function UnifiedHeader() {
   const handleBirthPlanClick = () => {
     if (hasBirthPlanAccess) {
       navigateTo('/criar-plano');
+    } else if (isAuthenticated) {
+      // For authenticated users without access, first try to refresh their status
+      refreshPlanStatus().then(() => {
+        const currentPlan = localStorage.getItem('user_plan');
+        if (currentPlan === 'paid') {
+          toast.success("Acesso atualizado! Redirecionando...");
+          setTimeout(() => navigateTo('/criar-plano'), 1000);
+        } else {
+          // Redirect LEADs to the Wix landing page
+          window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+        }
+      });
     } else {
-      // Redirect LEADs to the Wix landing page
-      window.location.href = "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos";
+      // Redirect non-authenticated users to login
+      navigateTo('/acesso-plano?from=birth-plan');
     }
   };
 
@@ -80,9 +94,14 @@ export function UnifiedHeader() {
             <Button 
               variant={isActive('/criar-plano') ? 'secondary' : 'ghost'}
               onClick={handleBirthPlanClick}
+              disabled={isRefreshing}
               className={isActive('/criar-plano') ? 'text-white' : 'text-maternal-700 hover:text-maternal-900'}
             >
-              <FileText className="h-4 w-4 mr-2" />
+              {isRefreshing ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <FileText className="h-4 w-4 mr-2" />
+              )}
               Construtor Virtual
             </Button>
             
@@ -143,9 +162,14 @@ export function UnifiedHeader() {
                       handleBirthPlanClick();
                       setMobileMenuOpen(false);
                     }}
+                    disabled={isRefreshing}
                     className={`w-full justify-start ${isActive('/criar-plano') ? 'text-white' : 'text-maternal-700'}`}
                   >
-                    <FileText className="h-4 w-4 mr-2" />
+                    {isRefreshing ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <FileText className="h-4 w-4 mr-2" />
+                    )}
                     Construtor Virtual
                   </Button>
                   
@@ -171,9 +195,14 @@ export function UnifiedHeader() {
                           handleBirthPlanClick();
                           setMobileMenuOpen(false);
                         }}
+                        disabled={isRefreshing}
                         className="w-full justify-start text-maternal-700"
                       >
-                        <FileText className="h-4 w-4 mr-2" />
+                        {isRefreshing ? (
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <FileText className="h-4 w-4 mr-2" />
+                        )}
                         {hasBirthPlanAccess ? 'Retomar Construtor Virtual' : 'Adquirir Construtor Virtual'}
                       </Button>
                       

@@ -1,9 +1,11 @@
 
-import { BookOpen, CheckCircle2, Circle } from "lucide-react";
+import { BookOpen, CheckCircle2, Circle, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useNavigation } from "@/hooks/useNavigation";
+import { useBirthPlanAccess } from "@/hooks/useBirthPlanAccess";
+import { toast } from "sonner";
 
 interface GuideSection {
   id: string;
@@ -18,17 +20,44 @@ interface GuideProgressCardProps {
 
 export function GuideProgressCard({ sections, currentTab, isCompleted }: GuideProgressCardProps) {
   const { navigateTo } = useNavigation();
+  const { refreshPlanStatus, isRefreshing } = useBirthPlanAccess();
   
   // Modificamos esta função para criar URLs específicas para cada seção
   const handleSectionClick = (sectionId: string) => {
     navigateTo(`/guia-online?tab=${sectionId}`);
   };
+
+  const handleRefreshAccess = () => {
+    refreshPlanStatus().then(() => {
+      const currentPlan = localStorage.getItem('user_plan');
+      if (currentPlan === 'paid') {
+        toast.success("Acesso atualizado com sucesso!");
+        // No need to reload since we're not showing anything different based on plan here
+      }
+    });
+  };
   
   return (
     <Card className="p-6 bg-white border border-maternal-100">
-      <h2 className="text-xl font-semibold text-maternal-900 mb-4 flex items-center">
-        <BookOpen className="h-5 w-5 mr-2 text-maternal-600" /> Guia do Parto Respeitoso
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-maternal-900 flex items-center">
+          <BookOpen className="h-5 w-5 mr-2 text-maternal-600" /> Guia do Parto Respeitoso
+        </h2>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleRefreshAccess}
+          disabled={isRefreshing}
+          className="h-8 px-2 text-xs flex items-center gap-1 text-maternal-600"
+        >
+          {isRefreshing ? (
+            <RefreshCw className="h-3 w-3 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3 w-3" />
+          )}
+          {isRefreshing ? "Verificando..." : "Verificar acesso"}
+        </Button>
+      </div>
       
       <div className="space-y-2">
         {sections.map((section, index) => {

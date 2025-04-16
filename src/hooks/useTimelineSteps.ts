@@ -1,5 +1,13 @@
 
-import { useNavigation } from "@/hooks/useNavigation";
+interface GuideSection {
+  id: string;
+  name: string;
+}
+
+interface BirthPlanStage {
+  id: string;
+  name: string;
+}
 
 interface TimelineStep {
   id: string;
@@ -8,6 +16,17 @@ interface TimelineStep {
   onClick: () => void;
 }
 
+interface UseTimelineStepsProps {
+  guideSections: GuideSection[];
+  birthPlanStages: BirthPlanStage[];
+  currentGuideTab: string | null;
+  hasStartedBirthPlan: boolean;
+  hasBirthPlanAccess: boolean | null;
+  birthPlanProgress: number;
+}
+
+import { useNavigation } from "./useNavigation";
+
 export function useTimelineSteps({
   guideSections,
   birthPlanStages,
@@ -15,33 +34,62 @@ export function useTimelineSteps({
   hasStartedBirthPlan,
   hasBirthPlanAccess,
   birthPlanProgress
-}: {
-  guideSections: Array<{ id: string; name: string }>;
-  birthPlanStages: Array<{ id: string; name: string }>;
-  currentGuideTab: string | null;
-  hasStartedBirthPlan: boolean;
-  hasBirthPlanAccess: boolean | null;
-  birthPlanProgress: number;
-}) {
+}: UseTimelineStepsProps) {
   const { navigateTo } = useNavigation();
   
-  const guideTimelineSteps: TimelineStep[] = guideSections.map(section => ({
-    id: section.id,
-    name: section.name,
-    isCompleted: currentGuideTab ? 
-      guideSections.findIndex(s => s.id === section.id) <= 
-      guideSections.findIndex(s => s.id === currentGuideTab) : 
-      false,
-    onClick: () => navigateTo(`/guia-online?tab=${section.id}`),
-  }));
+  // Create guide timeline steps
+  const guideTimelineSteps: TimelineStep[] = guideSections.map(section => {
+    const currentIndex = currentGuideTab 
+      ? guideSections.findIndex(s => s.id === currentGuideTab) 
+      : -1;
+    
+    const sectionIndex = guideSections.findIndex(s => s.id === section.id);
+    const isCompleted = currentIndex >= sectionIndex;
+    
+    return {
+      id: section.id,
+      name: section.name,
+      isCompleted,
+      onClick: () => navigateTo(`/guia-online?tab=${section.id}`)
+    };
+  });
   
-  const birthPlanTimelineSteps: TimelineStep[] = birthPlanStages.map((stage, index) => ({
-    id: stage.id,
-    name: stage.name,
-    isCompleted: hasStartedBirthPlan && hasBirthPlanAccess && 
-      (birthPlanProgress > (index * (100 / birthPlanStages.length))),
-    onClick: () => navigateTo(`/criar-plano?stage=${stage.id}`),
-  }));
+  // Create birth plan timeline steps
+  const birthPlanTimelineSteps: TimelineStep[] = birthPlanStages.map(stage => {
+    // If no birth plan access, mark all as not completed
+    if (!hasBirthPlanAccess) {
+      return {
+        id: stage.id,
+        name: stage.name,
+        isCompleted: false,
+        onClick: () => window.open("https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos", "_blank")
+      };
+    }
+    
+    // If not started birth plan yet, mark all as not completed
+    if (!hasStartedBirthPlan) {
+      return {
+        id: stage.id,
+        name: stage.name,
+        isCompleted: false,
+        onClick: () => navigateTo("/criar-plano")
+      };
+    }
+    
+    // Determine completion based on progress
+    // This is a simplified approach - we're assuming stages are completed sequentially
+    const stageIndex = birthPlanStages.findIndex(s => s.id === stage.id);
+    const totalStages = birthPlanStages.length;
+    const progressPerStage = 100 / totalStages;
+    const isCompleted = birthPlanProgress >= (stageIndex + 1) * progressPerStage;
+    
+    return {
+      id: stage.id,
+      name: stage.name,
+      isCompleted,
+      onClick: () => navigateTo("/criar-plano")
+    };
+  });
   
   return { guideTimelineSteps, birthPlanTimelineSteps };
 }

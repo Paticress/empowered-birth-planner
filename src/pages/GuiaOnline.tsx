@@ -4,7 +4,7 @@ import { OnlineGuide } from '@/components/Guide/OnlineGuide';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigation } from '@/hooks/useNavigation';
 import { Button } from '@/components/ui/button';
-import { Mail } from 'lucide-react';
+import { Mail, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocation } from 'react-router-dom';
@@ -15,6 +15,7 @@ export function GuiaOnline() {
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -71,6 +72,7 @@ export function GuiaOnline() {
           
           // Store the user plan in localStorage for easy access
           localStorage.setItem('user_plan', data.plan);
+          localStorage.setItem('user_plan_checked_at', Date.now().toString());
         } else {
           console.log("GuiaOnline: User not found in database, showing auth prompt");
           setShowAuthPrompt(true);
@@ -87,6 +89,67 @@ export function GuiaOnline() {
     checkAccess();
     
   }, [isAuthenticated, user, isLoading, location.search]);
+
+  const handleRefreshAccess = async () => {
+    if (isRefreshing) return;
+    
+    setIsRefreshing(true);
+    
+    try {
+      // Get the email from multiple sources for reliability
+      const userEmail = user?.email || localStorage.getItem('birthPlanEmail');
+      
+      if (!userEmail) {
+        toast.error("Não foi possível identificar seu email");
+        return;
+      }
+      
+      // Force-check the database for the latest plan status
+      const { data, error } = await supabase
+        .from('users_db_birthplanbuilder')
+        .select('email, plan')
+        .eq('email', userEmail)
+        .maybeSingle();
+        
+      if (error) {
+        console.error("Error refreshing access:", error);
+        toast.error("Erro ao verificar acesso");
+        return;
+      }
+      
+      if (data) {
+        // Update localStorage with the latest data
+        localStorage.setItem('user_plan', data.plan);
+        localStorage.setItem('user_plan_checked_at', Date.now().toString());
+        
+        setIsAuthorized(true);
+        setShowAuthPrompt(false);
+        toast.success("Acesso verificado com sucesso!");
+      } else {
+        // Try to add the user to the database as they are authenticated
+        const { error: insertError } = await supabase
+          .from('users_db_birthplanbuilder')
+          .insert({ email: userEmail });
+          
+        if (insertError) {
+          console.error("Error adding user to database:", insertError);
+          toast.error("Erro ao adicionar usuário");
+        } else {
+          console.log("Added user to database:", userEmail);
+          localStorage.setItem('user_plan', 'free');
+          localStorage.setItem('user_plan_checked_at', Date.now().toString());
+          setIsAuthorized(true);
+          setShowAuthPrompt(false);
+          toast.success("Acesso concedido");
+        }
+      }
+    } catch (error) {
+      console.error("Unexpected error during refresh:", error);
+      toast.error("Erro inesperado ao verificar acesso");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const handleLogin = () => {
     // Add parameter indicating redirection from guide
@@ -119,11 +182,33 @@ export function GuiaOnline() {
               <Button 
                 onClick={handleLogin}
                 variant="birth-plan-builder"
-                className="font-semibold"
+                className="font-semibold mb-4"
               >
                 <Mail className="mr-2 h-5 w-5" />
                 Receber Link de Acesso
               </Button>
+              
+              {isAuthenticated && (
+                <div className="mt-4">
+                  <p className="text-sm text-maternal-600 mb-2">
+                    Já tem acesso mas está vendo esta mensagem?
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefreshAccess}
+                    disabled={isRefreshing}
+                    className="text-sm"
+                  >
+                    {isRefreshing ? (
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                    )}
+                    {isRefreshing ? "Verificando..." : "Verificar Meu Acesso"}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         ) : (

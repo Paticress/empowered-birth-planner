@@ -1,8 +1,11 @@
 
-import { Clock, Lock } from "lucide-react";
+import { Clock, Lock, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { useNavigation } from "@/hooks/useNavigation";
+import { useBirthPlanAccess } from "@/hooks/useBirthPlanAccess";
+import { toast } from "sonner";
 
 interface ProgressCardProps {
   guideProgress: number;
@@ -11,6 +14,21 @@ interface ProgressCardProps {
 }
 
 export function ProgressCard({ guideProgress, birthPlanProgress, isFullAccessUser }: ProgressCardProps) {
+  const { navigateTo } = useNavigation();
+  const { refreshPlanStatus, isRefreshing } = useBirthPlanAccess();
+  
+  const handleCheckAccess = () => {
+    refreshPlanStatus().then(() => {
+      const currentPlan = localStorage.getItem('user_plan');
+      if (currentPlan === 'paid') {
+        toast.success("Acesso ao plano premium atualizado! Atualizando página...");
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        window.open("https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos", "_blank");
+      }
+    });
+  };
+  
   return (
     <Card className="p-6 bg-white border border-maternal-100">
       <h2 className="text-xl font-semibold text-maternal-900 mb-4 flex items-center">
@@ -47,10 +65,12 @@ export function ProgressCard({ guideProgress, birthPlanProgress, isFullAccessUse
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-xs text-maternal-500 hover:text-maternal-700 p-0 h-auto"
-                  onClick={() => window.open("https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos", "_blank")}
+                  disabled={isRefreshing}
+                  className="text-xs text-maternal-500 hover:text-maternal-700 p-0 h-auto flex items-center gap-1"
+                  onClick={handleCheckAccess}
                 >
-                  Adquirir acesso
+                  {isRefreshing && <RefreshCw className="h-3 w-3 animate-spin" />}
+                  {isRefreshing ? "Verificando acesso..." : "Adquirir acesso"}
                 </Button>
               </div>
             </div>

@@ -1,21 +1,20 @@
 
-import { BookOpen, FileText, ChevronRight } from "lucide-react";
 import { LucideIcon } from "lucide-react";
+import { BookOpen, FileText } from "lucide-react";
+import { useNavigation } from "./useNavigation";
 
-interface RecommendedStep {
-  title: string;
-  description: string;
-  path: string;
-  icon: LucideIcon;
+interface GuideSection {
+  id: string;
+  name: string;
 }
 
-interface UseRecommendedStepParams {
+interface UseRecommendedStepProps {
   currentGuideTab: string | null;
   hasBirthPlanAccess: boolean | null;
   guideProgress: number;
   hasStartedBirthPlan: boolean;
   isGuideCompleted: boolean;
-  guideSections: { id: string; name: string }[];
+  guideSections: GuideSection[];
 }
 
 export function useRecommendedStep({
@@ -25,53 +24,62 @@ export function useRecommendedStep({
   hasStartedBirthPlan,
   isGuideCompleted,
   guideSections
-}: UseRecommendedStepParams): RecommendedStep {
-  if (!currentGuideTab && !hasBirthPlanAccess) {
+}: UseRecommendedStepProps) {
+  const { navigateTo } = useNavigation();
+  
+  // If guide not started yet, recommend starting the guide
+  if (!currentGuideTab && guideProgress === 0) {
     return {
-      title: "Conheça o Guia do Parto Respeitoso",
-      description: "Leia nosso guia completo com informações importantes sobre o parto.",
+      title: "Comece Lendo o Guia",
+      description: "Aprenda sobre o parto respeitoso e como criar um plano de parto eficaz.",
       path: "/guia-online",
-      icon: BookOpen
-    };
-  } else if (guideProgress < 100 && !hasBirthPlanAccess) {
-    const currentIndex = guideSections.findIndex(section => section.id === currentGuideTab);
-    const nextSectionName = currentIndex < guideSections.length - 1 
-      ? guideSections[currentIndex + 1].name 
-      : "restantes";
-    
-    return {
-      title: `Continue a leitura do Guia`,
-      description: `Continue de onde parou na seção "${nextSectionName}".`,
-      path: "/guia-online",
-      icon: BookOpen
-    };
-  } else if (isGuideCompleted && !hasBirthPlanAccess) {
-    return {
-      title: "Crie seu Plano de Parto",
-      description: "Agora que você conhece o guia, crie seu plano de parto personalizado.",
-      path: "/criar-plano",
-      icon: FileText
-    };
-  } else if (!hasStartedBirthPlan && hasBirthPlanAccess) {
-    return {
-      title: "Crie seu Plano de Parto",
-      description: "Comece a criar seu plano de parto personalizado com nosso construtor.",
-      path: "/criar-plano",
-      icon: FileText
-    };
-  } else if (hasBirthPlanAccess) {
-    return {
-      title: "Continue seu Plano de Parto",
-      description: "Retome de onde parou na criação do seu plano de parto.",
-      path: "/criar-plano",
-      icon: ChevronRight
-    };
-  } else {
-    return {
-      title: "Explore o Guia Online",
-      description: "Conheça nosso guia completo com informações importantes sobre o parto.",
-      path: "/guia-online",
+      onClick: () => navigateTo("/guia-online"),
       icon: BookOpen
     };
   }
+  
+  // If guide started but not completed, recommend continuing
+  if (currentGuideTab && !isGuideCompleted) {
+    const currentSectionIndex = guideSections.findIndex(s => s.id === currentGuideTab);
+    const sectionName = guideSections[currentSectionIndex]?.name || "atual";
+    
+    return {
+      title: "Continue o Guia",
+      description: `Continue sua leitura na seção '${sectionName}'.`,
+      path: `/guia-online?tab=${currentGuideTab}`,
+      onClick: () => navigateTo(`/guia-online?tab=${currentGuideTab}`),
+      icon: BookOpen
+    };
+  }
+  
+  // If guide completed and has birth plan access but not started, recommend starting birth plan
+  if (isGuideCompleted && hasBirthPlanAccess && !hasStartedBirthPlan) {
+    return {
+      title: "Crie seu Plano de Parto",
+      description: "Agora que você concluiu a leitura do guia, crie seu plano de parto personalizado.",
+      path: "/criar-plano",
+      onClick: () => navigateTo("/criar-plano"),
+      icon: FileText
+    };
+  }
+  
+  // If birth plan started but not completed, recommend continuing
+  if (hasBirthPlanAccess && hasStartedBirthPlan) {
+    return {
+      title: "Continue seu Plano de Parto",
+      description: "Continue a criação do seu plano de parto personalizado.",
+      path: "/criar-plano",
+      onClick: () => navigateTo("/criar-plano"),
+      icon: FileText
+    };
+  }
+  
+  // Default (fallback): guide completed but no birth plan access
+  return {
+    title: "Adquira Acesso ao Construtor",
+    description: "Complete sua jornada adquirindo acesso ao construtor de plano de parto.",
+    path: "https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos",
+    onClick: () => window.open("https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos", "_blank"),
+    icon: FileText
+  };
 }
