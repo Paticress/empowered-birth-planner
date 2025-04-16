@@ -54,6 +54,7 @@ export function useAuthCheck() {
       
       // Final attempt to check with Supabase directly
       try {
+        // Updated: Using supabase.auth.getSession() instead of supabase.auth.getSession()
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           console.log("Session found directly from Supabase:", data.session.user?.email);
