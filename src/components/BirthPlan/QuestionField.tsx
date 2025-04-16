@@ -1,3 +1,4 @@
+
 import { 
   FormControl,
   FormField,
@@ -12,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Question } from './types/questionnaire';
 import { Control } from 'react-hook-form';
+import { useEffect } from 'react';
 
 interface QuestionFieldProps {
   question: Question;
@@ -20,6 +22,17 @@ interface QuestionFieldProps {
 }
 
 export function QuestionField({ question, errors, control }: QuestionFieldProps) {
+  // Special debug for problematic fields
+  const specialQuestionIds = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+  
+  useEffect(() => {
+    if (specialQuestionIds.includes(question.id)) {
+      console.log(`QuestionField rendering special question: ${question.id}`);
+      console.log(`Question type: ${question.type}`);
+      console.log(`Question options:`, question.options);
+    }
+  }, [question.id, question.type, question.options]);
+
   return (
     <FormItem key={question.id} className="space-y-2">
       <div className="flex items-start gap-2">
@@ -46,11 +59,12 @@ export function QuestionField({ question, errors, control }: QuestionFieldProps)
         <RadioQuestion question={question} control={control} />
       )}
       
-      {question.type === 'checkbox' && question.options && (
+      {/* Always treat special field IDs as checkbox type questions */}
+      {(question.type === 'checkbox' || specialQuestionIds.includes(question.id)) && question.options && (
         <CheckboxQuestion question={question} control={control} />
       )}
       
-      {question.type === 'select' && question.options && (
+      {question.type === 'select' && question.options && !specialQuestionIds.includes(question.id) && (
         <SelectQuestion question={question} control={control} />
       )}
       
@@ -130,6 +144,15 @@ function RadioQuestion({ question, control }: { question: Question; control: Con
 }
 
 function CheckboxQuestion({ question, control }: { question: Question; control: Control<Record<string, any>, any> }) {
+  // Special handling and debug for special fields
+  const isSpecialField = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(question.id);
+  
+  useEffect(() => {
+    if (isSpecialField) {
+      console.log(`Rendering CheckboxQuestion for special field: ${question.id}`);
+    }
+  }, [isSpecialField, question.id]);
+  
   return (
     <div className="space-y-2">
       {question.options?.map((option) => (
@@ -137,24 +160,31 @@ function CheckboxQuestion({ question, control }: { question: Question; control: 
           key={option}
           control={control}
           name={`${question.id}.${option}`}
-          render={({ field }) => (
-            <div className="flex items-center space-x-2">
-              <FormControl>
-                <Checkbox
-                  id={`${question.id}-${option}`}
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  className="rounded-sm"
-                />
-              </FormControl>
-              <label
-                htmlFor={`${question.id}-${option}`}
-                className="text-maternal-800"
-              >
-                {option}
-              </label>
-            </div>
-          )}
+          render={({ field }) => {
+            // Debug logging for special fields
+            if (isSpecialField) {
+              console.log(`Field value for ${question.id}.${option}:`, field.value);
+            }
+            
+            return (
+              <div className="flex items-center space-x-2">
+                <FormControl>
+                  <Checkbox
+                    id={`${question.id}-${option}`}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="rounded-sm"
+                  />
+                </FormControl>
+                <label
+                  htmlFor={`${question.id}-${option}`}
+                  className="text-maternal-800"
+                >
+                  {option}
+                </label>
+              </div>
+            );
+          }}
         />
       ))}
     </div>

@@ -29,6 +29,24 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
           console.log("Carregando respostas salvas:", parsedAnswers);
           setFormData(parsedAnswers);
           
+          // Check for special fields and log them
+          const specialFields = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+          specialFields.forEach(field => {
+            if (parsedAnswers[field]) {
+              console.log(`Loaded special field ${field}:`, parsedAnswers[field]);
+              
+              // If it's an object, log the selected options
+              if (typeof parsedAnswers[field] === 'object' && !Array.isArray(parsedAnswers[field])) {
+                const selectedOptions = Object.entries(parsedAnswers[field])
+                  .filter(([_, value]) => !!value)
+                  .map(([key]) => key);
+                console.log(`Selected options for ${field}:`, selectedOptions);
+              }
+            } else {
+              console.log(`No saved data for special field ${field}`);
+            }
+          });
+          
           // Determine which sections are completed based on saved answers
           const completed: string[] = [];
           questionnaireSections.forEach(section => {
@@ -61,6 +79,23 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
   useEffect(() => {
     if (Object.keys(formData).length > 0 && isLoaded) {
       console.log("Salvando respostas no localStorage:", formData);
+      
+      // Special debug logging for the problematic fields
+      const specialFields = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+      specialFields.forEach(field => {
+        if (formData[field]) {
+          console.log(`Saving special field ${field}:`, formData[field]);
+          
+          // If it's an object, log the selected options
+          if (typeof formData[field] === 'object' && !Array.isArray(formData[field])) {
+            const selectedOptions = Object.entries(formData[field])
+              .filter(([_, value]) => !!value)
+              .map(([key]) => key);
+            console.log(`Selected options for ${field}:`, selectedOptions);
+          }
+        }
+      });
+      
       localStorage.setItem('birthPlanAnswers', JSON.stringify(formData));
     }
   }, [formData, isLoaded]);
@@ -86,6 +121,17 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
         emergencyPreferences: updatedFormData.emergencyPreferences,
         highRiskComplications: updatedFormData.highRiskComplications,
         lowRiskOccurrences: updatedFormData.lowRiskOccurrences
+      });
+      
+      // For each special field, log the selected options if it exists
+      const specialFields = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+      specialFields.forEach(field => {
+        if (updatedFormData[field] && typeof updatedFormData[field] === 'object') {
+          const selectedOptions = Object.entries(updatedFormData[field])
+            .filter(([_, value]) => !!value)
+            .map(([key]) => key);
+          console.log(`Selected options for ${field}:`, selectedOptions);
+        }
       });
     }
     

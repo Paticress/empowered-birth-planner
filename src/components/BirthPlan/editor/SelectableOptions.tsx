@@ -54,15 +54,30 @@ export function SelectableOptions({
     return null;
   }
   
-  // Debug for special questions
-  if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+  // Enhanced debugging for special questions
+  if (isSpecialField || ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
     console.log(`SelectableOptions for special question: ${questionId}`);
+    console.log(`Question type: ${question.type}`);
+    console.log(`Is special field: ${isSpecialField}`);
     console.log(`Has answer:`, !!questionnaireAnswers[questionId]);
     console.log(`Options:`, question.options);
     console.log(`Current selected options:`, selectedOptions[questionId]);
+    
+    // If we have answers in the questionnaire, log them in detail
+    if (questionnaireAnswers[questionId]) {
+      if (typeof questionnaireAnswers[questionId] === 'object') {
+        const selectedFromQuestionnaire = Object.entries(questionnaireAnswers[questionId])
+          .filter(([_, value]) => !!value)
+          .map(([key]) => key);
+        console.log(`Selected options from questionnaire:`, selectedFromQuestionnaire);
+      } else {
+        console.log(`Answer value:`, questionnaireAnswers[questionId]);
+      }
+    }
   }
   
   const handleCheckedChange = (option: string, checked: boolean) => {
+    // For special fields, we always use checkbox behavior even if originally radio/select
     const newSelections = updateSelectionState(
       questionId,
       option,
@@ -71,6 +86,15 @@ export function SelectableOptions({
       (question.type === 'radio' || question.type === 'select') && !isSpecialField,
       isSpecialField
     );
+    
+    // Log what's happening with the selection for special fields
+    if (isSpecialField) {
+      console.log(`Updating selection for special field ${questionId}:`, {
+        option,
+        checked,
+        newState: newSelections[questionId]
+      });
+    }
     
     setSelectedOptions(newSelections);
   };
@@ -81,7 +105,7 @@ export function SelectableOptions({
     handleCheckedChange(option, true);
   };
   
-  // Special treatment for special fields with radio/select types
+  // Special treatment for special fields - ALWAYS render as checkboxes
   if (isSpecialField) {
     return (
       <CheckboxOptions

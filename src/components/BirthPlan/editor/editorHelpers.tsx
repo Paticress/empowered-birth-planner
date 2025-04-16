@@ -21,6 +21,15 @@ export const handleAddSelectedOptions = (
   console.log('Current selected options:', selectedOptions);
   console.log('Textarea values:', textareaValues);
   
+  // Special debug for problematic fields
+  const specialFieldKeys = ['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'];
+  if (specialFieldKeys.includes(activeFieldKey)) {
+    console.log(`Processing special field: ${activeFieldKey}`);
+    // Log which question IDs are associated with this field
+    const questionIds = Object.keys(selectedOptions);
+    console.log(`Question IDs in selected options:`, questionIds);
+  }
+  
   const updatedPlan = { ...localBirthPlan };
   
   // Group selected options by question type to maintain consistent formatting
@@ -43,20 +52,33 @@ export const handleAddSelectedOptions = (
         
         const questionType = questionInfo?.question?.type || 'checkbox';
         
+        // Special handling for special fields - always treat as checkbox regardless of original type
+        const isSpecialField = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId);
+        const effectiveType = isSpecialField ? 'checkbox' : questionType;
+        
         // Store the question type
-        questionTypes[questionId] = questionType;
+        questionTypes[questionId] = effectiveType;
         
         if (!allSelectedOptions[questionId]) {
           allSelectedOptions[questionId] = [];
         }
         
-        // For radio/select questions, we only want the last selected option
-        if (questionType === 'radio' || questionType === 'select') {
+        // For radio/select questions (unless special field), we only want the last selected option
+        if ((questionType === 'radio' || questionType === 'select') && !isSpecialField) {
           // Only take the last selected option for radio buttons
           allSelectedOptions[questionId] = [selectedForQuestion[selectedForQuestion.length - 1]];
         } else {
-          // For checkboxes, add all selected options
+          // For checkboxes or special fields, add all selected options
           allSelectedOptions[questionId] = [...selectedForQuestion];
+        }
+        
+        // Special debug logging for problematic fields
+        if (isSpecialField) {
+          console.log(`Processed special question ${questionId}`, {
+            originalType: questionType,
+            effectiveType,
+            selectedOptions: allSelectedOptions[questionId]
+          });
         }
       }
     }
@@ -112,13 +134,22 @@ export const handleAddSelectedOptions = (
       const options = allSelectedOptions[questionId];
       if (!options || options.length === 0) return '';
       
+      // Special debug logging for problematic fields
+      const isSpecialField = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId);
+      if (isSpecialField) {
+        console.log(`Formatting special field ${questionId}`, {
+          type: questionTypes[questionId],
+          options
+        });
+      }
+      
       // For textarea, just use the text as is without any prefixes
       if (questionTypes[questionId] === 'textarea') {
         return options[0];
       }
       
       // For radio/select/checkbox, just return the selected options without prefixes
-      return options.join(', ');
+      return options.join('\n\n');
     }).filter(text => text.length > 0);
     
     if (formattedOptions.length > 0) {

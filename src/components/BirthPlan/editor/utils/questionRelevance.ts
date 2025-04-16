@@ -33,6 +33,7 @@ export const getRelevantQuestionsForField = (
   console.log(`Getting relevant questions for field: ${fieldKey}`);
   
   // Special field handling - hardcoded mappings for problematic fields
+  // Ensure these special fields ALWAYS have exact 1:1 mappings
   const specialFieldMappings: Record<string, string[]> = {
     'emergencyScenarios': ['emergencyPreferences'],
     'highRiskComplications': ['highRiskComplications'],
@@ -50,7 +51,7 @@ export const getRelevantQuestionsForField = (
     for (const section of questionnaireSections) {
       for (const question of section.questions) {
         if (specialQuestionIds.includes(question.id)) {
-          console.log(`Found special question ${question.id} for field ${fieldKey}`);
+          console.log(`Found special question ${question.id} for field ${fieldKey} in section ${section.id}`);
           relevantQuestions.push({
             question,
             sectionId: section.id

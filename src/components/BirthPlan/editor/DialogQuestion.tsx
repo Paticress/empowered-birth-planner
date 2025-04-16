@@ -23,12 +23,27 @@ export function DialogQuestion({
 }: DialogQuestionProps) {
   if (!question) return null;
 
-  // For debugging special fields
+  // Enhanced debugging for special fields
   if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
     console.log(`DialogQuestion rendering special question: ${questionId}`);
     console.log(`Question data:`, question);
+    console.log(`Question type:`, question.type);
     console.log(`Selected options:`, selectedOptions[questionId]);
-    console.log(`Questionnaire answers:`, questionnaireAnswers[questionId]);
+    
+    // Check what's in questionnaire answers for this ID
+    if (questionnaireAnswers && questionnaireAnswers[questionId]) {
+      console.log(`Questionnaire answers for ${questionId}:`, questionnaireAnswers[questionId]);
+      
+      // If it's an object, log the selected true values
+      if (typeof questionnaireAnswers[questionId] === 'object' && !Array.isArray(questionnaireAnswers[questionId])) {
+        const selectedOptions = Object.entries(questionnaireAnswers[questionId])
+          .filter(([_, value]) => !!value)
+          .map(([key]) => key);
+        console.log(`Selected options from questionnaire for ${questionId}:`, selectedOptions);
+      }
+    } else {
+      console.log(`No questionnaire answers found for ${questionId}`);
+    }
   }
 
   // Render textarea when question is textarea type
@@ -49,7 +64,8 @@ export function DialogQuestion({
     );
   }
 
-  // Special treatment for known special situation questions
+  // Special treatment for known special situation questions - ALWAYS treat these as checkbox type
+  // even if they're marked as radio or select in the data
   const isSpecialField = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId);
 
   // Render selectable options (radio/select/checkbox)
