@@ -22,18 +22,16 @@ interface QuestionFieldProps {
 }
 
 export function QuestionField({ question, errors, control }: QuestionFieldProps) {
-  // List of question IDs that must be treated as checkboxes regardless of their type
+  // Special debug for problematic fields
   const specialQuestionIds = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
-  const isSpecialQuestion = specialQuestionIds.includes(question.id);
   
   useEffect(() => {
-    if (isSpecialQuestion) {
-      console.log(`QuestionField initialized special question: ${question.id}`);
-      console.log(`Original question type: ${question.type}`);
-      console.log(`Will be rendered as checkbox regardless of type`);
+    if (specialQuestionIds.includes(question.id)) {
+      console.log(`QuestionField rendering special question: ${question.id}`);
+      console.log(`Question type: ${question.type}`);
       console.log(`Question options:`, question.options);
     }
-  }, [question.id, question.type, question.options, isSpecialQuestion]);
+  }, [question.id, question.type, question.options]);
 
   return (
     <FormItem key={question.id} className="space-y-2">
@@ -49,24 +47,24 @@ export function QuestionField({ question, errors, control }: QuestionFieldProps)
         </div>
       )}
       
-      {question.type === 'text' && !isSpecialQuestion && (
+      {question.type === 'text' && (
         <TextQuestion question={question} control={control} />
       )}
       
-      {question.type === 'textarea' && !isSpecialQuestion && (
+      {question.type === 'textarea' && (
         <TextareaQuestion question={question} control={control} />
       )}
       
-      {question.type === 'radio' && question.options && !isSpecialQuestion && (
+      {question.type === 'radio' && question.options && (
         <RadioQuestion question={question} control={control} />
       )}
       
-      {/* Always treat special question IDs as checkbox type questions regardless of their defined type */}
-      {(question.type === 'checkbox' || isSpecialQuestion) && question.options && (
-        <CheckboxQuestion question={question} control={control} isSpecialQuestion={isSpecialQuestion} />
+      {/* Always treat special field IDs as checkbox type questions */}
+      {(question.type === 'checkbox' || specialQuestionIds.includes(question.id)) && question.options && (
+        <CheckboxQuestion question={question} control={control} />
       )}
       
-      {question.type === 'select' && question.options && !isSpecialQuestion && (
+      {question.type === 'select' && question.options && !specialQuestionIds.includes(question.id) && (
         <SelectQuestion question={question} control={control} />
       )}
       
@@ -145,21 +143,15 @@ function RadioQuestion({ question, control }: { question: Question; control: Con
   );
 }
 
-function CheckboxQuestion({ 
-  question, 
-  control, 
-  isSpecialQuestion = false 
-}: { 
-  question: Question; 
-  control: Control<Record<string, any>, any>;
-  isSpecialQuestion?: boolean;
-}) {
+function CheckboxQuestion({ question, control }: { question: Question; control: Control<Record<string, any>, any> }) {
+  // Special handling and debug for special fields
+  const isSpecialField = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(question.id);
+  
   useEffect(() => {
-    if (isSpecialQuestion) {
-      console.log(`Rendering CheckboxQuestion for special question: ${question.id}`);
-      console.log(`Options:`, question.options);
+    if (isSpecialField) {
+      console.log(`Rendering CheckboxQuestion for special field: ${question.id}`);
     }
-  }, [isSpecialQuestion, question.id, question.options]);
+  }, [isSpecialField, question.id]);
   
   return (
     <div className="space-y-2">
@@ -170,7 +162,7 @@ function CheckboxQuestion({
           name={`${question.id}.${option}`}
           render={({ field }) => {
             // Debug logging for special fields
-            if (isSpecialQuestion) {
+            if (isSpecialField) {
               console.log(`Field value for ${question.id}.${option}:`, field.value);
             }
             

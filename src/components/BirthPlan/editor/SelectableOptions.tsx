@@ -25,58 +25,16 @@ export function SelectableOptions({
   // Add state to track initialization
   const [initialized, setInitialized] = useState(false);
   
-  // Special fields that must be treated as checkboxes
-  const specialFieldIds = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
-  
-  // Check if this is one of our special question IDs
-  const isSpecialQuestion = specialFieldIds.includes(questionId);
-  
-  // If this is a special field or special question, force checkbox behavior
-  const forceCheckbox = isSpecialField || isSpecialQuestion;
-  
-  // Pre-initialize with questionnaire answers if this is a special field
-  useEffect(() => {
-    if (forceCheckbox && !initialized) {
-      console.log(`Pre-initializing options for special field ${questionId} from questionnaire answers`);
-      
-      // If we have questionnaire answers for this question, use them
-      if (questionnaireAnswers[questionId] && typeof questionnaireAnswers[questionId] === 'object') {
-        const questAnswers = questionnaireAnswers[questionId];
-        const initOptions: Record<string, boolean> = {};
-        
-        // Initialize all options as unselected first
-        question.options?.forEach((option: string) => {
-          initOptions[option] = false;
-        });
-        
-        // Then set selected options from questionnaire
-        Object.entries(questAnswers).forEach(([option, selected]) => {
-          if (selected && question.options?.includes(option)) {
-            initOptions[option] = true;
-          }
-        });
-        
-        console.log(`Initialized options from questionnaire for ${questionId}:`, initOptions);
-        
-        setSelectedOptions(prev => ({
-          ...prev,
-          [questionId]: initOptions
-        }));
-      }
-      
-      setInitialized(true);
-    }
-  }, [forceCheckbox, questionId, question, questionnaireAnswers, initialized, setSelectedOptions]);
-  
   // Initialize on first render if options are empty
   useEffect(() => {
-    if (!initialized && (!selectedOptions[questionId] || Object.keys(selectedOptions[questionId] || {}).length === 0)) {
-      console.log(`Initializing options for ${questionId} (special field: ${forceCheckbox ? 'yes' : 'no'})`);
+    if (!initialized && (!selectedOptions[questionId] || Object.keys(selectedOptions[questionId]).length === 0)) {
+      console.log(`SelectableOptions: Initializing options for ${questionId}`);
       
       // Only initialize if we have options to work with
       if (question.options && question.options.length > 0) {
         const newOptions = initializeQuestionOptions(question, questionId, questionnaireAnswers);
         
+        // Properly type the function parameter in setSelectedOptions
         setSelectedOptions((prev) => {
           return {
             ...prev,
@@ -84,12 +42,12 @@ export function SelectableOptions({
           };
         });
         
-        console.log(`Initialized options for ${questionId}:`, newOptions);
+        console.log(`SelectableOptions: Initialized options for ${questionId}:`, newOptions);
       }
       
       setInitialized(true);
     }
-  }, [questionId, questionnaireAnswers, question, selectedOptions, setSelectedOptions, initialized, forceCheckbox]);
+  }, [questionId, questionnaireAnswers, question, selectedOptions, setSelectedOptions, initialized]);
   
   if (!question.options || question.options.length === 0) {
     console.warn(`No options found for question ${questionId}`);
@@ -97,33 +55,41 @@ export function SelectableOptions({
   }
   
   // Enhanced debugging for special questions
-  if (forceCheckbox) {
-    console.log(`Rendering options for special question: ${questionId}`);
-    console.log(`Original question type: ${question.type}, forced checkbox: ${forceCheckbox}`);
+  if (isSpecialField || ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+    console.log(`SelectableOptions for special question: ${questionId}`);
+    console.log(`Question type: ${question.type}`);
+    console.log(`Is special field: ${isSpecialField}`);
+    console.log(`Has answer:`, !!questionnaireAnswers[questionId]);
     console.log(`Options:`, question.options);
     console.log(`Current selected options:`, selectedOptions[questionId]);
+    
+    // If we have answers in the questionnaire, log them in detail
+    if (questionnaireAnswers[questionId]) {
+      if (typeof questionnaireAnswers[questionId] === 'object') {
+        const selectedFromQuestionnaire = Object.entries(questionnaireAnswers[questionId])
+          .filter(([_, value]) => !!value)
+          .map(([key]) => key);
+        console.log(`Selected options from questionnaire:`, selectedFromQuestionnaire);
+      } else {
+        console.log(`Answer value:`, questionnaireAnswers[questionId]);
+      }
+    }
   }
   
   const handleCheckedChange = (option: string, checked: boolean) => {
-    // Log before updating
-    if (forceCheckbox) {
-      console.log(`Checkbox change for special field ${questionId}:`, { option, checked });
-      console.log(`Current state:`, selectedOptions[questionId]);
-    }
-    
     // For special fields, we always use checkbox behavior even if originally radio/select
     const newSelections = updateSelectionState(
       questionId,
       option,
       checked,
       selectedOptions,
-      (question.type === 'radio' || question.type === 'select') && !forceCheckbox, // only allow single selection if not a special field
-      forceCheckbox // force checkbox behavior for special fields
+      (question.type === 'radio' || question.type === 'select') && !isSpecialField,
+      isSpecialField
     );
     
     // Log what's happening with the selection for special fields
-    if (forceCheckbox) {
-      console.log(`Updated selection for special field ${questionId}:`, {
+    if (isSpecialField) {
+      console.log(`Updating selection for special field ${questionId}:`, {
         option,
         checked,
         newState: newSelections[questionId]
@@ -140,7 +106,7 @@ export function SelectableOptions({
   };
   
   // Special treatment for special fields - ALWAYS render as checkboxes
-  if (forceCheckbox) {
+  if (isSpecialField) {
     return (
       <CheckboxOptions
         options={question.options}
