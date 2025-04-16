@@ -19,7 +19,7 @@ export function BirthPlanHeader({ currentStage, onStageChange }: BirthPlanHeader
         </div>
         
         <div className="flex space-x-2">
-          {currentStage !== 'welcome' && currentStage !== 'questionnaire' && (
+          {(currentStage !== 'welcome' && currentStage !== 'questionnaire') && (
             <>
               <Button 
                 variant={currentStage === 'editor' ? "default" : "outline"}

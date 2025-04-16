@@ -54,6 +54,11 @@ export function useTimelineSteps({
     };
   });
   
+  // Load saved birth plan stage from localStorage
+  const getSavedBirthPlanStage = (): string | null => {
+    return localStorage.getItem('birthPlanStage');
+  };
+  
   // Create birth plan timeline steps
   const birthPlanTimelineSteps: TimelineStep[] = birthPlanStages.map(stage => {
     // If no birth plan access, mark all as not completed
@@ -65,6 +70,9 @@ export function useTimelineSteps({
         onClick: () => window.open("https://www.energiamaterna.com.br/criar-meu-plano-de-parto-em-minutos", "_blank")
       };
     }
+    
+    // Get the saved stage
+    const savedStage = getSavedBirthPlanStage();
     
     // If not started birth plan yet, mark all as not completed
     if (!hasStartedBirthPlan) {
@@ -83,11 +91,22 @@ export function useTimelineSteps({
     const progressPerStage = 100 / totalStages;
     const isCompleted = birthPlanProgress >= (stageIndex + 1) * progressPerStage;
     
+    // Handle click based on the stage
+    const handleStageClick = () => {
+      if (savedStage) {
+        // If there's a saved stage, navigate to the birth plan with stage parameter
+        localStorage.setItem('birthPlanStage', stage.id);
+      }
+      
+      // Navigate to the birth plan page
+      navigateTo("/criar-plano");
+    };
+    
     return {
       id: stage.id,
       name: stage.name,
       isCompleted,
-      onClick: () => navigateTo("/criar-plano")
+      onClick: handleStageClick
     };
   });
   

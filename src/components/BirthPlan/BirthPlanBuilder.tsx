@@ -1,7 +1,5 @@
 
 import { useEffect } from 'react';
-import { BirthPlanHeader } from './BirthPlanHeader';
-import { Footer } from '@/components/Footer';
 import { useBirthPlanState } from './hooks/useBirthPlanState';
 import { useAuthCheck } from './hooks/useAuthCheck';
 import { StageContent } from './components/StageContent';
@@ -32,28 +30,24 @@ export function BirthPlanBuilder() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="bg-maternal-50 min-h-screen pt-24" role="main" aria-label="Construa seu Plano de Parto">
-      <div>
-        <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
+    <div className="bg-maternal-50 min-h-screen" role="main" aria-label="Construa seu Plano de Parto">
+      <BirthPlanHeader currentStage={currentStage} onStageChange={goToStage} />
+      
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <StageBanner currentStage={currentStage} />
         
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <StageBanner currentStage={currentStage} />
-          
-          <div className="bg-white shadow-xl rounded-lg p-6 md:p-8 mb-8 border-t-4 border-maternal-400">
-            <StageContent 
-              currentStage={currentStage}
-              birthPlanContent={birthPlanContent}
-              questionnaireAnswers={questionnaireAnswers}
-              onQuestionnaireSubmit={handleQuestionnaireSubmit}
-              onUpdateBirthPlan={setBirthPlanContent}
-              onNextStage={goToNextStage}
-              onGoToStage={goToStage}
-            />
-          </div>
-        </main>
-        
-        <Footer />
-      </div>
+        <div className="bg-white shadow-xl rounded-lg p-6 md:p-8 mb-8 border-t-4 border-maternal-400">
+          <StageContent 
+            currentStage={currentStage}
+            birthPlanContent={birthPlanContent}
+            questionnaireAnswers={questionnaireAnswers}
+            onQuestionnaireSubmit={handleQuestionnaireSubmit}
+            onUpdateBirthPlan={setBirthPlanContent}
+            onNextStage={goToNextStage}
+            onGoToStage={goToStage}
+          />
+        </div>
+      </main>
     </div>
   );
 }

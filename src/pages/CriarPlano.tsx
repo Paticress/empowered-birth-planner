@@ -1,7 +1,5 @@
 
 import { BirthPlanBuilder } from "@/components/BirthPlan/BirthPlanBuilder";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -115,8 +113,7 @@ export function CriarPlano() {
 
   if (isLoading || isCheckingAuth || hasBirthPlanAccess === null) {
     return (
-      <div className="min-h-screen flex flex-col bg-maternal-50">
-        <Header />
+      <div className="min-h-screen flex flex-col">
         <main className="flex-grow flex items-center justify-center pt-20">
           <div className="text-center bg-white p-8 rounded-lg shadow-md">
             <Loader2 className="h-12 w-12 animate-spin text-maternal-500 mx-auto" />
@@ -128,7 +125,6 @@ export function CriarPlano() {
             </p>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -136,8 +132,7 @@ export function CriarPlano() {
   // If access is denied (hasBirthPlanAccess is false), show access denied screen with refresh option
   if (hasBirthPlanAccess === false) {
     return (
-      <div className="min-h-screen flex flex-col bg-maternal-50">
-        <Header />
+      <div className="min-h-screen flex flex-col">
         <main className="flex-grow flex items-center justify-center pt-20">
           <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-md">
             <div className="h-16 w-16 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-4">
@@ -182,21 +177,18 @@ export function CriarPlano() {
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
 
   // If we got here, the user is authenticated and has access
   return (
-    <div className="min-h-screen flex flex-col bg-maternal-100">
-      <Header />
-      <main className="flex-grow pt-20">
+    <div className="min-h-screen flex flex-col">
+      <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
           <BirthPlanBuilder />
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
