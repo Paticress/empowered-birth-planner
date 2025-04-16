@@ -1,3 +1,4 @@
+
 import { BookOpen, FileText, Award, ShoppingBag } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useNavigation } from "@/hooks/useNavigation";
