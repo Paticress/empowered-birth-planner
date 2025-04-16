@@ -93,10 +93,11 @@ export function useTimelineSteps({
     
     // Handle click based on the stage
     const handleStageClick = () => {
-      if (savedStage) {
-        // If there's a saved stage, navigate to the birth plan with stage parameter
-        localStorage.setItem('birthPlanStage', stage.id);
-      }
+      // Always navigate to the birth plan page first
+      const hasSavedAnswers = localStorage.getItem('birthPlanAnswers');
+      
+      // Set the target stage in localStorage before navigating
+      localStorage.setItem('birthPlanStage', stage.id);
       
       // Navigate to the birth plan page
       navigateTo("/criar-plano");
