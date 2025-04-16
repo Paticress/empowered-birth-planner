@@ -68,7 +68,7 @@ export function SelectableOptions({
       option,
       checked,
       selectedOptions,
-      (question.type === 'radio' || question.type === 'select'),
+      (question.type === 'radio' || question.type === 'select') && !isSpecialField,
       isSpecialField
     );
     
@@ -82,7 +82,7 @@ export function SelectableOptions({
   };
   
   // Special treatment for special fields with radio/select types
-  if (isSpecialField && (question.type === 'radio' || question.type === 'select')) {
+  if (isSpecialField) {
     return (
       <CheckboxOptions
         options={question.options}

@@ -57,6 +57,14 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
     loadSavedAnswers();
   }, []);
   
+  // Save answers to localStorage whenever formData changes
+  useEffect(() => {
+    if (Object.keys(formData).length > 0 && isLoaded) {
+      console.log("Salvando respostas no localStorage:", formData);
+      localStorage.setItem('birthPlanAnswers', JSON.stringify(formData));
+    }
+  }, [formData, isLoaded]);
+  
   const handleSectionSubmit = (data: Record<string, any>) => {
     console.log("Section submitted with data:", data);
     
@@ -71,6 +79,15 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
     
     console.log("Updated form data:", updatedFormData);
     setFormData(updatedFormData);
+    
+    // Log special situation fields for debugging
+    if (currentSection.id === 'specialSituations') {
+      console.log("Special situations data:", {
+        emergencyPreferences: updatedFormData.emergencyPreferences,
+        highRiskComplications: updatedFormData.highRiskComplications,
+        lowRiskOccurrences: updatedFormData.lowRiskOccurrences
+      });
+    }
     
     // Mark this section as completed
     if (!completedSections.includes(currentSection.id)) {

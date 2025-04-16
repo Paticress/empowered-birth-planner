@@ -23,6 +23,14 @@ export function DialogQuestion({
 }: DialogQuestionProps) {
   if (!question) return null;
 
+  // For debugging special fields
+  if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
+    console.log(`DialogQuestion rendering special question: ${questionId}`);
+    console.log(`Question data:`, question);
+    console.log(`Selected options:`, selectedOptions[questionId]);
+    console.log(`Questionnaire answers:`, questionnaireAnswers[questionId]);
+  }
+
   // Render textarea when question is textarea type
   if (question.type === 'textarea') {
     return (
@@ -41,6 +49,9 @@ export function DialogQuestion({
     );
   }
 
+  // Special treatment for known special situation questions
+  const isSpecialField = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId);
+
   // Render selectable options (radio/select/checkbox)
   return (
     <div className="py-3 border-b border-gray-100">
@@ -51,6 +62,7 @@ export function DialogQuestion({
         selectedOptions={selectedOptions}
         setSelectedOptions={setSelectedOptions}
         questionnaireAnswers={questionnaireAnswers}
+        isSpecialField={isSpecialField}
       />
     </div>
   );
