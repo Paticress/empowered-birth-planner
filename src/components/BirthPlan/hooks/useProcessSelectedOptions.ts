@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { birthPlanSections } from '../utils/birthPlanSections';
 
@@ -79,14 +80,32 @@ export function useProcessSelectedOptions({
     const selectedItems = [];
     
     // Capturar todas as opções selecionadas para o campo ativo
-    if (selectedOptions[activeFieldKey]) {
-      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
-        .filter(([_, isSelected]) => isSelected)
-        .map(([option]) => option.trim());
-      
-      if (selectedForField.length > 0) {
-        selectedItems.push(...selectedForField);
-      }
+    if (activeFieldKey && Object.keys(selectedOptions).length > 0) {
+      // Combinar opções de todas as questões relevantes para este campo
+      Object.entries(selectedOptions).forEach(([questionId, options]) => {
+        // Para os campos especiais específicos, verificamos se o questionId corresponde
+        // às questões específicas mapeadas para esses campos
+        const specialFields = {
+          'emergencyScenarios': ['emergencyPreferences'],
+          'highRiskComplications': ['highRiskComplications'],
+          'lowRiskOccurrences': ['lowRiskOccurrences']
+        };
+        
+        // Verificar se este questionId é relevante para o campo ativo
+        const relevantQuestionIds = specialFields[activeFieldKey as keyof typeof specialFields] || [];
+        const isRelevantQuestion = relevantQuestionIds.includes(questionId) || 
+                                  questionId === activeFieldKey;
+        
+        if (isRelevantQuestion || Object.keys(relevantQuestionIds).length === 0) {
+          const selectedForQuestion = Object.entries(options)
+            .filter(([_, isSelected]) => isSelected)
+            .map(([option]) => option.trim());
+          
+          if (selectedForQuestion.length > 0) {
+            selectedItems.push(...selectedForQuestion);
+          }
+        }
+      });
     }
     
     // Capturar qualquer texto de textareas

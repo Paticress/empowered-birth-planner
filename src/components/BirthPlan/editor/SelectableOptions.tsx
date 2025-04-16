@@ -81,8 +81,9 @@ export function SelectableOptions({
     handleCheckedChange(option, true);
   };
   
-  // Special treatment for special fields with radio/select types
-  if (isSpecialField && (question.type === 'radio' || question.type === 'select')) {
+  // Para campos especiais, sempre tratamos como checkbox mesmo se for radio/select
+  // para permitir múltiplas seleções
+  if (isSpecialField || ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
     return (
       <CheckboxOptions
         options={question.options}

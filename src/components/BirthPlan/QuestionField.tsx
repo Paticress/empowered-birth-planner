@@ -1,3 +1,4 @@
+
 import { 
   FormControl,
   FormField,
@@ -20,6 +21,11 @@ interface QuestionFieldProps {
 }
 
 export function QuestionField({ question, errors, control }: QuestionFieldProps) {
+  // Adicionar log para depurar questões problemáticas
+  if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(question.id)) {
+    console.log(`Renderizando questão especial: ${question.id}`);
+  }
+  
   return (
     <FormItem key={question.id} className="space-y-2">
       <div className="flex items-start gap-2">
