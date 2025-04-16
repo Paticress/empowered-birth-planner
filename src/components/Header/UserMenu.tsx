@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 export function UserMenu() {
   const { user, signOut } = useAuth();
   const { navigateTo } = useNavigation();
-  const hasBirthPlanAccess = useBirthPlanAccess();
+  const { hasBirthPlanAccess } = useBirthPlanAccess();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   // Get the current guide section from localStorage if available

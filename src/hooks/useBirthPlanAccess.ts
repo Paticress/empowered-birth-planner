@@ -19,6 +19,8 @@ export function useBirthPlanAccess() {
         
       const isPaidUser = !error && !!data && data.plan === 'paid';
       
+      console.log("Access check result for", email, ":", isPaidUser ? 'paid' : 'free');
+      
       // Update localStorage with latest plan status
       localStorage.setItem('user_plan', isPaidUser ? 'paid' : 'free');
       
