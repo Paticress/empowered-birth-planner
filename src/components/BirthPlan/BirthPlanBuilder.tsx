@@ -5,6 +5,7 @@ import { useAuthCheck } from './hooks/useAuthCheck';
 import { StageContent } from './components/StageContent';
 import { LoadingState } from './components/LoadingState';
 import { StageBanner } from './components/StageBanner';
+import { BirthPlanHeader } from './BirthPlanHeader';
 
 export function BirthPlanBuilder() {
   console.log("RENDERING BIRTH PLAN BUILDER COMPONENT - THIS SHOULD BE VISIBLE");
