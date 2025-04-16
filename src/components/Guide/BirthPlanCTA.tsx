@@ -1,4 +1,5 @@
-import { CheckCircle, Shield, FileText } from 'lucide-react';
+
+import { CheckCircle, Shield, FileText, Clock, Star, Book, Award, Percent } from 'lucide-react';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -91,16 +92,28 @@ export function BirthPlanCTA() {
           </p>
           <ul className="space-y-2 mb-4">
             <li className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
-              <span>Apenas <strong>5 minutos</strong> para criar um plano completo e personalizado</span>
+              <Clock className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
+              <span>Crie um Plano de Parto <strong>do seu jeito em apenas 5 minutos</strong></span>
+            </li>
+            <li className="flex items-center">
+              <Star className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
+              <span><strong>Construtor simplificado</strong>, não precisa começar do zero</span>
             </li>
             <li className="flex items-center">
               <CheckCircle className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
-              <span>Compartilhe facilmente por <strong>WhatsApp, e-mail ou PDF</strong> com sua equipe</span>
+              <span><strong>Compartilhe com sua equipe médica</strong> para garantir alinhamento</span>
             </li>
             <li className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
-              <span>Interface intuitiva que <strong>elimina a confusão</strong> de criar do zero</span>
+              <FileText className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
+              <span><strong>Faça quantos ajustes</strong> forem necessários de forma prática</span>
+            </li>
+            <li className="flex items-center">
+              <Award className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
+              <span><strong>Imprima algumas cópias</strong> para levar com você no dia do parto</span>
+            </li>
+            <li className="flex items-center">
+              <Book className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
+              <span><strong>Acesso ao Guia Online Gratuito</strong> incluído</span>
             </li>
             <li className="flex items-center">
               <Shield className="h-5 w-5 text-maternal-600 mr-2 flex-shrink-0" />
@@ -108,16 +121,32 @@ export function BirthPlanCTA() {
             </li>
           </ul>
         </div>
-        <div className="md:w-1/3 flex flex-col items-center">
-          <div className="text-center mb-4">
+        <div className="md:w-1/3 flex flex-col items-center bg-white p-4 rounded-lg shadow-sm border border-maternal-200">
+          <div className="text-center mb-4 w-full">
             <span className="inline-block bg-maternal-400 text-white text-sm font-bold px-3 py-1 rounded-full mb-2">
               Recomendado por Especialistas
             </span>
-            <h3 className="text-xl font-bold text-maternal-900">Construtor de Plano de Parto</h3>
+            <h3 className="text-xl font-bold text-maternal-900">Construtor Virtual de Plano de Parto</h3>
             <p className="text-maternal-700 text-lg mb-2">Acesso Único</p>
-            <p className="text-maternal-900 font-bold text-3xl mb-4">R$ 128,00</p>
+            
+            <div className="flex justify-center items-center gap-2 mb-2">
+              <p className="text-maternal-600 text-lg font-medium line-through">R$ 128,00</p>
+              <p className="text-maternal-900 font-bold text-3xl">R$ 76,80</p>
+            </div>
+            
+            <div className="bg-yellow-100 border border-yellow-200 rounded-md p-2 mb-4 flex items-center justify-center">
+              <Percent className="h-4 w-4 text-yellow-600 mr-1" />
+              <span className="text-yellow-800 font-semibold text-sm">Cupom: OFFGUIA40 (-40%)</span>
+            </div>
+            
+            <p className="text-maternal-600 text-xs mb-4">
+              Oferta por tempo limitado para leitores do Guia
+            </p>
           </div>
-          <BirthPlanNavButton className="w-full py-4" />
+          <BirthPlanNavButton className="w-full py-4" source="guide" />
+          <p className="text-maternal-500 text-xs mt-2 text-center">
+            Pagamento único, sem assinaturas
+          </p>
         </div>
       </div>
     </div>
