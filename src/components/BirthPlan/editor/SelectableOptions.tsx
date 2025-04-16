@@ -34,9 +34,43 @@ export function SelectableOptions({
   // If this is a special field or special question, force checkbox behavior
   const forceCheckbox = isSpecialField || isSpecialQuestion;
   
+  // Pre-initialize with questionnaire answers if this is a special field
+  useEffect(() => {
+    if (forceCheckbox && !initialized) {
+      console.log(`Pre-initializing options for special field ${questionId} from questionnaire answers`);
+      
+      // If we have questionnaire answers for this question, use them
+      if (questionnaireAnswers[questionId] && typeof questionnaireAnswers[questionId] === 'object') {
+        const questAnswers = questionnaireAnswers[questionId];
+        const initOptions: Record<string, boolean> = {};
+        
+        // Initialize all options as unselected first
+        question.options?.forEach((option: string) => {
+          initOptions[option] = false;
+        });
+        
+        // Then set selected options from questionnaire
+        Object.entries(questAnswers).forEach(([option, selected]) => {
+          if (selected && question.options?.includes(option)) {
+            initOptions[option] = true;
+          }
+        });
+        
+        console.log(`Initialized options from questionnaire for ${questionId}:`, initOptions);
+        
+        setSelectedOptions(prev => ({
+          ...prev,
+          [questionId]: initOptions
+        }));
+      }
+      
+      setInitialized(true);
+    }
+  }, [forceCheckbox, questionId, question, questionnaireAnswers, initialized, setSelectedOptions]);
+  
   // Initialize on first render if options are empty
   useEffect(() => {
-    if (!initialized && (!selectedOptions[questionId] || Object.keys(selectedOptions[questionId]).length === 0)) {
+    if (!initialized && (!selectedOptions[questionId] || Object.keys(selectedOptions[questionId] || {}).length === 0)) {
       console.log(`Initializing options for ${questionId} (special field: ${forceCheckbox ? 'yes' : 'no'})`);
       
       // Only initialize if we have options to work with
@@ -65,26 +99,31 @@ export function SelectableOptions({
   // Enhanced debugging for special questions
   if (forceCheckbox) {
     console.log(`Rendering options for special question: ${questionId}`);
-    console.log(`Question type: ${question.type}`);
-    console.log(`Force checkbox: ${forceCheckbox}`);
+    console.log(`Original question type: ${question.type}, forced checkbox: ${forceCheckbox}`);
     console.log(`Options:`, question.options);
     console.log(`Current selected options:`, selectedOptions[questionId]);
   }
   
   const handleCheckedChange = (option: string, checked: boolean) => {
+    // Log before updating
+    if (forceCheckbox) {
+      console.log(`Checkbox change for special field ${questionId}:`, { option, checked });
+      console.log(`Current state:`, selectedOptions[questionId]);
+    }
+    
     // For special fields, we always use checkbox behavior even if originally radio/select
     const newSelections = updateSelectionState(
       questionId,
       option,
       checked,
       selectedOptions,
-      (question.type === 'radio' || question.type === 'select') && !forceCheckbox,
-      forceCheckbox
+      (question.type === 'radio' || question.type === 'select') && !forceCheckbox, // only allow single selection if not a special field
+      forceCheckbox // force checkbox behavior for special fields
     );
     
     // Log what's happening with the selection for special fields
     if (forceCheckbox) {
-      console.log(`Updating selection for special field ${questionId}:`, {
+      console.log(`Updated selection for special field ${questionId}:`, {
         option,
         checked,
         newState: newSelections[questionId]

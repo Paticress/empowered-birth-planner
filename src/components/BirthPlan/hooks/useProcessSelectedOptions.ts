@@ -51,12 +51,21 @@ export function useProcessSelectedOptions({
       });
     }
     
-    // Special handling for the problematic fields
-    const specialFieldKeys = ['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'];
-    const isSpecialField = specialFieldKeys.includes(activeFieldKey);
+    // Special handling for the problematic fields - always use their exact field mapping
+    const specialFieldMappings = {
+      'emergencyScenarios': 'emergencyPreferences',
+      'highRiskComplications': 'highRiskComplications',
+      'lowRiskOccurrences': 'lowRiskOccurrences'
+    };
+    
+    const isSpecialField = Object.keys(specialFieldMappings).includes(activeFieldKey);
     
     if (isSpecialField) {
       console.log(`Processing special field: ${activeFieldKey}`);
+      
+      // Get the corresponding questionnaire field ID for this special field
+      const questionnaireFieldId = specialFieldMappings[activeFieldKey as keyof typeof specialFieldMappings];
+      console.log(`Mapped to questionnaire field: ${questionnaireFieldId}`);
     }
     
     // Collect all selected options from all questions
@@ -90,7 +99,7 @@ export function useProcessSelectedOptions({
       console.log(`Updating field ${activeFieldKey} with selected options:`, allSelectedTexts);
       
       // Format the selected options as a text string
-      // Join with commas for better readability
+      // Join with commas and line breaks for better readability
       const formattedText = allSelectedTexts.join(', ');
       
       // Update the birth plan with all selected options

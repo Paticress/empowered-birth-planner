@@ -27,25 +27,36 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
         if (savedAnswers) {
           const parsedAnswers = JSON.parse(savedAnswers);
           console.log("Carregando respostas salvas:", parsedAnswers);
-          setFormData(parsedAnswers);
           
-          // Check for special fields and log them
+          // Special debugging for problematic fields
           const specialFields = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
           specialFields.forEach(field => {
             if (parsedAnswers[field]) {
               console.log(`Loaded special field ${field}:`, parsedAnswers[field]);
               
-              // If it's an object, log the selected options
+              // Ensure special fields are properly formatted as objects with boolean values
               if (typeof parsedAnswers[field] === 'object' && !Array.isArray(parsedAnswers[field])) {
                 const selectedOptions = Object.entries(parsedAnswers[field])
                   .filter(([_, value]) => !!value)
                   .map(([key]) => key);
                 console.log(`Selected options for ${field}:`, selectedOptions);
+              } else if (Array.isArray(parsedAnswers[field])) {
+                // Convert array format to object format for consistency
+                const objectFormat: Record<string, boolean> = {};
+                parsedAnswers[field].forEach((option: string) => {
+                  objectFormat[option] = true;
+                });
+                parsedAnswers[field] = objectFormat;
+                console.log(`Converted array to object format for ${field}:`, parsedAnswers[field]);
               }
             } else {
-              console.log(`No saved data for special field ${field}`);
+              // Initialize empty object for special fields if they don't exist
+              parsedAnswers[field] = {};
+              console.log(`Initialized empty object for special field ${field}`);
             }
           });
+          
+          setFormData(parsedAnswers);
           
           // Determine which sections are completed based on saved answers
           const completed: string[] = [];
@@ -53,7 +64,9 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
             let sectionCompleted = false;
             // Check if any questions in this section have answers
             section.questions.forEach(question => {
-              if (parsedAnswers[question.id]) {
+              if (parsedAnswers[question.id] && 
+                  (typeof parsedAnswers[question.id] === 'string' || 
+                   Object.values(parsedAnswers[question.id]).some((val: any) => !!val))) {
                 sectionCompleted = true;
               }
             });
@@ -80,23 +93,33 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
     if (Object.keys(formData).length > 0 && isLoaded) {
       console.log("Salvando respostas no localStorage:", formData);
       
-      // Special debug logging for the problematic fields
+      // Special handling for the problematic fields to ensure they're saved correctly
       const specialFields = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+      const dataToSave = { ...formData };
+      
       specialFields.forEach(field => {
-        if (formData[field]) {
-          console.log(`Saving special field ${field}:`, formData[field]);
+        if (dataToSave[field]) {
+          console.log(`Saving special field ${field}:`, dataToSave[field]);
           
-          // If it's an object, log the selected options
-          if (typeof formData[field] === 'object' && !Array.isArray(formData[field])) {
-            const selectedOptions = Object.entries(formData[field])
+          // Ensure it's in the correct format (object with boolean values)
+          if (typeof dataToSave[field] === 'object' && !Array.isArray(dataToSave[field])) {
+            const selectedOptions = Object.entries(dataToSave[field])
               .filter(([_, value]) => !!value)
               .map(([key]) => key);
             console.log(`Selected options for ${field}:`, selectedOptions);
+            
+            // If no options are selected, make sure the object exists but is empty
+            if (selectedOptions.length === 0) {
+              dataToSave[field] = {};
+            }
           }
+        } else {
+          // Initialize empty object for special fields if they don't exist
+          dataToSave[field] = {};
         }
       });
       
-      localStorage.setItem('birthPlanAnswers', JSON.stringify(formData));
+      localStorage.setItem('birthPlanAnswers', JSON.stringify(dataToSave));
     }
   }, [formData, isLoaded]);
   
@@ -106,6 +129,39 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
     // Create a clean copy of the data to avoid mutation issues
     const processedData = { ...data };
     
+    // Special handling for checkbox fields - ensure they're properly formatted
+    const specialFields = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+    
+    // Process special fields to ensure consistent format
+    specialFields.forEach(field => {
+      if (currentSection.id === 'specialSituations' && processedData[field]) {
+        console.log(`Processing special field ${field} before saving`, processedData[field]);
+        
+        // Ensure the field is an object with boolean values
+        if (typeof processedData[field] !== 'object' || Array.isArray(processedData[field])) {
+          console.warn(`Invalid format for ${field}, converting to object format`);
+          const newFormat: Record<string, boolean> = {};
+          
+          if (Array.isArray(processedData[field])) {
+            processedData[field].forEach((option: string) => {
+              newFormat[option] = true;
+            });
+          } else {
+            // If it's a string or other type, create an empty object
+            // This shouldn't happen but just in case
+          }
+          
+          processedData[field] = newFormat;
+        }
+        
+        // Log the selected options to verify
+        const selectedOptions = Object.entries(processedData[field])
+          .filter(([_, value]) => !!value)
+          .map(([key]) => key);
+        console.log(`Final selected options for ${field}:`, selectedOptions);
+      }
+    });
+    
     // Save data from current section
     const updatedFormData = {
       ...formData,
@@ -114,26 +170,6 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
     
     console.log("Updated form data:", updatedFormData);
     setFormData(updatedFormData);
-    
-    // Log special situation fields for debugging
-    if (currentSection.id === 'specialSituations') {
-      console.log("Special situations data:", {
-        emergencyPreferences: updatedFormData.emergencyPreferences,
-        highRiskComplications: updatedFormData.highRiskComplications,
-        lowRiskOccurrences: updatedFormData.lowRiskOccurrences
-      });
-      
-      // For each special field, log the selected options if it exists
-      const specialFields = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
-      specialFields.forEach(field => {
-        if (updatedFormData[field] && typeof updatedFormData[field] === 'object') {
-          const selectedOptions = Object.entries(updatedFormData[field])
-            .filter(([_, value]) => !!value)
-            .map(([key]) => key);
-          console.log(`Selected options for ${field}:`, selectedOptions);
-        }
-      });
-    }
     
     // Mark this section as completed
     if (!completedSections.includes(currentSection.id)) {

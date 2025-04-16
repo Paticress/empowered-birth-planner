@@ -53,7 +53,7 @@ export const getRelevantQuestionsForField = (
         if (specialQuestionIds.includes(question.id)) {
           console.log(`Found special question ${question.id} for field ${fieldKey} in section ${section.id}`);
           
-          // CRITICAL FIX: Ensure the question is treated as a checkbox type
+          // CRITICAL: Ensure the question is treated as a checkbox type
           // This ensures consistent handling across the application
           const enhancedQuestion = {
             ...question,
@@ -70,6 +70,10 @@ export const getRelevantQuestionsForField = (
     
     if (relevantQuestions.length > 0) {
       console.log(`Returning ${relevantQuestions.length} special questions for ${fieldKey}`);
+      
+      // Additional debugging for special fields
+      console.log(`For special field ${fieldKey}, mapped questions:`, relevantQuestions.map(q => q.question.id));
+      
       return relevantQuestions;
     }
   }

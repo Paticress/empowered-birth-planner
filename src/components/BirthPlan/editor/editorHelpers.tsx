@@ -25,9 +25,29 @@ export const handleAddSelectedOptions = (
   const specialFieldKeys = ['emergencyScenarios', 'highRiskComplications', 'lowRiskOccurrences'];
   if (specialFieldKeys.includes(activeFieldKey)) {
     console.log(`Processing special field: ${activeFieldKey}`);
+    
     // Log which question IDs are associated with this field
     const questionIds = Object.keys(selectedOptions);
     console.log(`Question IDs in selected options:`, questionIds);
+    
+    // Special mapping for problematic fields
+    const specialFieldMapping: Record<string, string> = {
+      'emergencyScenarios': 'emergencyPreferences',
+      'highRiskComplications': 'highRiskComplications',
+      'lowRiskOccurrences': 'lowRiskOccurrences'
+    };
+    
+    // Log the mapped question ID
+    const mappedQuestionId = specialFieldMapping[activeFieldKey];
+    console.log(`Mapped question ID for ${activeFieldKey}: ${mappedQuestionId}`);
+    
+    // Check if we have selections for the expected question ID
+    if (mappedQuestionId && selectedOptions[mappedQuestionId]) {
+      console.log(`Found selections for mapped question ID ${mappedQuestionId}:`, 
+        selectedOptions[mappedQuestionId]);
+    } else {
+      console.log(`No selections found for mapped question ID ${mappedQuestionId}`);
+    }
   }
   
   const updatedPlan = { ...localBirthPlan };
@@ -100,8 +120,9 @@ export const handleAddSelectedOptions = (
   // If we have selected options, update the birth plan
   if (Object.values(allSelectedOptions).some(options => options.length > 0)) {
     // Get the current active section
-    const firstQuestionId = Object.keys(selectedOptions)[0] || 
-                           (textareaValues && Object.keys(textareaValues)[0]);
+    const firstQuestionId = Object.keys(allSelectedOptions)[0] || 
+                          (textareaValues && Object.keys(textareaValues)[0]) ||
+                          Object.keys(selectedOptions)[0];
     
     if (!firstQuestionId) {
       console.warn('No question IDs found in selections or textareas');
@@ -111,18 +132,53 @@ export const handleAddSelectedOptions = (
       return;
     }
     
-    const questionInfo = findQuestionById(firstQuestionId);
-    if (!questionInfo) {
-      console.warn(`Question info not found for first question ID: ${firstQuestionId}`);
-      toast("Não foi possível encontrar informações da questão selecionada.");
-      setSelectedOptions({});
-      setDialogOpen(false);
-      return;
+    // Special handling for problematic fields with direct field-to-question mapping
+    const specialFieldMapping: Record<string, string> = {
+      'emergencyScenarios': 'emergencyPreferences',
+      'highRiskComplications': 'highRiskComplications',
+      'lowRiskOccurrences': 'lowRiskOccurrences'
+    };
+    
+    const mappedQuestionId = specialFieldMapping[activeFieldKey];
+    
+    // If this is a special field and we don't have the expected mapped question ID,
+    // check if we have any selections under the field key itself
+    if (specialFieldKeys.includes(activeFieldKey) && mappedQuestionId && !allSelectedOptions[mappedQuestionId]) {
+      console.log(`Special field ${activeFieldKey} missing mapped question ${mappedQuestionId} in selections`);
+      
+      // Look for any selections that might be under a different question ID
+      const otherQuestionId = Object.keys(allSelectedOptions)[0];
+      if (otherQuestionId) {
+        console.log(`Found selections under question ID ${otherQuestionId} instead`);
+        // Remap these selections to the correct question ID
+        allSelectedOptions[mappedQuestionId] = allSelectedOptions[otherQuestionId];
+        delete allSelectedOptions[otherQuestionId];
+        questionTypes[mappedQuestionId] = 'checkbox';
+      }
     }
     
-    const mappedSectionId = mapQuestionnaireToSectionId(
-      questionInfo?.sectionId || 'specialSituations'
-    );
+    const questionInfo = findQuestionById(firstQuestionId);
+    if (!questionInfo) {
+      // For special fields, we can still proceed with a default mapping
+      if (specialFieldKeys.includes(activeFieldKey) && mappedQuestionId) {
+        console.log(`Using default mapping for special field ${activeFieldKey}`);
+      } else {
+        console.warn(`Question info not found for first question ID: ${firstQuestionId}`);
+        toast("Não foi possível encontrar informações da questão selecionada.");
+        setSelectedOptions({});
+        setDialogOpen(false);
+        return;
+      }
+    }
+    
+    // For special fields, use a hardcoded section ID
+    let mappedSectionId = 'situacoesEspeciais'; // Default for special fields
+    
+    if (questionInfo) {
+      mappedSectionId = mapQuestionnaireToSectionId(
+        questionInfo?.sectionId || 'specialSituations'
+      );
+    }
     
     // Initialize section if not exists
     if (!updatedPlan[mappedSectionId]) {

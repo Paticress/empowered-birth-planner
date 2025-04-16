@@ -28,7 +28,7 @@ export function QuestionField({ question, errors, control }: QuestionFieldProps)
   
   useEffect(() => {
     if (isSpecialQuestion) {
-      console.log(`QuestionField rendering special question: ${question.id}`);
+      console.log(`QuestionField initialized special question: ${question.id}`);
       console.log(`Original question type: ${question.type}`);
       console.log(`Will be rendered as checkbox regardless of type`);
       console.log(`Question options:`, question.options);
@@ -63,7 +63,7 @@ export function QuestionField({ question, errors, control }: QuestionFieldProps)
       
       {/* Always treat special question IDs as checkbox type questions regardless of their defined type */}
       {(question.type === 'checkbox' || isSpecialQuestion) && question.options && (
-        <CheckboxQuestion question={question} control={control} />
+        <CheckboxQuestion question={question} control={control} isSpecialQuestion={isSpecialQuestion} />
       )}
       
       {question.type === 'select' && question.options && !isSpecialQuestion && (
@@ -145,15 +145,21 @@ function RadioQuestion({ question, control }: { question: Question; control: Con
   );
 }
 
-function CheckboxQuestion({ question, control }: { question: Question; control: Control<Record<string, any>, any> }) {
-  // Special handling and debug for special fields
-  const isSpecialField = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(question.id);
-  
+function CheckboxQuestion({ 
+  question, 
+  control, 
+  isSpecialQuestion = false 
+}: { 
+  question: Question; 
+  control: Control<Record<string, any>, any>;
+  isSpecialQuestion?: boolean;
+}) {
   useEffect(() => {
-    if (isSpecialField) {
-      console.log(`Rendering CheckboxQuestion for special field: ${question.id}`);
+    if (isSpecialQuestion) {
+      console.log(`Rendering CheckboxQuestion for special question: ${question.id}`);
+      console.log(`Options:`, question.options);
     }
-  }, [isSpecialField, question.id]);
+  }, [isSpecialQuestion, question.id, question.options]);
   
   return (
     <div className="space-y-2">
@@ -164,7 +170,7 @@ function CheckboxQuestion({ question, control }: { question: Question; control: 
           name={`${question.id}.${option}`}
           render={({ field }) => {
             // Debug logging for special fields
-            if (isSpecialField) {
+            if (isSpecialQuestion) {
               console.log(`Field value for ${question.id}.${option}:`, field.value);
             }
             
