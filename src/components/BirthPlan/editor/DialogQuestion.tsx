@@ -1,16 +1,14 @@
 
 import { Textarea } from '@/components/ui/textarea';
 import { SelectableOptions } from './SelectableOptions';
-import { isSpecialField } from './utils/specialFieldHandler';
-import { SelectedOptionsMap, TextareaValuesMap } from './utils/types';
 
 interface DialogQuestionProps {
   question: any;
   questionId: string;
-  selectedOptions: SelectedOptionsMap;
-  setSelectedOptions: React.Dispatch<React.SetStateAction<SelectedOptionsMap>>;
+  selectedOptions: Record<string, Record<string, boolean>>;
+  setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>;
   questionnaireAnswers: Record<string, any>;
-  textareaValues: TextareaValuesMap;
+  textareaValues: Record<string, string>;
   onTextareaChange: (questionId: string, value: string) => void;
 }
 
@@ -26,7 +24,7 @@ export function DialogQuestion({
   if (!question) return null;
 
   // Enhanced debugging for special fields
-  if (isSpecialField(questionId)) {
+  if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId)) {
     console.log(`DialogQuestion rendering special question: ${questionId}`);
     console.log(`Question data:`, question);
     console.log(`Question type:`, question.type);
@@ -66,8 +64,9 @@ export function DialogQuestion({
     );
   }
 
-  // Check if this is a special field (always treat as checkbox)
-  const isSpecialFieldQuestion = isSpecialField(questionId);
+  // Special treatment for known special situation questions - ALWAYS treat these as checkbox type
+  // even if they're marked as radio or select in the data
+  const isSpecialField = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId);
 
   // Render selectable options (radio/select/checkbox)
   return (
@@ -79,7 +78,7 @@ export function DialogQuestion({
         selectedOptions={selectedOptions}
         setSelectedOptions={setSelectedOptions}
         questionnaireAnswers={questionnaireAnswers}
-        isSpecialField={isSpecialFieldQuestion}
+        isSpecialField={isSpecialField}
       />
     </div>
   );

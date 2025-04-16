@@ -1,21 +1,18 @@
-
 import { useCallback } from 'react';
 import { birthPlanSections } from '../utils/birthPlanSections';
-import { isSpecialFieldKey } from '../editor/utils/fieldMapping';
-import { SelectedOptionsMap, TextareaValuesMap } from '../editor/utils/types';
 
 type UseProcessSelectedOptionsParams = {
   activeSectionIndex: number;
   activeFieldKey: string;
-  selectedOptions: SelectedOptionsMap;
+  selectedOptions: Record<string, Record<string, boolean>>;
   localBirthPlan: Record<string, any>;
   setLocalBirthPlan: (plan: Record<string, any>) => void;
   completedSections: string[];
   setCompletedSections: (sections: string[]) => void;
-  setSelectedOptions: React.Dispatch<React.SetStateAction<SelectedOptionsMap>>;
+  setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>;
   setDialogOpen: (open: boolean) => void;
-  textareaValues: TextareaValuesMap;
-  setTextareaValues: (values: TextareaValuesMap) => void;
+  textareaValues: Record<string, string>;
+  setTextareaValues: (values: Record<string, string>) => void;
 };
 
 export function useProcessSelectedOptions({
@@ -34,20 +31,20 @@ export function useProcessSelectedOptions({
   
   const processAddSelectedOptions = useCallback(() => {
     // Strategic logging for debugging option selection
-    console.log("➕ Adding options to field:", activeFieldKey);
-    console.log("📋 Currently selected options:", selectedOptions);
-    console.log("🧠 Filled textareas:", textareaValues);
-    console.log("📄 Current birthPlan content:", localBirthPlan);
+    console.log("➕ Adicionando opções ao campo:", activeFieldKey);
+    console.log("📋 Opções atualmente selecionadas:", selectedOptions);
+    console.log("🧠 Textareas preenchidos:", textareaValues);
+    console.log("📄 Conteúdo atual do birthPlan:", localBirthPlan);
 
-    // Verify the structure of the active section
+    // Verificar a estrutura atual da seção ativa
     const currentActiveSection = birthPlanSections[activeSectionIndex];
     if (currentActiveSection) {
-      console.log("🔍 Active section:", currentActiveSection.id);
-      console.log("🔍 Active field:", activeFieldKey);
+      console.log("🔍 Seção ativa:", currentActiveSection.id);
+      console.log("🔍 Campo ativo:", activeFieldKey);
       
-      // Verify if the localBirthPlan has the correct structure
+      // Verificar se o localBirthPlan tem a estrutura correta
       if (!localBirthPlan[currentActiveSection.id]) {
-        console.log("⚠️ Section doesn't exist in localBirthPlan, creating...");
+        console.log("⚠️ Seção não existe no localBirthPlan, criando...");
         setLocalBirthPlan({
           ...localBirthPlan,
           [currentActiveSection.id]: {}
@@ -55,20 +52,20 @@ export function useProcessSelectedOptions({
       }
     }
 
-    // Check selected options for the current field
+    // Verificar as opções selecionadas para o campo atual
     if (selectedOptions[activeFieldKey]) {
       const selectedForField = Object.entries(selectedOptions[activeFieldKey])
         .filter(([_, isSelected]) => isSelected)
         .map(([option]) => option);
-      console.log("🔍 Options selected for this field:", selectedForField);
+      console.log("🔍 Opções selecionadas para este campo:", selectedForField);
     } else {
-      console.log("⚠️ No options selected for this field");
+      console.log("⚠️ Nenhuma opção selecionada para este campo");
     }
 
-    // Process options
+    // Usar o hook personalizado para processar as opções
     const currentSection = birthPlanSections[activeSectionIndex];
     if (!localBirthPlan[currentSection.id]) {
-      // Ensure the section exists before adding options
+      // Certifique-se de que a seção existe antes de adicionar opções
       const updatedPlan = {
         ...localBirthPlan,
         [currentSection.id]: {}
@@ -76,25 +73,23 @@ export function useProcessSelectedOptions({
       setLocalBirthPlan(updatedPlan);
     }
 
-    // Process the selected options and textareas
+    // CORREÇÃO: Modificação na forma como processamos as opções e atualizamos o campo
+    
+    // Processar as opções selecionadas e textareas
     const selectedItems = [];
     
-    // Check if this is a special field for special handling
-    const isSpecialField = isSpecialFieldKey(activeFieldKey);
-    
-    // Process selected options based on question IDs
-    Object.entries(selectedOptions).forEach(([questionId, options]) => {
-      // Get all selected options for this question
-      const selectedForQuestion = Object.entries(options)
+    // Capturar todas as opções selecionadas para o campo ativo
+    if (selectedOptions[activeFieldKey]) {
+      const selectedForField = Object.entries(selectedOptions[activeFieldKey])
         .filter(([_, isSelected]) => isSelected)
         .map(([option]) => option.trim());
       
-      if (selectedForQuestion.length > 0) {
-        selectedItems.push(...selectedForQuestion);
+      if (selectedForField.length > 0) {
+        selectedItems.push(...selectedForField);
       }
-    });
+    }
     
-    // Add textareas
+    // Capturar qualquer texto de textareas
     Object.values(textareaValues)
       .map(text => text.trim())
       .filter(Boolean)
@@ -102,14 +97,14 @@ export function useProcessSelectedOptions({
         selectedItems.push(text);
       });
     
-    // If we have selected items, update the field
+    // Se temos opções selecionadas, vamos atualizar o campo
     if (selectedItems.length > 0) {
-      console.log("🔍 Final selected items:", selectedItems);
+      console.log("🔍 Opções selecionadas finais:", selectedItems);
       
-      // Format with comma and space for better readability
+      // CORREÇÃO: Formatar com vírgula e espaço, sem quebras de linha
       const formattedText = selectedItems.join(', ');
       
-      // Update the birth plan
+      // Atualizar o plano de parto com o texto formatado
       const updatedSection = {
         ...localBirthPlan[currentSection.id],
         [activeFieldKey]: formattedText
@@ -120,16 +115,16 @@ export function useProcessSelectedOptions({
         [currentSection.id]: updatedSection
       };
       
-      console.log("🔍 Updating plan with:", formattedText);
+      console.log("🔍 Atualizando plano com:", formattedText);
       setLocalBirthPlan(updatedPlan);
       
-      // Mark section as completed if not already
+      // Marcar a seção como concluída se ainda não estiver
       if (!completedSections.includes(activeFieldKey)) {
         setCompletedSections([...completedSections, activeFieldKey]);
       }
     }
     
-    // Reset state and close dialog
+    // Limpar seleções e fechar diálogo
     setSelectedOptions(prev => ({
       ...prev,
       [activeFieldKey]: {}

@@ -1,6 +1,6 @@
 
 import { questionnaireSections } from '../../questionnaire';
-import { getQuestionIdsForField, isSpecialFieldKey } from './fieldMapping';
+import { fieldToQuestionMap } from './fieldMapping';
 import { getAlwaysShowAddButtonFields } from './fieldConfig';
 
 /**
@@ -32,24 +32,25 @@ export const getRelevantQuestionsForField = (
 ) => {
   console.log(`Getting relevant questions for field: ${fieldKey}`);
   
-  // Special field handling for direct 1:1 mapping
-  if (isSpecialFieldKey(fieldKey)) {
-    // Map the field key to its corresponding question ID
-    const questionIds = getQuestionIdsForField(fieldKey);
-    
-    if (questionIds.length === 0) {
-      console.warn(`No mapped question IDs found for special field ${fieldKey}`);
-      return [];
-    }
-    
-    console.log(`Using special mapping for ${fieldKey}:`, questionIds);
+  // Special field handling - hardcoded mappings for problematic fields
+  // Ensure these special fields ALWAYS have exact 1:1 mappings
+  const specialFieldMappings: Record<string, string[]> = {
+    'emergencyScenarios': ['emergencyPreferences'],
+    'highRiskComplications': ['highRiskComplications'],
+    'lowRiskOccurrences': ['lowRiskOccurrences']
+  };
+  
+  // If this is a special field, use the hardcoded mapping
+  if (specialFieldMappings[fieldKey]) {
+    console.log(`Using special mapping for ${fieldKey}:`, specialFieldMappings[fieldKey]);
     
     const relevantQuestions: Array<{question: any, sectionId: string}> = [];
+    const specialQuestionIds = specialFieldMappings[fieldKey];
     
     // Find the questions from the questionnaire sections
     for (const section of questionnaireSections) {
       for (const question of section.questions) {
-        if (questionIds.includes(question.id)) {
+        if (specialQuestionIds.includes(question.id)) {
           console.log(`Found special question ${question.id} for field ${fieldKey} in section ${section.id}`);
           relevantQuestions.push({
             question,
@@ -65,7 +66,8 @@ export const getRelevantQuestionsForField = (
   }
   
   // Get the list of question IDs that are relevant for this specific field
-  const relevantQuestionIds = getQuestionIdsForField(fieldKey);
+  // This is the key to fixing the bug - we need a direct mapping from field key to question IDs
+  const relevantQuestionIds = fieldToQuestionMap[fieldKey] || [];
   
   // If no relevant questions are mapped to this field, return empty array
   if (relevantQuestionIds.length === 0) {
