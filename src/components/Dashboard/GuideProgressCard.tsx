@@ -19,8 +19,9 @@ interface GuideProgressCardProps {
 export function GuideProgressCard({ sections, currentTab, isCompleted }: GuideProgressCardProps) {
   const { navigateTo } = useNavigation();
   
-  const getGuideSectionUrl = (sectionId: string) => {
-    return `/guia-online?tab=${sectionId}`;
+  // Modificamos esta função para criar URLs específicas para cada seção
+  const handleSectionClick = (sectionId: string) => {
+    navigateTo(`/guia-online?tab=${sectionId}`);
   };
   
   return (
@@ -38,7 +39,7 @@ export function GuideProgressCard({ sections, currentTab, isCompleted }: GuidePr
             <div 
               key={section.id} 
               className={`flex items-center ${isCompletedSection ? 'cursor-pointer hover:bg-maternal-50 transition-colors rounded py-1 px-1' : ''}`}
-              onClick={isCompletedSection ? () => navigateTo(getGuideSectionUrl(section.id)) : undefined}
+              onClick={isCompletedSection ? () => handleSectionClick(section.id) : undefined}
             >
               {isCompletedSection ? (
                 <CheckCircle2 className="h-5 w-5 mr-3 text-green-500" />

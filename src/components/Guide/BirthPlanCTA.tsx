@@ -1,16 +1,19 @@
 
-import { CheckCircle, Shield, FileText, Clock, Star, Book, Award, Percent } from 'lucide-react';
+import { CheckCircle, Shield, FileText, Clock, Star, Book, Award, Percent, Copy } from 'lucide-react';
 import { BirthPlanNavButton } from '../BirthPlan/NavButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export function BirthPlanCTA() {
   const { isAuthenticated, user } = useAuth();
   const { navigateTo } = useNavigation();
   const [isFullAccessUser, setIsFullAccessUser] = useState<boolean | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const discountCode = "OFFGUIA40";
   
   // Check if the authenticated user has full access (is a Client, not just a Lead)
   useEffect(() => {
@@ -23,11 +26,12 @@ export function BirthPlanCTA() {
       try {
         const { data, error } = await supabase
           .from('users_db_birthplanbuilder')
-          .select('email')
+          .select('email, plan')
           .eq('email', user.email)
           .maybeSingle();
           
-        setIsFullAccessUser(!error && !!data);
+        // User is a full access user if they have the plan set to 'paid'
+        setIsFullAccessUser(!error && !!data && data.plan === 'paid');
       } catch (error) {
         console.error("Error checking user access level:", error);
         setIsFullAccessUser(false);
@@ -36,6 +40,21 @@ export function BirthPlanCTA() {
     
     checkAccessLevel();
   }, [isAuthenticated, user]);
+
+  const copyDiscountCode = () => {
+    navigator.clipboard.writeText(discountCode)
+      .then(() => {
+        setCopiedCode(true);
+        toast.success("Código copiado!", {
+          description: "Utilize no checkout para obter 40% de desconto"
+        });
+        setTimeout(() => setCopiedCode(false), 3000);
+      })
+      .catch(err => {
+        console.error('Falha ao copiar código:', err);
+        toast.error("Erro ao copiar código");
+      });
+  };
 
   // Se o usuário já é um Cliente (tem acesso completo), mostrar interface diferente
   if (isAuthenticated && isFullAccessUser) {
@@ -79,6 +98,13 @@ export function BirthPlanCTA() {
   }
 
   // Versão para LEADs (usuários autenticados mas sem acesso completo) e Visitantes (não autenticados)
+  // Agora vamos verificar se é um LEAD (usuário autenticado mas sem acesso completo)
+  // e apenas exibir o CTA se for um LEAD
+  if (!isAuthenticated) {
+    return null; // Não exibe nada para visitantes não autenticados
+  }
+
+  // Esta parte só será exibida para LEADs (usuários autenticados, mas sem acesso completo)
   return (
     <div className="bg-gradient-to-r from-maternal-100 to-maternal-50 p-6 rounded-xl border border-maternal-200 mb-8 shadow-md">
       <div className="flex flex-col md:flex-row items-center justify-between">
@@ -134,9 +160,10 @@ export function BirthPlanCTA() {
               <p className="text-maternal-900 font-bold text-3xl">R$ 76,80</p>
             </div>
             
-            <div className="bg-yellow-100 border border-yellow-200 rounded-md p-2 mb-4 flex items-center justify-center">
+            <div className="bg-yellow-100 border border-yellow-200 rounded-md p-2 mb-4 flex items-center justify-center cursor-pointer group" onClick={copyDiscountCode}>
               <Percent className="h-4 w-4 text-yellow-600 mr-1" />
               <span className="text-yellow-800 font-semibold text-sm">Cupom: OFFGUIA40 (-40%)</span>
+              <Copy className={`h-4 w-4 ml-1 transition-all ${copiedCode ? 'text-green-600' : 'text-yellow-600 opacity-0 group-hover:opacity-100'}`} />
             </div>
             
             <p className="text-maternal-600 text-xs mb-4">

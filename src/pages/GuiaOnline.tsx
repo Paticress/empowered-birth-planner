@@ -6,9 +6,10 @@ import { Footer } from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigation } from '@/hooks/useNavigation';
 import { Button } from '@/components/ui/button';
-import { FileText, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useLocation } from 'react-router-dom';
 
 export function GuiaOnline() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -16,6 +17,7 @@ export function GuiaOnline() {
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     // Don't do anything while still loading auth state
@@ -26,7 +28,8 @@ export function GuiaOnline() {
     
     console.log("GuiaOnline: Auth check running with:", { 
       isAuthenticated, 
-      email: user?.email || localStorage.getItem('birthPlanEmail')
+      email: user?.email || localStorage.getItem('birthPlanEmail'),
+      queryParams: location.search
     });
     
     const checkAccess = async () => {
@@ -85,7 +88,7 @@ export function GuiaOnline() {
     
     checkAccess();
     
-  }, [isAuthenticated, user, isLoading]);
+  }, [isAuthenticated, user, isLoading, location.search]);
 
   const handleLogin = () => {
     // Add parameter indicating redirection from guide

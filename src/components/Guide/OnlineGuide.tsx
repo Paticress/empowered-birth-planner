@@ -12,15 +12,16 @@ import { GuideTabs } from './GuideTabs';
 import { GuideProgressBar } from './GuideProgressBar';
 import { BackToTopButton } from './BackToTopButton';
 import { MobileNavigation } from './MobileNavigation';
-import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLocation } from 'react-router-dom';
 
 export function OnlineGuide() {
   const [activeTab, setActiveTab] = useState("introduction");
   const [progress, setProgress] = useState(0);
   const isMobile = useIsMobile();
+  const location = useLocation();
   
   const tabs = ["introduction", "structure", "rights", "communication", "checklist", "resources"];
   const tabNames: Record<string, string> = {
@@ -33,12 +34,23 @@ export function OnlineGuide() {
   };
   
   useEffect(() => {
+    // Primeiro, verifique se há um parâmetro tab na URL
+    const searchParams = new URLSearchParams(location.search);
+    const tabParam = searchParams.get('tab');
+    
+    if (tabParam && tabs.includes(tabParam)) {
+      setActiveTab(tabParam);
+      updateProgress(tabParam);
+      return;
+    }
+    
+    // Se não houver parâmetro na URL, use o valor salvo no localStorage
     const savedTab = localStorage.getItem('guide-current-tab');
     if (savedTab && tabs.includes(savedTab)) {
       setActiveTab(savedTab);
       updateProgress(savedTab);
     }
-  }, []);
+  }, [location.search]);
   
   useEffect(() => {
     localStorage.setItem('guide-current-tab', activeTab);
@@ -167,7 +179,7 @@ export function OnlineGuide() {
         </main>
         
         <BackToTopButton />
-        <Footer />
+        {/* Removemos o Footer daqui pois ele já está sendo incluído na página GuiaOnline */}
       </div>
     </div>
   );
