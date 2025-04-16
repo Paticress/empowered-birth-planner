@@ -1,8 +1,6 @@
 
 import { useEffect, useState } from 'react';
 import { OnlineGuide } from '@/components/Guide/OnlineGuide';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigation } from '@/hooks/useNavigation';
 import { Button } from '@/components/ui/button';
@@ -99,23 +97,17 @@ export function GuiaOnline() {
   // Show loading state while checking auth
   if (isLoading || checkingAccess) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-maternal-500 border-r-transparent"></div>
-            <p className="mt-4 text-maternal-800">Carregando...</p>
-          </div>
-        </main>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-maternal-500 border-r-transparent"></div>
+          <p className="mt-4 text-maternal-800">Carregando...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
+    <>
       <main className="flex-grow">
         {showAuthPrompt ? (
           <div className="container mx-auto px-4 py-16">
@@ -138,8 +130,6 @@ export function GuiaOnline() {
           <OnlineGuide />
         )}
       </main>
-      
-      <Footer />
-    </div>
+    </>
   );
 }

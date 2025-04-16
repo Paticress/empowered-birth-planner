@@ -5,6 +5,7 @@ import { OnlineGuide } from '@/components/Guide/OnlineGuide';
 import { Testimonial } from '@/components/Testimonial';
 import { BookOpen, Shield, MessageCircle, CheckSquare } from 'lucide-react';
 import { FeatureCard } from '@/components/FeatureCard';
+import { MainLayout } from '@/layouts/MainLayout';
 
 const GuiaGratuito = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
