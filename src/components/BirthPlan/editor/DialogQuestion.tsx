@@ -1,4 +1,7 @@
 
+import { useState, useEffect } from 'react';
+import { CheckboxOptions } from './CheckboxOptions';
+import { RadioOptions } from './RadioOptions';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectableOptions } from './SelectableOptions';
 
@@ -9,7 +12,7 @@ interface DialogQuestionProps {
   setSelectedOptions: React.Dispatch<React.SetStateAction<Record<string, Record<string, boolean>>>>;
   questionnaireAnswers: Record<string, any>;
   textareaValues: Record<string, string>;
-  onTextareaChange: (questionId: string, value: string) => void;
+  onTextareaChange: (id: string, value: string) => void;
 }
 
 export function DialogQuestion({
@@ -21,33 +24,72 @@ export function DialogQuestion({
   textareaValues,
   onTextareaChange
 }: DialogQuestionProps) {
-  if (!question) return null;
+  const isSpecialQuestion = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(questionId);
+  
+  // Debug logs para questões especiais
+  if (isSpecialQuestion) {
+    console.log(`Renderizando DialogQuestion para questão especial: ${questionId}`);
+    console.log(`Tipo: ${question.type}`);
+    console.log(`Tem resposta do questionário:`, !!questionnaireAnswers[questionId]);
+    console.log(`Opções selecionadas:`, selectedOptions[questionId]);
+  }
 
-  // Render textarea when question is textarea type
+  // For textarea questions, render textarea
   if (question.type === 'textarea') {
     return (
-      <div className="py-3 border-b border-gray-100">
-        <div className="font-medium text-maternal-900">{question.text}</div>
-        <div className="mt-2">
-          <Textarea 
-            value={textareaValues[questionId] || ''}
-            onChange={(e) => onTextareaChange(questionId, e.target.value)}
-            placeholder="Digite sua resposta aqui..."
-            className="w-full"
-            rows={4}
-          />
-        </div>
+      <div className="mb-6">
+        <label htmlFor={questionId} className="block font-medium mb-2">
+          {question.text}
+        </label>
+        {question.description && (
+          <p className="text-sm text-gray-500 mb-2">{question.description}</p>
+        )}
+        <Textarea
+          id={questionId}
+          value={textareaValues[questionId] || ''}
+          onChange={(e) => onTextareaChange(questionId, e.target.value)}
+          placeholder="Digite sua resposta aqui..."
+          className="w-full"
+          rows={4}
+        />
       </div>
     );
   }
 
-  // Render selectable options (radio/select/checkbox)
+  // Forçar tratamento de questões especiais como checkbox sempre
+  if (isSpecialQuestion) {
+    return (
+      <div className="mb-6">
+        <label className="block font-medium mb-2">
+          {question.text}
+        </label>
+        {question.description && (
+          <p className="text-sm text-gray-500 mb-2">{question.description}</p>
+        )}
+        <SelectableOptions
+          question={{...question, type: 'checkbox'}} // Força tipo checkbox
+          questionId={questionId}
+          selectedOptions={selectedOptions}
+          setSelectedOptions={setSelectedOptions}
+          isSpecialField={true}
+          questionnaireAnswers={questionnaireAnswers}
+        />
+      </div>
+    );
+  }
+
+  // For other question types (checkbox, radio, select)
   return (
-    <div className="py-3 border-b border-gray-100">
-      <div className="font-medium text-maternal-900">{question.text}</div>
-      <SelectableOptions 
-        question={question} 
-        questionId={questionId} 
+    <div className="mb-6">
+      <label className="block font-medium mb-2">
+        {question.text}
+      </label>
+      {question.description && (
+        <p className="text-sm text-gray-500 mb-2">{question.description}</p>
+      )}
+      <SelectableOptions
+        question={question}
+        questionId={questionId}
         selectedOptions={selectedOptions}
         setSelectedOptions={setSelectedOptions}
         questionnaireAnswers={questionnaireAnswers}

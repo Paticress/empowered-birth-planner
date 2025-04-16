@@ -27,6 +27,16 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
         if (savedAnswers) {
           const parsedAnswers = JSON.parse(savedAnswers);
           console.log("Carregando respostas salvas:", parsedAnswers);
+          
+          // Verificação especial para questões problemáticas
+          const specialQuestions = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+          specialQuestions.forEach(questionId => {
+            console.log(`Questão especial ${questionId} presente:`, !!parsedAnswers[questionId]);
+            if (parsedAnswers[questionId]) {
+              console.log(`Formato da resposta:`, typeof parsedAnswers[questionId]);
+            }
+          });
+          
           setFormData(parsedAnswers);
           
           // Determine which sections are completed based on saved answers
@@ -59,6 +69,14 @@ export function BirthPlanQuestionnaire({ onSubmit }: BirthPlanQuestionnaireProps
   
   const handleSectionSubmit = (data: Record<string, any>) => {
     console.log("Section submitted with data:", data);
+    
+    // Verificação especial para questões problemáticas
+    const specialQuestions = ['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'];
+    specialQuestions.forEach(questionId => {
+      if (data[questionId]) {
+        console.log(`Dados enviados para questão especial ${questionId}:`, data[questionId]);
+      }
+    });
     
     // Create a clean copy of the data to avoid mutation issues
     const processedData = { ...data };

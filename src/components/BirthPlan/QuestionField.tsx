@@ -24,6 +24,8 @@ export function QuestionField({ question, errors, control }: QuestionFieldProps)
   // Adicionar log para depurar questões problemáticas
   if (['emergencyPreferences', 'highRiskComplications', 'lowRiskOccurrences'].includes(question.id)) {
     console.log(`Renderizando questão especial: ${question.id}`);
+    console.log(`Tipo da questão: ${question.type}`);
+    console.log(`Opções disponíveis:`, question.options);
   }
   
   return (
