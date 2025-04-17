@@ -1,10 +1,10 @@
 
 import { toast } from 'sonner';
 import { 
-  mapQuestionnaireToSectionId, 
   findQuestionById, 
   checkSectionCompletion 
 } from './utils';
+import { mapQuestionnaireToSectionId } from './utils/fieldMapping';
 
 export const handleAddSelectedOptions = (
   activeFieldKey: string,
@@ -176,3 +176,4 @@ export const handleAddSelectedOptions = (
   setSelectedOptions({});
   setDialogOpen(false);
 };
+
